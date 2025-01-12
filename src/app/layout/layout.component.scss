@@ -1,0 +1,46 @@
+.example-sidenav {
+    width: 250px;
+    background-color: #D1C4E9;
+    color: #311B92;
+    border-radius: 10px;
+    margin: 10px 0;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
+    overflow: hidden;
+}
+  
+.menu-content {
+    display: flex;
+    flex-direction: column;
+    height: calc(100% - 20px);
+    padding: 0 10px;
+}
+  
+.menu-item {
+    color: #FFFFFF;
+    background-color: #7E57C2;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 8px 0;
+    text-decoration: none;
+    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+}
+  
+.menu-item:hover {
+    background-color: #5E35B1;
+}
+  
+.toggle-button {
+    position: fixed;
+    top: 16px;
+    z-index: 1000;
+    color: #7E57C2;
+    border-radius: 50%;
+}
+  
+.toggle-button mat-icon {
+    font-size: 24px;
+}
