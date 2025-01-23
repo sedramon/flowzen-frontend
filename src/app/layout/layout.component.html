@@ -1,26 +1,39 @@
 <mat-sidenav-container class="example-container">
-    <!-- Sidenav -->
-    <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="example-sidenav">
-      <div class="menu-content">
-        <mat-nav-list>
-          <a mat-list-item routerLink="/home" routerLinkActive="active" class="menu-item">
-            Home
-          </a>
-          <a mat-list-item routerLink="/login" routerLinkActive="active" class="menu-item">
-            Login
-          </a>
-        </mat-nav-list>
-      </div>
-    </mat-sidenav>
-  
-    <!-- Main Content -->
-    <mat-sidenav-content>
-      <!-- Button to toggle sidenav -->
-      <button mat-icon-button class="toggle-button" (click)="toggleMenu()">
-        <mat-icon>{{ opened ? 'close' : 'menu' }}</mat-icon>
+  <!-- Sidenav -->
+  <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="example-sidenav">
+    <div class="menu-content">
+      <mat-nav-list>
+        <a mat-list-item routerLink="/home" routerLinkActive="active" class="menu-item">
+          Home
+        </a>
+        <a mat-list-item routerLink="/appoitments" routerLinkActive="active" class="menu-item">
+          Appoitments
+        </a>
+        <a mat-list-item routerLink="/clients" routerLinkActive="active" class="menu-item">
+          Clients
+        </a>
+        <a mat-list-item routerLink="/employees" routerLinkActive="active" class="menu-item">
+          Employees
+        </a>
+        <!-- Additional menu items -->
+      </mat-nav-list>
+    </div>
+  </mat-sidenav>
+
+  <!-- Main Content -->
+  <mat-sidenav-content>
+    <button mat-icon-button class="toggle-button" (click)="toggleMenu()">
+      <mat-icon>{{ opened ? 'close' : 'menu' }}</mat-icon>
+    </button>
+    <div fxLayout="row" fxLayoutAlign="end center">
+      <!-- Account Button -->
+       
+       <h2>{{ user?.username }}</h2>
+      <button mat-icon-button>
+        <mat-icon>account_circle</mat-icon>
       </button>
-  
-      <!-- Router outlet for content -->
-      <router-outlet></router-outlet>
-    </mat-sidenav-content>
-  </mat-sidenav-container>  
+      <button mat-raised-button color="warn" (click)="logout()">Logout</button>
+    </div>
+    <router-outlet></router-outlet> <!-- Show child routes -->
+  </mat-sidenav-content>
+</mat-sidenav-container>

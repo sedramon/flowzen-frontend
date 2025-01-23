@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
+import { Router } from '@angular/router';
 
 @Injectable({
   providedIn: 'root',
@@ -9,7 +11,7 @@ export class AuthService {
   private readonly apiUrl = 'http://localhost:3000';
   private readonly TOKEN_KEY = 'access_token';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   /**
    * Method to log in a user.
@@ -19,6 +21,20 @@ export class AuthService {
    */
   login(email: string, password: string): Observable<any> {
     return this.http.post(`${this.apiUrl}/auth/login`, { email, password });
+  }
+
+  logout(): void {
+    this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({
+      next: () => {
+        this.clearToken();
+        this.router.navigate(['/login']);
+      },
+      error: (err) => {
+        console.error('Logout error:', err);
+        this.clearToken();
+        this.router.navigate(['/login']);
+      },
+    });
   }
 
    /**
@@ -49,7 +65,31 @@ export class AuthService {
    * @returns True if a token exists, false otherwise.
    */
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    if (!token) return false;
+  
+    try {
+      const decodedToken: { exp: number } = jwtDecode(token);
+      const now = Math.floor(Date.now() / 1000); // Current time in seconds
+      return decodedToken.exp > now; // Check if the token is still valid
+    } catch (error) {
+      console.error('Invalid token:', error);
+      this.clearToken(); // Clear invalid token
+      return false;
+    }
+  }
+
+  getUserInfo(): any {
+    const token = this.getToken();
+    if (!token) return null;
+  
+    try {
+      const decodedToken: any = jwtDecode(token); // Decode the token
+      return decodedToken; // Return the payload
+    } catch (error) {
+      console.error('Invalid token:', error);
+      return null;
+    }
   }
 
 }

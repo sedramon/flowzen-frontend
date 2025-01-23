@@ -4,6 +4,14 @@
     align-items: center;
     width: 100%;
     max-width: 400px;
+    border: 1px solid #D1C4E9;
+    padding: 50px;
+    border-radius: 25px;
+
+    .error-message {
+      color: red;
+      margin-top: 25px;
+    }
   
     h2 {
       margin-bottom: 20px;
