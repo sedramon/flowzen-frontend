@@ -79,6 +79,10 @@ export class AuthService {
     }
   }
 
+  /**
+   * Get user info from the JWT token.
+   * @returns Decoded user information or null.
+   */
   getUserInfo(): any {
     const token = this.getToken();
     if (!token) return null;
@@ -90,6 +94,21 @@ export class AuthService {
       console.error('Invalid token:', error);
       return null;
     }
+  }
+
+  /**
+   * Get scopes from the JWT token.
+   * @returns An array of scopes or an empty array if none exist.
+   */
+  /**
+   * Get scopes from the JWT token.
+   * @returns An array of scope names or an empty array if none exist.
+   */
+  getScopes(): string[] {
+    const userInfo = this.getUserInfo();
+    const availableScopes = userInfo?.role?.availableScopes || [];
+    console.log(availableScopes);
+    return availableScopes.map((scope: any) => scope.name); // Extract and return scope names
   }
 
 }
