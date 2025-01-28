@@ -7,6 +7,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { AuthService } from '../core/services/auth.service';
+import { AuthenticatedUser } from '../models/AuthenticatedUser';
 
 
 @Component({
@@ -25,16 +26,15 @@ import { AuthService } from '../core/services/auth.service';
   styleUrl: './layout.component.scss'
 })
 export class LayoutComponent implements OnInit{
+  currentUser: AuthenticatedUser | null = null;
   opened = true;
-  user: any; 
 
   constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    if(this.authService.isLoggedIn()) {
-      this.user = this.authService.getUserInfo();
-      console.log(this.user)
-    }
+    this.authService.user$.subscribe((user) => {
+      this.currentUser = user;
+    });
   }
 
   logout() {

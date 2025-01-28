@@ -12,12 +12,9 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 export class HomeComponent {
   user: any;
 
-  constructor(private authService: AuthService) {}
+  constructor() {}
 
   ngOnInit(): void {
-    this.user = this.authService.getUserInfo();
-    if (this.user) {
-      console.log('User Details:', this.user);
-    }
+
   }
 }

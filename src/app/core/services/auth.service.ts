@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
+import { AuthenticatedUser } from '../../models/AuthenticatedUser';
 
 @Injectable({
   providedIn: 'root',
@@ -11,104 +12,99 @@ export class AuthService {
   private readonly apiUrl = 'http://localhost:3000';
   private readonly TOKEN_KEY = 'access_token';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  private userSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
+  public user$ = this.userSubject.asObservable();
 
-  /**
-   * Method to log in a user.
-   * @param email - The user's email.
-   * @param password - The user's password.
-   * @returns Observable with the API response.
-   */
+  constructor(private http: HttpClient, private router: Router) {
+    this.loadUserFromToken();
+  }
+
   login(email: string, password: string): Observable<any> {
-    return this.http.post(`${this.apiUrl}/auth/login`, { email, password });
+    return new Observable((observer) => {
+      this.http.post(`${this.apiUrl}/auth/login`, { email, password }).subscribe({
+        next: (response: any) => {
+          const token = response.access_token;
+          this.saveToken(token);
+          this.setUserFromToken(token);
+
+          // Redirekcija nakon prijave
+          const returnUrl = localStorage.getItem('returnUrl') || '/home'; // Preuzmi returnUrl ili default na /home
+          localStorage.removeItem('returnUrl'); // Očisti returnUrl
+          this.router.navigate([returnUrl]);
+
+          observer.next(response);
+          observer.complete();
+        },
+        error: (err) => observer.error(err),
+      });
+    });
   }
 
   logout(): void {
     this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({
       next: () => {
         this.clearToken();
+        this.userSubject.next(null);
         this.router.navigate(['/login']);
       },
-      error: (err) => {
-        console.error('Logout error:', err);
+      error: () => {
         this.clearToken();
+        this.userSubject.next(null);
         this.router.navigate(['/login']);
       },
     });
   }
 
-   /**
-   * Save JWT token to localStorage.
-   * @param token - JWT token.
-   */
   saveToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  /**
-   * Retrieve JWT token from localStorage.
-   * @returns Token string or null.
-   */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  /**
-   * Clear token from localStorage (for logout).
-   */
   clearToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
-  /**
-   * Check if the user is logged in.
-   * @returns True if a token exists, false otherwise.
-   */
   isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) return false;
-  
+
     try {
       const decodedToken: { exp: number } = jwtDecode(token);
-      const now = Math.floor(Date.now() / 1000); // Current time in seconds
-      return decodedToken.exp > now; // Check if the token is still valid
-    } catch (error) {
-      console.error('Invalid token:', error);
-      this.clearToken(); // Clear invalid token
+      const now = Math.floor(Date.now() / 1000);
+      return decodedToken.exp > now;
+    } catch {
+      this.clearToken();
       return false;
     }
   }
 
-  /**
-   * Get user info from the JWT token.
-   * @returns Decoded user information or null.
-   */
-  getUserInfo(): any {
-    const token = this.getToken();
-    if (!token) return null;
-  
+  private setUserFromToken(token: string): void {
     try {
-      const decodedToken: any = jwtDecode(token); // Decode the token
-      return decodedToken; // Return the payload
-    } catch (error) {
-      console.error('Invalid token:', error);
-      return null;
+      const decodedToken: AuthenticatedUser = jwtDecode<AuthenticatedUser>(token);
+      this.userSubject.next(decodedToken);
+    } catch {
+      this.userSubject.next(null);
     }
   }
 
-  /**
-   * Get scopes from the JWT token.
-   * @returns An array of scopes or an empty array if none exist.
-   */
-  /**
-   * Get scopes from the JWT token.
-   * @returns An array of scope names or an empty array if none exist.
-   */
+  private loadUserFromToken(): void {
+    const token = this.getToken();
+    if (token) {
+      this.setUserFromToken(token);
+    }
+  }
+
+  getCurrentUser(): AuthenticatedUser | null {
+    return this.userSubject.getValue();
+  }
+
   getScopes(): string[] {
-    const userInfo = this.getUserInfo();
-    const availableScopes = userInfo?.role?.availableScopes || [];
-    console.log(availableScopes);
-    return availableScopes.map((scope: any) => scope.name); // Extract and return scope names
+    const user = this.userSubject.getValue();
+    const availableScopes = user?.role?.availableScopes || [];
+    return availableScopes.map((scope) => scope.name);
   }
 
 }

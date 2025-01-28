@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { AuthService } from "../services/auth.service";
 import { ActivatedRouteSnapshot, Router } from "@angular/router";
+import { map, Observable, take } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -8,16 +9,19 @@ import { ActivatedRouteSnapshot, Router } from "@angular/router";
 export class ScopeGuard {
     constructor(private authService: AuthService, private router: Router) {}
 
-    canActivate(route: ActivatedRouteSnapshot): boolean {
-        const requiredScope = route.data['scope']; // Get the required scope from route data
-        const userScopes = this.authService.getScopes(); // Fetch the user's scopes from AuthService
-
-    if (userScopes && userScopes.includes(requiredScope)) {
-      return true; // User has the required scope, allow access
-    }
-
-    // Redirect to unauthorized page if the scope is missing
-    this.router.navigate(['/unauthorized']);
-    return false;
-    }
+    canActivate(route: ActivatedRouteSnapshot): Observable<boolean> {
+        const requiredScope = route.data['scope'];
+    
+        return this.authService.user$.pipe(
+          take(1),
+          map(user => {
+            if (user?.role?.availableScopes.some(scope => scope.name === requiredScope)) {
+              return true; // Dozvoli pristup ako korisnik ima traženi scope
+            }
+    
+            this.router.navigate(['/unauthorized']);
+            return false; // Odbij pristup
+          })
+        );
+      }
 }

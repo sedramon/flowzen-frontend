@@ -15,6 +15,9 @@
         <a mat-list-item routerLink="/employees" routerLinkActive="active" class="menu-item">
           Employees
         </a>
+        <a mat-list-item routerLink="/user-administration" routerLinkActive="active" class="menu-item">
+          User Administration
+        </a>
         <!-- Additional menu items -->
       </mat-nav-list>
     </div>
@@ -27,8 +30,8 @@
     </button>
     <div fxLayout="row" fxLayoutAlign="end center">
       <!-- Account Button -->
-       
-       <h2>{{ user?.username }}</h2>
+       <h2>tenant : {{ currentUser?.tenant }}</h2>
+       <h2>{{ currentUser?.username }}</h2>
       <button mat-icon-button>
         <mat-icon>account_circle</mat-icon>
       </button>

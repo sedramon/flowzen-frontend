@@ -1,0 +1,28 @@
+<div class="main-container" fxLayout="column" fxLayoutAlign="center center">
+    <h1>Welcome to Flowzen!</h1>
+    <p>This is the user administration page.</p>
+    <div *ngIf="users.length; else noUsers">
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Tenant</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td>{{ user.name }}</td>
+              <td>{{ user.email }}</td>
+              <td>{{ user.role.name }}</td>
+              <td>{{ user.tenant.name }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #noUsers>
+        <p>No users found.</p>
+      </ng-template>
+</div>
+  

@@ -8,6 +8,7 @@ import { ClientsComponent } from './modules/clients/clients.component';
 import { EmployeesComponent } from './modules/employees/employees.component';
 import { ScopeGuard } from './core/guards/scope.guard';
 import { UnauthorizedComponent } from './modules/unauthorized/unauthorized.component';
+import { UserAdministrationComponent } from './modules/user-administration/user-administration.component';
 
 export const routes: Routes = [
   {
@@ -38,6 +39,12 @@ export const routes: Routes = [
         component: EmployeesComponent, 
         canActivate: [ScopeGuard], 
         data: { scope: 'scope_employees' } // Required scope for Employees
+      },
+      { 
+        path: 'user-administration', 
+        component: UserAdministrationComponent, 
+        canActivate: [ScopeGuard], 
+        data: { scope: 'scope_user_administration' } // Required scope for Employees
       },
       { 
         path: '', 

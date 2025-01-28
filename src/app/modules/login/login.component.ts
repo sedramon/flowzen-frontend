@@ -27,18 +27,16 @@ export class LoginComponent {
 
   onSubmit() {
     const { username, password } = this.credentials;
-
+  
     this.authService.login(username, password).subscribe({
       next: (response) => {
         console.log('Login successful:', response);
-        const token = response.access_token; // Extract token from the response
-        this.authService.saveToken(token); // Save the token to localStorage
-        this.loginError = false; // Reset the error flag
-        this.router.navigate(['/home']); // Redirect to the dashboard
+        this.loginError = false;
+        // Ne radi ovde navigaciju, već to radi servis (sa returnUrl).
       },
       error: (err) => {
         console.error('Login failed:', err);
-        this.loginError = true; // Set error flag to show general error message
+        this.loginError = true;
       },
     });
   }
