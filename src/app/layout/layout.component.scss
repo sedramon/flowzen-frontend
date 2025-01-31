@@ -1,11 +1,37 @@
+html, body {
+    height: 100%;
+    margin: 0;
+    overflow: hidden; /* Prevent scrolling on the entire page */
+}
+
+.example-container {
+    height: 100vh;
+    display: flex;
+    overflow: hidden; /* Prevents the sidenav from scrolling */
+}
+
+.logout-button {
+    width: 100%;
+}
+
+
 .example-sidenav {
     width: 250px;
-    background-color: #D1C4E9;
-    color: #311B92;
-    border-radius: 10px;
-    margin: 10px 0;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.15);
-    overflow: hidden;
+    height: 100vh;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-color: #100d2e;
+    color: white;
+    box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.15);
+}
+
+mat-sidenav-content {
+    flex-grow: 1;
+    height: 100vh;
+    overflow-y: auto; /* Enables scrolling for the routed content */
+    display: flex;
+    flex-direction: column;
 }
   
 .menu-content {
@@ -16,8 +42,8 @@
 }
   
 .menu-item {
-    color: #FFFFFF;
-    background-color: #7E57C2;
+    color: white !important;
+    background-color: #ae036b;
     border-radius: 4px;
     padding: 16px;
     text-align: center;
@@ -28,19 +54,41 @@
     text-decoration: none;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
 }
+
   
 .menu-item:hover {
-    background-color: #5E35B1;
+    background-color: #ae036ab8;
+    transform: scale(1.05);
+    transition: 100ms;
 }
   
 .toggle-button {
+    width: 48px; /* Adjust width */
+    height: 48px; /* Adjust height */
+    font-size: 24px; /* Increases button size */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background-color: #ae036b; /* Optional: Background color */
+    color: white !important;
+}
+
+.toggle-button:hover {
+    background-color: #ae036ab8; /* Slightly lighter on hover */
+    transform: scale(1.1); /* Increases size on hover */
+    transition: 0.2s;
+}
+
+/* Increase the size of the icon */
+.toggle-button mat-icon {
+    font-size: 24px; /* Bigger menu icon */
+}
+
+
+.profile-header  {
     position: fixed;
     top: 16px;
-    z-index: 1000;
-    color: #7E57C2;
-    border-radius: 50%;
+    margin-left: 24px;
 }
   
-.toggle-button mat-icon {
-    font-size: 24px;
-}
