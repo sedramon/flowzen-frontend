@@ -74,9 +74,16 @@ export class AuthService {
     try {
       const decodedToken: { exp: number } = jwtDecode(token);
       const now = Math.floor(Date.now() / 1000);
-      return decodedToken.exp > now;
-    } catch {
-      this.clearToken();
+
+      if (decodedToken.exp < now) {
+        this.clearToken();
+        return false;
+      }
+
+      return true;
+    } catch (error)  {
+      console.error('Invalid token:', error);
+      this.clearToken(); // Clear corrupted token
       return false;
     }
   }
