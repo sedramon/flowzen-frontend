@@ -28,7 +28,7 @@
           </button>
         </div>
         <div fxLayout="column" fxLayoutAlign="center center" class="logout-container">
-          <button mat-raised-button color="warn" class="logout-button" (click)="logout()">Logout</button>
+          <button mat-raised-button class="logout-button" style="background-color: red; color: white;" (click)="logout()">Logout</button>
         </div>
         
       </div>
@@ -39,7 +39,7 @@
   <mat-sidenav-content>
     <div fxLayout="row" fxLayoutAlign="end center" class="profile-header">
       <button mat-icon-button class="toggle-button" (click)="toggleMenu()">
-        <mat-icon>{{ opened ? 'close' : 'menu' }}</mat-icon>
+        <mat-icon color>{{ opened ? 'close' : 'menu' }}</mat-icon>
       </button>
     </div>
     <router-outlet></router-outlet> <!-- Show child routes -->
