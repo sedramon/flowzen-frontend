@@ -1,5 +1,5 @@
 export interface Scope {
-    id: string;
+    _id: string;
     name: string;
     description: string;
 }

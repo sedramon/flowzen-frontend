@@ -2,7 +2,7 @@ import { Role } from "./Role";
 import { Tenant } from "./Tenant";
 
 export interface User {
-    id: number;
+    _id: string;
     name: string;
     email: string;
     role: Role;

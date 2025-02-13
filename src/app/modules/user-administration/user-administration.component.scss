@@ -3,3 +3,37 @@
     color: white;
 }
 
+.table-wrapper {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Push table to top, paginator to bottom */
+    min-height: 450px; /* Ensure table wrapper has enough height */
+    border: 2px solid #ae036b; /* Matches your design */
+    padding: 10px;
+    border-radius: 20px;
+    width: 90%;
+    background-color: #232323;
+}
+
+.table-wrapper > mat-paginator {
+    background-color: #232323;
+}
+
+.mat-table-container {
+    flex-grow: 1; /* Ensures table takes up available space */
+    min-height: 300px; /* Adjust based on your layout */
+}
+
+table {
+    width: 100%;
+    background-color: #232323;
+}
+
+mat-paginator {
+    align-self: flex-end;
+}
+
+.mat-column-actions {
+    text-align: right; /* Align text and buttons to the right */
+    width: 150px; /* Adjust width if necessary */
+}

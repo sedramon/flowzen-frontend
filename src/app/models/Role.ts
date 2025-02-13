@@ -1,7 +1,7 @@
 import { Scope } from "./Scope";
 
 export interface Role {
-    id: number;
+    _id: string;
     name: string;
     availableScopes: Scope[];
     tenant: string;

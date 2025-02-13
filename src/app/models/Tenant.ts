@@ -1,5 +1,5 @@
 export interface Tenant {
-    id: number;
+    _id: string;
     name: string;
     companyType: string;
     street: string;
