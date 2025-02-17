@@ -62,6 +62,15 @@ export class UserAdministrationService {
             })
         );
     }
+
+    createUser(user: User): Observable<User> {
+        return this.http.post<User>(`${this.apiUrl}/users`, user).pipe(
+            tap((createdUser) => {
+                const updatedUsers = [...this.usersSubject.getValue(), createdUser];
+                this.usersSubject.next(updatedUsers);
+            })
+        )
+    }
     
     
 

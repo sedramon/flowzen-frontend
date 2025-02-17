@@ -1,1 +1,36 @@
-<p>add-user-dialog works!</p>
+<h2 mat-dialog-title>Add User</h2>
+<div mat-dialog-content style="padding: 20px;">
+
+  <!-- Name Input -->
+  <mat-form-field appearance="outline" style="width: 100%">
+    <mat-label>Name</mat-label>
+    <input matInput [formControl]="userForm.controls['name']" required>
+  </mat-form-field>
+
+  <!-- Email Input -->
+  <mat-form-field appearance="outline" style="width: 100%">
+    <mat-label>Email</mat-label>
+    <input matInput [formControl]="userForm.controls['email']" required>
+  </mat-form-field>
+
+  <!-- Password Input -->
+  <mat-form-field appearance="outline" style="width: 100%">
+    <mat-label>Password</mat-label>
+    <input matInput [formControl]="userForm.controls['password']" required>
+  </mat-form-field>
+
+  <!-- Role Select -->
+  <mat-form-field appearance="outline" style="width: 100%">
+    <mat-label>Role</mat-label>
+    <mat-select [formControl]="userForm.controls['role']" required>
+      <mat-option *ngFor="let role of allRoles" [value]="role.name">
+        {{ role.name }}
+      </mat-option>
+    </mat-select>
+  </mat-form-field>
+
+</div>
+<div mat-dialog-actions align="end">
+    <button mat-button color="primary" (click)="createUser()" [disabled]="userForm.invalid">Create</button>
+  <button mat-button (click)="closeDialog()">Cancel</button>
+</div>

@@ -144,7 +144,27 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(AddUserDialogComponent, {
       width: '500px',
       height: '500px',
-    })
+    });
+  
+    dialogRef.afterClosed().subscribe((user: User | undefined) => {
+      if (user) {
+        console.log('User added:', user);
+        this.userAdministrationService.createUser(user).subscribe(
+          (createdUser) => {
+            console.log('User successfully created:', createdUser);
+            // Instead of re-fetching all users, update the MatTable data source directly:
+            const updatedData = [...this.dataSourceUsers.data, createdUser];
+            this.dataSourceUsers.data = updatedData;
+          },
+          (error) => {
+            console.error('Error creating user:', error);
+            if (error.status === 409) {
+              console.error('User with the same email already exists.');
+            }
+          }
+        );
+      }
+    });
   }
 
   deleteUser(){
