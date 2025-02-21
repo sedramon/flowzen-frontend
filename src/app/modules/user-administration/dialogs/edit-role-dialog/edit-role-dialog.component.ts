@@ -9,11 +9,12 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { Scope } from '../../../../models/Scope';
 import { ScopeService } from '../../../../core/services/scope.service';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-edit-role-dialog',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatInputModule],
+  imports: [CommonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatInputModule, FlexLayoutModule],
   templateUrl: './edit-role-dialog.component.html',
   styleUrl: './edit-role-dialog.component.scss'
 })

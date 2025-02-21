@@ -17,12 +17,13 @@ import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialo
 import { AddRoleDialogComponent } from './dialogs/add-role-dialog/add-role-dialog.component';
 import { AddUserDialogComponent } from './dialogs/add-user-dialog/add-user-dialog.component';
 import { EditUserDialogComponent } from './dialogs/edit-user-dialog/edit-user-dialog.component';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 
 @Component({
   selector: 'app-user-administration',
   standalone: true,
-  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule],
+  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule],
   templateUrl: './user-administration.component.html',
   styleUrl: './user-administration.component.scss'
 })
@@ -44,7 +45,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   @ViewChildren(MatSort) sorts!: QueryList<MatSort>;
 
 
-  constructor(private userAdministrationService: UserAdministrationService, private authService: AuthService, private dialog: MatDialog, private userAdminService: UserAdministrationService) { }
+  constructor(private userAdministrationService: UserAdministrationService, private authService: AuthService, private dialog: MatDialog, private userAdminService: UserAdministrationService, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
@@ -99,80 +100,105 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openEditRoleDialog(role: Role) {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
-      width: '500px',
+      width: '600px',
       height: '500px',
-      data: { role } // Pass the selected role to the dialog
+      data: { role }
     });
   
-    // Handle dialog close event
     dialogRef.afterClosed().subscribe((updatedData) => {
       if (updatedData) {
-        console.log('Updated role data:', updatedData);
-  
-        // Send API request to update the role
-        this.userAdminService.updateRole(role._id, updatedData).subscribe(
+        this.userAdminService.updateRole(role._id!, updatedData).subscribe(
           (updatedRole) => {
-            console.log('Role successfully updated:', updatedRole);
-  
-            // Refresh roles list to reflect the changes
+            this.showSnackbar(`Role "${role.name}" updated successfully`);
             this.userAdminService.fetchRoles().subscribe();
           },
           (error) => {
             console.error('Error updating role:', error);
+            this.showSnackbar('Failed to update role', true);
           }
         );
       }
     });
   }
   
+  
 
   openEditUserDialog(user: User) {
     const dialogRef = this.dialog.open(EditUserDialogComponent, {
-      width: '500px',
+      width: '600px',
       height: '500px',
     })
   }
 
   openAddRoleDialog() {
     const dialogRef = this.dialog.open(AddRoleDialogComponent, {
-      width: '500px',
+      width: '600px',
       height: '500px',
     })
-  }
 
-  openAddUserDialog() {
-    const dialogRef = this.dialog.open(AddUserDialogComponent, {
-      width: '500px',
-      height: '500px',
-    });
-  
-    dialogRef.afterClosed().subscribe((user: User | undefined) => {
-      if (user) {
-        console.log('User added:', user);
-        this.userAdministrationService.createUser(user).subscribe(
-          (createdUser) => {
-            console.log('User successfully created:', createdUser);
-            // Instead of re-fetching all users, update the MatTable data source directly:
-            const updatedData = [...this.dataSourceUsers.data, createdUser];
-            this.dataSourceUsers.data = updatedData;
+    dialogRef.afterClosed().subscribe((role: Role | undefined) => {
+      if (role) {
+        this.userAdministrationService.createRole(role).subscribe(
+          (createdRole) => {
+            const updatedData = [...this.dataSourceRoles.data, createdRole];
+            this.dataSourceRoles.data = updatedData;
+            this.showSnackbar(`Role "${role.name}" created successfully`);
           },
           (error) => {
-            console.error('Error creating user:', error);
-            if (error.status === 409) {
-              console.error('User with the same email already exists.');
-            }
+            console.error('Error creating role:', error);
+            this.showSnackbar('Failed to create role', true);
           }
         );
       }
     });
   }
 
-  deleteUser(){
+  openAddUserDialog() {
+    const dialogRef = this.dialog.open(AddUserDialogComponent, {
+      width: '600px',
+      height: '500px',
+    });
+  
+    dialogRef.afterClosed().subscribe((user: User | undefined) => {
+      if (user) {
+        this.userAdministrationService.createUser(user).subscribe(
+          (createdUser) => {
+            const updatedData = [...this.dataSourceUsers.data, createdUser];
+            this.dataSourceUsers.data = updatedData;
+            this.showSnackbar(`User "${user.name}" created successfully`);
+          },
+          (error) => {
+            console.error('Error creating user:', error);
+            this.showSnackbar('Failed to create user', true);
+          }
+        );
+      }
+    });
+  }
+  
+
+  deleteUser(user: User) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
-      height: '500px',
-    })
+      height: '250px',
+      data: user.name 
+    });
+  
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userAdministrationService.deleteUser(user._id!).subscribe({
+          next: () => {
+            this.dataSourceUsers.data = this.dataSourceUsers.data.filter(u => u._id !== user._id);
+            this.showSnackbar(`User "${user.name}" deleted successfully`);
+          },
+          error: (err) => {
+            this.showSnackbar('Failed to delete user', true);
+          }
+        });
+      }
+    });
   }
+  
 
   deleteRole() {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
@@ -180,6 +206,17 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       height: '500px',
     })
   }
+
+  showSnackbar(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000, // 3 seconds
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+    });
+  }
+  
+  
 
 
 }

@@ -22,6 +22,26 @@ body {
     margin: 0;
 }
 
+.cdk-overlay-pane.mat-mdc-dialog-panel {
+    max-width: none !important;
+}
+
+::ng-deep .snackbar-success {
+    background-color: #4caf50 !important;
+    color: white !important;
+  }
+  
+  ::ng-deep .snackbar-error {
+    background-color: #f44336 !important;
+    color: white !important;
+  }
+  
+  
+
+
+
+  
+
 
 
 

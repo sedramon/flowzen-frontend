@@ -49,7 +49,7 @@ export class UserAdministrationService {
                     ...existingRole, // Preserve existing structure
                     name: updatedData.name,
                     availableScopes: existingRole.availableScopes.filter(scope =>
-                        updatedData.availableScopes.includes(scope._id) // Retain existing scope objects
+                        updatedData.availableScopes.includes(scope._id!) // Retain existing scope objects
                     )
                 };
     
@@ -71,6 +71,15 @@ export class UserAdministrationService {
             })
         )
     }
+
+    createRole(role: Role): Observable<Role> {
+        return this.http.post<Role>(`${this.apiUrl}/roles`, role).pipe(
+            tap((createdRole) => {
+                const updatedRoles = [...this.rolesSubject.getValue(), createdRole];
+                this.rolesSubject.next(updatedRoles);
+            })
+        )
+    }
     
     
 
@@ -80,6 +89,10 @@ export class UserAdministrationService {
 
     getCurrentUsers(): User[] {
         return this.usersSubject.getValue();
+    }
+
+    deleteUser(id: string): Observable<User> {
+        return this.http.delete<User>(`${this.apiUrl}/users/${id}`);
     }
 
 }
