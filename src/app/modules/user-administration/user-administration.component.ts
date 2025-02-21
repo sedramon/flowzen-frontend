@@ -200,11 +200,25 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   }
   
 
-  deleteRole() {
+  deleteRole(selectedRole: Role) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
-      height: '500px',
+      height: '250px',
     })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.userAdministrationService.deleteRole(selectedRole!._id!).subscribe({
+          next: () => {
+            this.dataSourceRoles.data = this.dataSourceRoles.data.filter(r => r._id !== selectedRole!._id);
+            this.showSnackbar(`Role "${selectedRole!.name}" deleted successfully`);
+          },
+          error: (err) => {
+            this.showSnackbar('Failed to delete role', true);
+          }
+        });
+      }
+    });
   }
 
   showSnackbar(message: string, isError: boolean = false) {

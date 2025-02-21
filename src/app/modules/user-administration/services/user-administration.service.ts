@@ -95,4 +95,8 @@ export class UserAdministrationService {
         return this.http.delete<User>(`${this.apiUrl}/users/${id}`);
     }
 
+    deleteRole(id: string): Observable<Role> {
+        return this.http.delete<Role>(`${this.apiUrl}/roles/${id}`);
+    }
+
 }
