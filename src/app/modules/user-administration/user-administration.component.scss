@@ -1,3 +1,8 @@
+:host {
+    display: block;
+    overflow: hidden; /* Sprečava scroll unutar komponente */
+}
+
 .main-container {
     background-color: #424242;
     color: white;
