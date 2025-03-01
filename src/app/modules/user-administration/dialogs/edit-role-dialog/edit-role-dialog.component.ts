@@ -58,7 +58,8 @@ export class EditRoleDialogComponent {
   updateRole() {
     const updatedData = {
       name: this.roleForm.get('name')?.value || '',
-      availableScopes: this.roleForm.get('availableScopes')?.value || []
+      availableScopes: this.roleForm.get('availableScopes')?.value || [],
+      tenant: this.data.role.tenant
     };
   
     // Close the dialog and pass the updated role data back to the parent component

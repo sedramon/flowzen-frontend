@@ -112,7 +112,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
         this.userAdminService.updateRole(role._id!, updatedData).subscribe(
           (updatedRole) => {
             this.showSnackbar(`Role "${role.name}" updated successfully`);
-            this.userAdminService.fetchRoles().subscribe();
+            this.dataSourceRoles.data = this.dataSourceRoles.data.map(r => r._id === updatedRole._id ? updatedRole : r);
           },
           (error) => {
             console.error('Error updating role:', error);
@@ -137,7 +137,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
         this.userAdminService.updateUser(user._id!, updatedData).subscribe(
           (updatedUser) => {
             this.showSnackbar(`User "${user.name}" updated successfully`);
-            this.userAdminService.fetchUsers(this.authService.getCurrentUser()!.tenant).subscribe();
+            this.dataSourceUsers.data = this.dataSourceUsers.data.map(u => u._id === updatedUser._id ? updatedUser : u);
           },
           (error) => {
             console.error('Error updating user:', error);

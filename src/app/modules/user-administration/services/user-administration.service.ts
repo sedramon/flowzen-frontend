@@ -31,33 +31,15 @@ export class UserAdministrationService {
         );
     }
 
-    updateRole(roleId: string, updatedData: { name: string; availableScopes: string[] }): Observable<Role> {
+    updateRole(roleId: string, updatedData: { name: string; availableScopes: string[], tenant: string }): Observable<Role> {
         console.log("Updating role:", roleId, updatedData);
         
         return this.http.patch<Role>(`${this.apiUrl}/roles/${roleId}`, updatedData).pipe(
             tap((updatedRole) => {
-                // Get the current list of roles
                 const currentRoles = this.rolesSubject.getValue();
-    
-                // Find the existing role to retain its Scope[] structure
-                const existingRole = currentRoles.find(role => role._id === roleId);
-                
-                if (!existingRole) return;
-    
-                // Convert availableScopes (string[]) back to Scope[]
-                const updatedRoleWithScopes: Role = {
-                    ...existingRole, // Preserve existing structure
-                    name: updatedData.name,
-                    availableScopes: existingRole.availableScopes.filter(scope =>
-                        updatedData.availableScopes.includes(scope._id!) // Retain existing scope objects
-                    )
-                };
-    
-                // Replace the role in the BehaviorSubject
                 const updatedRoles = currentRoles.map(role =>
-                    role._id === roleId ? updatedRoleWithScopes : role
+                    role._id === roleId ? updatedRole : role
                 );
-                
                 this.rolesSubject.next(updatedRoles);
             })
         );
@@ -67,29 +49,11 @@ export class UserAdministrationService {
         console.log("Updating user:", userId, updatedData);
         return this.http.patch<User>(`${this.apiUrl}/users/${userId}`, updatedData).pipe(
             tap((updatedUser) => {
-                console.log('Backend response: ' + updatedUser)
+                console.log('Backend response: ' + updatedUser._id);
                 const currentUsers = this.usersSubject.getValue();
-
-                const existingUser = currentUsers.find(user => user._id === userId);
-
-                if (!existingUser) return;
-
-                const currentRoles = this.rolesSubject.getValue();
-                
-                const existingRole = currentRoles.find(role => role._id === updatedData.role);
-
-                
-
-                const updatedUserWithRole: User = {
-                    ...existingUser,
-                    name: updatedData.name,
-                    role: existingRole!
-                };
-
                 const updatedUsers = currentUsers.map(user =>
-                    user._id === userId ? updatedUserWithRole : user
+                    user._id === userId ? updatedUser : user
                 );
-                
                 this.usersSubject.next(updatedUsers);
             })
         );
