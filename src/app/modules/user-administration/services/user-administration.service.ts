@@ -63,6 +63,38 @@ export class UserAdministrationService {
         );
     }
 
+    updateUser(userId: string, updatedData: { name: string; role: string, tenant: string }): Observable<User> {
+        console.log("Updating user:", userId, updatedData);
+        return this.http.patch<User>(`${this.apiUrl}/users/${userId}`, updatedData).pipe(
+            tap((updatedUser) => {
+                console.log('Backend response: ' + updatedUser)
+                const currentUsers = this.usersSubject.getValue();
+
+                const existingUser = currentUsers.find(user => user._id === userId);
+
+                if (!existingUser) return;
+
+                const currentRoles = this.rolesSubject.getValue();
+                
+                const existingRole = currentRoles.find(role => role._id === updatedData.role);
+
+                
+
+                const updatedUserWithRole: User = {
+                    ...existingUser,
+                    name: updatedData.name,
+                    role: existingRole!
+                };
+
+                const updatedUsers = currentUsers.map(user =>
+                    user._id === userId ? updatedUserWithRole : user
+                );
+                
+                this.usersSubject.next(updatedUsers);
+            })
+        );
+    }
+
     createUser(user: User): Observable<User> {
         return this.http.post<User>(`${this.apiUrl}/users`, user).pipe(
             tap((createdUser) => {

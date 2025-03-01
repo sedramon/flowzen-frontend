@@ -9,3 +9,4 @@ export interface User {
     role: Role | string;
     tenant: Tenant | string;
 }
+

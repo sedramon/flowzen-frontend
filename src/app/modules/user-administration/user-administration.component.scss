@@ -1,23 +1,18 @@
 :host {
     display: block;
-    overflow: hidden; /* Sprečava scroll unutar komponente */
 }
 
 .main-container {
-    background-color: #424242;
     color: white;
+    padding: 25px;
 }
 
-.table-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between; /* Push table to top, paginator to bottom */
-    min-height: 450px; /* Ensure table wrapper has enough height */
-    border: 2px solid #ae036b; /* Matches your design */
-    padding: 10px;
-    border-radius: 20px;
-    width: 90%;
-    background-color: #232323;
+
+.component-title > .mat-icon {
+    margin-right: 10px;
+    height: 50px;
+    width: 50px;
+    font-size: 50px;
 }
 
 .table-wrapper > mat-paginator {
@@ -29,9 +24,48 @@
     min-height: 300px; /* Adjust based on your layout */
 }
 
-table {
+
+mat-card {
     width: 100%;
-    background-color: #232323;
+    box-shadow: black 5px 5px 5px;
+    background-color: #303030;
+
+    mat-card-title {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+
+        mat-icon {
+            margin-right: 10px;
+        }
+    }
+
+    mat-divider {
+        margin-bottom: 10px;
+    }
+
+    mat-card-content {
+        padding: 10px;
+    }
+
+    mat-card-subtitle {
+        margin-bottom: 10px;
+    }
+
+    .table-wrapper {
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between; /* Push table to top, paginator to bottom */
+        min-height: 450px; /* Ensure table wrapper has enough height */
+        border: 5px solid #ae036b; /* Matches your design */
+        padding: 6px;
+        border-radius: 25px;
+        background-color: #232323;
+    }
+
+    table {
+        background-color: #232323;
+    }
 }
 
 mat-paginator {
@@ -40,6 +74,35 @@ mat-paginator {
 
 .mat-column-actions {
     text-align: right; /* Align text and buttons to the right */
-    width: 150px; /* Adjust width if necessary */
 }
+
+
+.custom-row {
+    height: 80px;
+    td {
+        border-bottom: 1px solid #ffffff;
+    }
+}
+
+.admin-chip {
+    background-color: #ff0000 !important; /* Red for Admin */
+    color: #fff !important;
+    border: 1px solid white !important;
+  }
+  
+.employee-chip {
+    background-color: #ffa200 !important; /* Blue for User */
+    color: #fff !important;
+    border: 1px solid white !important;
+  }
+  
+  .guest-chip {
+    background-color: #4caf50; /* Green for Guest */
+    color: #fff;
+  }
+  
+  .default-chip {
+    background-color: #9e9e9e; /* Gray for any other roles */
+    color: #fff;
+  }
 

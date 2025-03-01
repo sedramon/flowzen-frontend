@@ -4,16 +4,10 @@ html, body {
     overflow: hidden; /* Prevent scrolling on the entire page */
 }
 
-.example-container {
-    height: 100vh;
-    display: flex;
-    overflow: hidden; /* Prevents the sidenav from scrolling */
-}
 
 .logout-button {
     width: 100%;
 }
-
 
 .example-sidenav {
     width: 250px;
@@ -28,7 +22,7 @@ html, body {
 
 mat-sidenav-content {
     flex-grow: 1;
-    height: 100vh;
+    margin-top: 64px;
     overflow-y: auto; /* Enables scrolling for the routed content */
     display: flex;
     flex-direction: column;
@@ -46,13 +40,16 @@ mat-sidenav-content {
     background-color: #ae036b;
     border-radius: 4px;
     padding: 16px;
-    text-align: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
     margin: 8px 0;
     text-decoration: none;
     box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
+
+    div {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+    }
 }
 
   
@@ -63,13 +60,14 @@ mat-sidenav-content {
 }
   
 .toggle-button {
-    width: 48px; /* Adjust width */
-    height: 48px; /* Adjust height */
+    width: 40px; /* Adjust width */
+    height: 40px; /* Adjust height */
     font-size: 24px; /* Increases button size */
     display: flex;
     align-items: center;
     justify-content: center;
     border-radius: 50%;
+    margin-right: 25px;
     background-color: #ae036b; /* Optional: Background color */
     color: white !important;
 }
@@ -86,9 +84,27 @@ mat-sidenav-content {
 }
 
 
-.profile-header  {
+/* The fixed header that starts AFTER the sidenav */
+.fixed-header {
     position: fixed;
-    top: 16px;
-    margin-left: 24px;
-}
+    top: 0;
+    z-index: 1000; /* On top of other elements */
+    height: 64px;  /* Typical toolbar height */
+    display: flex;
+    align-items: center;
+    width: 100%;
+    padding: 0 16px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+
+
+    .header-title {
+        display: flex;
+        flex-direction: row;
+
+        mat-icon {
+            margin-right: 5px;
+        }
+    }
+  }
+
   

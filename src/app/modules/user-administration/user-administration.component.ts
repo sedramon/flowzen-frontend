@@ -10,6 +10,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
 import { MatIconButton } from '@angular/material/button';
 import { MatDividerModule } from '@angular/material/divider';
+import { MatCardModule } from '@angular/material/card';
 import { Role } from '../../models/Role';
 import { MatDialog } from '@angular/material/dialog';
 import { EditRoleDialogComponent } from './dialogs/edit-role-dialog/edit-role-dialog.component';
@@ -18,12 +19,13 @@ import { AddRoleDialogComponent } from './dialogs/add-role-dialog/add-role-dialo
 import { AddUserDialogComponent } from './dialogs/add-user-dialog/add-user-dialog.component';
 import { EditUserDialogComponent } from './dialogs/edit-user-dialog/edit-user-dialog.component';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 @Component({
   selector: 'app-user-administration',
   standalone: true,
-  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule],
+  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule, MatChipsModule, MatDividerModule, MatCardModule],
   templateUrl: './user-administration.component.html',
   styleUrl: './user-administration.component.scss'
 })
@@ -127,7 +129,23 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(EditUserDialogComponent, {
       width: '600px',
       height: '500px',
+      data: { user }
     })
+
+    dialogRef.afterClosed().subscribe((updatedData) => {
+      if (updatedData) {
+        this.userAdminService.updateUser(user._id!, updatedData).subscribe(
+          (updatedUser) => {
+            this.showSnackbar(`User "${user.name}" updated successfully`);
+            this.userAdminService.fetchUsers(this.authService.getCurrentUser()!.tenant).subscribe();
+          },
+          (error) => {
+            console.error('Error updating user:', error);
+            this.showSnackbar('Failed to update user', true);
+          }
+        );
+      }
+    });
   }
 
   openAddRoleDialog() {
@@ -230,7 +248,18 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     });
   }
   
-  
+ getChipClass(role: string): string {
+    switch (role) {
+      case 'admin':
+        return 'admin-chip';
+      case 'employee':
+        return 'employee-chip';
+      case 'Guest':
+        return 'guest-chip';
+      default:
+        return 'default-chip';
+    }
+  }
 
 
 }

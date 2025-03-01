@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Component, Inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldControl, MatFormFieldModule } from '@angular/material/form-field';
@@ -20,8 +20,8 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 })
 export class EditRoleDialogComponent {
   roleForm = new FormGroup({
-    name: new FormControl<string>(''),
-    availableScopes: new FormControl<string[]>([]) // Ensure it's an array
+    name: new FormControl<string>('', [Validators.required]),
+    availableScopes: new FormControl<string[]>([], [Validators.required]) // Ensure it's an array
   });
 
   allScopes: any[] = []; // Holds all available scopes

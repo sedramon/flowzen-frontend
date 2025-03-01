@@ -1,118 +1,125 @@
-<h1 style="text-align: end; padding-right: 25px">User Administration</h1>
-<div class="main-container" fxLayout="row" fxLayoutAlign="space-evenly start">
-  <!-- Users Table -->
-  <div style="width: 50%" fxLayout="column" fxLayoutAlign="space-around center">
-    <h3>Users</h3>
+<div class="main-container" fxLayout="column" fxLayoutAlign="space-evenly center">
 
-    <div class="table-wrapper">
-      <div
-        *ngIf="dataSourceUsers.data.length; else noUsers"
-        class="mat-table-container"
-      >
-        <table
-          mat-table
-          [dataSource]="dataSourceUsers"
-          matSort
-          class="mat-elevation-z8"
-        >
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-            <td mat-cell *matCellDef="let user">{{ user.name }}</td>
-          </ng-container>
+  <!-- Users Table Card -->
+  <mat-card>
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>person</mat-icon> Users
+      </mat-card-title>
+      <mat-card-subtitle>
+        Manage and view all registered users along with their details.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <div class="table-wrapper">
+        <div *ngIf="dataSourceUsers.data.length; else noUsers" class="mat-table-container">
+          <table mat-table [dataSource]="dataSourceUsers" matSort class="mat-elevation-z8">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+              <td mat-cell *matCellDef="let user">
+                <div fxLayout="row" fxLayoutAlign="start center">
+                  <img src="user-profile-image.png" alt="user-image" width="50px" style="margin-right: 10px;"> 
+                  {{ user.name }}
+                </div>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="email">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-            <td mat-cell *matCellDef="let user">{{ user.email }}</td>
-          </ng-container>
+            <ng-container matColumnDef="email">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+              <td mat-cell *matCellDef="let user">{{ user.email }}</td>
+            </ng-container>
 
-          <ng-container matColumnDef="role">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Role</th>
-            <td mat-cell *matCellDef="let user">{{ user.role.name }}</td>
-          </ng-container>
+            <ng-container matColumnDef="role">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>User Roles</th>
+              <td mat-cell *matCellDef="let user">
+                <mat-chip [ngClass]="getChipClass(user.role.name)">
+                  {{ user.role.name }}
+                </mat-chip>
+              </td>
+            </ng-container>
 
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>
-              Actions<button mat-icon-button (click)="openAddUserDialog()">
-                <mat-icon style="color: greenyellow">add</mat-icon>
-              </button>
-            </th>
-            <td mat-cell *matCellDef="let user">
-              <button mat-icon-button (click)="openEditUserDialog(user)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button (click)="deleteUser(user)">
-                <mat-icon style="color: red">delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>
+                <div fxLayout="row" fxLayoutAlign="end center">
+                  Actions
+                  <button mat-icon-button (click)="openAddUserDialog()">
+                    <mat-icon style="color: greenyellow">add</mat-icon>
+                  </button>
+                </div>
+              </th>
+              <td mat-cell *matCellDef="let user">
+                <div fxLayout="row" fxLayoutAlign="end center">
+                  <button mat-icon-button (click)="openEditUserDialog(user)" style="margin: 0px 10px;">
+                    <mat-icon style="color: aqua;">edit</mat-icon>
+                  </button>
+                  Edit User
+                  <button mat-icon-button (click)="deleteUser(user)" style="margin: 0px 10px;">
+                    <mat-icon style="color: red">delete</mat-icon>
+                  </button>
+                  Delete User
+                </div>
+              </td>
+            </ng-container>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers" class="custom-row"></tr>
+          </table>
+        </div>
+        <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
       </div>
+      <ng-template #noUsers>
+        <p>No users found.</p>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
 
-      <!-- Ensure paginator stays inside the borders -->
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 25]"
-        showFirstLastButtons
-      ></mat-paginator>
-    </div>
+  <!-- Roles Table Card -->
+  <mat-card style="margin-top: 20px;">
+    <mat-card-header>
+      <mat-card-title>
+        <mat-icon>assignment_ind</mat-icon> Roles
+      </mat-card-title>
+      <mat-card-subtitle>
+        Review and manage user roles and their associated permissions.
+      </mat-card-subtitle>
+    </mat-card-header>
+    <mat-divider></mat-divider>
+    <mat-card-content>
+      <div class="table-wrapper">
+        <div *ngIf="dataSourceRoles.data.length; else noRoles" class="mat-table-container">
+          <table mat-table [dataSource]="dataSourceRoles" matSort class="mat-elevation-z8">
+            <ng-container matColumnDef="name">
+              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+              <td mat-cell *matCellDef="let role">{{ role.name }}</td>
+            </ng-container>
 
-    <ng-template #noUsers>
-      <p>No users found.</p>
-    </ng-template>
-  </div>
+            <ng-container matColumnDef="actions">
+              <th mat-header-cell *matHeaderCellDef>
+                Actions
+                <button mat-icon-button (click)="openAddRoleDialog()">
+                  <mat-icon style="color: greenyellow">add</mat-icon>
+                </button>
+              </th>
+              <td mat-cell *matCellDef="let role">
+                <button mat-icon-button (click)="openEditRoleDialog(role)">
+                  <mat-icon style="color: aqua;">edit</mat-icon>
+                </button>
+                <button mat-icon-button (click)="deleteRole(role)">
+                  <mat-icon style="color: red">delete</mat-icon>
+                </button>
+              </td>
+            </ng-container>
 
-  <!-- Roles Table -->
-  <div style="width: 50%" fxLayout="column" fxLayoutAlign="space-around center">
-    <h3>Roles</h3>
-
-    <div class="table-wrapper">
-      <div
-        *ngIf="dataSourceRoles.data.length; else noRoles"
-        class="mat-table-container"
-      >
-        <table
-          mat-table
-          [dataSource]="dataSourceRoles"
-          matSort
-          class="mat-elevation-z8"
-        >
-          <ng-container matColumnDef="name">
-            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-            <td mat-cell *matCellDef="let role">{{ role.name }}</td>
-          </ng-container>
-
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>
-              Actions<button mat-icon-button (click)="openAddRoleDialog()">
-                <mat-icon style="color: greenyellow">add</mat-icon>
-              </button>
-            </th>
-            <td mat-cell *matCellDef="let role">
-              <button mat-icon-button (click)="openEditRoleDialog(role)">
-                <mat-icon>edit</mat-icon>
-              </button>
-              <button mat-icon-button (click)="deleteRole(role)">
-                <mat-icon style="color: red">delete</mat-icon>
-              </button>
-            </td>
-          </ng-container>
-
-          <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles"></tr>
-        </table>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles"></tr>
+          </table>
+        </div>
+        <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
       </div>
-
-      <!-- Ensure paginator stays inside the borders -->
-      <mat-paginator
-        [pageSizeOptions]="[5, 10, 25]"
-        showFirstLastButtons
-      ></mat-paginator>
-    </div>
-
-    <ng-template #noRoles>
-      <p>No roles found.</p>
-    </ng-template>
-  </div>
+      <ng-template #noRoles>
+        <p>No roles found.</p>
+      </ng-template>
+    </mat-card-content>
+  </mat-card>
 </div>

@@ -1,15 +1,14 @@
 @use '@angular/material' as mat;
-@import "app/themes/flowzentheme.css";
+@import "app/themes/themestheme.css";
 
 
 .main-container{
     color: white;
-    background-color: #424242;
     display: flex;
     align-items: center;
     justify-content: center;
     // height: calc(100vh - 20px);
-    height: 100vh;
+    min-height: calc(100vh - 64px);
     overflow: hidden;
     text-align: center;
     flex-direction: column;
@@ -35,6 +34,19 @@ body {
     background-color: #f44336 !important;
     color: white !important;
   }
+
+  .component-title {
+    background-color: #131313;
+    margin: 0px;
+    height: 75px;
+    display: flex;
+    flex: row;
+    justify-content: end;
+    align-items: center;
+    padding-right: 25px;
+  }
+
+  
   
   
 

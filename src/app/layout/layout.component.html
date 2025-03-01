@@ -1,26 +1,46 @@
-<mat-sidenav-container class="example-container">
+<mat-sidenav-container>
   <!-- Sidenav -->
   <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="example-sidenav">
     <div class="menu-content" fxLayout="column" fxLayoutAlign="space-between none">
       <mat-nav-list>
         <a mat-list-item routerLink="/home" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">Home</span>
+          <div>
+            <mat-icon>home</mat-icon>
+            <span>Home</span>
+          </div>
         </a>
         <a mat-list-item routerLink="/appoitments" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">Appoitments</span>
+          <div>
+            <mat-icon>event</mat-icon>
+            <span>Appointments</span>
+          </div>
         </a>
         <a mat-list-item routerLink="/clients" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">Clients</span>
+          <div>
+            <mat-icon>people</mat-icon>
+            <span>Clients</span>
+          </div>
         </a>
         <a mat-list-item routerLink="/employees" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">Employees</span>
+          <div>
+            <mat-icon>supervisor_account</mat-icon>
+            <span>Employees</span>
+          </div>
+
         </a>
         <a mat-list-item routerLink="/user-administration" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">User Administration</span>
+          <div>
+            <mat-icon>admin_panel_settings</mat-icon>
+            <span>User Administration</span>
+          </div>
         </a>
         <a mat-list-item routerLink="/services" routerLinkActive="active" class="menu-item">
-          <span style="color: white;">Services</span>
+          <div>
+            <mat-icon>miscellaneous_services</mat-icon>
+            <span>Services</span>
+          </div>
         </a>
+
         <!-- Additional menu items -->
       </mat-nav-list>
       <div>
@@ -31,20 +51,29 @@
           </button>
         </div>
         <div fxLayout="column" fxLayoutAlign="center center" class="logout-container">
-          <button mat-raised-button class="logout-button" style="background-color: red; color: white;" (click)="logout()">Logout</button>
+          <button mat-raised-button class="logout-button" style="background-color: red; color: white;"
+            (click)="logout()">Logout</button>
         </div>
-        
+
       </div>
     </div>
   </mat-sidenav>
 
   <!-- Main Content -->
   <mat-sidenav-content>
-    <div fxLayout="row" fxLayoutAlign="end center" class="profile-header">
-      <button mat-icon-button class="toggle-button" (click)="toggleMenu()">
-        <mat-icon color>{{ opened ? 'close' : 'menu' }}</mat-icon>
+    <!-- Global Fixed Header -->
+    <mat-toolbar color="primary" class="fixed-header">
+      <button mat-icon-button (click)="toggleMenu()" class="toggle-button">
+        <mat-icon>{{ opened ? 'close' : 'menu' }}</mat-icon>
       </button>
-    </div>
-    <router-outlet></router-outlet> <!-- Show child routes -->
+      <span class="header-title">
+        <mat-icon>{{ currentIcon }}</mat-icon>
+        {{ currentTitle }}
+      </span>
+    </mat-toolbar>
+
+   
+      <router-outlet></router-outlet> <!-- Routed content goes here -->
+
   </mat-sidenav-content>
 </mat-sidenav-container>
