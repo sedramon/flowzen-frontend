@@ -33,7 +33,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   users: User[] = [];
   roles: Role[] = [];
 
-  displayedColumnsUsers: string[] = ['name', 'email', 'role','actions'];
+  displayedColumnsUsers: string[] = ['name', 'email', 'role', 'actions'];
   dataSourceUsers = new MatTableDataSource<User>(this.users);
 
   displayedColumnsRoles: string[] = [
@@ -44,7 +44,19 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   // Use @ViewChildren instead of @ViewChild to get multiple paginators
   @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-  @ViewChildren(MatSort) sorts!: QueryList<MatSort>;
+  // Use @ViewChild for each table's sort
+  @ViewChild('userSort', { static: false })
+  set userSort(ms: MatSort) {
+    if (ms) {
+      this.dataSourceUsers.sort = ms;
+    }
+  }
+  @ViewChild('roleSort')
+  set roleSort(ms: MatSort) {
+    if (ms) {
+      this.dataSourceRoles.sort = ms;
+    }
+  }
 
 
   constructor(private userAdministrationService: UserAdministrationService, private authService: AuthService, private dialog: MatDialog, private userAdminService: UserAdministrationService, private snackBar: MatSnackBar) { }
@@ -88,15 +100,10 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-      // Assign paginators and sorts correctly
+    // Assign paginators and sorts correctly
     if (this.paginators.length > 1) {
       this.dataSourceUsers.paginator = this.paginators.toArray()[0];
       this.dataSourceRoles.paginator = this.paginators.toArray()[1];
-    }
-
-    if (this.sorts.length > 1) {
-      this.dataSourceUsers.sort = this.sorts.toArray()[0];
-      this.dataSourceRoles.sort = this.sorts.toArray()[1];
     }
   }
 
@@ -106,7 +113,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       height: '500px',
       data: { role }
     });
-  
+
     dialogRef.afterClosed().subscribe((updatedData) => {
       if (updatedData) {
         this.userAdminService.updateRole(role._id!, updatedData).subscribe(
@@ -122,8 +129,8 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
-  
+
+
 
   openEditUserDialog(user: User) {
     const dialogRef = this.dialog.open(EditUserDialogComponent, {
@@ -176,7 +183,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       width: '600px',
       height: '500px',
     });
-  
+
     dialogRef.afterClosed().subscribe((user: User | undefined) => {
       if (user) {
         this.userAdministrationService.createUser(user).subscribe(
@@ -193,15 +200,15 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+
 
   deleteUser(user: User) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
-      data: user.name 
+      data: user.name
     });
-  
+
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.userAdministrationService.deleteUser(user._id!).subscribe({
@@ -216,7 +223,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       }
     });
   }
-  
+
 
   deleteRole(selectedRole: Role) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
@@ -247,19 +254,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
     });
   }
-  
- getChipClass(role: string): string {
-    switch (role) {
-      case 'admin':
-        return 'admin-chip';
-      case 'employee':
-        return 'employee-chip';
-      case 'Guest':
-        return 'guest-chip';
-      default:
-        return 'default-chip';
-    }
-  }
+
 
 
 }

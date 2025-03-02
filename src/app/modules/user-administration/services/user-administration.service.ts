@@ -4,6 +4,8 @@ import { environmentDev } from "../../../../environments/environment";
 import { User } from "../../../models/User";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Role } from "../../../models/Role";
+import { AuthenticatedUser } from "../../../models/AuthenticatedUser";
+import { AuthService } from "../../../core/services/auth.service";
 
 @Injectable({ providedIn: 'root' })
 export class UserAdministrationService {
@@ -15,7 +17,7 @@ export class UserAdministrationService {
     private rolesSubject = new BehaviorSubject<Role[]>([]);
     public roles$ = this.rolesSubject.asObservable();
 
-    constructor(private http: HttpClient) { }
+    constructor(private http: HttpClient, private authService: AuthService) { }
 
     fetchUsers(tenant: string): Observable<User[]> {
         console.log("Calling API to fetch users for tenant:", tenant);
@@ -33,7 +35,7 @@ export class UserAdministrationService {
 
     updateRole(roleId: string, updatedData: { name: string; availableScopes: string[], tenant: string }): Observable<Role> {
         console.log("Updating role:", roleId, updatedData);
-        
+
         return this.http.patch<Role>(`${this.apiUrl}/roles/${roleId}`, updatedData).pipe(
             tap((updatedRole) => {
                 const currentRoles = this.rolesSubject.getValue();
@@ -55,6 +57,13 @@ export class UserAdministrationService {
                     user._id === userId ? updatedUser : user
                 );
                 this.usersSubject.next(updatedUsers);
+
+                // If the updated user is the currently authenticated user, update the AuthService user
+                const currentAuthUser = this.authService.getCurrentUser();
+                if (currentAuthUser && currentAuthUser.sub === updatedUser._id) {
+                    const updatedAuthUser = this.mapUserToAuthenticatedUser(updatedUser);
+                    this.authService.updateCurrentUser(updatedAuthUser);
+                }
             })
         );
     }
@@ -76,8 +85,8 @@ export class UserAdministrationService {
             })
         )
     }
-    
-    
+
+
 
     getCurrentRoles(): Role[] {
         return this.rolesSubject.getValue();
@@ -93,6 +102,19 @@ export class UserAdministrationService {
 
     deleteRole(id: string): Observable<Role> {
         return this.http.delete<Role>(`${this.apiUrl}/roles/${id}`);
+    }
+
+    mapUserToAuthenticatedUser(user: User): AuthenticatedUser {
+        return {
+            sub: user._id!, // assuming _id exists after an update
+            username: user.name,
+            role: typeof user.role === 'string' ? { _id: user.role } as Role : user.role,
+            tenant:
+                typeof user.tenant === 'string'
+                    ? user.tenant
+                    : // If tenant is an object, assume it has an _id property; adjust if needed
+                    (user.tenant as any)._id || user.tenant.toString(),
+        };
     }
 
 }

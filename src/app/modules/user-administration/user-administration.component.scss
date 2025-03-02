@@ -84,25 +84,4 @@ mat-paginator {
     }
 }
 
-.admin-chip {
-    background-color: #ff0000 !important; /* Red for Admin */
-    color: #fff !important;
-    border: 1px solid white !important;
-  }
-  
-.employee-chip {
-    background-color: #ffa200 !important; /* Blue for User */
-    color: #fff !important;
-    border: 1px solid white !important;
-  }
-  
-  .guest-chip {
-    background-color: #4caf50; /* Green for Guest */
-    color: #fff;
-  }
-  
-  .default-chip {
-    background-color: #9e9e9e; /* Gray for any other roles */
-    color: #fff;
-  }
 

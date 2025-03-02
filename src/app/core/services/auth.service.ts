@@ -67,6 +67,10 @@ export class AuthService {
     localStorage.removeItem(this.TOKEN_KEY);
   }
 
+  updateCurrentUser(updatedUser: AuthenticatedUser): void {
+    this.userSubject.next(updatedUser);
+  }
+
   isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) return false;
