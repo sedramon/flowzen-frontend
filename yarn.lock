@@ -1485,6 +1485,64 @@
   resolved "https://registry.npmjs.org/@esbuild/win32-x64/-/win32-x64-0.23.0.tgz"
   integrity sha512-Arm+WgUFLUATuoxCJcahGuk6Yj9Pzxd6l11Zb/2aAuv5kWWvvfhLFo2fni4uSK5vzlUdCGZ/BdV5tH8klj8p8g==
 
+"@fullcalendar/angular@^6.1.16":
+  version "6.1.16"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/angular/-/angular-6.1.16.tgz#2850e5a4fcd67d05ca3dea7a078d8c283f6776ed"
+  integrity sha512-Qqs0MZPlIDretmWgtOr0H+uiLO6DKeqxqH1Y2oeWufwEbQTaAxhH7mivdTmxL596JkiuJ/1dhCm+v4tVbFb40w==
+  dependencies:
+    tslib "^2.3.0"
+
+"@fullcalendar/core@^6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/core/-/core-6.1.15.tgz#6c3f5259fc4589870228853072131219bb533f6e"
+  integrity sha512-BuX7o6ALpLb84cMw1FCB9/cSgF4JbVO894cjJZ6kP74jzbUZNjtwffwRdA+Id8rrLjT30d/7TrkW90k4zbXB5Q==
+  dependencies:
+    preact "~10.12.1"
+
+"@fullcalendar/daygrid@^6.1.15", "@fullcalendar/daygrid@~6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/daygrid/-/daygrid-6.1.15.tgz#91208b0955ba805ddad285a53ee6f53855146963"
+  integrity sha512-j8tL0HhfiVsdtOCLfzK2J0RtSkiad3BYYemwQKq512cx6btz6ZZ2RNc/hVnIxluuWFyvx5sXZwoeTJsFSFTEFA==
+
+"@fullcalendar/interaction@^6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/interaction/-/interaction-6.1.15.tgz#1c685d5c269388d4877b75ab2185e97d7c386cc7"
+  integrity sha512-DOTSkofizM7QItjgu7W68TvKKvN9PSEEvDJceyMbQDvlXHa7pm/WAVtAc6xSDZ9xmB1QramYoWGLHkCYbTW1rQ==
+
+"@fullcalendar/list@^6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/list/-/list-6.1.15.tgz#d9b7ff0a50d7efa0d31234ed6caea06db6090c29"
+  integrity sha512-U1bce04tYDwkFnuVImJSy2XalYIIQr6YusOWRPM/5ivHcJh67Gm8CIMSWpi3KdRSNKFkqBxLPkfZGBMaOcJYug==
+
+"@fullcalendar/premium-common@~6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/premium-common/-/premium-common-6.1.15.tgz#66b0690aae4abb43e8476a007e812682703fee25"
+  integrity sha512-IwUHptHNzWDOgAsXLoBntGxmbfCKvUy6iYFMCP3F3ahbG58E0PJMYsXvgw+NaA7Cz4gcQoVHioGjIFgQqs3Keg==
+
+"@fullcalendar/resource-daygrid@~6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/resource-daygrid/-/resource-daygrid-6.1.15.tgz#d52d6cea8d8f09247060e2aff28e01fd11e6d383"
+  integrity sha512-4SVfr2Gf0KtLkW56U9gCXf8Jrug8CDJ81g0KMCTbTsaqrIdQ0DKWc0O5+4UVvibwUeh2jWQNIVXXOoPQ5lDHhQ==
+  dependencies:
+    "@fullcalendar/daygrid" "~6.1.15"
+    "@fullcalendar/premium-common" "~6.1.15"
+
+"@fullcalendar/resource-timegrid@^6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/resource-timegrid/-/resource-timegrid-6.1.15.tgz#4e5383915016a0a1f79f93f41e5a1e1a0a758e07"
+  integrity sha512-nT3aT8WGm4zSek1zcGCm4NRmuBdAhl+Tpod/NH8N5ZcN3A490GdT7J3uDK1KzPb+5kQ/RlW0Pzj0hF4B5BkBwg==
+  dependencies:
+    "@fullcalendar/premium-common" "~6.1.15"
+    "@fullcalendar/resource-daygrid" "~6.1.15"
+    "@fullcalendar/timegrid" "~6.1.15"
+
+"@fullcalendar/timegrid@^6.1.15", "@fullcalendar/timegrid@~6.1.15":
+  version "6.1.15"
+  resolved "https://registry.yarnpkg.com/@fullcalendar/timegrid/-/timegrid-6.1.15.tgz#c4630b7c03c813065154c6e3981f8d51d9d692e5"
+  integrity sha512-61ORr3A148RtxQ2FNG7JKvacyA/TEVZ7z6I+3E9Oeu3dqTf6M928bFcpehRTIK6zIA6Yifs7BeWHgOE9dFnpbw==
+  dependencies:
+    "@fullcalendar/daygrid" "~6.1.15"
+
 "@inquirer/checkbox@^2.4.7":
   version "2.5.0"
   resolved "https://registry.npmjs.org/@inquirer/checkbox/-/checkbox-2.5.0.tgz"
@@ -5590,6 +5648,11 @@ postcss@^8.2.14, postcss@^8.4.23, postcss@^8.4.33, postcss@^8.4.43:
     nanoid "^3.3.7"
     picocolors "^1.1.1"
     source-map-js "^1.2.1"
+
+preact@~10.12.1:
+  version "10.12.1"
+  resolved "https://registry.yarnpkg.com/preact/-/preact-10.12.1.tgz#8f9cb5442f560e532729b7d23d42fd1161354a21"
+  integrity sha512-l8386ixSsBdbreOAkqtrwqHwdvR35ID8c3rKPa8lCWuO86dBi32QWHV4vfsZK1utLLFMvw+Z5Ad4XLkZzchscg==
 
 proc-log@^4.0.0, proc-log@^4.1.0, proc-log@^4.2.0:
   version "4.2.0"
