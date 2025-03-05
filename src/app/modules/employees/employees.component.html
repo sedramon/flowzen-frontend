@@ -1,4 +1,41 @@
 <div class="main-container">
-    <h1>Welcome to Flowzen!</h1>
-    <p>This is the employees page.</p>
+    <div>
+        <h1>Employees</h1>
+    </div>
+    <div fxLayout="row">
+        <div *ngFor="let employee of employees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles">
+            <div fxLayout="row" fxLayoutAlign="end center">
+                <mat-chip>Active</mat-chip>
+            </div>
+            <div>
+                <img src="user-profile-image.png" alt="employee-image" width="125px">
+            </div>
+            <div fxLayout="column" fxLayoutAlign="center center" class="employee-name">
+                <span style="font-weight: bold;">{{ employee.firstName }} {{ employee.lastName }}</span>
+                {{ employee.jobRole }}
+            </div>
+            <div class="employee-contact-details" fxLayout="column" fxLayoutAlign="space-around">
+                <div fxLayout="row" fxLayoutAlign="space-around center">
+                    <div fxLayout="column" fxLayoutAlign="center center">
+                        <span>Department</span>
+                        Design Team
+                    </div>
+                    <div fxLayout="column" fxLayoutAlign="center center">
+                        <span>Date Hired</span>
+                        17/03/2021
+                    </div>
+                </div>
+                <div fxLayout="column" fxLayoutAlign="center center">
+                    <div fxLayout="row" fxLayoutAlign="center center">
+                        <mat-icon>email</mat-icon>
+                        {{ employee.contactEmail }}
+                    </div>
+                    <div fxLayout="row" fxLayoutAlign="center center">
+                        <mat-icon>phone</mat-icon>
+                        {{ employee.contactPhone }}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

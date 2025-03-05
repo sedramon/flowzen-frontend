@@ -1,0 +1,38 @@
+.employee-tiles {
+    border: 1px #ae036b solid;
+    width: 300px;
+    height: 400px;
+    border-radius: 25px;
+    padding: 25px;
+    transition: 0.25s ease-in-out;
+    background-color: #323232;
+    cursor: pointer;
+    margin: 20px;
+
+    mat-chip {
+        border: greenyellow solid 1px;
+    }
+}
+
+.employee-tiles:hover{
+    transform: scale(1.025);
+}
+
+.employee-contact-details {
+    background-color: #232323;
+    width: 100%;
+    height: 200px;
+    border-radius: 25px;
+
+    mat-icon {
+        margin-right: 10px;
+    }
+}
+
+.employee-name {
+    margin-bottom: 10px;
+}
+
+.main-container{
+    padding: 0px 25px;
+}
