@@ -1,9 +1,26 @@
 <div class="main-container">
-    <div>
-        <h1>Employees</h1>
+    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
+        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="25px">
+            <span style="font-weight: bold; font-size: 35px;">{{employees.length}}</span>
+            <h1>Employees</h1>
+            <button mat-raised-button><mat-icon>filter_list</mat-icon> Filter</button>
+            <!-- Search Button -->
+            <button mat-icon-button style="background-color: #131313;" (click)="toggleSearch()">
+                <mat-icon>search</mat-icon>
+            </button>
+
+            <!-- Always Present Input with Animated Width -->
+            <input matInput [(ngModel)]="searchQuery" placeholder="Search..."
+                [@expandSearch]="searchExpanded ? 'expanded' : 'collapsed'" class="search-input">
+        </div>
+        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="25px">
+            <button mat-icon-button style="background-color: #131313;"><mat-icon>import_export</mat-icon></button>
+            <button mat-raised-button (click)="openAddEmployeeDialog()"><mat-icon>add</mat-icon> Add Employee</button>
+        </div>
     </div>
-    <div fxLayout="row">
-        <div *ngFor="let employee of employees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles">
+    <mat-divider style="margin-bottom: 25px;"></mat-divider>
+    <div fxLayout="row wrap" fxLayoutGap="20px" fxLayoutAlign="center center">
+        <div *ngFor="let employee of filteredEmployees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles">
             <div fxLayout="row" fxLayoutAlign="end center">
                 <mat-chip>Active</mat-chip>
             </div>

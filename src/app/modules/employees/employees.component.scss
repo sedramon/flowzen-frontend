@@ -1,13 +1,13 @@
 .employee-tiles {
     border: 1px #ae036b solid;
-    width: 300px;
+    width: 320px;
     height: 400px;
     border-radius: 25px;
     padding: 25px;
     transition: 0.25s ease-in-out;
     background-color: #323232;
     cursor: pointer;
-    margin: 20px;
+    margin-bottom: 20px;
 
     mat-chip {
         border: greenyellow solid 1px;
@@ -35,4 +35,23 @@
 
 .main-container{
     padding: 0px 25px;
+}
+
+.search-input {
+    border: none;
+    background-color: #232323;
+    color: white;
+    border-radius: 25px;
+    font-size: 1rem;
+    outline: none;
+    transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
+    width: 0;
+    opacity: 0;
+    background-color: #131313;
+}
+
+input[matInput] {
+    transition: all 0.3s ease-in-out;
+    width: 0;
+    overflow: hidden;
 }

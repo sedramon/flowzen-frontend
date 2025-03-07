@@ -8,4 +8,5 @@ export interface Employee {
     jobRole: string;
     isActive: boolean;
     includeInAppoitments: boolean;
+    tenant: string;
 }
