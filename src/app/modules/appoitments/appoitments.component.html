@@ -1,4 +1,80 @@
-<div class="main-container">
-    <h1>Welcome to Flowzen!</h1>
-    <p>This is the appoitments page.</p>
-</div>
+<mat-card class="appointments-container">
+  <!-- Toolbar -->
+  <mat-toolbar color="primary" class="toolbar-custom">
+    <span class="title">Raspored za zaposlene</span>
+    <span class="spacer"></span>
+    <mat-form-field appearance="outline">
+      <mat-label>Izaberi datum</mat-label>
+      <input matInput [matDatepicker]="picker" [formControl]="dateControl" (dateChange)="onDateChange($event.value)" />
+      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </mat-toolbar>
+
+  <div class="schedule-grid">
+    <!-- Zaglavlje -->
+    <div class="grid-header">
+      <div class="time-header-cell"></div>
+      <div class="employee-header-cell" *ngFor="let emp of employees">
+        <img [src]="emp.avatarUrl" alt="{{ emp.name }}" class="avatar" />
+        <span class="employee-name">{{ emp.name }}</span>
+      </div>
+    </div>
+
+    <!-- Grid telo -->
+    <div class="grid-body">
+      <!-- Horizontalne linije -->
+      <div class="horizontal-lines">
+        <ng-container *ngFor="let t of timeSlots; let i = index">
+          <div
+            class="horizontal-line"
+            *ngIf="i > 0 && i < timeSlots.length"
+            [style.top.%]="(i * 100) / timeSlots.length"
+          ></div>
+        </ng-container>
+      </div>
+
+      <!-- Vremenska kolona -->
+      <div class="time-column">
+        <div class="time-cell" *ngFor="let time of timeSlots">
+          {{ formatTime(time) }}
+        </div>
+      </div>
+
+      <!-- Kolone zaposlenih -->
+      <div class="employee-columns">
+        <div class="employee-column"
+             *ngFor="let emp of employees"
+             cdkDropList
+             [id]="'employee-' + emp.id"
+             [cdkDropListConnectedTo]="dropListIds"
+             [cdkDropListSortingDisabled]="true"
+             [cdkDropListData]="getAppointmentsForEmployee(emp.id)"
+             (cdkDropListDropped)="onDrop($event, emp)">
+          <!-- Appointment blok -->
+          <div class="appointment-block"
+               *ngFor="let appointment of getAppointmentsForEmployee(emp.id)"
+               cdkDrag
+               [cdkDragData]="appointment"
+               [style.top.%]="calculateTop(appointment.startHour)"
+               [style.height.%]="calculateHeight(appointment.startHour, appointment.endHour)"
+               (cdkDragStarted)="onDragStarted(appointment)"
+               (cdkDragEnded)="onDragEnded(appointment)">
+            {{ appointment.serviceName }}
+            <div class="resize-handle" (mousedown)="onResizeMouseDown($event, appointment)"></div>
+            <!-- Drag preview – isti sadržaj i veličina -->
+            <ng-template cdkDragPreview>
+              <div class="appointment-block preview">
+                {{ appointment.serviceName }}
+              </div>
+            </ng-template>
+            <!-- Drag placeholder – prazan, sakriven -->
+            <ng-template cdkDragPlaceholder>
+              <div class="appointment-block placeholder" style="visibility: hidden;"></div>
+            </ng-template>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</mat-card>

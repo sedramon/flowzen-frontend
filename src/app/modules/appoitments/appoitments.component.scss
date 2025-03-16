@@ -1,0 +1,145 @@
+.appointments-container {
+  width: 100%;
+  margin: 0 auto;
+  min-height: 600px;
+  display: flex;
+  flex-direction: column;
+  background-color: transparent; // uklonjena pozadina kartice
+  box-shadow: none; // uklonjena senka
+}
+
+.toolbar-custom {
+  background: transparent; // bez pozadinske boje
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+  margin-top: 20px;
+  .title {
+    font-size: 1.2rem;
+    font-weight: 600;
+  }
+  .spacer {
+    flex: 1 1 auto;
+  }
+}
+
+.schedule-grid {
+  margin: 20px;
+  border: 2px solid #8c0055;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+
+  .grid-header {
+    display: flex;
+    flex-direction: row;
+    background-color: transparent;
+    padding: 8px 0;
+    border-bottom: 1px solid rgb(204 204 204 / 25%);
+    .time-header-cell {
+      width: 109px; // širina kolone za vreme
+    }
+    .employee-header-cell {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-left: 1px solid #ccc;
+      padding: 4px;
+      .avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 8px;
+      }
+      .employee-name {
+        font-weight: 500;
+      }
+    }
+  }
+
+  .grid-body {
+    display: flex;
+    position: relative;
+    height: 1020px; // fiksirana visina timeline-a
+    background: transparent;
+
+    // Blage horizontalne linije (iza svega)
+    .horizontal-lines {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 1;
+      pointer-events: none; // da ne ometa drag&drop
+
+      .horizontal-line {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background-color: #ccc;
+        opacity: 0.3;
+      }
+    }
+
+    .time-column {
+      width: 109px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      z-index: 2; // ispred .horizontal-lines
+
+      .time-cell {
+        flex: 1; // 29 elemenata => svaki ~3.448% visine
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-bottom: 1px solid #cccccc7d;
+        font-weight: 600;
+        
+        // Ukloni donji border poslednjem (da nema linije ispod 22:00)
+        &:last-child {
+          border-bottom: none;
+        }
+      }
+    }
+
+    .employee-columns {
+      flex: 1;
+      display: flex;
+      position: relative;
+      z-index: 2; // ispred .horizontal-lines
+      .employee-column {
+        flex: 1;
+        position: relative;
+        border-left: 1px solid rgb(204 204 204 / 25%);
+      }
+    }
+  }
+}
+
+.appointment-block {
+  position: absolute;
+  left: 4px;
+  right: 4px;
+  background-color: #673ab7; // boja ostaje ista
+  color: #fff;
+  padding: 4px;
+  border-radius: 4px;
+  cursor: move;
+  box-sizing: border-box;
+  overflow: hidden;
+  z-index: 3; // iznad .horizontal-lines i kolona
+}
+
+.resize-handle {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 6px;
+  cursor: ns-resize;
+}
