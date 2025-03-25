@@ -1,64 +1,63 @@
 <mat-card class="appointments-container">
   <!-- Toolbar -->
-  <mat-toolbar color="primary" class="toolbar-custom" [ngClass]="{'centered': !selectedDate}">
-    <span class="title" *ngIf="selectedDate">Raspored za zaposlene</span>
-    <span class="spacer"></span>
-    <mat-form-field appearance="outline" class="date-picker">
-      <mat-label>Izaberi datum</mat-label>
-      <input matInput [matDatepicker]="picker" [formControl]="dateControl" (dateChange)="onDateChange($event.value)" />
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-    </mat-form-field>
+  <mat-toolbar class="toolbar-custom">
+    <div class="toolbar-item title-container" [@titleAnim]="toolbarState">
+      <span class="title" *ngIf="selectedDate">Raspored za zaposlene</span>
+    </div>
+    <div class="toolbar-item datepicker-container" [@dateAnim]="toolbarState">
+      <mat-form-field appearance="outline" class="date-picker">
+        <mat-label>Izaberi datum</mat-label>
+        <input matInput [matDatepicker]="picker" [formControl]="dateControl"
+          (dateChange)="onDateChange($event.value)" />
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+      </mat-form-field>
+    </div>
   </mat-toolbar>
 
-  <div class="schedule-grid" *ngIf="selectedDate" @fadeIn>
-    <!-- Zaglavlje -->
-    <div class="grid-header">
-      <div class="time-header-cell"></div>
-      <div class="employee-header-cell" *ngFor="let emp of employees">
-        <img [src]="emp.avatarUrl" alt="{{ emp.name }}" class="avatar" />
-        <span class="employee-name">{{ emp.name }}</span>
-      </div>
-    </div>
-
-    <!-- Telo grida -->
-    <div class="grid-body">
-      <!-- Horizontalne linije -->
-      <div class="horizontal-lines">
-        <ng-container *ngFor="let t of timeSlots; let i = index">
-          <div
-            class="horizontal-line"
-            *ngIf="i>0 && i<timeSlots.length"
-            [style.top.%]="(i*100)/timeSlots.length">
-          </div>
-        </ng-container>
-      </div>
-
-      <!-- Vremenska kolona -->
-      <div class="time-column" #timeColumn>
-        <div class="time-cell" *ngFor="let time of timeSlots">
-          {{ formatTime(time) }}
+  <ng-container *ngIf="selectedDate && animateSchedule">
+    <div class="schedule-grid" [@scheduleChange]="selectedDate.getTime()">
+      <!-- Zaglavlje -->
+      <div class="grid-header">
+        <div class="time-header-cell"></div>
+        <div class="employee-header-cell" *ngFor="let emp of employees">
+          <img [src]="emp.avatarUrl" alt="{{ emp.name }}" class="avatar" />
+          <span class="employee-name">{{ emp.name }}</span>
         </div>
       </div>
 
-      <!-- Kolone zaposlenih -->
-      <div class="employee-columns" #employeeColumns>
-        <div class="employee-column"
-             *ngFor="let emp of employees"
-             class="employee-column"
-             [attr.data-employee-id]="emp.id">
-          <!-- Appointment blokovi -->
-          <div class="appointment-block"
-               *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
-               class="appointment-block"
-               [attr.data-appointment-id]="ap.id"
-               [style.top.%]="calculateTop(ap.startHour)"
-               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)">
-            {{ ap.serviceName }}
-            <div class="resize-handle"></div>
+      <!-- Telo grida -->
+      <div class="grid-body">
+        <!-- Horizontalne linije -->
+        <div class="horizontal-lines">
+          <ng-container *ngFor="let t of timeSlots; let i = index">
+            <div class="horizontal-line" *ngIf="i > 0 && i < timeSlots.length"
+                 [style.top.%]="(i * 100) / timeSlots.length">
+            </div>
+          </ng-container>
+        </div>
+
+        <!-- Vremenska kolona -->
+        <div class="time-column" #timeColumn>
+          <div class="time-cell" *ngFor="let time of timeSlots">
+            {{ formatTime(time) }}
+          </div>
+        </div>
+
+        <!-- Kolone zaposlenih -->
+        <div class="employee-columns" #employeeColumns>
+          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp.id">
+            <!-- Appointment blokovi -->
+            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
+                 [attr.data-appointment-id]="ap.id"
+                 [style.top.%]="calculateTop(ap.startHour)"
+                 [style.height.%]="calculateHeight(ap.startHour, ap.endHour)">
+              {{ ap.serviceName }}
+              <div class="resize-handle"></div>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
+  </ng-container>
 </mat-card>

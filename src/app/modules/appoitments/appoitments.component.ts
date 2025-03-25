@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostBinding } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
@@ -8,22 +8,11 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
+import { Router, NavigationStart } from '@angular/router';
 import interact from 'interactjs';
-import { trigger, state, style, transition, animate } from '@angular/animations';
-
-interface Employee {
-  id: number;
-  name: string;
-  avatarUrl: string;
-}
-
-interface Appointment {
-  id: number;
-  employeeId: number;
-  startHour: number; // npr. 9.0 = 09:00, 9.5 = 09:30, itd.
-  endHour: number;
-  serviceName: string;
-}
+import { trigger, state, style, transition, animate, keyframes, query, stagger } from '@angular/animations';
+import { Employee, Appointment, ScheduleService } from './services/schedule.service';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-appoitments',
@@ -42,10 +31,37 @@ interface Appointment {
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
   animations: [
-    trigger('fadeIn', [
-      state('void', style({ opacity: 0 })),
+    // Animacija za slide-in pri ulasku elementa
+    trigger('slideIn', [
       transition(':enter', [
-        animate('0.5s ease-in', style({ opacity: 1 }))
+        animate('0.5s ease-in', keyframes([
+          style({ opacity: 0, transform: 'translateY(20px)', offset: 0 }),
+          style({ opacity: 1, transform: 'translateY(0)', offset: 1 })
+        ]))
+      ])
+    ]),
+    // Animacije za naslov i datepicker (pomak ulevo/udesno)
+    trigger('titleAnim', [
+      state('centered', style({ transform: 'translateX(0)' })),
+      state('spaced', style({ transform: 'translateX(-100px)' })),
+      transition('centered => spaced', animate('0.5s ease-out')),
+      transition('spaced => centered', animate('0.5s ease-in'))
+    ]),
+    trigger('dateAnim', [
+      state('centered', style({ transform: 'translateX(0)' })),
+      state('spaced', style({ transform: 'translateX(100px)' })),
+      transition('centered => spaced', animate('0.5s ease-out')),
+      transition('spaced => centered', animate('0.5s ease-in'))
+    ]),
+    // Animacija za promenu rasporeda – samo ulazna animacija (fade-in)
+    trigger('scheduleChange', [
+      transition(':enter', [
+        query('.employee-column', [
+          style({ opacity: 0 }),
+          stagger(100, [
+            animate('0.5s ease-out', style({ opacity: 1 }))
+          ])
+        ])
       ])
     ])
   ]
@@ -55,60 +71,40 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
   @ViewChild('employeeColumns', { static: false }) employeeColumnsRef!: ElementRef;
 
-  dateControl = new FormControl(new Date());
-  selectedDate: Date = new Date();
+  dateControl = new FormControl(null);
+  selectedDate: Date | null = null;
+  // Kontrola prikaza rasporeda u DOM-u
+  animateSchedule: boolean = false;
+  toolbarState: 'centered' | 'spaced' = 'centered';
 
-  // Polusatni intervali (8:00 - 22:00 => 29 elemenata)
   timeSlots: number[] = Array.from({ length: 29 }, (_, i) => 8 + i * 0.5);
 
-  employees: Employee[] = [
-    { id: 1, name: 'Milan',  avatarUrl: 'https://i.pravatar.cc/50?u=Milan' },
-    { id: 2, name: 'Jovana', avatarUrl: 'https://i.pravatar.cc/50?u=Jovana' },
-    { id: 3, name: 'Petar',  avatarUrl: 'https://i.pravatar.cc/50?u=Petar' },
-    { id: 4, name: 'Ana',    avatarUrl: 'https://i.pravatar.cc/50?u=Ana' },
-    { id: 5, name: 'Marko',  avatarUrl: 'https://i.pravatar.cc/50?u=Marko' },
-    { id: 6, name: 'Ivana',  avatarUrl: 'https://i.pravatar.cc/50?u=Ivana' },
-    { id: 7, name: 'Stefan', avatarUrl: 'https://i.pravatar.cc/50?u=Stefan' },
-    { id: 8, name: 'Marija', avatarUrl: 'https://i.pravatar.cc/50?u=Marija' }
-  ];
-  
-  appointments: Appointment[] = [
-    { id: 101, employeeId: 1, startHour: 8,  endHour: 10, serviceName: 'Usluga A' },
-    { id: 102, employeeId: 2, startHour: 9,  endHour: 10, serviceName: 'Usluga B' },
-    { id: 103, employeeId: 2, startHour: 11, endHour: 12, serviceName: 'Usluga C' },
-    { id: 104, employeeId: 3, startHour: 15, endHour: 17, serviceName: 'Usluga D' },
-    { id: 105, employeeId: 1, startHour: 18, endHour: 20, serviceName: 'Usluga E' },
-    { id: 106, employeeId: 1, startHour: 14, endHour: 15, serviceName: 'Usluga F' },
-    { id: 107, employeeId: 4, startHour: 10, endHour: 11, serviceName: 'Usluga G' },
-    { id: 108, employeeId: 5, startHour: 12, endHour: 13, serviceName: 'Usluga H' },
-    { id: 109, employeeId: 6, startHour: 9,  endHour: 11, serviceName: 'Usluga I' },
-    { id: 110, employeeId: 7, startHour: 16, endHour: 18, serviceName: 'Usluga J' },
-    { id: 111, employeeId: 8, startHour: 8,  endHour: 9,  serviceName: 'Usluga K' },
-    { id: 112, employeeId: 8, startHour: 13, endHour: 14, serviceName: 'Usluga L' }
-  ];
+  employees: Employee[] = [];
+  appointments: Appointment[] = [];
 
-  // 840 minuta (14 sati) – (od 8 do 22)
   private totalMinutes = 14 * 60;
   gridBodyHeight: number = 1020;
 
-  // Za drag – čuvamo offset klika unutar elementa
   dragOffset: { [id: number]: { x: number; y: number } } = {};
 
-  // Privatni listener za brisanje selekcije
-  private mouseMoveListener: any = (ev: MouseEvent) => {
+  // Nova promenljiva koja kontroliše animacije na nivou cele komponente
+
+  private mouseMoveListener = (ev: MouseEvent) => {
     if (window.getSelection) {
       window.getSelection()?.removeAllRanges();
     }
     ev.preventDefault();
   };
 
-  constructor(private cd: ChangeDetectorRef) {}
+  constructor(
+    private cd: ChangeDetectorRef,
+    private scheduleService: ScheduleService,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {}
 
   ngAfterViewInit(): void {
-    // Funkcija za dinamički bounding box: 
-    // ograničava boxove da se kreću unutar prostora kolona zaposlenih (od desne ivice time-column do desne ivice employee-columns)
     const boundingFn = () => {
       const timeR = this.timeColumnRef.nativeElement.getBoundingClientRect();
       const colsR = this.employeeColumnsRef.nativeElement.getBoundingClientRect();
@@ -120,37 +116,30 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       };
     };
 
+    // Konfiguracija interact.js za drag & drop i resizable
     interact('.appointment-block')
       .draggable({
         inertia: false,
         autoScroll: false,
         modifiers: [
-          interact.modifiers.restrictRect({
-            restriction: boundingFn,
-            endOnly: false
-          })
+          interact.modifiers.restrictRect({ restriction: boundingFn, endOnly: false })
         ],
         listeners: {
           start: (event) => {
             const target = event.target as HTMLElement;
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const rect = target.getBoundingClientRect();
-            this.dragOffset[apId] = {
-              x: event.clientX - rect.left,
-              y: event.clientY - rect.top
-            };
+            this.dragOffset[apId] = { x: event.clientX - rect.left, y: event.clientY - rect.top };
             document.addEventListener('mousemove', this.mouseMoveListener, { passive: false });
           },
           move: (event) => {
             const target = event.target as HTMLElement;
-            let transform = target.style.transform || 'translate(0px,0px)';
-            const match = transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
-            let prevX = match ? parseFloat(match[1]) : 0;
-            let prevY = match ? parseFloat(match[2]) : 0;
+            const match = target.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+            const prevX = match ? parseFloat(match[1]) : 0;
+            const prevY = match ? parseFloat(match[2]) : 0;
             const newX = prevX + event.dx;
             const newY = prevY + event.dy;
             target.style.transform = `translate(${newX}px, ${newY}px)`;
-            // Live reordering: provjera preklapanja u realnom vremenu
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const ap = this.appointments.find(a => a.id === apId);
             if (ap) {
@@ -173,13 +162,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       .resizable({
         edges: { bottom: '.resize-handle' },
         modifiers: [
-          interact.modifiers.restrictEdges({
-            outer: boundingFn,
-            endOnly: true
-          }),
-          interact.modifiers.restrictSize({
-            min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight }
-          })
+          interact.modifiers.restrictEdges({ outer: boundingFn, endOnly: true }),
+          interact.modifiers.restrictSize({ min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight } })
         ],
         inertia: false,
         listeners: {
@@ -191,17 +175,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const ap = this.appointments.find(a => a.id === apId);
             if (!ap) return;
-
-            // Calculate the new height
             let newHeightPx = event.rect.height;
             let newDuration = (newHeightPx / this.gridBodyHeight) * 14;
-            // Minimum duration is 0.5h (one cell)
             if (newDuration < 0.5) newDuration = 0.5;
-
-            // Restriction: if there is a next box, the maximum duration is until its start
             const colApps = this.appointments.filter(a => a.employeeId === ap.employeeId).sort((a, b) => a.startHour - b.startHour);
             const currentIndex = colApps.findIndex(a => a.id === apId);
-            let maxAllowedDuration = 22 - ap.startHour; // if it's the last one, until 22:00
+            let maxAllowedDuration = 22 - ap.startHour;
             if (currentIndex >= 0 && currentIndex < colApps.length - 1) {
               const next = colApps[currentIndex + 1];
               maxAllowedDuration = next.startHour - ap.startHour;
@@ -212,8 +191,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             }
             ap.endHour = ap.startHour + newDuration;
             target.style.height = newHeightPx + 'px';
-
-            // Adjust the positions of the boxes below
             for (let i = currentIndex + 1; i < colApps.length; i++) {
               let prev = colApps[i - 1];
               let curr = colApps[i];
@@ -223,7 +200,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 curr.endHour = curr.startHour + duration;
               }
             }
-
             this.cd.detectChanges();
           },
           end: (event) => {
@@ -275,7 +251,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   private fixOverlapsLive(employeeId: number): void {
-    // Uzimamo sve appointment-e za tu kolonu i sortiramo po startHour
     let colApps = this.appointments.filter(a => a.employeeId === employeeId);
     colApps.sort((a, b) => a.startHour - b.startHour);
     for (let i = 0; i < colApps.length - 1; i++) {
@@ -287,7 +262,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         next.endHour = next.startHour + duration;
       }
     }
-    // Ako zadnji box prelazi granicu, pomakni sve gore (opcionalno)
     let last = colApps[colApps.length - 1];
     if (last && last.endHour > 22) {
       const diff = last.endHour - 22;
@@ -298,9 +272,40 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  loadSchedule(date: Date): void {
+    this.scheduleService.getSchedule(date).subscribe(data => {
+      this.employees = data.employees;
+      this.appointments = data.appointments;
+      this.cd.detectChanges();
+    });
+  }
+
   onDateChange(dateValue: Date | null): void {
     if (dateValue) {
-      this.selectedDate = dateValue;
+      // Ako je izabran novi datum (različit od trenutnog)
+      if (!this.selectedDate || dateValue.getTime() !== this.selectedDate.getTime()) {
+        // Pokreni animaciju za nestajanje trenutnog rasporeda
+        this.animateSchedule = false;
+        // Sačekaj da se izlazna animacija završi (500ms)
+        setTimeout(() => {
+          // Nakon izlazne animacije, postavi novi datum i učitaj raspored
+          this.selectedDate = dateValue;
+          this.toolbarState = 'spaced';
+          this.employees = [];
+          this.appointments = [];
+          this.cd.detectChanges();
+          this.loadSchedule(dateValue);
+          // Omogući prikaz novog rasporeda uz ulaznu animaciju
+          this.animateSchedule = true;
+          this.cd.detectChanges();
+        }, 500);
+      }
+    } else {
+      this.toolbarState = 'centered';
+      this.selectedDate = null;
+      this.employees = [];
+      this.appointments = [];
+      this.animateSchedule = false;
     }
   }
 
