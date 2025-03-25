@@ -20,9 +20,10 @@
     </div>
     <mat-divider style="margin-bottom: 25px;"></mat-divider>
     <div fxLayout="row wrap" fxLayoutGap="20px" fxLayoutAlign="center center">
-        <div *ngFor="let employee of filteredEmployees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles">
+        <div *ngFor="let employee of filteredEmployees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles" (click)="openEditEmployeeDialog(employee)">
             <div fxLayout="row" fxLayoutAlign="end center">
-                <mat-chip>Active</mat-chip>
+                <mat-chip *ngIf="employee.isActive">Active</mat-chip>
+                <mat-chip *ngIf="!employee.isActive" style="background-color: red; border: white solid 1px;">Inactive</mat-chip>
             </div>
             <div>
                 <img src="user-profile-image.png" alt="employee-image" width="125px">
