@@ -8,7 +8,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatDividerModule } from '@angular/material/divider';
 import { MatIconModule } from '@angular/material/icon';
 import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 import { Employee } from '../../models/Employee';
@@ -16,6 +16,7 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddEmployeeDialogComponent } from './dialogs/add-employee-dialog/add-employee-dialog.component';
+import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit-employee-dialog.component';
 
 @Component({
   selector: 'app-employees',
@@ -36,7 +37,7 @@ export class EmployeesComponent implements OnInit {
   searchExpanded = false;
   searchQuery = '';
 
-  constructor(private employeeService: EmployeesService, private dialog: MatDialog) { }
+  constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
     this.employeeService.getAllEmployees().subscribe((employees) => this.employees = employees);
@@ -56,7 +57,7 @@ export class EmployeesComponent implements OnInit {
     }
 
     const query = this.searchQuery.toLowerCase().trim();
-    
+
     return this.employees.filter(emp => {
       const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase(); // Full name match
       return (
@@ -72,7 +73,57 @@ export class EmployeesComponent implements OnInit {
   openAddEmployeeDialog() {
     const dialogRef = this.dialog.open(AddEmployeeDialogComponent, {
       width: '750px',
-      height: '600px',
+      height: '900px',
+    });
+
+    dialogRef.afterClosed().subscribe((employee) => {
+      if (employee) {
+        this.employeeService.createEmployee(employee).subscribe(
+          (createdEmployee) => {
+            this.employees.push(createdEmployee);
+            this.showSnackbar(`Employee "${createdEmployee.firstName} ${createdEmployee.lastName}" created successfully`);
+          },
+          (error) => {
+            console.error('Error creating employee:', error);
+            this.showSnackbar('Failed to create employee', true);
+          }
+        );
+      }
+    });
+  }
+
+  openEditEmployeeDialog(employee: Employee) {
+    const dialogRef = this.dialog.open(EditEmployeeDialogComponent, {
+      width: '750px',
+      height: '900px',
+      data: { employee }
+    });
+
+    dialogRef.afterClosed().subscribe((updatedEmployee) => {
+      if (updatedEmployee) {
+        this.employeeService.updateEmployee(employee._id!, updatedEmployee).subscribe(
+          () => {
+            const index = this.employees.findIndex(emp => emp._id === employee._id);
+            if (index !== -1) {
+              this.employees[index] = { ...this.employees[index], ...updatedEmployee }; // Merge updates
+            }
+            this.showSnackbar(`Employee "${updatedEmployee.firstName} ${updatedEmployee.lastName}" updated successfully`);
+          },
+          (error) => {
+            console.error('Error updating employee:', error);
+            this.showSnackbar('Failed to update employee', true);
+          }
+        );
+      }
+    });
+  }
+
+  showSnackbar(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000, // 3 seconds
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
     });
   }
 }
