@@ -15,7 +15,7 @@ html, body {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #100d2e;
+    background-color: #14131e;
     color: white;
     box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.15);
 }
@@ -37,7 +37,7 @@ mat-sidenav-content {
   
 .menu-item {
     color: white !important;
-    background-color: #ae036b;
+    background-color: #ff0066;
     border-radius: 4px;
     padding: 16px;
     margin: 8px 0;
@@ -54,7 +54,7 @@ mat-sidenav-content {
 
   
 .menu-item:hover {
-    background-color: #ae036ab8;
+    background-color: rgba(174, 3, 106, 0.613);
     transform: scale(1.05);
     transition: 100ms;
 }
@@ -68,12 +68,12 @@ mat-sidenav-content {
     justify-content: center;
     border-radius: 50%;
     margin-right: 25px;
-    background-color: #ae036b; /* Optional: Background color */
+    background-color: #ff0066; /* Optional: Background color */
     color: white !important;
 }
 
 .toggle-button:hover {
-    background-color: #ae036ab8; /* Slightly lighter on hover */
+    background-color: rgba(174, 3, 106, 0.613); /* Slightly lighter on hover */
     transform: scale(1.1); /* Increases size on hover */
     transition: 0.2s;
 }
