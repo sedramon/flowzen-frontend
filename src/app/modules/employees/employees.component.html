@@ -1,37 +1,65 @@
 <div class="main-container">
     <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
         <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="25px">
-            <span style="font-weight: bold; font-size: 35px;">{{employees.length}}</span>
+            <!-- Display the number of employees using the async pipe -->
+            <span style="font-weight: bold; font-size: 35px;">{{ (filteredEmployees$ | async)?.length || 0 }}</span>
             <h1>Employees</h1>
             <button mat-raised-button><mat-icon>filter_list</mat-icon> Filter</button>
+            
             <!-- Search Button -->
             <button mat-icon-button style="background-color: #131313;" (click)="toggleSearch()">
                 <mat-icon>search</mat-icon>
             </button>
 
-            <!-- Always Present Input with Animated Width -->
-            <input matInput [(ngModel)]="searchQuery" placeholder="Search..."
-                [@expandSearch]="searchExpanded ? 'expanded' : 'collapsed'" class="search-input">
+            <!-- Animated Search Input -->
+            <input 
+                matInput 
+                [(ngModel)]="searchQuery" 
+                placeholder="Search..."
+                [@expandSearch]="searchExpanded ? 'expanded' : 'collapsed'" 
+                class="search-input"
+                (input)="filterEmployees()">
         </div>
+
         <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="25px">
-            <button mat-icon-button style="background-color: #131313;"><mat-icon>import_export</mat-icon></button>
-            <button mat-raised-button (click)="openAddEmployeeDialog()"><mat-icon>add</mat-icon> Add Employee</button>
+            <button mat-icon-button style="background-color: #131313;">
+                <mat-icon>import_export</mat-icon>
+            </button>
+            <button mat-raised-button (click)="openAddEmployeeDialog()">
+                <mat-icon>add</mat-icon> Add Employee
+            </button>
         </div>
     </div>
+
     <mat-divider style="margin-bottom: 25px;"></mat-divider>
+
+    <!-- Employee Cards -->
     <div fxLayout="row wrap" fxLayoutGap="20px" fxLayoutAlign="center center">
-        <div *ngFor="let employee of filteredEmployees" fxLayout="column" fxLayoutAlign="space-between" class="employee-tiles" (click)="openEditEmployeeDialog(employee)">
+        <!-- Use the async pipe to iterate over the filtered employees -->
+        <div *ngFor="let employee of (filteredEmployees$ | async)" 
+            fxLayout="column" 
+            fxLayoutAlign="space-between" 
+            class="employee-tiles" 
+            (click)="openEditEmployeeDialog(employee)">
+            
+            <!-- Active/Inactive Chip -->
             <div fxLayout="row" fxLayoutAlign="end center">
                 <mat-chip *ngIf="employee.isActive">Active</mat-chip>
                 <mat-chip *ngIf="!employee.isActive" style="background-color: red; border: white solid 1px;">Inactive</mat-chip>
             </div>
+
+            <!-- Employee Image -->
             <div>
                 <img src="user-profile-image.png" alt="employee-image" width="125px">
             </div>
+
+            <!-- Employee Name and Role -->
             <div fxLayout="column" fxLayoutAlign="center center" class="employee-name">
                 <span style="font-weight: bold;">{{ employee.firstName }} {{ employee.lastName }}</span>
                 {{ employee.jobRole }}
             </div>
+
+            <!-- Employee Contact Details -->
             <div class="employee-contact-details" fxLayout="column" fxLayoutAlign="space-around">
                 <div fxLayout="row" fxLayoutAlign="space-around center">
                     <div fxLayout="column" fxLayoutAlign="center center">

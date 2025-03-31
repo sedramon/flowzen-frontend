@@ -17,6 +17,7 @@ import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddEmployeeDialogComponent } from './dialogs/add-employee-dialog/add-employee-dialog.component';
 import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit-employee-dialog.component';
+import { map, Observable, of } from 'rxjs';
 
 @Component({
   selector: 'app-employees',
@@ -33,14 +34,23 @@ import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit
   ]
 })
 export class EmployeesComponent implements OnInit {
-  employees: Employee[] = [];
+  employees$: Observable<Employee[]> = of([]);
+  filteredEmployees$: Observable<Employee[]> = of([]);
   searchExpanded = false;
   searchQuery = '';
 
   constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
-    this.employeeService.getAllEmployees().subscribe((employees) => this.employees = employees);
+    // Get the cached employees observable
+    this.employees$ = this.employeeService.employees$;
+
+     // Trigger the initial fetch if not already loaded
+     this.employeeService.getAllEmployees().subscribe();
+
+ 
+     // Initialize filtered employees
+     this.filteredEmployees$ = this.employees$;
   }
 
   toggleSearch() {
@@ -51,23 +61,20 @@ export class EmployeesComponent implements OnInit {
   }
 
   // Computed property to filter employees dynamically
-  get filteredEmployees(): Employee[] {
-    if (!this.searchQuery) {
-      return this.employees;
-    }
-
-    const query = this.searchQuery.toLowerCase().trim();
-
-    return this.employees.filter(emp => {
-      const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase(); // Full name match
-      return (
-        emp.firstName.toLowerCase().includes(query) ||
-        emp.lastName.toLowerCase().includes(query) ||
-        fullName.includes(query) || // First + Last name together
-        emp.jobRole.toLowerCase().includes(query) ||
-        emp.contactEmail.toLowerCase().includes(query)
-      );
-    });
+  filterEmployees() {
+    this.filteredEmployees$ = this.employees$.pipe(
+      map(employees => employees.filter(emp => {
+        const query = this.searchQuery.toLowerCase().trim();
+        const fullName = `${emp.firstName} ${emp.lastName}`.toLowerCase();
+        return (
+          emp.firstName.toLowerCase().includes(query) ||
+          emp.lastName.toLowerCase().includes(query) ||
+          fullName.includes(query) ||
+          emp.jobRole.toLowerCase().includes(query) ||
+          emp.contactEmail.toLowerCase().includes(query)
+        );
+      }))
+    );
   }
 
   openAddEmployeeDialog() {
@@ -79,9 +86,8 @@ export class EmployeesComponent implements OnInit {
     dialogRef.afterClosed().subscribe((employee) => {
       if (employee) {
         this.employeeService.createEmployee(employee).subscribe(
-          (createdEmployee) => {
-            this.employees.push(createdEmployee);
-            this.showSnackbar(`Employee "${createdEmployee.firstName} ${createdEmployee.lastName}" created successfully`);
+          () => {
+            this.showSnackbar(`Employee "${employee.firstName} ${employee.lastName}" created successfully`);
           },
           (error) => {
             console.error('Error creating employee:', error);
@@ -103,10 +109,6 @@ export class EmployeesComponent implements OnInit {
       if (updatedEmployee) {
         this.employeeService.updateEmployee(employee._id!, updatedEmployee).subscribe(
           () => {
-            const index = this.employees.findIndex(emp => emp._id === employee._id);
-            if (index !== -1) {
-              this.employees[index] = { ...this.employees[index], ...updatedEmployee }; // Merge updates
-            }
             this.showSnackbar(`Employee "${updatedEmployee.firstName} ${updatedEmployee.lastName}" updated successfully`);
           },
           (error) => {
