@@ -12,8 +12,8 @@ import { Router, NavigationStart } from '@angular/router';
 import interact from 'interactjs';
 import { trigger, state, style, transition, animate, keyframes, query, stagger } from '@angular/animations';
 import { Employee, Appointment, ScheduleService } from './services/schedule.service';
-import { Subscription } from 'rxjs';
-
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { Service, ServicesService } from '../services/services/services.service';
 @Component({
   selector: 'app-appoitments',
   standalone: true,
@@ -81,6 +81,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   employees: Employee[] = [];
   appointments: Appointment[] = [];
+  services: Service[] = [];
 
   private totalMinutes = 14 * 60;
   gridBodyHeight: number = 1020;
@@ -96,13 +97,26 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     ev.preventDefault();
   };
 
+  get selectedDateStr(): string {
+    return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : '';
+  }
+
   constructor(
     private cd: ChangeDetectorRef,
     private scheduleService: ScheduleService,
-    private router: Router
+    private readonly servicesService: ServicesService,
+    private snackBar: MatSnackBar
   ) {}
 
-  ngOnInit(): void {}
+  ngOnInit(): void {
+    this.servicesService.getAllServices().subscribe((data: any[]) => {
+      this.services = data.map((item) => ({
+        id: item._id,
+        name: item.name
+      }));
+      console.log('Services loaded:', this.services);
+    });
+  }
 
   ngAfterViewInit(): void {
     const boundingFn = () => {
@@ -220,10 +234,23 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
         const employeeId = +(empEl.getAttribute('data-employee-id') || 0);
+        const employee = this.employees.find(e => e.id === employeeId);
         const appointmentEl = event.relatedTarget as HTMLElement;
         const apId = +(appointmentEl.getAttribute('data-appointment-id') || 0);
         const ap = this.appointments.find(a => a.id === apId);
         if (!ap) return;
+
+        if (employee && !employee.workingDays.includes(this.selectedDateStr)) {
+          appointmentEl.style.transition = 'transform 0.3s ease';
+          appointmentEl.style.transform = 'none';
+          this.snackBar.open(
+            'Nije moguće postaviti uslugu jer zaposleni ne radi',
+            'Zatvori',
+            { duration: 3000 }
+          );
+          return;
+        }
+
         const colRect = empEl.getBoundingClientRect();
         const pointerY = event.dragEvent.clientY;
         const offsetY = this.dragOffset[apId]?.y || 0;
@@ -274,6 +301,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   loadSchedule(date: Date): void {
     this.scheduleService.getSchedule(date).subscribe(data => {
+      console.log('Loaded schedule data:', data);
       this.employees = data.employees;
       this.appointments = data.appointments;
       this.cd.detectChanges();

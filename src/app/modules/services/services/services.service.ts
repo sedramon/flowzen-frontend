@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environmentDev } from '../../../../environments/environment';
 
-interface Service {
+export interface Service {
   _id?: string; // MongoDB ID (ako koristiš MongoDB)
   name: string;
 }

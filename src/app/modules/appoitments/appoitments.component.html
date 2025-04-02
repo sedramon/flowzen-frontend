@@ -46,7 +46,7 @@
 
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
-          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp.id">
+          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp.id" [ngClass]="{'not-working': !emp.workingDays.includes(selectedDateStr)}">
             <!-- Appointment blokovi -->
             <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
                  [attr.data-appointment-id]="ap.id"
