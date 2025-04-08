@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, ChangeDetectorRef, HostBinding } from '@angular/core';
+import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
@@ -8,12 +8,12 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { Router, NavigationStart } from '@angular/router';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import interact from 'interactjs';
 import { trigger, state, style, transition, animate, keyframes, query, stagger } from '@angular/animations';
 import { Employee, Appointment, ScheduleService } from './services/schedule.service';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { Service, ServicesService } from '../services/services/services.service';
+
 @Component({
   selector: 'app-appoitments',
   standalone: true,
@@ -67,7 +67,6 @@ import { Service, ServicesService } from '../services/services/services.service'
   ]
 })
 export class AppoitmentsComponent implements OnInit, AfterViewInit {
-
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
   @ViewChild('employeeColumns', { static: false }) employeeColumnsRef!: ElementRef;
 
@@ -86,10 +85,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   private totalMinutes = 14 * 60;
   gridBodyHeight: number = 1020;
 
+  // Čuvamo offsete tokom drag operacije
   dragOffset: { [id: number]: { x: number; y: number } } = {};
 
-  // Nova promenljiva koja kontroliše animacije na nivou cele komponente
-
+  // Sprečavamo default ponašanje selektovanja teksta
   private mouseMoveListener = (ev: MouseEvent) => {
     if (window.getSelection) {
       window.getSelection()?.removeAllRanges();
@@ -130,7 +129,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       };
     };
 
-    // Konfiguracija interact.js za drag & drop i resizable
+    // Konfiguracija draggable elemenata pomoću Interact.js
     interact('.appointment-block')
       .draggable({
         inertia: false,
@@ -141,6 +140,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         listeners: {
           start: (event) => {
             const target = event.target as HTMLElement;
+            // Postavljamo box da bude ispod ostalih tako što mu dajemo niži z-index
+            target.style.zIndex = '1';
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const rect = target.getBoundingClientRect();
             this.dragOffset[apId] = { x: event.clientX - rect.left, y: event.clientY - rect.top };
@@ -162,9 +163,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             }
           },
           end: (event) => {
-            event.target.style.transform = 'none';
+            const target = event.target as HTMLElement;
+            // Privremeno isključujemo transition da se reset transformacije izvrši momentalno
+            target.style.transition = 'none';
+            target.style.transform = 'none';
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            const apId = +(event.target.getAttribute('data-appointment-id') || 0);
+            // Zadržavamo niži z-index tako da box ostane iza ostalih
+            target.style.zIndex = '1';
+            // Force reflow i ponovo uključujemo transition za naredne drag operacije
+            void target.offsetWidth;
+            target.style.transition = 'transform 0.1s ease';
+            const apId = +(target.getAttribute('data-appointment-id') || 0);
             const ap = this.appointments.find(a => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
@@ -271,6 +280,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         }
         ap.employeeId = employeeId;
         appointmentEl.style.transform = 'none';
+        // Postavljamo z-index da ostane iza ostalih boxeva
+        appointmentEl.style.zIndex = '1';
         this.fixOverlapsLive(employeeId);
         this.cd.detectChanges();
       }
@@ -310,20 +321,15 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   onDateChange(dateValue: Date | null): void {
     if (dateValue) {
-      // Ako je izabran novi datum (različit od trenutnog)
       if (!this.selectedDate || dateValue.getTime() !== this.selectedDate.getTime()) {
-        // Pokreni animaciju za nestajanje trenutnog rasporeda
         this.animateSchedule = false;
-        // Sačekaj da se izlazna animacija završi (500ms)
         setTimeout(() => {
-          // Nakon izlazne animacije, postavi novi datum i učitaj raspored
           this.selectedDate = dateValue;
           this.toolbarState = 'spaced';
           this.employees = [];
           this.appointments = [];
           this.cd.detectChanges();
           this.loadSchedule(dateValue);
-          // Omogući prikaz novog rasporeda uz ulaznu animaciju
           this.animateSchedule = true;
           this.cd.detectChanges();
         }, 500);

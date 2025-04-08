@@ -194,7 +194,30 @@
   box-sizing: border-box;
   overflow: hidden;
   z-index: 3;
-  transition: transform 0.3s ease;
+  transition: transform 0.1s ease;
+}
+
+.appointment-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  justify-content: flex-start;
+}
+
+.appointment-info .service {
+  font-size: 1.2em;       
+  font-weight: bold;      
+  margin-bottom: 4px;     
+}
+
+.appointment-info .time {
+  font-size: 0.9em;       
+  margin-bottom: 4px;     
+}
+
+.appointment-info .date {
+  font-size: 0.9em;       
 }
 
 .resize-handle {
