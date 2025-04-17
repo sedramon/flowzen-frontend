@@ -10,7 +10,6 @@ import { ServicesService } from './services/services.service';
 export interface Service {
   _id?: string;
   name: string;
-  // Koristimo staticAngle za raspored servisa oko orbite
   staticAngle: number;
   startX?: number;
   startY?: number;

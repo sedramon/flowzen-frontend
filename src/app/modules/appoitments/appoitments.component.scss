@@ -37,13 +37,11 @@
   }
 }
 
-/* Postavljamo toolbar stavke apsolutno */
 .toolbar-item {
   transform: translateY(-50%);
   margin-top: 19px;
 }
 
-/* Inicijalno (state "centered"): oba elementa su centrirana */
 .title-container {
   transform: translateX(-50%) translateY(-50%);
   margin-bottom: 20px;
@@ -54,14 +52,11 @@
   transform: translateX(-50%) translateY(-50%);
 }
 
-/* Kada se toolbarState postavi na "spaced", animacijom će se položaji promeeniti.*/
   
-/* Stilovi date-picker polja */
 .date-picker {
   width: auto;
 }
 
-/* Ostali stilovi za raspored ostaju nepromijenjeni */
 
 .schedule-grid {
   margin: 20px;
@@ -141,22 +136,21 @@
     
     .time-column {
       width: 109px;
-      display: flex;
-      flex-direction: column;
       position: relative;
       z-index: 2;
-      
+      height: 100%;
+      border-right: 1px solid #ccc;
+
       .time-cell {
-        flex: 1;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-bottom: 1px solid #cccccc7d;
+        position: absolute; 
+        left: 0;
+        right: 0;
+        margin-top: -28px; 
+        text-align: center;
         font-weight: 600;
-        box-shadow: 20px -6px 13px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
         
-        &:last-child {
-          border-bottom: none;
+        .time-cell.header {
+          font-weight: bold;
         }
       }
     }
@@ -171,11 +165,13 @@
         flex: 1;
         position: relative;
         border-left: 1px solid rgba(204, 204, 204, 0.25);
+        cursor: pointer;
       }
       .employee-column.not-working {
         background-color: #333;
         color: #fff;         
         opacity: 0.8; 
+        cursor: not-allowed;
       }
     }
   }
@@ -227,4 +223,15 @@
   right: 0;
   height: 6px;
   cursor: ns-resize;
+}
+
+.custom-appointment-dialog .mat-dialog-container {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 10px;
+}
+
+.custom-backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  overflow: hidden;
 }

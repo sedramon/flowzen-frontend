@@ -35,19 +35,24 @@
         <!-- Horizontalne linije -->
         <div class="horizontal-lines">
           <ng-container *ngFor="let t of timeSlots; let i = index">
-            <div
-              class="horizontal-line"
-              *ngIf="i > 0 && i < timeSlots.length"
-              [style.top.%]="(i * 100) / timeSlots.length"
-            ></div>
+            <div class="horizontal-line"
+                 *ngIf="i !== 0 && i !== timeSlots.length - 1"
+                 [style.top.%]="((t - 8) / 14) * 100">
+            </div>
           </ng-container>
         </div>
 
         <!-- Vremenska kolona -->
         <div class="time-column" #timeColumn>
-          <div class="time-cell" *ngFor="let time of timeSlots">
-            {{ formatTime(time) }}
-          </div>
+          <ng-container *ngFor="let t of timeSlots; let i = index">
+            <div
+              class="time-cell"
+              [ngClass]="{ 'header': i === 0 }"
+              [style.top.%]="((t - 8) / 14) * 100"
+            >
+              {{ i === 0 ? 'time' : formatTime(t) }}
+            </div>
+          </ng-container>
         </div>
 
         <!-- Kolone zaposlenih -->
@@ -59,6 +64,7 @@
             [ngClass]="{
               'not-working': !emp.workingDays.includes(selectedDateStr)
             }"
+            (click)="onEmptyColumnClick(emp, $event)"
           >
             <!-- Appointment blokovi -->
             <div

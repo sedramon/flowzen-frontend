@@ -1,0 +1,58 @@
+.outer-dialog-container {
+    width: 350px;           // Veći okvir koji obuhvata dijalog
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;       // Osiguravamo da se ništa ne preljeva izvan okvira
+  }
+  
+  .dialog-container {
+    border-radius: 10px;
+    padding: 16px;
+    width: 300px;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+    overflow: hidden;               // Sakriva eventualni prelazak sadržaja
+    transform-origin: center center; // Animacija iz centra
+    will-change: transform;
+  }
+  
+  .dialog-title {
+    margin: 0;
+    font-size: 1.5em;
+    text-align: center;
+    color: #ff0066;
+  }
+  
+  .dialog-content {
+    margin-top: 16px;
+  }
+  
+  .dialog-field {
+    width: 100%;
+    margin-bottom: 12px;
+  }
+  
+  .time-picker {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .time-field {
+    flex: 1;
+    margin-right: 8px;
+  }
+  
+  .time-field:last-child {
+    margin-right: 0;
+  }
+  
+  .dialog-actions {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 16px;
+  }
+  
+  .dialog-actions button + button {
+    margin-left: 8px;
+  }
+  

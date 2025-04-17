@@ -13,6 +13,8 @@ import interact from 'interactjs';
 import { trigger, state, style, transition, animate, keyframes, query, stagger } from '@angular/animations';
 import { Employee, Appointment, ScheduleService } from './services/schedule.service';
 import { Service, ServicesService } from '../services/services/services.service';
+import { MatDialog } from '@angular/material/dialog';
+import { AppointmentDialogComponent, AppointmentDialogData } from './dialog/appointment-dialog.component';
 
 @Component({
   selector: 'app-appoitments',
@@ -104,7 +106,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private cd: ChangeDetectorRef,
     private scheduleService: ScheduleService,
     private readonly servicesService: ServicesService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog 
   ) {}
 
   ngOnInit(): void {
@@ -129,7 +132,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       };
     };
 
-    // Konfiguracija draggable elemenata pomoću Interact.js
+    // KONFIGURACIJA DRAGGABLE ELEMENTA POMOĆU INTERACT.JS
     interact('.appointment-block')
       .draggable({
         inertia: false,
@@ -140,7 +143,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         listeners: {
           start: (event) => {
             const target = event.target as HTMLElement;
-            // Postavljamo box da bude ispod ostalih tako što mu dajemo niži z-index
+            // POSTAVLJAMO BOX DA BUDE ISPOD OSTALIH - IZMENJENO
             target.style.zIndex = '1';
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const rect = target.getBoundingClientRect();
@@ -164,13 +167,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           },
           end: (event) => {
             const target = event.target as HTMLElement;
-            // Privremeno isključujemo transition da se reset transformacije izvrši momentalno
+            // PRIVREMENO ISKLJUČUJEMO TRANSITION - IZMENJENO
             target.style.transition = 'none';
             target.style.transform = 'none';
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            // Zadržavamo niži z-index tako da box ostane iza ostalih
+            // ZADRŽAVAMO NIŽI Z-INDEX - IZMENJENO
             target.style.zIndex = '1';
-            // Force reflow i ponovo uključujemo transition za naredne drag operacije
+            // FORCE REFLOW I PONOVNO UKLJUČIVANJE TRANSITION
             void target.offsetWidth;
             target.style.transition = 'transform 0.1s ease';
             const apId = +(target.getAttribute('data-appointment-id') || 0);
@@ -199,9 +202,19 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const ap = this.appointments.find(a => a.id === apId);
             if (!ap) return;
             let newHeightPx = event.rect.height;
-            let newDuration = (newHeightPx / this.gridBodyHeight) * 14;
-            if (newDuration < 0.5) newDuration = 0.5;
-            const colApps = this.appointments.filter(a => a.employeeId === ap.employeeId).sort((a, b) => a.startHour - b.startHour);
+            // IZMENJENO: ZAOKRUŽIVANJE DUŽINE TERMINA NA 5 MINUTA
+            const fiveMinuteFraction = 5 / 60; // 5 MINUTA U SATIMA
+            let computedDuration = (newHeightPx / this.gridBodyHeight) * 14;
+            let newDuration = Math.round(computedDuration / fiveMinuteFraction) * fiveMinuteFraction;
+            if (newDuration < 0.5) {
+              newDuration = 0.5;
+              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+            }
+            ap.endHour = ap.startHour + newDuration;
+            target.style.height = newHeightPx + 'px';
+            const colApps = this.appointments
+              .filter(a => a.employeeId === ap.employeeId)
+              .sort((a, b) => a.startHour - b.startHour);
             const currentIndex = colApps.findIndex(a => a.id === apId);
             let maxAllowedDuration = 22 - ap.startHour;
             if (currentIndex >= 0 && currentIndex < colApps.length - 1) {
@@ -213,7 +226,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               newHeightPx = (newDuration / 14) * this.gridBodyHeight;
             }
             ap.endHour = ap.startHour + newDuration;
-            target.style.height = newHeightPx + 'px';
             for (let i = currentIndex + 1; i < colApps.length; i++) {
               let prev = colApps[i - 1];
               let curr = colApps[i];
@@ -265,7 +277,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const offsetY = this.dragOffset[apId]?.y || 0;
         let localY = pointerY - colRect.top - offsetY;
         const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-        const snappedMinutes = Math.round(minutesFromTop);
+        // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
+        const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
         const newStartHour = 8 + snappedMinutes / 60;
         const duration = ap.endHour - ap.startHour;
         ap.startHour = newStartHour;
@@ -280,9 +293,54 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         }
         ap.employeeId = employeeId;
         appointmentEl.style.transform = 'none';
-        // Postavljamo z-index da ostane iza ostalih boxeva
+        // POSTAVLJAMO Z-INDEX DA OSTANE IZA OSTALIH
         appointmentEl.style.zIndex = '1';
         this.fixOverlapsLive(employeeId);
+        this.cd.detectChanges();
+      }
+    });
+  }
+
+  onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
+    // AKO JE EMPLOYEE NEAKTIVAN (NPR. NIJE RADNI DAN), NE OTVARAJ DIJALOG
+    if (!emp.workingDays.includes(this.selectedDateStr)) {
+      return;
+    }
+
+    // IZRAČUNAJ (OPCIONO) POČETNO VREME NA OSNOVU POZICIJE KLIKA
+    const empColRect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const localY = event.clientY - empColRect.top;
+    const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
+    // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
+    const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
+    const appointmentStart = 8 + snappedMinutes / 60;
+    
+    // KREIRANJE PODATAKA ZA DIJALOG
+    const dialogData: AppointmentDialogData = {
+      employeeId: emp.id,
+      appointmentStart,
+      services: this.services
+    };
+
+    const dialogRef = this.dialog.open(AppointmentDialogComponent, {
+      data: dialogData,
+      panelClass: 'custom-appointment-dialog',
+      backdropClass: 'custom-backdrop'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        // PREMA VRAĆENIM PODACIMA, KREIRAJ NOVI TERMIN
+        const newAp: Appointment = {
+          id: Math.floor(Math.random() * 10000), // GENERIŠI ID
+          employeeId: emp.id,
+          startHour: result.startHour,
+          endHour: result.startHour + 1, // PRETPOSTAVI DA TRAJE 1 SAT; MODIFIKUJ PO POTREBI
+          serviceName: result.service,
+          date: this.selectedDateStr
+        };
+        this.appointments.push(newAp);
+        this.fixOverlapsLive(emp.id);
         this.cd.detectChanges();
       }
     });

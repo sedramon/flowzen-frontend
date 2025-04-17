@@ -1,0 +1,40 @@
+<div class="outer-dialog-container">
+    <div [@dialogPop] class="dialog-container">
+      <h2 class="dialog-title">Nova Usluga</h2>
+      <div class="dialog-content">
+        <!-- Dropdown za usluge -->
+        <mat-form-field appearance="fill" class="dialog-field">
+          <mat-label>Izaberi uslugu</mat-label>
+          <mat-select [(value)]="selectedService">
+            <mat-option *ngFor="let service of data.services" [value]="service.name">
+              {{ service.name }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <!-- Vremenski picker: Sati i Minuti -->
+        <div class="time-picker">
+          <mat-form-field appearance="fill" class="dialog-field time-field">
+            <mat-label>Sati</mat-label>
+            <mat-select [(value)]="selectedHour">
+              <mat-option *ngFor="let hour of hours" [value]="hour">
+                {{ hour }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+          <mat-form-field appearance="fill" class="dialog-field time-field">
+            <mat-label>Minuti</mat-label>
+            <mat-select [(value)]="selectedMinute">
+              <mat-option *ngFor="let min of minutes" [value]="min">
+                {{ min < 10 ? '0' + min : min }}
+              </mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+      </div>
+      <div class="dialog-actions">
+        <button mat-button (click)="onCancel()">Odustani</button>
+        <button mat-raised-button color="primary" (click)="onSave()">Sačuvaj</button>
+      </div>
+    </div>
+  </div>
+  
