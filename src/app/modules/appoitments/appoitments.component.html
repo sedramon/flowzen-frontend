@@ -73,6 +73,7 @@
               [attr.data-appointment-id]="ap.id"
               [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
+              (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
             >
               <div class="appointment-info">
                 <div class="service">{{ ap.serviceName }}</div>

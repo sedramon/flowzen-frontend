@@ -9,7 +9,9 @@ import { MatButtonModule } from '@angular/material/button';
 
 export interface AppointmentDialogData {
   employeeId: number;
-  appointmentStart?: number;
+  appointmentStart: number;
+  appointmentEnd?: number;
+  service?: string;
   services: Service[];
 }
 
@@ -39,16 +41,18 @@ export interface AppointmentDialogData {
   ]
 })
 export class AppointmentDialogComponent implements OnInit {
-  selectedService!: string;
-  selectedHour!: number;
-  selectedMinute!: number;
-  hours: number[] = [];
-  minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
-
   constructor(
     public dialogRef: MatDialogRef<AppointmentDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: AppointmentDialogData
   ) {}
+
+  selectedService!: string;
+  selectedHour!: number;
+  selectedMinute!: number;
+  endHour!: number;
+  endMinute!: number;
+  hours: number[] = [];
+  minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   ngOnInit(): void {
     for (let i = 8; i <= 22; i++) {
@@ -61,16 +65,26 @@ export class AppointmentDialogComponent implements OnInit {
       this.selectedHour = 8;
       this.selectedMinute = 0;
     }
-  }
-
-  onCancel(): void {
-    this.dialogRef.close();
+    // Dodaj za end
+    if (this.data.appointmentEnd) {
+      this.endHour = Math.floor(this.data.appointmentEnd);
+      this.endMinute = Math.round((this.data.appointmentEnd - this.endHour) * 60);
+    } else {
+      this.endHour = this.selectedHour + 1;
+      this.endMinute = this.selectedMinute;
+    }
+    this.selectedService = this.data.service || '';
   }
 
   onSave(): void {
     this.dialogRef.close({
       service: this.selectedService,
-      startHour: this.selectedHour + this.selectedMinute / 60
+      startHour: this.selectedHour + this.selectedMinute / 60,
+      endHour: this.endHour + this.endMinute / 60
     });
+  }
+
+  onCancel(): void {
+    this.dialogRef.close();
   }
 }

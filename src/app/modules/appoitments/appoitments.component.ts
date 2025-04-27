@@ -120,6 +120,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  isDragging = false;
+
   ngAfterViewInit(): void {
     const boundingFn = () => {
       const timeR = this.timeColumnRef.nativeElement.getBoundingClientRect();
@@ -142,6 +144,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         ],
         listeners: {
           start: (event) => {
+            this.isDragging = true;
+            event.target.setAttribute('data-dragging', 'true');
             const target = event.target as HTMLElement;
             // POSTAVLJAMO BOX DA BUDE ISPOD OSTALIH - IZMENJENO
             target.style.zIndex = '1';
@@ -182,6 +186,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
             }
+            setTimeout(() => {
+              event.target.removeAttribute('data-dragging');
+              this.isDragging = false;
+            }, 0);
           }
         }
       })
@@ -302,6 +310,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
+    if (this.isDragging) return;
     // AKO JE EMPLOYEE NEAKTIVAN (NPR. NIJE RADNI DAN), NE OTVARAJ DIJALOG
     if (!emp.workingDays.includes(this.selectedDateStr)) {
       return;
@@ -345,6 +354,37 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       }
     });
   }
+
+  onAppointmentClick(ap: Appointment, event: MouseEvent): void {
+  console.log('EDIT', ap); // Dodaj ovo za debug
+  if (this.isDragging) return;
+  const target = event.currentTarget as HTMLElement;
+  if (target.getAttribute('data-dragging') === 'true') return;
+
+  const dialogData: AppointmentDialogData = {
+    employeeId: ap.employeeId,
+    appointmentStart: ap.startHour,
+    appointmentEnd: ap.endHour,
+    service: ap.serviceName,
+    services: this.services
+  };
+
+  const dialogRef = this.dialog.open(AppointmentDialogComponent, {
+    data: dialogData,
+    panelClass: 'custom-appointment-dialog',
+    backdropClass: 'custom-backdrop'
+  });
+
+  dialogRef.afterClosed().subscribe(result => {
+    if (result) {
+      ap.startHour = result.startHour;
+      ap.endHour = result.endHour;
+      ap.serviceName = result.service;
+      this.fixOverlapsLive(ap.employeeId);
+      this.cd.detectChanges();
+    }
+  });
+}
 
   private fixOverlapsLive(employeeId: number): void {
     let colApps = this.appointments.filter(a => a.employeeId === employeeId);
