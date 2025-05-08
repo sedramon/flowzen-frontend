@@ -1,4 +1,103 @@
-<div class="main-container">
-    <h1>Welcome to Flowzen!</h1>
-    <p>This is the clients page.</p>
-</div>
+<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+
+    <!-- ── CLIENTS TABLE (80%) ── -->
+    <div fxFlex="80">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>person</mat-icon> Clients
+          </mat-card-title>
+          <mat-card-subtitle>
+            Manage and view all your clients here.
+          </mat-card-subtitle>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <div *ngIf="dataSourceClients.data.length; else noClients" class="table-wrapper mat-table-container">
+            <table mat-table #clientSort="matSort" [dataSource]="dataSourceClients" matSort class="mat-elevation-z8 w-full">
+  
+              <!-- First Name -->
+              <ng-container matColumnDef="firstName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+                <td mat-cell *matCellDef="let client">{{ client.firstName }}</td>
+              </ng-container>
+  
+              <!-- Last Name -->
+              <ng-container matColumnDef="lastName">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+                <td mat-cell *matCellDef="let client">{{ client.lastName }}</td>
+              </ng-container>
+  
+              <!-- Actions -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>
+                  <div fxLayout="row" fxLayoutAlign="end center">
+                    Actions
+                    <button mat-icon-button (click)="openAddClientDialog()" style="margin-left: 8px;">
+                      <mat-icon color="primary">add</mat-icon>
+                    </button>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let client">
+                  <div fxLayout="row" fxLayoutAlign="end center">
+                    <button mat-icon-button (click)="openEditClientDialog(client)" style="margin: 0 4px;">
+                      <mat-icon color="accent">edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteClient(client)" style="margin: 0 4px;">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+  
+              <!-- Header & Row Declarations -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsClients"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsClients" class="custom-row"></tr>
+            </table>
+  
+            
+          </div>
+          <mat-paginator [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+          <ng-template #noClients>
+            <p>No clients found.</p>
+          </ng-template>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+    <!-- ── SEARCH & FILTER COLUMN (20%) ── -->
+    <div fxFlex="20">
+      <mat-card>
+        <mat-card-header>
+          <mat-card-title>
+            <mat-icon>filter_list</mat-icon> Filters
+          </mat-card-title>
+        </mat-card-header>
+        <mat-divider></mat-divider>
+        <mat-card-content>
+          <!-- <mat-form-field appearance="outline" class="w-full mb-4">
+            <mat-label>Search Clients</mat-label>
+            <input
+              matInput
+              [(ngModel)]="searchQuery"
+              (ngModelChange)="applyFilter()"
+              placeholder="Name…"
+            />
+          </mat-form-field>
+  
+          <mat-form-field appearance="outline" class="w-full mb-4">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
+              <mat-option value="">All</mat-option>
+              <mat-option value="active">Active</mat-option>
+              <mat-option value="inactive">Inactive</mat-option>
+            </mat-select>
+          </mat-form-field> -->
+  
+          <button mat-flat-button color="accent" (click)="clearFilters()">Clear</button>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  
+  </div>
+  
