@@ -6,7 +6,7 @@ import { ClientsService } from './services/clients.service';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconButton, MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
@@ -15,19 +15,22 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatFormField, MatLabel } from '@angular/material/form-field';
+import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/form-field';
 import { MatOption } from '@angular/material/core';
+import { MatSelectModule } from '@angular/material/select';
+import { MatInputModule } from '@angular/material/input';
 
 @Component({
   selector: 'app-clients',
   standalone: true,
-  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule, MatChipsModule, MatDividerModule, MatCardModule, MatButtonModule, FormsModule],
+  imports: [MatFormFieldModule, MatInputModule, MatSelectModule, FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule, MatChipsModule, MatDividerModule, MatCardModule, MatButtonModule, FormsModule, ReactiveFormsModule],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.scss'
 })
 export class ClientsComponent implements OnInit, AfterViewInit {
   dataSourceClients = new MatTableDataSource<Client>([]);
-  displayedColumnsClients: string[] = ['firstName', 'lastName', 'actions'];
+  displayedColumnsClients: string[] = ['firstName', 'lastName', 'contactEmail', 'contactPhone', 'actions'];
+  selectedStatus: string = '';
 
   searchQuery = '';
 
@@ -82,4 +85,8 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   openAddClientDialog() { /* … */ }
   openEditClientDialog(client: Client) { /* … */ }
   deleteClient(client: Client) { /* … */ }
+
+  openClientDetailView(client: Client) {
+    console.log(client);
+  }
 }
