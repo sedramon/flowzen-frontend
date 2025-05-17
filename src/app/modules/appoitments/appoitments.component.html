@@ -2,20 +2,22 @@
   <!-- Toolbar -->
   <mat-toolbar class="toolbar-custom">
     <div class="toolbar-item title-container" [@titleAnim]="toolbarState">
-      <span class="title" *ngIf="selectedDate">Raspored za zaposlene</span>
+      <span class="title" *ngIf="selectedDate"><mat-icon>schedule</mat-icon>Raspored za zaposlene</span>
     </div>
     <div class="toolbar-item datepicker-container" [@dateAnim]="toolbarState">
+      <button mat-icon-button (click)="shiftDate(-1)" style="margin-right: 20px;">
+        <mat-icon>chevron_left</mat-icon>
+      </button>
       <mat-form-field appearance="outline" class="date-picker">
         <mat-label>Izaberi datum</mat-label>
-        <input
-          matInput
-          [matDatepicker]="picker"
-          [formControl]="dateControl"
-          (dateChange)="onDateChange($event.value)"
-        />
+        <input matInput [matDatepicker]="picker" [formControl]="dateControl"
+          (dateChange)="onDateChange($event.value)" />
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
+      <button mat-icon-button (click)="shiftDate(1)" style="margin-left: 20px;">
+        <mat-icon>chevron_right</mat-icon>
+      </button>
     </div>
   </mat-toolbar>
 
@@ -35,9 +37,8 @@
         <!-- Horizontalne linije -->
         <div class="horizontal-lines">
           <ng-container *ngFor="let t of timeSlots; let i = index">
-            <div class="horizontal-line"
-                 *ngIf="i !== 0 && i !== timeSlots.length - 1"
-                 [style.top.%]="((t - 8) / 14) * 100">
+            <div class="horizontal-line" *ngIf="i !== 0 && i !== timeSlots.length - 1"
+              [style.top.%]="((t - 8) / 14) * 100">
             </div>
           </ng-container>
         </div>
@@ -45,11 +46,7 @@
         <!-- Vremenska kolona -->
         <div class="time-column" #timeColumn>
           <ng-container *ngFor="let t of timeSlots; let i = index">
-            <div
-              class="time-cell"
-              [ngClass]="{ 'header': i === 0 }"
-              [style.top.%]="((t - 8) / 14) * 100"
-            >
+            <div class="time-cell" [ngClass]="{ 'header': i === 0 }" [style.top.%]="((t - 8) / 14) * 100">
               {{ i === 0 ? 'time' : formatTime(t) }}
             </div>
           </ng-container>
@@ -57,24 +54,14 @@
 
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
-          <div
-            class="employee-column"
-            *ngFor="let emp of employees"
-            [attr.data-employee-id]="emp.id"
-            [ngClass]="{
+          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp.id" [ngClass]="{
               'not-working': !emp.workingDays.includes(selectedDateStr)
-            }"
-            (click)="onEmptyColumnClick(emp, $event)"
-          >
+            }" (click)="onEmptyColumnClick(emp, $event)">
             <!-- Appointment blokovi -->
-            <div
-              class="appointment-block"
-              *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
-              [attr.data-appointment-id]="ap.id"
-              [style.top.%]="calculateTop(ap.startHour)"
+            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
+              [attr.data-appointment-id]="ap.id" [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
-              (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
-            >
+              (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">
               <div class="appointment-info">
                 <div class="service">{{ ap.serviceName }}</div>
 

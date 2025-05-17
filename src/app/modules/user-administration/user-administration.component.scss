@@ -52,6 +52,12 @@ mat-card {
         margin-bottom: 10px;
     }
 
+    mat-card-header {
+        background-color: #003ea8;
+        margin: 20px;
+        border-radius: 25px;
+    }
+
     .table-wrapper {
         display: flex;
         flex-direction: column;

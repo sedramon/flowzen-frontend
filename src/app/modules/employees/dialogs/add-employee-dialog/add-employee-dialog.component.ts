@@ -39,17 +39,7 @@ export class AddEmployeeDialogComponent implements OnInit {
   }
 
   createEmployee(){
-    const employee = {
-      firstName: this.employeeForm.get('firstName')?.value,
-      lastName: this.employeeForm.get('lastName')?.value,
-      contactEmail: this.employeeForm.get('contactEmail')?.value,
-      contactPhone: this.employeeForm.get('contactPhone')?.value,
-      dateOfBirth: this.employeeForm.get('dateOfBirth')?.value,
-      jobRole: this.employeeForm.get('jobRole')?.value,
-      isActive: this.employeeForm.get('isActive')?.value,
-      includeInAppoitments: this.employeeForm.get('includeInAppoitments')?.value,
-      tenant: this.employeeForm.get('tenant')?.value
-    };
+    const employee = this.employeeForm.value;
     
     this.dialogRef.close(employee);
   }

@@ -1,1 +1,12 @@
-<p>client-detail-view works!</p>
+<div class="main-container">
+    <button mat-raised-button (click)="goBack()"><mat-icon>arrow_back</mat-icon></button>
+    <h1>Clients Details</h1>
+    <p>This is the client details page.</p>
+    <div *ngIf="client">
+        <p>Client ID: {{ client._id }}</p>
+        <p>Client Name: {{ client.firstName }} {{ client.lastName    }}</p>
+        <p>Client Address: {{ client.address }}</p>
+        <p>Client Created At: {{ client.createdAt | date }}</p>
+        <p>Client Updated At: {{ client.updatedAt | date }}</p>
+    </div>
+</div>

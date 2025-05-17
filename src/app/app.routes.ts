@@ -10,6 +10,7 @@ import { ScopeGuard } from './core/guards/scope.guard';
 import { UnauthorizedComponent } from './modules/unauthorized/unauthorized.component';
 import { UserAdministrationComponent } from './modules/user-administration/user-administration.component';
 import { ServicesComponent } from './modules/services/services.component';
+import { ClientDetailViewComponent } from './modules/clients/client-detail-view/client-detail-view.component';
 
 export const routes: Routes = [
   {
@@ -40,6 +41,15 @@ export const routes: Routes = [
       {
         path: 'clients',
         component: ClientsComponent,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_clients',
+          title: 'Clients',
+          icon: 'people'
+        }
+      },{
+        path: 'clients/:id',
+        component: ClientDetailViewComponent,
         canActivate: [ScopeGuard],
         data: {
           scope: 'scope_clients',

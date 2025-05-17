@@ -1,5 +1,12 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, AfterViewInit, ElementRef, ViewChild, ChangeDetectorRef } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  AfterViewInit,
+  ElementRef,
+  ViewChild,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { MatCardModule } from '@angular/material/card';
@@ -10,11 +17,31 @@ import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import interact from 'interactjs';
-import { trigger, state, style, transition, animate, keyframes, query, stagger } from '@angular/animations';
-import { Employee, Appointment, ScheduleService } from './services/schedule.service';
-import { Service, ServicesService } from '../services/services/services.service';
+import {
+  trigger,
+  state,
+  style,
+  transition,
+  animate,
+  keyframes,
+  query,
+  stagger,
+} from '@angular/animations';
+import {
+  Employee,
+  Appointment,
+  ScheduleService,
+} from './services/schedule.service';
+import {
+  Service,
+  ServicesService,
+} from '../services/services/services.service';
 import { MatDialog } from '@angular/material/dialog';
-import { AppointmentDialogComponent, AppointmentDialogData } from './dialog/appointment-dialog.component';
+import {
+  AppointmentDialogComponent,
+  AppointmentDialogData,
+} from './dialog/appointment-dialog.component';
+import { MatIconModule } from '@angular/material/icon';
 
 @Component({
   selector: 'app-appoitments',
@@ -28,7 +55,8 @@ import { AppointmentDialogComponent, AppointmentDialogData } from './dialog/appo
     MatInputModule,
     MatToolbarModule,
     MatCardModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    MatIconModule
   ],
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
@@ -36,43 +64,45 @@ import { AppointmentDialogComponent, AppointmentDialogData } from './dialog/appo
     // Animacija za slide-in pri ulasku elementa
     trigger('slideIn', [
       transition(':enter', [
-        animate('0.5s ease-in', keyframes([
-          style({ opacity: 0, transform: 'translateY(20px)', offset: 0 }),
-          style({ opacity: 1, transform: 'translateY(0)', offset: 1 })
-        ]))
-      ])
+        animate(
+          '0.5s ease-in',
+          keyframes([
+            style({ opacity: 0, transform: 'translateY(20px)', offset: 0 }),
+            style({ opacity: 1, transform: 'translateY(0)', offset: 1 }),
+          ])
+        ),
+      ]),
     ]),
     // Animacije za naslov i datepicker (pomak ulevo/udesno)
     trigger('titleAnim', [
       state('centered', style({ transform: 'translateX(0)' })),
       state('spaced', style({ transform: 'translateX(-100px)' })),
       transition('centered => spaced', animate('0.5s ease-out')),
-      transition('spaced => centered', animate('0.5s ease-in'))
+      transition('spaced => centered', animate('0.5s ease-in')),
     ]),
     trigger('dateAnim', [
       state('centered', style({ transform: 'translateX(0)' })),
       state('spaced', style({ transform: 'translateX(100px)' })),
       transition('centered => spaced', animate('0.5s ease-out')),
-      transition('spaced => centered', animate('0.5s ease-in'))
+      transition('spaced => centered', animate('0.5s ease-in')),
     ]),
     // Animacija za promenu rasporeda – samo ulazna animacija (fade-in)
     trigger('scheduleChange', [
       transition(':enter', [
         query('.employee-column', [
           style({ opacity: 0 }),
-          stagger(100, [
-            animate('0.5s ease-out', style({ opacity: 1 }))
-          ])
-        ])
-      ])
-    ])
-  ]
+          stagger(100, [animate('0.5s ease-out', style({ opacity: 1 }))]),
+        ]),
+      ]),
+    ]),
+  ],
 })
 export class AppoitmentsComponent implements OnInit, AfterViewInit {
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
-  @ViewChild('employeeColumns', { static: false }) employeeColumnsRef!: ElementRef;
+  @ViewChild('employeeColumns', { static: false })
+  employeeColumnsRef!: ElementRef;
 
-  dateControl = new FormControl(null);
+  dateControl = new FormControl<Date | null>(null);
   selectedDate: Date | null = null;
   // Kontrola prikaza rasporeda u DOM-u
   animateSchedule: boolean = false;
@@ -99,7 +129,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   };
 
   get selectedDateStr(): string {
-    return this.selectedDate ? this.selectedDate.toISOString().split('T')[0] : '';
+    return this.selectedDate
+      ? this.selectedDate.toISOString().split('T')[0]
+      : '';
   }
 
   constructor(
@@ -107,17 +139,21 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private scheduleService: ScheduleService,
     private readonly servicesService: ServicesService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog 
+    private dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
     this.servicesService.getAllServices().subscribe((data: any[]) => {
       this.services = data.map((item) => ({
         id: item._id,
-        name: item.name
+        name: item.name,
       }));
       console.log('Services loaded:', this.services);
     });
+
+    const today = new Date();
+    this.dateControl.setValue(today);
+    this.onDateChange(today); // manually trigger date load
   }
 
   isDragging = false;
@@ -125,12 +161,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   ngAfterViewInit(): void {
     const boundingFn = () => {
       const timeR = this.timeColumnRef.nativeElement.getBoundingClientRect();
-      const colsR = this.employeeColumnsRef.nativeElement.getBoundingClientRect();
+      const colsR =
+        this.employeeColumnsRef.nativeElement.getBoundingClientRect();
       return {
         top: colsR.top,
         left: timeR.right,
         bottom: colsR.bottom,
-        right: colsR.right
+        right: colsR.right,
       };
     };
 
@@ -140,7 +177,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         inertia: false,
         autoScroll: false,
         modifiers: [
-          interact.modifiers.restrictRect({ restriction: boundingFn, endOnly: false })
+          interact.modifiers.restrictRect({
+            restriction: boundingFn,
+            endOnly: false,
+          }),
         ],
         listeners: {
           start: (event) => {
@@ -151,19 +191,26 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             target.style.zIndex = '1';
             const apId = +(target.getAttribute('data-appointment-id') || 0);
             const rect = target.getBoundingClientRect();
-            this.dragOffset[apId] = { x: event.clientX - rect.left, y: event.clientY - rect.top };
-            document.addEventListener('mousemove', this.mouseMoveListener, { passive: false });
+            this.dragOffset[apId] = {
+              x: event.clientX - rect.left,
+              y: event.clientY - rect.top,
+            };
+            document.addEventListener('mousemove', this.mouseMoveListener, {
+              passive: false,
+            });
           },
           move: (event) => {
             const target = event.target as HTMLElement;
-            const match = target.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/);
+            const match = target.style.transform.match(
+              /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/
+            );
             const prevX = match ? parseFloat(match[1]) : 0;
             const prevY = match ? parseFloat(match[2]) : 0;
             const newX = prevX + event.dx;
             const newY = prevY + event.dy;
             target.style.transform = `translate(${newX}px, ${newY}px)`;
             const apId = +(target.getAttribute('data-appointment-id') || 0);
-            const ap = this.appointments.find(a => a.id === apId);
+            const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
@@ -181,7 +228,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             void target.offsetWidth;
             target.style.transition = 'transform 0.1s ease';
             const apId = +(target.getAttribute('data-appointment-id') || 0);
-            const ap = this.appointments.find(a => a.id === apId);
+            const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
@@ -190,30 +237,39 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               event.target.removeAttribute('data-dragging');
               this.isDragging = false;
             }, 0);
-          }
-        }
+          },
+        },
       })
       .resizable({
         edges: { bottom: '.resize-handle' },
         modifiers: [
-          interact.modifiers.restrictEdges({ outer: boundingFn, endOnly: true }),
-          interact.modifiers.restrictSize({ min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight } })
+          interact.modifiers.restrictEdges({
+            outer: boundingFn,
+            endOnly: true,
+          }),
+          interact.modifiers.restrictSize({
+            min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight },
+          }),
         ],
         inertia: false,
         listeners: {
           start: (event) => {
-            document.addEventListener('mousemove', this.mouseMoveListener, { passive: false });
+            document.addEventListener('mousemove', this.mouseMoveListener, {
+              passive: false,
+            });
           },
           move: (event) => {
             const target = event.target as HTMLElement;
             const apId = +(target.getAttribute('data-appointment-id') || 0);
-            const ap = this.appointments.find(a => a.id === apId);
+            const ap = this.appointments.find((a) => a.id === apId);
             if (!ap) return;
             let newHeightPx = event.rect.height;
             // IZMENJENO: ZAOKRUŽIVANJE DUŽINE TERMINA NA 5 MINUTA
             const fiveMinuteFraction = 5 / 60; // 5 MINUTA U SATIMA
             let computedDuration = (newHeightPx / this.gridBodyHeight) * 14;
-            let newDuration = Math.round(computedDuration / fiveMinuteFraction) * fiveMinuteFraction;
+            let newDuration =
+              Math.round(computedDuration / fiveMinuteFraction) *
+              fiveMinuteFraction;
             if (newDuration < 0.5) {
               newDuration = 0.5;
               newHeightPx = (newDuration / 14) * this.gridBodyHeight;
@@ -221,9 +277,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             ap.endHour = ap.startHour + newDuration;
             target.style.height = newHeightPx + 'px';
             const colApps = this.appointments
-              .filter(a => a.employeeId === ap.employeeId)
+              .filter((a) => a.employeeId === ap.employeeId)
               .sort((a, b) => a.startHour - b.startHour);
-            const currentIndex = colApps.findIndex(a => a.id === apId);
+            const currentIndex = colApps.findIndex((a) => a.id === apId);
             let maxAllowedDuration = 22 - ap.startHour;
             if (currentIndex >= 0 && currentIndex < colApps.length - 1) {
               const next = colApps[currentIndex + 1];
@@ -247,14 +303,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           },
           end: (event) => {
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            const apId = +(event.target.getAttribute('data-appointment-id') || 0);
-            const ap = this.appointments.find(a => a.id === apId);
+            const apId = +(
+              event.target.getAttribute('data-appointment-id') || 0
+            );
+            const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
             }
-          }
-        }
+          },
+        },
       });
 
     interact('.employee-column').dropzone({
@@ -263,10 +321,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
         const employeeId = +(empEl.getAttribute('data-employee-id') || 0);
-        const employee = this.employees.find(e => e.id === employeeId);
+        const employee = this.employees.find((e) => e.id === employeeId);
         const appointmentEl = event.relatedTarget as HTMLElement;
         const apId = +(appointmentEl.getAttribute('data-appointment-id') || 0);
-        const ap = this.appointments.find(a => a.id === apId);
+        const ap = this.appointments.find((a) => a.id === apId);
         if (!ap) return;
 
         if (employee && !employee.workingDays.includes(this.selectedDateStr)) {
@@ -284,7 +342,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const pointerY = event.dragEvent.clientY;
         const offsetY = this.dragOffset[apId]?.y || 0;
         let localY = pointerY - colRect.top - offsetY;
-        const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
+        const minutesFromTop =
+          (localY / this.gridBodyHeight) * this.totalMinutes;
         // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
         const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
         const newStartHour = 8 + snappedMinutes / 60;
@@ -292,11 +351,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         ap.startHour = newStartHour;
         ap.endHour = newStartHour + duration;
         if (ap.startHour < 8) {
-          ap.endHour += (8 - ap.startHour);
+          ap.endHour += 8 - ap.startHour;
           ap.startHour = 8;
         }
         if (ap.endHour > 22) {
-          ap.startHour -= (ap.endHour - 22);
+          ap.startHour -= ap.endHour - 22;
           ap.endHour = 22;
         }
         ap.employeeId = employeeId;
@@ -305,7 +364,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         appointmentEl.style.zIndex = '1';
         this.fixOverlapsLive(employeeId);
         this.cd.detectChanges();
-      }
+      },
     });
   }
 
@@ -317,27 +376,29 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     }
 
     // IZRAČUNAJ (OPCIONO) POČETNO VREME NA OSNOVU POZICIJE KLIKA
-    const empColRect = (event.currentTarget as HTMLElement).getBoundingClientRect();
+    const empColRect = (
+      event.currentTarget as HTMLElement
+    ).getBoundingClientRect();
     const localY = event.clientY - empColRect.top;
     const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
     // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
     const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
     const appointmentStart = 8 + snappedMinutes / 60;
-    
+
     // KREIRANJE PODATAKA ZA DIJALOG
     const dialogData: AppointmentDialogData = {
       employeeId: emp.id,
       appointmentStart,
-      services: this.services
+      services: this.services,
     };
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
       data: dialogData,
       panelClass: 'custom-appointment-dialog',
-      backdropClass: 'custom-backdrop'
+      backdropClass: 'custom-backdrop',
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         // PREMA VRAĆENIM PODACIMA, KREIRAJ NOVI TERMIN
         const newAp: Appointment = {
@@ -346,7 +407,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           startHour: result.startHour,
           endHour: result.startHour + 1, // PRETPOSTAVI DA TRAJE 1 SAT; MODIFIKUJ PO POTREBI
           serviceName: result.service,
-          date: this.selectedDateStr
+          date: this.selectedDateStr,
         };
         this.appointments.push(newAp);
         this.fixOverlapsLive(emp.id);
@@ -356,38 +417,38 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
-  console.log('EDIT', ap); // Dodaj ovo za debug
-  if (this.isDragging) return;
-  const target = event.currentTarget as HTMLElement;
-  if (target.getAttribute('data-dragging') === 'true') return;
+    console.log('EDIT', ap); // Dodaj ovo za debug
+    if (this.isDragging) return;
+    const target = event.currentTarget as HTMLElement;
+    if (target.getAttribute('data-dragging') === 'true') return;
 
-  const dialogData: AppointmentDialogData = {
-    employeeId: ap.employeeId,
-    appointmentStart: ap.startHour,
-    appointmentEnd: ap.endHour,
-    service: ap.serviceName,
-    services: this.services
-  };
+    const dialogData: AppointmentDialogData = {
+      employeeId: ap.employeeId,
+      appointmentStart: ap.startHour,
+      appointmentEnd: ap.endHour,
+      service: ap.serviceName,
+      services: this.services,
+    };
 
-  const dialogRef = this.dialog.open(AppointmentDialogComponent, {
-    data: dialogData,
-    panelClass: 'custom-appointment-dialog',
-    backdropClass: 'custom-backdrop'
-  });
+    const dialogRef = this.dialog.open(AppointmentDialogComponent, {
+      data: dialogData,
+      panelClass: 'custom-appointment-dialog',
+      backdropClass: 'custom-backdrop',
+    });
 
-  dialogRef.afterClosed().subscribe(result => {
-    if (result) {
-      ap.startHour = result.startHour;
-      ap.endHour = result.endHour;
-      ap.serviceName = result.service;
-      this.fixOverlapsLive(ap.employeeId);
-      this.cd.detectChanges();
-    }
-  });
-}
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        ap.startHour = result.startHour;
+        ap.endHour = result.endHour;
+        ap.serviceName = result.service;
+        this.fixOverlapsLive(ap.employeeId);
+        this.cd.detectChanges();
+      }
+    });
+  }
 
   private fixOverlapsLive(employeeId: number): void {
-    let colApps = this.appointments.filter(a => a.employeeId === employeeId);
+    let colApps = this.appointments.filter((a) => a.employeeId === employeeId);
     colApps.sort((a, b) => a.startHour - b.startHour);
     for (let i = 0; i < colApps.length - 1; i++) {
       let current = colApps[i];
@@ -409,7 +470,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   loadSchedule(date: Date): void {
-    this.scheduleService.getSchedule(date).subscribe(data => {
+    this.scheduleService.getSchedule(date).subscribe((data) => {
       console.log('Loaded schedule data:', data);
       this.employees = data.employees;
       this.appointments = data.appointments;
@@ -419,7 +480,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   onDateChange(dateValue: Date | null): void {
     if (dateValue) {
-      if (!this.selectedDate || dateValue.getTime() !== this.selectedDate.getTime()) {
+      if (
+        !this.selectedDate ||
+        dateValue.getTime() !== this.selectedDate.getTime()
+      ) {
         this.animateSchedule = false;
         setTimeout(() => {
           this.selectedDate = dateValue;
@@ -441,8 +505,19 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  shiftDate(deltaDays: number): void {
+    const current = this.dateControl.value;
+    if (!current) return;
+
+    const next = new Date(current);
+    next.setDate(current.getDate() + deltaDays);
+
+    this.dateControl.setValue(next);
+    this.onDateChange(next);
+  }
+
   getAppointmentsForEmployee(employeeId: number): Appointment[] {
-    return this.appointments.filter(a => a.employeeId === employeeId);
+    return this.appointments.filter((a) => a.employeeId === employeeId);
   }
 
   formatTime(time: number): string {

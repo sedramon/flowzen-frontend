@@ -30,4 +30,22 @@ export class ClientsService {
             })
         );
     }
+
+    getClientById(id: string): Observable<Client> {
+        return this.http.get<Client>(`${this.apiUrl}/clients/${id}`);
+    }
+
+    createClient(client: Client): Observable<Client> {
+        return this.http.post<Client>(`${this.apiUrl}/clients`, client).pipe(
+            tap(() => {
+                this.refreshClients();
+            })
+        )
+    }
+
+    private refreshClients(): void {
+        this.http.get<Client[]>(`${this.apiUrl}/clients`).subscribe((clients) => {
+            this.clientsSubject.next(clients);
+        })
+    }
 }

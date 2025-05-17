@@ -19,6 +19,8 @@ import { MatFormField, MatFormFieldModule, MatLabel } from '@angular/material/fo
 import { MatOption } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
+import { CreateClientDialogComponent } from './dialogs/create-client-dialog/create-client-dialog.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-clients',
@@ -29,7 +31,7 @@ import { MatInputModule } from '@angular/material/input';
 })
 export class ClientsComponent implements OnInit, AfterViewInit {
   dataSourceClients = new MatTableDataSource<Client>([]);
-  displayedColumnsClients: string[] = ['firstName', 'lastName', 'contactEmail', 'contactPhone', 'actions'];
+  displayedColumnsClients: string[] = ['firstName', 'lastName', 'contactEmail', 'contactPhone', 'createdAt', 'updatedAt', 'actions'];
   selectedStatus: string = '';
 
   searchQuery = '';
@@ -46,7 +48,8 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   constructor(
     private clientsService: ClientsService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private router: Router
   ) { }
 
   ngOnInit(): void {
@@ -72,7 +75,6 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   }
 
   applyFilter() {
-    // trigger the filterPredicate
     this.dataSourceClients.filter = '' + Math.random();
   }
 
@@ -82,11 +84,41 @@ export class ClientsComponent implements OnInit, AfterViewInit {
   }
 
   // stub methods for dialogs/actions
-  openAddClientDialog() { /* … */ }
+  openAddClientDialog() { 
+    const dialogRef = this.dialog.open(CreateClientDialogComponent, {
+      width: '600px'
+    })
+
+    dialogRef.afterClosed().subscribe((client) => {
+      if (client) {
+        this.clientsService.createClient(client).subscribe(
+          (createdClient) => {
+            this.showSnackbar(`Client "${client.firstName} ${client.lastName}" created successfully`);
+            this.dataSourceClients.data = [...this.dataSourceClients.data, createdClient];
+          },
+          (error) => {
+            console.error('Error creating client:', error);
+            this.showSnackbar('Failed to create client', true);
+          }
+        );
+      }
+    });
+   }
+
+
   openEditClientDialog(client: Client) { /* … */ }
   deleteClient(client: Client) { /* … */ }
 
   openClientDetailView(client: Client) {
-    console.log(client);
+    this.router.navigate(['/clients', client._id]);
+  }
+
+  showSnackbar(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000, // 3 seconds
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+    });
   }
 }

@@ -1,1 +1,55 @@
-<p>create-client-dialog works!</p>
+<div class="dialog-container" fxLayout="column">
+    <div mat-dialog-title>Create Client</div>
+    <div mat-dialog-content style="padding: 20px">
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+            <!-- Name Input -->
+            <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px" class="mat-form-field-css">
+                <mat-label>Name</mat-label>
+                <input matInput [formControl]="clientForm.controls['firstName']" required />
+                <mat-error *ngIf="clientForm.controls['firstName'].hasError('required')">First Name is
+                    required</mat-error>
+            </mat-form-field>
+            <!-- Last Name Input -->
+            <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
+                <mat-label>Name</mat-label>
+                <input matInput [formControl]="clientForm.controls['lastName']" required>
+                <mat-error *ngIf="clientForm.controls['lastName'].hasError('required')">Last Name is
+                    required</mat-error>
+            </mat-form-field>
+        </div>
+        <div fxLayout="row" fxLayoutAlign="space-between center">
+                <!-- Email Input -->
+                <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;"
+                    class="mat-form-field-css">
+                    <mat-label>Email</mat-label>
+                    <input matInput [formControl]="clientForm.controls['contactEmail']" required>
+                    <mat-error *ngIf="clientForm.controls['contactEmail'].hasError('required')">Email is
+                        required</mat-error>
+                    <mat-error *ngIf="clientForm.controls['contactEmail'].hasError('email')">Enter a valid
+                        email</mat-error>
+                </mat-form-field>
+                <!-- Phone Input -->
+                <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
+                    <mat-label>Phone</mat-label>
+                    <input matInput [formControl]="clientForm.controls['contactPhone']" required>
+                    <mat-hint>Must be 10 numbers</mat-hint>
+                    <mat-error *ngIf="clientForm.controls['contactPhone'].hasError('required')">Phone is
+                        required</mat-error>
+                    <mat-error *ngIf="clientForm.controls['contactPhone'].hasError('pattern')">Enter a valid
+                        phone</mat-error>
+                </mat-form-field>
+            </div>
+            <div>
+                <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
+                    <mat-label>Address</mat-label>
+                    <input matInput [formControl]="clientForm.controls['address']" required>
+                    <mat-error *ngIf="clientForm.controls['address'].hasError('required')">Address is
+                        required</mat-error>
+                </mat-form-field>
+            </div>
+    </div>
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+    <button mat-raised-button (click)="createClient()" [disabled]="clientForm.invalid">Create</button>
+    <button mat-raised-button style="background-color: red; color: black;" (click)="closeDialog()">Cancel</button>
+  </div>
+</div>

@@ -20,13 +20,13 @@
               <!-- First Name -->
               <ng-container matColumnDef="firstName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
-                <td mat-cell *matCellDef="let client">{{ client.firstName }}</td>
+                <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.firstName }}</td>
               </ng-container>
 
               <!-- Last Name -->
               <ng-container matColumnDef="lastName">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
-                <td mat-cell *matCellDef="let client">{{ client.lastName }}</td>
+                <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.lastName }}</td>
               </ng-container>
 
               <!-- Email -->
@@ -39,6 +39,18 @@
               <ng-container matColumnDef="contactPhone">
                 <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
                 <td mat-cell *matCellDef="let client">{{ client.contactPhone }}</td>
+              </ng-container>
+
+              <!-- Created At -->
+              <ng-container matColumnDef="createdAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
+                <td mat-cell *matCellDef="let client">{{ client.createdAt | date }}</td>
+              </ng-container>
+
+              <!-- Updated At -->
+              <ng-container matColumnDef="updatedAt">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</th>
+                <td mat-cell *matCellDef="let client">{{ client.updatedAt | date }}</td>
               </ng-container>
 
               <!-- Actions -->
@@ -67,7 +79,7 @@
 
 
           </div>
-          <mat-paginator [pageSizeOptions]="[5,10,25]" showFirstLastButtons></mat-paginator>
+          <mat-paginator [pageSizeOptions]="[10,25, 50]" showFirstLastButtons></mat-paginator>
         </div>
 
         <ng-template #noClients>
@@ -92,14 +104,14 @@
           <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Name…" />
         </mat-form-field>
 
-        <mat-form-field appearance="outline" class="w-full mb-4">
+        <!-- <mat-form-field appearance="outline" class="w-full mb-4">
           <mat-label>Status</mat-label>
           <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
             <mat-option value="">All</mat-option>
             <mat-option value="active">Active</mat-option>
             <mat-option value="inactive">Inactive</mat-option>
           </mat-select>
-        </mat-form-field>
+        </mat-form-field> -->
 
         <button mat-flat-button color="accent" (click)="clearFilters()">Clear</button>
       </mat-card-content>
