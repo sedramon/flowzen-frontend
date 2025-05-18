@@ -31,7 +31,6 @@ import { MatTableModule } from '@angular/material/table';
     MatTableModule,
     MatSortModule,
     MatIconModule,
-    MatIconButton,
     MatDividerModule,
     MatSnackBarModule,
     MatChipsModule,

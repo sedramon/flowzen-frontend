@@ -1,12 +1,73 @@
-<div class="main-container">
-    <button mat-raised-button (click)="goBack()"><mat-icon>arrow_back</mat-icon></button>
-    <h1>Clients Details</h1>
-    <p>This is the client details page.</p>
-    <div *ngIf="client">
-        <p>Client ID: {{ client._id }}</p>
-        <p>Client Name: {{ client.firstName }} {{ client.lastName    }}</p>
-        <p>Client Address: {{ client.address }}</p>
-        <p>Client Created At: {{ client.createdAt | date }}</p>
-        <p>Client Updated At: {{ client.updatedAt | date }}</p>
+<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+    <div fxFlex="80" class="clients-details-column">
+        <mat-card>
+
+            <div class="title-container" fxLayout="row" fxLayoutAlign="start center" fxFlexFill>
+                <button mat-raised-button (click)="goBack()">
+                    <mat-icon>arrow_back</mat-icon>
+                </button>
+
+                <span fxFlex></span>
+
+                <div class="title">
+                    <mat-icon>info</mat-icon>
+                    Client Details
+                </div>
+
+            </div>
+
+
+            <mat-card-content *ngIf="client">
+                <div fxLayout="column" fxLayoutGap="16px">
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Client Name</mat-label>
+                        <input matInput [(ngModel)]="client.firstName" name="firstName">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Client Last Name</mat-label>
+                        <input matInput [(ngModel)]="client.lastName" name="lastName">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Client Address</mat-label>
+                        <input matInput [(ngModel)]="client.address" name="address">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Client Email</mat-label>
+                        <input matInput [(ngModel)]="client.contactEmail" name="email">
+                    </mat-form-field>
+
+                    <mat-form-field appearance="outline">
+                        <mat-label>Client Phone</mat-label>
+                        <input matInput [(ngModel)]="client.contactPhone" name="phone">
+                    </mat-form-field>
+
+                </div>
+            </mat-card-content>
+
+        </mat-card>
+    </div>
+    <div fxFlex="20" class="nav-column">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title><mat-icon>menu</mat-icon>Navigation</mat-card-title>
+            </mat-card-header>
+            <mat-divider></mat-divider>
+            <mat-card-content>
+                <div fxLayout="column">
+                    <button class="navigation-button" mat-raised-button><mat-icon>info</mat-icon> Client
+                        Details</button>
+                    <button class="navigation-button" mat-raised-button><mat-icon>receipt</mat-icon>Client
+                        Bills</button>
+                    <button class="navigation-button" mat-raised-button><mat-icon>schedule</mat-icon>Client
+                        Appointments</button>
+                    <button class="navigation-button" mat-raised-button><mat-icon>comment</mat-icon>Client
+                        Remarks</button>
+                </div>
+            </mat-card-content>
+        </mat-card>
     </div>
 </div>
