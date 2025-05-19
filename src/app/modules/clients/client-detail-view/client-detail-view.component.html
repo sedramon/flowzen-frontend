@@ -1,7 +1,7 @@
 <div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
     <div fxFlex="80" class="clients-details-column">
+        <!-- Client Details -->
         <mat-card>
-
             <div class="title-container" fxLayout="row" fxLayoutAlign="start center" fxFlexFill>
                 <button mat-raised-button (click)="goBack()">
                     <mat-icon>arrow_back</mat-icon>
@@ -10,14 +10,13 @@
                 <span fxFlex></span>
 
                 <div class="title">
-                    <mat-icon>info</mat-icon>
-                    Client Details
+                    <span>{{ sectionTitle }}</span>
                 </div>
 
             </div>
 
-
-            <mat-card-content *ngIf="client">
+            <ng-container [ngSwitch]="selectedSection">
+                <mat-card-content *ngSwitchCase="'details'">
                 <div fxLayout="column" fxLayoutGap="16px">
 
                     <mat-form-field appearance="outline">
@@ -47,27 +46,45 @@
 
                 </div>
             </mat-card-content>
-
+            <mat-card-content *ngSwitchCase="'bills'">
+                <h1>Bills</h1>
+            </mat-card-content>
+            <mat-card-content *ngSwitchCase="'appointments'">
+                <h1>Appointments</h1>
+            </mat-card-content>
+            <mat-card-content *ngSwitchCase="'remarks'">
+                <h1>Remarks</h1>
+            </mat-card-content>
+            </ng-container>
+            
         </mat-card>
     </div>
     <div fxFlex="20" class="nav-column">
         <mat-card>
             <mat-card-header>
-                <mat-card-title><mat-icon>menu</mat-icon>Navigation</mat-card-title>
+                <mat-card-title><mat-icon>menu</mat-icon> Navigation</mat-card-title>
             </mat-card-header>
             <mat-divider></mat-divider>
             <mat-card-content>
-                <div fxLayout="column">
-                    <button class="navigation-button" mat-raised-button><mat-icon>info</mat-icon> Client
-                        Details</button>
-                    <button class="navigation-button" mat-raised-button><mat-icon>receipt</mat-icon>Client
-                        Bills</button>
-                    <button class="navigation-button" mat-raised-button><mat-icon>schedule</mat-icon>Client
-                        Appointments</button>
-                    <button class="navigation-button" mat-raised-button><mat-icon>comment</mat-icon>Client
-                        Remarks</button>
+                <div fxLayout="column" fxLayoutGap="8px">
+                    <button mat-raised-button class="navigation-button" (click)="selectSection('details')">
+                        <mat-icon>info</mat-icon> Client Details
+                    </button>
+
+                    <button mat-raised-button class="navigation-button" (click)="selectSection('bills')">
+                        <mat-icon>receipt</mat-icon> Client Bills
+                    </button>
+
+                    <button mat-raised-button class="navigation-button" (click)="selectSection('appointments')">
+                        <mat-icon>schedule</mat-icon> Client Appointments
+                    </button>
+
+                    <button mat-raised-button class="navigation-button" (click)="selectSection('remarks')">
+                        <mat-icon>comment</mat-icon> Client Remarks
+                    </button>
                 </div>
             </mat-card-content>
         </mat-card>
     </div>
+
 </div>

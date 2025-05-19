@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { Client } from '../../../models/Client';
 import { ClientsService } from '../services/clients.service';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule } from '@angular/common';
+import { CommonModule, NgSwitchCase } from '@angular/common';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatIconButton, MatButtonModule } from '@angular/material/button';
@@ -39,7 +39,8 @@ import { MatTableModule } from '@angular/material/table';
     MatButtonModule,
     FormsModule,
     ReactiveFormsModule,
-    MatIconModule
+    MatIconModule,
+    NgSwitchCase
   ],
   templateUrl: './client-detail-view.component.html',
   styleUrl: './client-detail-view.component.scss',
@@ -47,6 +48,8 @@ import { MatTableModule } from '@angular/material/table';
 export class ClientDetailViewComponent implements OnInit {
   private clientId!: string;
   client!: Client;
+  selectedSection: 'details'|'bills'|'appointments'|'remarks' = 'details';
+  sectionTitle: string = 'Client Details';
 
   constructor(
     private clientsService: ClientsService,
@@ -63,5 +66,23 @@ export class ClientDetailViewComponent implements OnInit {
 
   goBack(): void {
     window.history.back();
+  }
+
+  selectSection(section: 'details'|'bills'|'appointments'|'remarks') {
+    this.selectedSection = section;
+    switch (section) {
+      case 'details':
+        this.sectionTitle = 'Client Details';
+        break;
+      case 'bills':
+        this.sectionTitle = 'Client Bills';
+        break;
+      case 'appointments':
+        this.sectionTitle = 'Client Appointments';
+        break;
+      case 'remarks':
+        this.sectionTitle = 'Client Remarks';
+        break;
+    }
   }
 }
