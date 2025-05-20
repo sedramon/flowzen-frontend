@@ -17,6 +17,7 @@ import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { AuthService } from '../../../../core/services/auth.service';
+import { EmployeesService } from '../../services/employees.service';
 
 
 @Component({
@@ -42,6 +43,9 @@ import { AuthService } from '../../../../core/services/auth.service';
 export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
 
+  avatarPreview: string | ArrayBuffer | null = null;
+  selectedAvatarFile: File | null = null;
+
   employeeForm = new FormGroup({
     firstName: new FormControl<string>('', [Validators.required]),
     lastName: new FormControl<string>('', [Validators.required]),
@@ -59,13 +63,15 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required]),
     workingDays: new FormControl<string[]>([], [Validators.required]),
+    avatarUrl: new FormControl('')
   });
 
   workingDayControl = new FormControl<Date | null>(null);
 
   constructor(
     private authService: AuthService,
-    private dialogRef: MatDialogRef<AddEmployeeDialogComponent>
+    private dialogRef: MatDialogRef<AddEmployeeDialogComponent>,
+    private employeesService: EmployeesService
   ) {}
 
   ngOnInit(): void {
@@ -85,6 +91,46 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
 
   closeDialog() {
     this.dialogRef.close();
+  }
+
+  onAvatarClick() {
+    (document.getElementById('avatarInput') as HTMLInputElement).click();
+  }
+
+  onAvatarSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedAvatarFile = file;
+      const reader = new FileReader();
+      reader.onload = e => this.avatarPreview = reader.result;
+      reader.readAsDataURL(file);
+    }
+  }
+
+  updateEmployee() {
+    if (this.employeeForm.valid) {
+      let avatarUrl = this.employeeForm.value.avatarUrl;
+      if (this.selectedAvatarFile) {
+        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
+          next: (res) => {
+            avatarUrl = res.url;
+            const employee = {
+              ...this.employeeForm.value,
+              avatarUrl,
+            };
+            this.dialogRef.close(employee);
+          },
+          error: () => {
+            alert('Greška pri uploadu slike!');
+          }
+        });
+      } else {
+        const employee = {
+          ...this.employeeForm.value
+        };
+        this.dialogRef.close(employee);
+      }
+    }
   }
 
   addWorkingDay(date: Date | null) {

@@ -9,4 +9,6 @@ export interface Employee {
     isActive: boolean;
     includeInAppoitments: boolean;
     tenant: string;
+    avatarUrl?: string;
+    workingDays: string[];
 }

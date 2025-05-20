@@ -11,6 +11,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { EmployeesService } from '../../services/employees.service';
+import { environmentDev } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-edit-employee-dialog',
@@ -46,13 +48,19 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     includeInAppoitments: new FormControl(true, Validators.required),
     tenant: new FormControl('', Validators.required),
     workingDays: new FormControl<string[]>([], arrayRequiredValidator()),
+    avatarUrl: new FormControl('')
   });
 
   workingDayControl = new FormControl<Date | null>(null);
 
+  avatarPreview: string | ArrayBuffer | null = null;
+  selectedAvatarFile: File | null = null;
+  private apiUrl = environmentDev.apiUrl;
+
   constructor(
     private dialogRef: MatDialogRef<EditEmployeeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    @Inject(MAT_DIALOG_DATA) public data: any,
+    private employeesService: EmployeesService
   ) {
   }
 
@@ -69,7 +77,9 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
       includeInAppoitments: emp.includeInAppoitments ?? true,
       tenant: emp.tenant || '',
       workingDays: emp.workingDays || [],
+      avatarUrl: emp.avatarUrl || '',
     });
+    this.avatarPreview = emp.avatarUrl ? this.apiUrl + emp.avatarUrl : 'user-profile-image.png';
   }
 
   ngAfterViewInit() {
@@ -80,12 +90,43 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     this.dialogRef.close();
   }
 
+  onAvatarClick() {
+    (document.getElementById('avatarInput') as HTMLInputElement).click();
+  }
+
+  onAvatarSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      this.selectedAvatarFile = file;
+      const reader = new FileReader();
+      reader.onload = e => this.avatarPreview = reader.result;
+      reader.readAsDataURL(file);
+    }
+  }
+
   updateEmployee() {
     if (this.employeeForm.valid) {
-      const employee = {
-        ...this.employeeForm.value
-      };
-      this.dialogRef.close(employee);
+      let avatarUrl = this.employeeForm.value.avatarUrl;
+      if (this.selectedAvatarFile) {
+        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
+          next: (res) => {
+            avatarUrl = res.url;
+            const employee = {
+              ...this.employeeForm.value,
+              avatarUrl,
+            };
+            this.dialogRef.close(employee);
+          },
+          error: () => {
+            alert('Greška pri uploadu slike!');
+          }
+        });
+      } else {
+        const employee = {
+          ...this.employeeForm.value
+        };
+        this.dialogRef.close(employee);
+      }
     }
   }
 

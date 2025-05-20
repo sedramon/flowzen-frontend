@@ -50,7 +50,13 @@
 
             <!-- Employee Image -->
             <div>
-                <img src="user-profile-image.png" alt="employee-image" width="125px">
+              <img
+                [src]="employee.avatarUrl ? (apiUrl + employee.avatarUrl) : 'user-profile-image.png'"
+                alt="employee-image"
+                width="125"
+                height="125"
+                style="border-radius: 50%; object-fit: cover;"
+              >
             </div>
 
             <!-- Employee Name and Role -->

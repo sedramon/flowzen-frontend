@@ -1,8 +1,22 @@
 <div class="dialog-container" fxLayout="column">
   <div class="dialog-content">
     <div mat-dialog-content #dialogContent style="padding: 20px;">
-      <div>
-        <img src="user-profile-image.png" alt="employee-image" width="125px" style="margin: 25px;">
+      <div style="display: flex; align-items: center;">
+        <img
+          [src]="avatarPreview || 'user-profile-image.png'"
+          alt="employee-image"
+          width="125"
+          height="125"
+          style="margin: 25px 25px 25px 0; cursor: pointer; border-radius: 50%; object-fit: cover; display: block;"
+          (click)="onAvatarClick()"
+        >
+        <input
+          id="avatarInput"
+          type="file"
+          accept="image/*"
+          style="display: none"
+          (change)="onAvatarSelected($event)"
+        >
       </div>
       <div fxLayout="row" fxLayoutAlign="space-between center">
         <!-- Name Input -->

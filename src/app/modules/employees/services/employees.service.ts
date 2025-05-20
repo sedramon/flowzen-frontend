@@ -48,6 +48,13 @@ export class EmployeesService {
         );
     }
 
+    uploadAvatar(file: File): Observable<{ url: string }> {
+        const formData = new FormData();
+        formData.append('file', file);
+        // Pravi URL: http://localhost:3000/employees/upload
+        return this.http.post<{ url: string }>(`${this.apiUrl}/employees/upload`, formData);
+    }
+
     private refreshEmployees(): void {
         // Fetch the latest employees from the API and update the cache
         this.http.get<Employee[]>(`${this.apiUrl}/employees`).subscribe((employees) => {
