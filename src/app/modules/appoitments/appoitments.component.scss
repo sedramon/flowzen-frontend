@@ -183,6 +183,9 @@
         opacity: 0.8; 
         cursor: not-allowed;
       }
+      .employee-column:last-child {
+        border-bottom-right-radius: 20px;
+      }
     }
   }
 }

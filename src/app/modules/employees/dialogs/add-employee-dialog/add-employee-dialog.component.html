@@ -1,79 +1,103 @@
 <div class="dialog-container" fxLayout="column">
-  <div mat-dialog-content style="padding: 20px;">
-    <div>
-      <img src="user-profile-image.png" alt="employee-image" width="125px" style="margin: 25px;">
-    </div>
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <!-- Name Input -->
+  <div class="dialog-content">
+    <div mat-dialog-content #dialogContent style="padding: 20px;">
+      <div>
+        <img src="user-profile-image.png" alt="employee-image" width="125px" style="margin: 25px;">
+      </div>
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <!-- Name Input -->
+        <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
+          <mat-label>Name</mat-label>
+          <input matInput [formControl]="employeeForm.controls['firstName']" required>
+          <mat-error *ngIf="employeeForm.controls['firstName'].hasError('required')">First Name is required</mat-error>
+        </mat-form-field>
+        <!-- Last Name Input -->
+        <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
+          <mat-label>Name</mat-label>
+          <input matInput [formControl]="employeeForm.controls['lastName']" required>
+          <mat-error *ngIf="employeeForm.controls['lastName'].hasError('required')">Last Name is required</mat-error>
+        </mat-form-field>
+      </div>
+    
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <!-- Email Input -->
       <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-        <mat-label>Name</mat-label>
-        <input matInput [formControl]="employeeForm.controls['firstName']" required>
-        <mat-error *ngIf="employeeForm.controls['firstName'].hasError('required')">First Name is required</mat-error>
+        <mat-label>Email</mat-label>
+        <input matInput [formControl]="employeeForm.controls['contactEmail']" required>
+        <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('required')">Email is required</mat-error>
+        <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('email')">Enter a valid email</mat-error>
       </mat-form-field>
-      <!-- Last Name Input -->
+      <!-- Phone Input -->
       <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-        <mat-label>Name</mat-label>
-        <input matInput [formControl]="employeeForm.controls['lastName']" required>
-        <mat-error *ngIf="employeeForm.controls['lastName'].hasError('required')">Last Name is required</mat-error>
+        <mat-label>Phone</mat-label>
+        <input matInput [formControl]="employeeForm.controls['contactPhone']" required>
+        <mat-hint>Must be 10 numbers</mat-hint>
+        <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('required')">Phone is required</mat-error>
+        <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('pattern')">Enter a valid phone</mat-error>
       </mat-form-field>
-    </div>
-  
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <!-- Email Input -->
-    <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-      <mat-label>Email</mat-label>
-      <input matInput [formControl]="employeeForm.controls['contactEmail']" required>
-      <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('required')">Email is required</mat-error>
-      <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('email')">Enter a valid email</mat-error>
-    </mat-form-field>
-    <!-- Phone Input -->
-    <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-      <mat-label>Phone</mat-label>
-      <input matInput [formControl]="employeeForm.controls['contactPhone']" required>
-      <mat-hint>Must be 10 numbers</mat-hint>
-      <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('required')">Phone is required</mat-error>
-      <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('pattern')">Enter a valid phone</mat-error>
-    </mat-form-field>
-    </div>
-  
-    <!-- Date of Birth Input -->
-    <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
-      <mat-label>Date of birth</mat-label>
-      <input matInput [matDatepicker]="picker" [formControl]="employeeForm.controls['dateOfBirth']" required>
-      <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker></mat-datepicker>
-      <mat-error *ngIf="employeeForm.controls['dateOfBirth'].hasError('required')">Date of birth is required</mat-error>
-    </mat-form-field>
+      </div>
     
-    <!-- Job Role Input -->
-    <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-      <mat-label>Job Role</mat-label>
-      <input matInput [formControl]="employeeForm.controls['jobRole']" required>
-      <mat-error *ngIf="employeeForm.controls['jobRole'].hasError('required')">Job Role is required</mat-error>
-    </mat-form-field>
-  
-  
-    <div fxLayout="row" fxLayoutAlign="space-between center">
-      <!-- Active Checkbox -->
-    <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-      <mat-label>Active</mat-label>
-      <mat-select [formControl]="employeeForm.controls['isActive']">
-        <mat-option [value]="true">Yes</mat-option>
-        <mat-option [value]="false">No</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <!-- Date of Birth Input -->
+      <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
+        <mat-label>Date of birth</mat-label>
+        <input matInput [matDatepicker]="picker" [formControl]="employeeForm.controls['dateOfBirth']" required>
+        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="employeeForm.controls['dateOfBirth'].hasError('required')">Date of birth is required</mat-error>
+      </mat-form-field>
+      
+      <!-- Job Role Input -->
+      <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
+        <mat-label>Job Role</mat-label>
+        <input matInput [formControl]="employeeForm.controls['jobRole']" required>
+        <mat-error *ngIf="employeeForm.controls['jobRole'].hasError('required')">Job Role is required</mat-error>
+      </mat-form-field>
     
-    <!-- Inclune In Appoitments -->
-    <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
-      <mat-label>Include in Appointments</mat-label>
-      <mat-select [formControl]="employeeForm.controls['includeInAppoitments']">
-        <mat-option [value]="true">Yes</mat-option>
-        <mat-option [value]="false">No</mat-option>
-      </mat-select>
-    </mat-form-field>
+      <div fxLayout="row" fxLayoutAlign="space-between center">
+        <!-- Active Checkbox -->
+      <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
+        <mat-label>Active</mat-label>
+        <mat-select [formControl]="employeeForm.controls['isActive']">
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+      
+      <!-- Inclune In Appoitments -->
+      <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
+        <mat-label>Include in Appointments</mat-label>
+        <mat-select [formControl]="employeeForm.controls['includeInAppoitments']">
+          <mat-option [value]="true">Yes</mat-option>
+          <mat-option [value]="false">No</mat-option>
+        </mat-select>
+      </mat-form-field>
+      </div>
+  
+      <!-- Working Days Input -->
+      <mat-form-field appearance="outline" style="width: 50%">
+        <mat-label>Add Working Day</mat-label>
+        <input
+          matInput
+          [matDatepicker]="workingDayPicker"
+          [formControl]="workingDayControl"
+          placeholder="Choose a date"
+          (dateChange)="addWorkingDay($event.value)"
+        >
+        <mat-datepicker-toggle matSuffix [for]="workingDayPicker"></mat-datepicker-toggle>
+        <mat-datepicker #workingDayPicker></mat-datepicker>
+      </mat-form-field>
+  
+      <mat-chip-listbox >
+        <mat-chip *ngFor="let day of employeeForm.controls['workingDays'].value; let i = index" (removed)="removeWorkingDay(i)">
+          {{ day }}
+          <button matChipRemove>
+            <mat-icon>cancel</mat-icon>
+          </button>
+        </mat-chip>
+      </mat-chip-listbox>
     </div>
   </div>
-  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center">
     <button mat-raised-button color="primary" (click)="createEmployee()" [disabled]="employeeForm.invalid">Create</button>
     <button mat-raised-button (click)="closeDialog()">Cancel</button>
   </div>

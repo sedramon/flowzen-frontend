@@ -342,27 +342,59 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const pointerY = event.dragEvent.clientY;
         const offsetY = this.dragOffset[apId]?.y || 0;
         let localY = pointerY - colRect.top - offsetY;
-        const minutesFromTop =
-          (localY / this.gridBodyHeight) * this.totalMinutes;
-        // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
-        const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
-        const newStartHour = 8 + snappedMinutes / 60;
+        const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
+        let newStartHour = 8 + Math.round(minutesFromTop / 5) * 5 / 60;
         const duration = ap.endHour - ap.startHour;
+        let newEndHour = newStartHour + duration;
+
+        // Pronađi sve termine za tog zaposlenog, osim trenutnog
+        const colApps = this.appointments
+          .filter((a) => a.employeeId === employeeId && a.id !== apId)
+          .sort((a, b) => a.startHour - b.startHour);
+
+        // Proveri da li postoji preklapanje sa nekim terminom
+        let overlap = colApps.find(other =>
+          newStartHour < other.endHour && newEndHour > other.startHour
+        );
+
+        if (overlap) {
+          // Ako je gornja ivica box1 iznad gornje ivice box2 (overlap.startHour)
+          if (newStartHour < overlap.startHour) {
+            // Samo snap-uj box1 da bude odmah iznad box2, bez pomeranja box2
+            newEndHour = overlap.startHour;
+            newStartHour = newEndHour - duration;
+            // Ako bi time izašao iz radnog vremena, snap-uj na minimum
+            if (newStartHour < 8) {
+              newStartHour = 8;
+              newEndHour = 8 + duration;
+            }
+          } else {
+            // Ako je gornja ivica box1 ispod gornje ivice box2, snap-uj box1 ispod box2
+            newStartHour = overlap.endHour;
+            newEndHour = newStartHour + duration;
+            // Ako bi time izašao iz radnog vremena, snap-uj na maksimum
+            if (newEndHour > 22) {
+              newEndHour = 22;
+              newStartHour = 22 - duration;
+            }
+          }
+        }
+
+        // Ograniči na radno vreme
+        if (newStartHour < 8) {
+          newEndHour += 8 - newStartHour;
+          newStartHour = 8;
+        }
+        if (newEndHour > 22) {
+          newStartHour -= newEndHour - 22;
+          newEndHour = 22;
+        }
+
         ap.startHour = newStartHour;
-        ap.endHour = newStartHour + duration;
-        if (ap.startHour < 8) {
-          ap.endHour += 8 - ap.startHour;
-          ap.startHour = 8;
-        }
-        if (ap.endHour > 22) {
-          ap.startHour -= ap.endHour - 22;
-          ap.endHour = 22;
-        }
+        ap.endHour = newEndHour;
         ap.employeeId = employeeId;
         appointmentEl.style.transform = 'none';
-        // POSTAVLJAMO Z-INDEX DA OSTANE IZA OSTALIH
         appointmentEl.style.zIndex = '1';
-        this.fixOverlapsLive(employeeId);
         this.cd.detectChanges();
       },
     });

@@ -1,7 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormControl, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -9,52 +9,130 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
 
 @Component({
   selector: 'app-edit-employee-dialog',
   standalone: true,
-   providers: [provideNativeDateAdapter()],
-    imports: [CommonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatInputModule, FlexLayoutModule, MatDatepickerModule],
+  providers: [provideNativeDateAdapter()],
+  imports: [
+    CommonModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    ReactiveFormsModule,
+    MatButtonModule,
+    MatDialogModule,
+    MatInputModule,
+    FlexLayoutModule,
+    MatDatepickerModule,
+    MatIconModule,
+    MatChipsModule,
+  ],
   templateUrl: './edit-employee-dialog.component.html',
   styleUrl: './edit-employee-dialog.component.scss'
 })
-export class EditEmployeeDialogComponent {
-  employeeForm = new FormGroup({
-      firstName: new FormControl<string>('', [Validators.required]),
-      lastName: new FormControl<string>('', [Validators.required]),
-      contactEmail: new FormControl<string>('', [Validators.required, Validators.email]),
-      contactPhone: new FormControl<string>('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
-      dateOfBirth: new FormControl<Date>(new Date(), [Validators.required]),
-      jobRole: new FormControl<string>('', [Validators.required]),
-      isActive: new FormControl<boolean>(true, [Validators.required]),
-      includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
-      tenant: new FormControl<string>('', [Validators.required])
-    });
+export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
+  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
 
-    constructor(private dialogRef: MatDialogRef<EditEmployeeDialogComponent>, @Inject(MAT_DIALOG_DATA) public data: any) { 
-      this.employeeForm = new FormGroup({
-        firstName: new FormControl<string>(data.employee.firstName || '', [Validators.required]),
-        lastName: new FormControl<string>(data.employee.lastName || '', [Validators.required]),
-        contactEmail: new FormControl<string>(data.employee.contactEmail || '', [Validators.required, Validators.email]),
-        contactPhone: new FormControl<string>(data.employee.contactPhone || '', [Validators.required, Validators.pattern(/^\d{10}$/)]),
-        dateOfBirth: new FormControl<Date>(data.employee.dateOfBirth || new Date(), [Validators.required]),
-        jobRole: new FormControl<string>(data.employee.jobRole || '', [Validators.required]),
-        isActive: new FormControl<boolean>(data.employee.isActive ?? true, [Validators.required]),
-        includeInAppoitments: new FormControl<boolean>(data.employee.includeInAppoitments || true, [Validators.required]),
-        tenant: new FormControl<string>(data.employee.tenant || '', [Validators.required])
+  employeeForm = new FormGroup({
+    firstName: new FormControl('', Validators.required),
+    lastName: new FormControl('', Validators.required),
+    contactEmail: new FormControl('', [Validators.required, Validators.email]),
+    contactPhone: new FormControl('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
+    dateOfBirth: new FormControl(new Date(), Validators.required),
+    jobRole: new FormControl('', Validators.required),
+    isActive: new FormControl(true, Validators.required),
+    includeInAppoitments: new FormControl(true, Validators.required),
+    tenant: new FormControl('', Validators.required),
+    workingDays: new FormControl<string[]>([], arrayRequiredValidator()),
+  });
+
+  workingDayControl = new FormControl<Date | null>(null);
+
+  constructor(
+    private dialogRef: MatDialogRef<EditEmployeeDialogComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: any
+  ) {
+  }
+
+  ngOnInit(): void {
+    const emp = this.data.employee;
+    this.employeeForm.patchValue({
+      firstName: emp.firstName || '',
+      lastName: emp.lastName || '',
+      contactEmail: emp.contactEmail || '',
+      contactPhone: emp.contactPhone || '',
+      dateOfBirth: emp.dateOfBirth ? new Date(emp.dateOfBirth) : new Date(),
+      jobRole: emp.jobRole || '',
+      isActive: emp.isActive ?? true,
+      includeInAppoitments: emp.includeInAppoitments ?? true,
+      tenant: emp.tenant || '',
+      workingDays: emp.workingDays || [],
+    });
+  }
+
+  ngAfterViewInit() {
+    this.scrollToBottom();
+  }
+
+  closeDialog() {
+    this.dialogRef.close();
+  }
+
+  updateEmployee() {
+    if (this.employeeForm.valid) {
+      const employee = {
+        ...this.employeeForm.value
+      };
+      this.dialogRef.close(employee);
+    }
+  }
+
+  addWorkingDay(date: Date | null) {
+    if (!date) return;
+    const iso = date.getFullYear() + '-' +
+      String(date.getMonth() + 1).padStart(2, '0') + '-' +
+      String(date.getDate()).padStart(2, '0');
+    const current = this.employeeForm.controls['workingDays'].value || [];
+    if (!current.includes(iso)) {
+      this.employeeForm.controls['workingDays'].setValue([...current, iso]);
+    }
+    this.workingDayControl.setValue(null);
+    setTimeout(() => this.scrollToBottom(), 0);
+  }
+
+  removeWorkingDay(index: number) {
+    const current = this.employeeForm.controls['workingDays'].value || [];
+    current.splice(index, 1);
+    this.employeeForm.controls['workingDays'].setValue([...current]);
+  }
+
+  dateClass = (d: Date) => {
+    const date =
+      d.getFullYear() +
+      '-' +
+      String(d.getMonth() + 1).padStart(2, '0') +
+      '-' +
+      String(d.getDate()).padStart(2, '0');
+    const selected = this.employeeForm.controls['workingDays'].value || [];
+    return selected.includes(date) ? 'selected-working-day' : '';
+  };
+
+  private scrollToBottom() {
+    if (this.dialogContent) {
+      this.dialogContent.nativeElement.scrollTo({
+        top: this.dialogContent.nativeElement.scrollHeight,
+        behavior: 'smooth'
       });
     }
+  }
+}
 
-    closeDialog() {
-      this.dialogRef.close();
-    }
-
-    updateEmployee() {
-      if (this.employeeForm.valid) {
-        const employee = {
-          ...this.employeeForm.value
-        };
-        this.dialogRef.close(employee);
-      }
-    }
+// Custom validator
+function arrayRequiredValidator(): ValidatorFn {
+  return (control: AbstractControl) => {
+    const value = control.value;
+    return Array.isArray(value) && value.length > 0 ? null : { required: true };
+  };
 }
