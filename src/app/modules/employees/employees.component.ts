@@ -19,6 +19,7 @@ import { AddEmployeeDialogComponent } from './dialogs/add-employee-dialog/add-em
 import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit-employee-dialog.component';
 import { map, Observable, of } from 'rxjs';
 import { environmentDev } from '../../../environments/environment';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-employees',
@@ -41,14 +42,20 @@ export class EmployeesComponent implements OnInit {
   searchQuery = '';
   apiUrl = environmentDev.apiUrl;
 
-  constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar, private authService: AuthService) { }
 
   ngOnInit(): void {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
+      return;
+    }
+
     // Get the cached employees observable
     this.employees$ = this.employeeService.employees$;
 
      // Trigger the initial fetch if not already loaded
-     this.employeeService.getAllEmployees().subscribe();
+     this.employeeService.getAllEmployees(currentUser.tenant).subscribe();
 
  
      // Initialize filtered employees

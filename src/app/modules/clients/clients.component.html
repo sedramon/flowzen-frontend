@@ -58,23 +58,27 @@
                 <th mat-header-cell *matHeaderCellDef>
                   <div fxLayout="row" fxLayoutAlign="end center">
                     Actions
-                    <button mat-icon-button (click)="openAddClientDialog()" style="margin-left: 8px;">
+                    <button mat-icon-button (click)="openAddClientDialog(); $event.stopPropagation()"
+                      style="margin-left: 8px;">
                       <mat-icon style="color: greenyellow;">add</mat-icon>
                     </button>
                   </div>
                 </th>
-                <td mat-cell *matCellDef="let client">
+                <td mat-cell *matCellDef="let client" (click)="$event.stopPropagation()">
                   <div fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button (click)="deleteClient(client)" style="margin: 0 4px; color: red;">
+                    <button mat-icon-button (click)="deleteClient(client._id); $event.stopPropagation()"
+                      style="margin: 0 4px; color: red;">
                       <mat-icon>delete</mat-icon>
                     </button>
                   </div>
                 </td>
               </ng-container>
 
+
               <!-- Header & Row Declarations -->
               <tr mat-header-row *matHeaderRowDef="displayedColumnsClients" class="custom-header-row"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsClients" (click)="openClientDetailView(row)" class="custom-row"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsClients" (click)="openClientDetailView(row)"
+                class="custom-row"></tr>
             </table>
 
 

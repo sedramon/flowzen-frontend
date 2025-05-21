@@ -21,36 +21,37 @@
 
                     <mat-form-field appearance="outline">
                         <mat-label>Client Name</mat-label>
-                        <input matInput [(ngModel)]="client.firstName" name="firstName">
+                        <input matInput [(ngModel)]="client.firstName" (ngModelChange)="hasChanged = true" name="firstName">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                         <mat-label>Client Last Name</mat-label>
-                        <input matInput [(ngModel)]="client.lastName" name="lastName">
+                        <input matInput [(ngModel)]="client.lastName" (ngModelChange)="hasChanged = true" name="lastName">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                         <mat-label>Client Address</mat-label>
-                        <input matInput [(ngModel)]="client.address" name="address">
+                        <input matInput [(ngModel)]="client.address" (ngModelChange)="hasChanged = true" name="address">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                         <mat-label>Client Email</mat-label>
-                        <input matInput [(ngModel)]="client.contactEmail" name="email">
+                        <input matInput [(ngModel)]="client.contactEmail" (ngModelChange)="hasChanged = true" name="email">
                     </mat-form-field>
 
                     <mat-form-field appearance="outline">
                         <mat-label>Client Phone</mat-label>
-                        <input matInput [(ngModel)]="client.contactPhone" name="phone">
+                        <input matInput [(ngModel)]="client.contactPhone" (ngModelChange)="hasChanged = true" name="phone">
                     </mat-form-field>
-
+                    <button mat-raised-button color="primary" (click)="saveClient()" [disabled]="!hasChanged">Save</button>
                 </div>
             </mat-card-content>
             <mat-card-content *ngSwitchCase="'bills'">
                 <h1>Bills</h1>
             </mat-card-content>
             <mat-card-content *ngSwitchCase="'appointments'">
-                <h1>Appointments</h1>
+                <h1>Future Appoitments</h1>
+                <h1>Past Appoitments</h1>
             </mat-card-content>
             <mat-card-content *ngSwitchCase="'remarks'">
                 <h1>Remarks</h1>

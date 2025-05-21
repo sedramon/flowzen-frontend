@@ -1,6 +1,6 @@
 import { Injectable } from "@angular/core";
 import { environmentDev } from "../../../../environments/environment";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Employee } from "../../../models/Employee";
 
@@ -16,15 +16,17 @@ export class EmployeesService {
 
     constructor(private http: HttpClient) {}
 
-    getAllEmployees(): Observable<Employee[]> {
+    getAllEmployees(tenant: string): Observable<Employee[]> {
          // If cached data exists and is not empty, return it
          if (this.employeesSubject.value.length > 0) {
             console.log("RETURNING CACHED EMPLOYEES")
             return this.employees$;
         }
 
+        const params = new HttpParams().set('tenant', tenant);
+
         // If no cached data, make the API call and update the BehaviorSubject
-        return this.http.get<Employee[]>(`${this.apiUrl}/employees`).pipe(
+        return this.http.get<Employee[]>(`${this.apiUrl}/employees`, { params }).pipe(
             tap((employees) => {
                 this.employeesSubject.next(employees)
                 console.log("FETCHED EMPLOYEES")

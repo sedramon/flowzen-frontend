@@ -14,7 +14,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
 
@@ -50,10 +50,12 @@ export class ClientDetailViewComponent implements OnInit {
   client!: Client;
   selectedSection: 'details'|'bills'|'appointments'|'remarks' = 'details';
   sectionTitle: string = 'Client Details';
+  hasChanged: boolean = false;
 
   constructor(
     private clientsService: ClientsService,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    private snackBar: MatSnackBar
   ) {}
 
   ngOnInit(): void {
@@ -84,5 +86,24 @@ export class ClientDetailViewComponent implements OnInit {
         this.sectionTitle = 'Client Remarks';
         break;
     }
+  }
+
+  saveClient() {
+    this.clientsService
+      .updateClient(this.client._id!, this.client)
+      .subscribe((updatedClient) => {
+        this.client = updatedClient;
+        this.hasChanged = false;
+        this.showSnackbar(`Client "${this.client.firstName} ${this.client.lastName}" updated successfully`);
+      })
+  }
+
+  showSnackbar(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Close', {
+      duration: 3000, // 3 seconds
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+    });
   }
 }

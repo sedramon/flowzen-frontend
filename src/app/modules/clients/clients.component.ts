@@ -21,6 +21,8 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { CreateClientDialogComponent } from './dialogs/create-client-dialog/create-client-dialog.component';
 import { Router } from '@angular/router';
+import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-clients',
@@ -49,11 +51,18 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     private clientsService: ClientsService,
     private dialog: MatDialog,
     private snackBar: MatSnackBar,
-    private router: Router
+    private router: Router,
+    private authService: AuthService
   ) { }
 
   ngOnInit(): void {
-    this.clientsService.getAllClients().subscribe(clients => {
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
+      return;
+    }
+
+    this.clientsService.getAllClients(currentUser.tenant).subscribe(clients => {
       this.dataSourceClients.data = clients;
 
       // set up combined search+status filter
@@ -107,7 +116,30 @@ export class ClientsComponent implements OnInit, AfterViewInit {
 
 
   openEditClientDialog(client: Client) { /* … */ }
-  deleteClient(client: Client) { /* … */ }
+
+  deleteClient(id: string) { 
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '500px',
+      height: '250px',
+    })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.clientsService.deleteClient(id).subscribe(
+          () => {
+            this.showSnackbar(`Client deleted successfully`);
+            this.dataSourceClients.data = this.dataSourceClients.data.filter(client => client._id !== id);
+          },
+          (error) => {
+            console.error('Error deleting client:', error);
+            this.showSnackbar('Failed to delete client', true);
+          }
+        );
+      }
+    })
+    
+
+   }
 
   openClientDetailView(client: Client) {
     this.router.navigate(['/clients', client._id]);
