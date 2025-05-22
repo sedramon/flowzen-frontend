@@ -63,7 +63,7 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required]),
     workingDays: new FormControl<string[]>([], [Validators.required]),
-    avatarUrl: new FormControl('')
+    avatarUrl: new FormControl<string>('')
   });
 
   workingDayControl = new FormControl<Date | null>(null);

@@ -54,11 +54,11 @@
 
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
-          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp.id" [ngClass]="{
+          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp._id" [ngClass]="{
               'not-working': !emp.workingDays.includes(selectedDateStr)
             }" (click)="onEmptyColumnClick(emp, $event)">
             <!-- Appointment blokovi -->
-            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp.id)"
+            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id)"
               [attr.data-appointment-id]="ap.id" [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">

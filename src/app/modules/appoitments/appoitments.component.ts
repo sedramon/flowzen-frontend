@@ -28,7 +28,7 @@ import {
   stagger,
 } from '@angular/animations';
 import {
-  Employee,
+  EmployeeMock,
   Appointment,
   ScheduleService,
 } from './services/schedule.service';
@@ -110,7 +110,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   timeSlots: number[] = Array.from({ length: 29 }, (_, i) => 8 + i * 0.5);
 
-  employees: Employee[] = [];
+  employees: EmployeeMock[] = [];
   appointments: Appointment[] = [];
   services: Service[] = [];
 
@@ -321,7 +321,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
         const employeeId = +(empEl.getAttribute('data-employee-id') || 0);
-        const employee = this.employees.find((e) => e.id === employeeId);
+        const employee = this.employees.find((e) => e._id === employeeId);
         const appointmentEl = event.relatedTarget as HTMLElement;
         const apId = +(appointmentEl.getAttribute('data-appointment-id') || 0);
         const ap = this.appointments.find((a) => a.id === apId);
@@ -400,7 +400,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
+  onEmptyColumnClick(emp: EmployeeMock, event: MouseEvent): void {
+    console.log('emp', emp);
     if (this.isDragging) return;
     // AKO JE EMPLOYEE NEAKTIVAN (NPR. NIJE RADNI DAN), NE OTVARAJ DIJALOG
     if (!emp.workingDays.includes(this.selectedDateStr)) {
@@ -419,7 +420,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     // KREIRANJE PODATAKA ZA DIJALOG
     const dialogData: AppointmentDialogData = {
-      employeeId: emp.id,
+      employeeId: emp._id,
       appointmentStart,
       services: this.services,
     };
@@ -432,24 +433,29 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // PREMA VRAĆENIM PODACIMA, KREIRAJ NOVI TERMIN
         const newAp: Appointment = {
-          id: Math.floor(Math.random() * 10000), // GENERIŠI ID
-          employeeId: emp.id,
+          id: Math.floor(Math.random() * 10000),
+          employeeId: emp._id,
           startHour: result.startHour,
-          endHour: result.startHour + 1, // PRETPOSTAVI DA TRAJE 1 SAT; MODIFIKUJ PO POTREBI
+          endHour: result.startHour + 1,
           serviceName: result.service,
           date: this.selectedDateStr,
         };
         this.appointments.push(newAp);
-        this.fixOverlapsLive(emp.id);
+        this.fixOverlapsLive(emp._id);
         this.cd.detectChanges();
+
+        // Pozovi backend
+        this.scheduleService.createAppointment(newAp).subscribe({
+          next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
+          error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
+        });
       }
     });
   }
 
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
-    console.log('EDIT', ap); // Dodaj ovo za debug
+    console.log('EDIT', ap); // Debug
     if (this.isDragging) return;
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
@@ -475,6 +481,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         ap.serviceName = result.service;
         this.fixOverlapsLive(ap.employeeId);
         this.cd.detectChanges();
+
+        // Pozovi backend za update
+        this.scheduleService.updateAppointment(ap.id, ap).subscribe({
+          next: () => this.snackBar.open('Termin izmenjen!', 'Zatvori', { duration: 2000 }),
+          error: () => this.snackBar.open('Greška pri izmeni termina!', 'Zatvori', { duration: 2000 })
+        });
       }
     });
   }
