@@ -1,38 +1,10 @@
-<div class="services-container">
-  <!-- Plus/krug za dodavanje -->
-  <div #addCircleElement class="add-circle" [@expandCircle]="isAdding ? 'open' : 'closed'" (click)="toggleAddService()">
-    <span *ngIf="!isAdding" (click)="toggleAddService(); $event.stopPropagation()">+</span>
-    <div *ngIf="isAdding" class="input-container">
-      <div class="input-wrapper" (click)="$event.stopPropagation()" [@fadeInInput]>
-        <mat-form-field appearance="fill" class="custom-field">
-          <mat-label>Enter Service</mat-label>
-          <input
-            matInput
-            id="serviceNameInput"
-            type="text"
-            #serviceName
-            (click)="$event.stopPropagation()"
-            (keydown.enter)="addService(serviceName.value); serviceName.value=''" />
-        </mat-form-field>
-      </div>
-    </div>
-  </div>
-  
-  <!-- Orbit kontejner sa servisima -->
-  <div class="orbit-container">
-    <div class="service-card"
-         *ngFor="let service of services"
-         [@flyIn]="{ value: service.flyInState, params: { startX: service.startX, startY: service.startY } }">
-      <div class="dynamic-wrapper" [style.transform]="'rotate(' + currentRotation + 'deg)'">
-        <div class="static-wrapper" [style.transform]="'rotate(' + service.staticAngle + 'deg)'">
-          <div class="translation" [style.transform]="'translate(' + radius + 'px)'">
-            <div class="counter-rotator" [style.transform]="'rotate(-' + (currentRotation + service.staticAngle) + 'deg)'">
-              <p>{{ service.name }}</p>
-              <button class="delete-btn" *ngIf="service._id" (click)="deleteService(service._id)">×</button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
+<div class="main-container">
+  <h1>Services</h1>
+  <div *ngFor="let service of services" class="service-div">
+    <p>Name : {{ service.name }}</p>
+    <p>Description : {{ service.description }}</p>
+    <p>Price : {{ service.price }}</p>
+    <p>Duration ( Minutes ) : {{ service.durationMinutes }}</p>
+    <p>Discount Price : {{ service.discountedPrice }}</p>
   </div>
 </div>

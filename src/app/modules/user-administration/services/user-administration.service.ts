@@ -20,14 +20,22 @@ export class UserAdministrationService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     fetchUsers(tenant: string): Observable<User[]> {
-        console.log("Calling API to fetch users for tenant:", tenant);
+        if(this.usersSubject.value.length > 0 ) {
+            console.log('RETURNING CACHED USERS');
+            return this.users$;
+        }
+        
         return this.http.get<User[]>(`${this.apiUrl}/users/tenant/${tenant}`).pipe(
             tap((users) => this.usersSubject.next(users)) // Čuvanje podataka u BehaviorSubject
         );
     }
 
     fetchRoles(): Observable<Role[]> {
-        console.log("Calling API to fetch roles");
+        if(this.rolesSubject.value.length > 0 ) {
+            console.log('RETURNING CACHED ROLES');
+            return this.roles$;
+        }
+
         return this.http.get<Role[]>(`${this.apiUrl}/roles`).pipe(
             tap((roles) => this.rolesSubject.next(roles)) // Čuvanje podataka u BehaviorSubject
         );

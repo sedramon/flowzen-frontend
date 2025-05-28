@@ -1,11 +1,11 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { trigger, style, animate, transition, keyframes } from '@angular/animations';
-import { Service } from '../../services/services/services.service';
 import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
+import { Service } from '../../../models/Service';
 
 export interface AppointmentDialogData {
   employeeId: number;

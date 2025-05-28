@@ -1,12 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { environmentDev } from '../../../../environments/environment';
+import { Service } from '../../../models/Service';
 
-export interface Service {
-  _id?: string; // MongoDB ID (ako koristiš MongoDB)
-  name: string;
-}
 
 @Injectable({
   providedIn: 'root'
@@ -14,10 +11,25 @@ export interface Service {
 export class ServicesService {
   private apiUrl = environmentDev.apiUrl;
 
+  private servicesSubject = new BehaviorSubject<Service[]>([]);
+  services$ = this.servicesSubject.asObservable();
+
   constructor(private http: HttpClient) {}
 
-  getAllServices(): Observable<Service[]> {
-    return this.http.get<Service[]>(`${this.apiUrl}/services`);
+  getAllServices(tenant: string): Observable<Service[]> {
+    if(this.servicesSubject.value.length > 0) {
+      console.log('RETURNING CACHED SERVICES');
+      return this.services$;
+    }
+
+    const params = new HttpParams().set('tenant', tenant);
+
+    return this.http.get<Service[]>(`${this.apiUrl}/services`, { params }).pipe(
+      tap((services) => {
+        this.servicesSubject.next(services);
+        console.log('FETCHED SERVICES');
+      })
+    );
   }
 
   getServiceById(id: string): Observable<Service> {
@@ -25,10 +37,21 @@ export class ServicesService {
   }
 
   createService(service: Service): Observable<Service> {
-    return this.http.post<Service>(`${this.apiUrl}/services`, service);
+    return this.http.post<Service>(`${this.apiUrl}/services`, service).pipe
+      (
+        tap((newService) => {
+          const list = this.servicesSubject.value;
+          this.servicesSubject.next([...list, newService]);
+        })
+      );
   }
 
   deleteService(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/services/${id}`);
+    return this.http.delete<void>(`${this.apiUrl}/services/${id}`).pipe(
+      tap(() => {
+        const list = this.servicesSubject.value.filter((s) => s._id !== id);
+        this.servicesSubject.next(list);
+      })
+    )
   }
 }

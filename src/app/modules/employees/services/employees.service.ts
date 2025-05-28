@@ -40,13 +40,21 @@ export class EmployeesService {
 
     createEmployee(employee: Employee): Observable<Employee> {
         return this.http.post<Employee>(`${this.apiUrl}/employees`, employee).pipe(
-            tap(() => this.refreshEmployees()) // Refresh the cache after creating
-        );
+            tap((newEmployee) => {
+                const list = this.employeesSubject.value;
+                this.employeesSubject.next([...list, newEmployee]);
+            })
+        )
     }
 
     updateEmployee(id: string, employee: Employee): Observable<Employee> {
         return this.http.put<Employee>(`${this.apiUrl}/employees/${id}`, employee).pipe(
-            tap(() => this.refreshEmployees()) // Refresh the cache after updating
+            tap((updated) => {
+                const list = this.employeesSubject.value.map((e) =>
+                    e._id === id ? updated : e
+                );
+                this.employeesSubject.next(list);
+            })
         );
     }
 
@@ -57,10 +65,4 @@ export class EmployeesService {
         return this.http.post<{ url: string }>(`${this.apiUrl}/employees/upload`, formData);
     }
 
-    private refreshEmployees(): void {
-        // Fetch the latest employees from the API and update the cache
-        this.http.get<Employee[]>(`${this.apiUrl}/employees`).subscribe((employees) => {
-            this.employeesSubject.next(employees);
-        });
-    }
 }

@@ -33,7 +33,6 @@ import {
   ScheduleService,
 } from './services/schedule.service';
 import {
-  Service,
   ServicesService,
 } from '../services/services/services.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -42,6 +41,8 @@ import {
   AppointmentDialogData,
 } from './dialog/appointment-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
+import { AuthService } from '../../core/services/auth.service';
+import { Service } from '../../models/Service';
 
 @Component({
   selector: 'app-appoitments',
@@ -139,21 +140,24 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private scheduleService: ScheduleService,
     private readonly servicesService: ServicesService,
     private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private dialog: MatDialog,
+    private authService: AuthService
   ) {}
 
   ngOnInit(): void {
-    this.servicesService.getAllServices().subscribe((data: any[]) => {
-      this.services = data.map((item) => ({
-        id: item._id,
-        name: item.name,
-      }));
-      console.log('Services loaded:', this.services);
-    });
+    const currentUser = this.authService.getCurrentUser();
+    if (!currentUser) {
+      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
+      return;
+    }
+
+    this.servicesService.getAllServices(currentUser.tenant).subscribe(fetchedServices => {
+      this.services = fetchedServices
 
     const today = new Date();
     this.dateControl.setValue(today);
     this.onDateChange(today); // manually trigger date load
+  });
   }
 
   isDragging = false;
