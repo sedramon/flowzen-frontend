@@ -92,15 +92,18 @@ export class ScheduleService {
       { id: 112, employeeId: 8, startHour: 13, endHour: 14, serviceName: 'Farbanje', date: '2025-05-17' }
     ];
 
-    this.getAllAppoitements().subscribe(apps => {
-      console.log("Fetched appointments from API:", apps);
-    });
-
     // const employees = allEmployees.filter(emp => emp.workingDays.includes(selectedDate));
     const employees = allEmployees; 
     const appointments = allAppointments.filter(app => app.date === selectedDate);
 
+    this.getAllAppoitements().subscribe(apps => {
+      console.log("appointments:",appointments);
+      console.log("appointmentsDb", apps);
+      console.log("employees:", employees);
+      console.log("employeesDb:", this.employeesDb);
+    });
 
-    return of({ employees, appointments, employeesDb: this.employeesDb }); // Dodaj employees$ u rezultat
+
+    return of({ employees, appointments }); // Dodaj employees$ u rezultat
   }
 }
