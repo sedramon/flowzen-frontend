@@ -1,10 +1,87 @@
-<div class="main-container">
-  <h1>Services</h1>
-  <div *ngFor="let service of services" class="service-div">
-    <p>Name : {{ service.name }}</p>
-    <p>Description : {{ service.description }}</p>
-    <p>Price : {{ service.price }}</p>
-    <p>Duration ( Minutes ) : {{ service.durationMinutes }}</p>
-    <p>Discount Price : {{ service.discountedPrice }}</p>
+<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
+  <div fxFlex="80" class="services-table">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>miscellaneous_services</mat-icon> Services
+        </mat-card-title>
+        <mat-card-subtitle>
+          Manage and view all your services here.
+        </mat-card-subtitle>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+       <mat-card-content class="table-card">
+        <div class="table-wrapper">
+          <div *ngIf="dataSourceServices.data.length; else noServices">
+            <table mat-table #servicesSort="matSort" [dataSource]="dataSourceServices" matSort>
+
+              <!-- Name -->
+              <ng-container matColumnDef="name">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
+                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.name }}</td>
+              </ng-container>
+
+              <!-- Price -->
+              <ng-container matColumnDef="price">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
+                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.price }}</td>
+              </ng-container>
+
+              <!-- Duration Minutes -->
+              <ng-container matColumnDef="durationMinutes">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Duration Minutes</th>
+                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.durationMinutes }}</td>
+              </ng-container>
+
+
+              <!-- Actions -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>
+                  <div fxLayout="row" fxLayoutAlign="end center">
+                    Actions
+                    <button mat-icon-button (click)="$event.stopPropagation()"
+                      style="margin-left: 8px;">
+                      <mat-icon style="color: greenyellow;">add</mat-icon>
+                    </button>
+                  </div>
+                </th>
+                <td mat-cell *matCellDef="let client" (click)="$event.stopPropagation()">
+                  <div fxLayout="row" fxLayoutAlign="end center">
+                    <button mat-icon-button (click)="$event.stopPropagation()"
+                      style="margin: 0 4px; color: red;">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </div>
+                </td>
+              </ng-container>
+
+
+              <!-- Header & Row Declarations -->
+              <tr mat-header-row *matHeaderRowDef="displayedColumnsServices" class="custom-header-row"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumnsServices"
+                class="custom-row"></tr>
+            </table>
+
+
+          </div>
+          <mat-paginator [pageSizeOptions]="[10,25, 50]" showFirstLastButtons></mat-paginator>
+        </div>
+
+        <ng-template #noServices>
+          <p>No services found.</p>
+        </ng-template>
+      </mat-card-content>
+    </mat-card>
   </div>
+  <div fxFlex="20" class="filter-column">
+    <mat-card>
+      <mat-card-header>
+        <mat-card-title>
+          <mat-icon>filter_list</mat-icon> Filters
+        </mat-card-title>
+      </mat-card-header>
+      <mat-divider></mat-divider>
+    </mat-card>
+  </div>
+  
 </div>
