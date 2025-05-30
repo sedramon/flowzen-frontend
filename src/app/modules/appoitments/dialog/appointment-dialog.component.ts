@@ -8,7 +8,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { Service } from '../../../models/Service';
 
 export interface AppointmentDialogData {
-  employeeId: number;
+  employeeId: string;
   appointmentStart: number;
   appointmentEnd?: number;
   service?: string;

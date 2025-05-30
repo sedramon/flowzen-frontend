@@ -27,8 +27,9 @@
       <div class="grid-header">
         <div class="time-header-cell"></div>
         <div class="employee-header-cell" *ngFor="let emp of employees">
-          <img [src]="emp.avatarUrl" alt="{{ emp.name }}" class="avatar" />
-          <span class="employee-name">{{ emp.name }}</span>
+          <img [src]="emp.avatarUrl ? emp.avatarUrl : 'user-profile-image.png'" alt="{{ emp.firstName }}" class="avatar"
+               (error)="emp.avatarUrl = 'assets/default-avatar.png'" />
+          <span class="employee-name">{{ emp.firstName }}</span>
         </div>
       </div>
 
@@ -54,11 +55,14 @@
 
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
-          <div class="employee-column" *ngFor="let emp of employees" [attr.data-employee-id]="emp._id" [ngClass]="{
-              'not-working': !emp.workingDays.includes(selectedDateStr)
-            }" (click)="onEmptyColumnClick(emp, $event)">
+          <div class="employee-column"
+               *ngFor="let emp of employees"
+               [attr.data-employee-id]="emp._id"
+               [ngClass]="{ 'not-working': isColumnDisabled(emp) }"
+               [class.disabled]="isColumnDisabled(emp)"
+               (click)="!isColumnDisabled(emp) && onEmptyColumnClick(emp, $event)">
             <!-- Appointment blokovi -->
-            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id)"
+            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id || '')"
               [attr.data-appointment-id]="ap.id" [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">

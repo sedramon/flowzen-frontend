@@ -1,16 +1,17 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewChild, ElementRef, AfterViewInit, OnInit } from '@angular/core';
+import { Component, Inject, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatDatepickerModule } from '@angular/material/datepicker';
+import { MatDatepickerModule, MatDatepickerInputEvent, MatDatepicker } from '@angular/material/datepicker';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeesService } from '../../services/employees.service';
 import { environmentDev } from '../../../../../environments/environment';
 
@@ -36,6 +37,7 @@ import { environmentDev } from '../../../../../environments/environment';
 })
 export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
+  @ViewChild('monthPicker') monthPicker!: MatDatepicker<Date>;
 
   employeeForm = new FormGroup({
     firstName: new FormControl('', Validators.required),
@@ -57,10 +59,18 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
   selectedAvatarFile: File | null = null;
   private apiUrl = environmentDev.apiUrl;
 
+  showMonthPicker = false;
+  selectedMonth: Date | null = null;
+  today = new Date();
+
+  selectedWorkDays: Date[] = [];
+
   constructor(
     private dialogRef: MatDialogRef<EditEmployeeDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
-    private employeesService: EmployeesService
+    private employeesService: EmployeesService,
+    private snackBar: MatSnackBar,
+    private cdr: ChangeDetectorRef
   ) {
   }
 
@@ -140,6 +150,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
       this.employeeForm.controls['workingDays'].setValue([...current, iso]);
     }
     this.workingDayControl.setValue(null);
+    this.cdr.detectChanges();
     setTimeout(() => this.scrollToBottom(), 0);
   }
 
@@ -162,11 +173,70 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
 
   private scrollToBottom() {
     if (this.dialogContent) {
-      this.dialogContent.nativeElement.scrollTo({
-        top: this.dialogContent.nativeElement.scrollHeight,
-        behavior: 'smooth'
-      });
+      // Prvo instant na dno, pa onda smooth još jednom za svaki slučaj
+      this.dialogContent.nativeElement.scrollTop = this.dialogContent.nativeElement.scrollHeight;
+      setTimeout(() => {
+        this.dialogContent.nativeElement.scrollTo({
+          top: this.dialogContent.nativeElement.scrollHeight,
+          behavior: 'smooth'
+        });
+      }, 10);
     }
+  }
+
+  toggleMonthPicker() {
+    this.showMonthPicker = true;
+    setTimeout(() => {
+      this.monthPicker.open();
+    }, 0);
+  }
+
+  onMonthSelected(event: any, datepicker?: any) {
+    this.selectedMonth = event;
+    if (datepicker) {
+      datepicker.close();
+    }
+    if (this.selectedMonth) {
+      this.addWholeMonth();
+    }
+  }
+
+  addWholeMonth() {
+    if (!this.selectedMonth) return;
+    const year = this.selectedMonth.getFullYear();
+    const month = this.selectedMonth.getMonth();
+
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const newDays: string[] = [];
+    const current: string[] = this.employeeForm.controls['workingDays'].value || [];
+
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(year, month, day);
+      if (date.getDay() !== 0 && date.getDay() !== 6) {
+        const iso =
+          date.getFullYear() +
+          '-' +
+          String(date.getMonth() + 1).padStart(2, '0') +
+          '-' +
+          String(date.getDate()).padStart(2, '0');
+        if (!current.includes(iso)) {
+          newDays.push(iso);
+        }
+      }
+    }
+    this.employeeForm.controls['workingDays'].setValue([...current, ...newDays]);
+    this.showSnackbar('Dodati svi radni dani za izabrani mesec!');
+    this.cdr.detectChanges(); // Forsiraj detekciju pre skrolovanja
+    setTimeout(() => this.scrollToBottom(), 0);
+  }
+
+  showSnackbar(message: string, isError: boolean = false) {
+    this.snackBar.open(message, 'Zatvori', {
+      duration: 3000,
+      horizontalPosition: 'center',
+      verticalPosition: 'bottom',
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success']
+    });
   }
 }
 

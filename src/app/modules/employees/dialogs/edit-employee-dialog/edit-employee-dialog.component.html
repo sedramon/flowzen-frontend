@@ -107,19 +107,46 @@
         </mat-form-field>
       </div>
 
+      <div fxLayout="row" fxLayoutAlign="space-between baseline">
       <!-- Working Days Input -->
-      <mat-form-field appearance="outline" style="width: 50%">
-        <mat-label>Add Working Day</mat-label>
-        <input
-          matInput
-          [matDatepicker]="workingDayPicker"
-          [formControl]="workingDayControl"
-          placeholder="Choose a date"
-          (dateChange)="addWorkingDay($event.value)"
-        >
-        <mat-datepicker-toggle matSuffix [for]="workingDayPicker"></mat-datepicker-toggle>
-        <mat-datepicker #workingDayPicker [dateClass]="dateClass"></mat-datepicker>
-      </mat-form-field>
+        <mat-form-field appearance="outline" style="width: 50%">
+          <mat-label>Add Working Day</mat-label>
+          <input
+            matInput
+            [matDatepicker]="workingDayPicker"
+            [formControl]="workingDayControl"
+            placeholder="Choose a date"
+            (dateChange)="addWorkingDay($event.value)"
+          >
+          <mat-datepicker-toggle matSuffix [for]="workingDayPicker"></mat-datepicker-toggle>
+          <mat-datepicker #workingDayPicker [dateClass]="dateClass"></mat-datepicker>
+        </mat-form-field>
+
+        <div style="margin-top: 24px;">
+          <button mat-stroked-button color="primary" (click)="toggleMonthPicker()">
+            <mat-icon>calendar_month</mat-icon>
+            Dodaj ceo mesec
+          </button>
+          <!-- Hidden input for month picker -->
+          <input
+            matInput
+            [matDatepicker]="monthPicker"
+            style="display: none"
+            readonly
+          >
+        </div>
+      </div>
+
+
+      <mat-datepicker
+        #monthPicker
+        startView="multi-year"
+        (monthSelected)="onMonthSelected($event, monthPicker)"
+        panelClass="month-picker"
+        [startAt]="today"
+        [startView]="'year'"
+        [touchUi]="true">
+      </mat-datepicker>
 
       <mat-chip-listbox>
         <mat-chip *ngFor="let day of employeeForm.controls['workingDays'].value; let i = index" (removed)="removeWorkingDay(i)">

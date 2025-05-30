@@ -1,20 +1,14 @@
 import { Injectable } from '@angular/core';
-import { Observable, of } from 'rxjs';
+import { Observable, forkJoin, of } from 'rxjs';
+import { map, switchMap } from 'rxjs/operators';
 import { EmployeesService } from '../../employees/services/employees.service';
 import { Employee } from '../../../models/Employee';
 import { HttpClient } from '@angular/common/http';
 import { environmentDev } from '../../../../environments/environment';
 
-export interface EmployeeMock {
-  _id: number;
-  name: string;
-  avatarUrl: string;
-  workingDays: string[];
-}
-
 export interface Appointment {
-  id: number;
-  employeeId: number;
+  id: string; // string now
+  employeeId: string; // string now
   startHour: number;
   endHour: number;
   serviceName: string;
@@ -22,9 +16,8 @@ export interface Appointment {
 }
 
 export interface ScheduleData {
-  employees: EmployeeMock[];
+  employees: Employee[];
   appointments: Appointment[];
-  employeesDb?: Employee[]; // Dodaj ovo
 }
 
 @Injectable({
@@ -34,8 +27,6 @@ export class ScheduleService {
   private apiUrl = environmentDev.apiUrl;
 
   employees$: Observable<Employee[]> = of([]);
-
-  /** NOVA varijabla – ovde će završiti sirovi podaci iz employees$  */
   employeesDb: Employee[] = [];
 
   constructor(
@@ -43,11 +34,8 @@ export class ScheduleService {
     private http: HttpClient
   ) {
     const tenantId = '67bcf25a3311448ed3af993f';
-    /* Podesi izvor strima */
     this.employees$ = this.employeesService.employees$;
-
-    /* Povučeš podatke jednom, pa šta stigne smestiš u employeesDb */
-    this.employeesService.getAllEmployees(tenantId).subscribe();      // okida fetch
+    this.employeesService.getAllEmployees(tenantId).subscribe();
     this.employees$.subscribe(list => (this.employeesDb = list));
   }
 
@@ -55,55 +43,64 @@ export class ScheduleService {
     return this.http.post(`${this.apiUrl}/appointments`, appointment);
   }
 
-  updateAppointment(id: number, appointment: Appointment) {
+  updateAppointment(id: string, appointment: Appointment) {
     return this.http.put(`${this.apiUrl}/appointments/${id}`, appointment);
   }
 
-  getAllAppoitements(): Observable<Appointment[]> {
-    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments`);
+  getAllAppoitements(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/appointments`);
   }
 
-  getSchedule(date: Date): Observable<ScheduleData> {
-    const selectedDate = date.toISOString().split('T')[0];
-
-    const allEmployees: EmployeeMock[] = [
-      { _id: 1, name: 'Milan',  avatarUrl: 'https://i.pravatar.cc/50?u=Milan', workingDays: ['2025-05-16', '2025-05-18'] },
-      { _id: 2, name: 'Jovana', avatarUrl: 'https://i.pravatar.cc/50?u=Jovana', workingDays: ['2025-05-17', '2025-05-19'] },
-      { _id: 3, name: 'Petar',  avatarUrl: 'https://i.pravatar.cc/50?u=Petar', workingDays: ['2025-05-16', '2025-05-17'] },
-      { _id: 4, name: 'Ana',    avatarUrl: 'https://i.pravatar.cc/50?u=Ana', workingDays: ['2025-05-16', '2025-05-18'] },
-      { _id: 5, name: 'Marko',  avatarUrl: 'https://i.pravatar.cc/50?u=Marko', workingDays: ['2025-05-17', '2025-05-19'] },
-      { _id: 6, name: 'Ivana',  avatarUrl: 'https://i.pravatar.cc/50?u=Ivana', workingDays: ['2025-05-16', '2025-05-17'] },
-      { _id: 7, name: 'Stefan', avatarUrl: 'https://i.pravatar.cc/50?u=Stefan', workingDays: ['2025-05-18', '2025-05-19'] },
-      { _id: 8, name: 'Marija', avatarUrl: 'https://i.pravatar.cc/50?u=Marija', workingDays: ['2025-05-16', '2025-05-17'] }
-    ];
-
-    const allAppointments: Appointment[] = [
-      { id: 101, employeeId: 1, startHour: 8,  endHour: 10, serviceName: 'Sisanje', date: '2025-05-16' },
-      { id: 102, employeeId: 2, startHour: 9,  endHour: 10, serviceName: 'Brijanje', date: '2025-05-17' },
-      { id: 105, employeeId: 2, startHour: 11, endHour: 12, serviceName: 'Farbanje', date: '2025-05-17' },
-      { id: 105, employeeId: 3, startHour: 15, endHour: 17, serviceName: 'Sisanje', date: '2025-05-16' },
-      { id: 105, employeeId: 1, startHour: 18, endHour: 20, serviceName: 'Brijanje', date: '2025-05-16' },
-      { id: 106, employeeId: 1, startHour: 14, endHour: 15, serviceName: 'Farbanje', date: '2025-05-18' },
-      { id: 107, employeeId: 4, startHour: 10, endHour: 11, serviceName: 'Sisanje', date: '2025-05-16' },
-      { id: 108, employeeId: 5, startHour: 12, endHour: 13, serviceName: 'Brijanje', date: '2025-05-17' },
-      { id: 109, employeeId: 6, startHour: 9,  endHour: 11, serviceName: 'Farbanje', date: '2025-05-16' },
-      { id: 110, employeeId: 7, startHour: 16, endHour: 18, serviceName: 'Sisanje', date: '2025-05-19' },
-      { id: 111, employeeId: 8, startHour: 8,  endHour: 9,  serviceName: 'Brijanje', date: '2025-05-16' },
-      { id: 112, employeeId: 8, startHour: 13, endHour: 14, serviceName: 'Farbanje', date: '2025-05-17' }
-    ];
-
-    // const employees = allEmployees.filter(emp => emp.workingDays.includes(selectedDate));
-    const employees = allEmployees; 
-    const appointments = allAppointments.filter(app => app.date === selectedDate);
-
-    this.getAllAppoitements().subscribe(apps => {
-      console.log("appointments:",appointments);
-      console.log("appointmentsDb", apps);
-      console.log("employees:", employees);
-      console.log("employeesDb:", this.employeesDb);
+  getScheduleSimple(date: Date): Observable<ScheduleData> {
+    const selectedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+    const employees$ = this.http.get<Employee[]>(`${this.apiUrl}/employees?tenant=67bcf25a3311448ed3af993f`);
+    const appointments$ = this.http.get<any[]>(`${this.apiUrl}/appointments`);
+    
+    this.getAllAppoitements().subscribe(appointments => {
+      if (appointments.length > 0) {
+        console.log('Fetched appointments:', appointments);
+      } else {
+        console.log('No appointments found.');
+      }
     });
 
-
-    return of({ employees, appointments }); // Dodaj employees$ u rezultat
+    return employees$.pipe(
+      map(employees =>
+        employees
+          .filter(e => e.includeInAppoitments)
+          .map(e => ({
+            ...e,
+            avatarUrl: e.avatarUrl ? this.apiUrl + e.avatarUrl : undefined
+          }))
+      ),
+      switchMap(filteredEmployees =>
+        appointments$.pipe(
+          map(appointments => {
+            console.log('All appointments from backend:', appointments);
+            return ({
+              employees: filteredEmployees,
+              appointments: appointments
+                .filter(app => {
+                  const match = app.date === selectedDate;
+                  if (!match) {
+                    console.log('Filtered out:', app.date, '!==', selectedDate, app);
+                  }
+                  return match;
+                })
+                .map(app => ({
+                  id: typeof app.id === 'string' ? app.id : app.id?.toString() ?? app._id?.toString() ?? '',
+                  employeeId: typeof app.employeeId === 'string'
+                    ? app.employeeId
+                    : app.employeeId?._id ?? '',
+                  startHour: app.startHour,
+                  endHour: app.endHour,
+                  serviceName: app.serviceName,
+                  date: app.date
+                }))
+            })
+          })
+        )
+      )
+    );
   }
 }

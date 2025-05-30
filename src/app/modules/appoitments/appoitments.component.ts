@@ -6,6 +6,7 @@ import {
   ElementRef,
   ViewChild,
   ChangeDetectorRef,
+  NgZone,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -28,7 +29,6 @@ import {
   stagger,
 } from '@angular/animations';
 import {
-  EmployeeMock,
   Appointment,
   ScheduleService,
 } from './services/schedule.service';
@@ -43,6 +43,7 @@ import {
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { Service } from '../../models/Service';
+import { Employee } from '../../models/Employee';
 
 @Component({
   selector: 'app-appoitments',
@@ -90,10 +91,14 @@ import { Service } from '../../models/Service';
     // Animacija za promenu rasporeda – samo ulazna animacija (fade-in)
     trigger('scheduleChange', [
       transition(':enter', [
-        query('.employee-column', [
-          style({ opacity: 0 }),
-          stagger(100, [animate('0.5s ease-out', style({ opacity: 1 }))]),
-        ]),
+        query(
+          '.employee-column',
+          [
+            style({ opacity: 0 }),
+            stagger(100, [animate('0.5s ease-out', style({ opacity: 1 }))]),
+          ],
+          { optional: true } // <-- dodaj ovo!
+        ),
       ]),
     ]),
   ],
@@ -111,7 +116,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   timeSlots: number[] = Array.from({ length: 29 }, (_, i) => 8 + i * 0.5);
 
-  employees: EmployeeMock[] = [];
+  employees: Employee[] = [];
   appointments: Appointment[] = [];
   services: Service[] = [];
 
@@ -119,7 +124,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   gridBodyHeight: number = 1020;
 
   // Čuvamo offsete tokom drag operacije
-  dragOffset: { [id: number]: { x: number; y: number } } = {};
+  dragOffset: { [id: string]: { x: number; y: number } } = {};
 
   // Sprečavamo default ponašanje selektovanja teksta
   private mouseMoveListener = (ev: MouseEvent) => {
@@ -130,10 +135,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   };
 
   get selectedDateStr(): string {
-    return this.selectedDate
-      ? this.selectedDate.toISOString().split('T')[0]
-      : '';
-  }
+  if (!this.selectedDate) return '';
+  return this.selectedDate.getFullYear() + '-' +
+    String(this.selectedDate.getMonth() + 1).padStart(2, '0') + '-' +
+    String(this.selectedDate.getDate()).padStart(2, '0');
+ }
 
   constructor(
     private cd: ChangeDetectorRef,
@@ -141,7 +147,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private readonly servicesService: ServicesService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
-    private authService: AuthService
+    private authService: AuthService,
+    private ngZone: NgZone // dodaj ovo
   ) {}
 
   ngOnInit(): void {
@@ -175,7 +182,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       };
     };
 
-    // KONFIGURACIJA DRAGGABLE ELEMENTA POMOĆU INTERACT.JS
     interact('.appointment-block')
       .draggable({
         inertia: false,
@@ -191,9 +197,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.isDragging = true;
             event.target.setAttribute('data-dragging', 'true');
             const target = event.target as HTMLElement;
-            // POSTAVLJAMO BOX DA BUDE ISPOD OSTALIH - IZMENJENO
             target.style.zIndex = '1';
-            const apId = +(target.getAttribute('data-appointment-id') || 0);
+            const apId = target.getAttribute('data-appointment-id') || '';
             const rect = target.getBoundingClientRect();
             this.dragOffset[apId] = {
               x: event.clientX - rect.left,
@@ -213,7 +218,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const newX = prevX + event.dx;
             const newY = prevY + event.dy;
             target.style.transform = `translate(${newX}px, ${newY}px)`;
-            const apId = +(target.getAttribute('data-appointment-id') || 0);
+            const apId = target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
@@ -222,16 +227,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           },
           end: (event) => {
             const target = event.target as HTMLElement;
-            // PRIVREMENO ISKLJUČUJEMO TRANSITION - IZMENJENO
             target.style.transition = 'none';
             target.style.transform = 'none';
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            // ZADRŽAVAMO NIŽI Z-INDEX - IZMENJENO
             target.style.zIndex = '1';
-            // FORCE REFLOW I PONOVNO UKLJUČIVANJE TRANSITION
             void target.offsetWidth;
             target.style.transition = 'transform 0.1s ease';
-            const apId = +(target.getAttribute('data-appointment-id') || 0);
+            const apId = target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
@@ -264,12 +266,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           },
           move: (event) => {
             const target = event.target as HTMLElement;
-            const apId = +(target.getAttribute('data-appointment-id') || 0);
+            const apId = target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (!ap) return;
             let newHeightPx = event.rect.height;
-            // IZMENJENO: ZAOKRUŽIVANJE DUŽINE TERMINA NA 5 MINUTA
-            const fiveMinuteFraction = 5 / 60; // 5 MINUTA U SATIMA
+            const fiveMinuteFraction = 5 / 60;
             let computedDuration = (newHeightPx / this.gridBodyHeight) * 14;
             let newDuration =
               Math.round(computedDuration / fiveMinuteFraction) *
@@ -307,9 +308,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           },
           end: (event) => {
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            const apId = +(
-              event.target.getAttribute('data-appointment-id') || 0
-            );
+            const apId = event.target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
@@ -324,10 +323,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       overlap: 0.5,
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
-        const employeeId = +(empEl.getAttribute('data-employee-id') || 0);
+        const employeeId = empEl.getAttribute('data-employee-id') || '';
         const employee = this.employees.find((e) => e._id === employeeId);
         const appointmentEl = event.relatedTarget as HTMLElement;
-        const apId = +(appointmentEl.getAttribute('data-appointment-id') || 0);
+        const apId = appointmentEl.getAttribute('data-appointment-id') || '';
         const ap = this.appointments.find((a) => a.id === apId);
         if (!ap) return;
 
@@ -351,32 +350,25 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const duration = ap.endHour - ap.startHour;
         let newEndHour = newStartHour + duration;
 
-        // Pronađi sve termine za tog zaposlenog, osim trenutnog
         const colApps = this.appointments
           .filter((a) => a.employeeId === employeeId && a.id !== apId)
           .sort((a, b) => a.startHour - b.startHour);
 
-        // Proveri da li postoji preklapanje sa nekim terminom
         let overlap = colApps.find(other =>
           newStartHour < other.endHour && newEndHour > other.startHour
         );
 
         if (overlap) {
-          // Ako je gornja ivica box1 iznad gornje ivice box2 (overlap.startHour)
           if (newStartHour < overlap.startHour) {
-            // Samo snap-uj box1 da bude odmah iznad box2, bez pomeranja box2
             newEndHour = overlap.startHour;
             newStartHour = newEndHour - duration;
-            // Ako bi time izašao iz radnog vremena, snap-uj na minimum
             if (newStartHour < 8) {
               newStartHour = 8;
               newEndHour = 8 + duration;
             }
           } else {
-            // Ako je gornja ivica box1 ispod gornje ivice box2, snap-uj box1 ispod box2
             newStartHour = overlap.endHour;
             newEndHour = newStartHour + duration;
-            // Ako bi time izašao iz radnog vremena, snap-uj na maksimum
             if (newEndHour > 22) {
               newEndHour = 22;
               newStartHour = 22 - duration;
@@ -384,7 +376,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           }
         }
 
-        // Ograniči na radno vreme
         if (newStartHour < 8) {
           newEndHour += 8 - newStartHour;
           newStartHour = 8;
@@ -404,27 +395,21 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onEmptyColumnClick(emp: EmployeeMock, event: MouseEvent): void {
-    console.log('emp', emp);
+  onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
     if (this.isDragging) return;
-    // AKO JE EMPLOYEE NEAKTIVAN (NPR. NIJE RADNI DAN), NE OTVARAJ DIJALOG
     if (!emp.workingDays.includes(this.selectedDateStr)) {
       return;
     }
-
-    // IZRAČUNAJ (OPCIONO) POČETNO VREME NA OSNOVU POZICIJE KLIKA
     const empColRect = (
       event.currentTarget as HTMLElement
     ).getBoundingClientRect();
     const localY = event.clientY - empColRect.top;
     const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-    // IZMENJENO: ZAOKRUŽIVANJE POČETKA TERMINA NA 5 MINUTA
     const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
     const appointmentStart = 8 + snappedMinutes / 60;
 
-    // KREIRANJE PODATAKA ZA DIJALOG
     const dialogData: AppointmentDialogData = {
-      employeeId: emp._id,
+      employeeId: emp._id!, // string
       appointmentStart,
       services: this.services,
     };
@@ -438,18 +423,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         const newAp: Appointment = {
-          id: Math.floor(Math.random() * 10000),
-          employeeId: emp._id,
+          id: Math.random().toString(36).substring(2, 12), // string id
+          employeeId: emp._id!,
           startHour: result.startHour,
           endHour: result.startHour + 1,
           serviceName: result.service,
           date: this.selectedDateStr,
         };
         this.appointments.push(newAp);
-        this.fixOverlapsLive(emp._id);
+        this.fixOverlapsLive(emp._id!);
         this.cd.detectChanges();
 
-        // Pozovi backend
         this.scheduleService.createAppointment(newAp).subscribe({
           next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
           error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
@@ -459,7 +443,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
-    console.log('EDIT', ap); // Debug
     if (this.isDragging) return;
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
@@ -486,7 +469,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         this.fixOverlapsLive(ap.employeeId);
         this.cd.detectChanges();
 
-        // Pozovi backend za update
         this.scheduleService.updateAppointment(ap.id, ap).subscribe({
           next: () => this.snackBar.open('Termin izmenjen!', 'Zatvori', { duration: 2000 }),
           error: () => this.snackBar.open('Greška pri izmeni termina!', 'Zatvori', { duration: 2000 })
@@ -495,7 +477,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private fixOverlapsLive(employeeId: number): void {
+  private fixOverlapsLive(employeeId: string): void {
     let colApps = this.appointments.filter((a) => a.employeeId === employeeId);
     colApps.sort((a, b) => a.startHour - b.startHour);
     for (let i = 0; i < colApps.length - 1; i++) {
@@ -517,12 +499,22 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  getAppointmentsForEmployee(employeeId: string): Appointment[] {
+    return this.appointments.filter((a) => a.employeeId === employeeId);
+  }
+
   loadSchedule(date: Date): void {
-    this.scheduleService.getSchedule(date).subscribe((data) => {
-      console.log('Loaded schedule data:', data);
-      this.employees = data.employees;
-      this.appointments = data.appointments;
-      this.cd.detectChanges();
+    console.log('Pozivam loadSchedule', date);
+    this.scheduleService.getScheduleSimple(date).subscribe({
+      next: (data) => {
+        console.log('Loaded schedule data:', data);
+        this.employees = data.employees;
+        this.appointments = data.appointments;
+        this.cd.detectChanges();
+      },
+      error: (err) => {
+        console.error('Schedule loading error:', err);
+      }
     });
   }
 
@@ -533,16 +525,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         dateValue.getTime() !== this.selectedDate.getTime()
       ) {
         this.animateSchedule = false;
-        setTimeout(() => {
-          this.selectedDate = dateValue;
-          this.toolbarState = 'spaced';
-          this.employees = [];
-          this.appointments = [];
-          this.cd.detectChanges();
+        this.selectedDate = dateValue;
+        this.toolbarState = 'spaced';
+        this.employees = [];
+        this.appointments = [];
+        this.cd.detectChanges();
+        // ngZone.run
+        this.ngZone.run(() => {
           this.loadSchedule(dateValue);
           this.animateSchedule = true;
           this.cd.detectChanges();
-        }, 500);
+        });
       }
     } else {
       this.toolbarState = 'centered';
@@ -564,10 +557,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     this.onDateChange(next);
   }
 
-  getAppointmentsForEmployee(employeeId: number): Appointment[] {
-    return this.appointments.filter((a) => a.employeeId === employeeId);
-  }
-
   formatTime(time: number): string {
     const h = Math.floor(time);
     const m = Math.round((time - h) * 60);
@@ -580,5 +569,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   calculateHeight(startHour: number, endHour: number): number {
     return ((endHour - startHour) / 14) * 100;
+  }
+
+  isColumnDisabled(emp: Employee): boolean {
+    // Provera da li zaposleni radi tog dana
+    return !emp.workingDays.includes(this.selectedDateStr);
   }
 }
