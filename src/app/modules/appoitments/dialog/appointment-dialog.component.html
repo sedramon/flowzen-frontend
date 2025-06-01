@@ -59,6 +59,7 @@
     <div class="dialog-actions">
       <button mat-button (click)="onCancel()">Odustani</button>
       <button mat-raised-button color="primary" (click)="onSave()">Sačuvaj</button>
+      <button mat-raised-button color="warn" *ngIf="data.service" (click)="onDelete()">Obriši</button>
     </div>
   </div>
 </div>

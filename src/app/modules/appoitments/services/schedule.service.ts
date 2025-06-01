@@ -47,6 +47,10 @@ export class ScheduleService {
     return this.http.put(`${this.apiUrl}/appointments/${id}`, appointment);
   }
 
+  deleteAppointment(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
+  }
+
   getAllAppoitements(): Observable<any[]> {
     return this.http.get<any[]>(`${this.apiUrl}/appointments`);
   }
@@ -54,15 +58,18 @@ export class ScheduleService {
   getScheduleSimple(date: Date): Observable<ScheduleData> {
     const selectedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const employees$ = this.http.get<Employee[]>(`${this.apiUrl}/employees?tenant=67bcf25a3311448ed3af993f`);
-    const appointments$ = this.http.get<any[]>(`${this.apiUrl}/appointments`);
-    
-    this.getAllAppoitements().subscribe(appointments => {
-      if (appointments.length > 0) {
-        console.log('Fetched appointments:', appointments);
-      } else {
-        console.log('No appointments found.');
-      }
-    });
+    // const appointments$ = this.http.get<any[]>(`${this.apiUrl}/appointments`);
+    const appointments$ = this.getAllAppoitements().pipe(
+      map(appointments => {
+        if (appointments.length > 0) {
+          console.log('Fetched appointments:', appointments);
+          return appointments;
+        } else {
+          console.log('No appointments found.');
+          return [];
+        }
+      })
+    );
 
     return employees$.pipe(
       map(employees =>

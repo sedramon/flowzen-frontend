@@ -44,6 +44,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { Service } from '../../models/Service';
 import { Employee } from '../../models/Employee';
+import { MatMomentDateModule, MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
+import { MAT_DATE_FORMATS, DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
+import moment from 'moment';
+
+export const CUSTOM_DATE_FORMATS = {
+  parse: {
+    dateInput: 'DD/MM/YYYY',
+  },
+  display: {
+    dateInput: 'DD/MM/YYYY',
+    monthYearLabel: 'MMMM YYYY',
+    dateA11yLabel: 'DD/MM/YYYY',
+    monthYearA11yLabel: 'MMMM YYYY',
+  },
+};
 
 @Component({
   selector: 'app-appoitments',
@@ -52,6 +67,7 @@ import { Employee } from '../../models/Employee';
     CommonModule,
     ReactiveFormsModule,
     MatDatepickerModule,
+    MatMomentDateModule,
     MatNativeDateModule,
     MatFormFieldModule,
     MatInputModule,
@@ -62,6 +78,11 @@ import { Employee } from '../../models/Employee';
   ],
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
+  providers: [
+    { provide: DateAdapter, useClass: MomentDateAdapter, deps: [MAT_DATE_LOCALE, MAT_MOMENT_DATE_ADAPTER_OPTIONS] },
+    { provide: MAT_DATE_FORMATS, useValue: CUSTOM_DATE_FORMATS },
+    { provide: MAT_DATE_LOCALE, useValue: 'en-GB' }
+  ],
   animations: [
     // Animacija za slide-in pri ulasku elementa
     trigger('slideIn', [
@@ -238,6 +259,15 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
+
+              // Pozovi updateAppointment nakon drag & drop
+              this.scheduleService.updateAppointment(ap.id, {
+                ...ap,
+                date: this.selectedDateStr
+              }).subscribe({
+                next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
+                error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
+              });
             }
             setTimeout(() => {
               event.target.removeAttribute('data-dragging');
@@ -313,6 +343,15 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             if (ap) {
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
+
+              // Pozovi updateAppointment nakon resize
+              this.scheduleService.updateAppointment(ap.id, {
+                ...ap,
+                date: this.selectedDateStr
+              }).subscribe({
+                next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
+                error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
+              });
             }
           },
         },
@@ -422,20 +461,30 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
+        // Prvo napravi objekat bez id-a
         const newAp: Appointment = {
-          id: Math.random().toString(36).substring(2, 12), // string id
+          // id: Math.random().toString(36).substring(2, 12), // više ne koristi random id
           employeeId: emp._id!,
           startHour: result.startHour,
           endHour: result.startHour + 1,
           serviceName: result.service,
           date: this.selectedDateStr,
+          id: '' // privremeno prazan
         };
-        this.appointments.push(newAp);
-        this.fixOverlapsLive(emp._id!);
-        this.cd.detectChanges();
 
+        // Pozovi backend i koristi odgovor
         this.scheduleService.createAppointment(newAp).subscribe({
-          next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
+          next: (created: any) => {
+            // Dodaj pravi termin iz baze (sa pravim id-jem)
+            this.appointments.push({
+              ...newAp,
+              ...created,
+              id: created._id || created.id // koristi id iz baze
+            });
+            this.fixOverlapsLive(emp._id!);
+            this.cd.detectChanges();
+            this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 });
+          },
           error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
         });
       }
@@ -462,14 +511,29 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
 
     dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
+      if (result?.delete) {
+        // Pozovi backend za brisanje
+        this.scheduleService.deleteAppointment(ap.id).subscribe({
+          next: () => {
+            this.appointments = this.appointments.filter(a => a.id !== ap.id);
+            this.snackBar.open('Termin obrisan!', 'Zatvori', { duration: 2000 });
+            this.cd.detectChanges();
+          },
+          error: () => this.snackBar.open('Greška pri brisanju termina!', 'Zatvori', { duration: 2000 })
+        });
+      } else if (result) {
+        // Ažuriraj termin
         ap.startHour = result.startHour;
         ap.endHour = result.endHour;
         ap.serviceName = result.service;
         this.fixOverlapsLive(ap.employeeId);
         this.cd.detectChanges();
 
-        this.scheduleService.updateAppointment(ap.id, ap).subscribe({
+        // Pozovi update na backendu
+        this.scheduleService.updateAppointment(ap.id, {
+          ...ap,
+          date: this.selectedDateStr
+        }).subscribe({
           next: () => this.snackBar.open('Termin izmenjen!', 'Zatvori', { duration: 2000 }),
           error: () => this.snackBar.open('Greška pri izmeni termina!', 'Zatvori', { duration: 2000 })
         });
@@ -518,21 +582,22 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  onDateChange(dateValue: Date | null): void {
+  onDateChange(dateValue: any): void {
     if (dateValue) {
+      // Ako je dateValue Moment objekt, konvertuj ga u Date
+      const nativeDate = dateValue.toDate ? dateValue.toDate() : dateValue;
       if (
         !this.selectedDate ||
-        dateValue.getTime() !== this.selectedDate.getTime()
+        nativeDate.getTime() !== this.selectedDate.getTime()
       ) {
         this.animateSchedule = false;
-        this.selectedDate = dateValue;
+        this.selectedDate = nativeDate;
         this.toolbarState = 'spaced';
         this.employees = [];
         this.appointments = [];
         this.cd.detectChanges();
-        // ngZone.run
         this.ngZone.run(() => {
-          this.loadSchedule(dateValue);
+          this.loadSchedule(nativeDate);
           this.animateSchedule = true;
           this.cd.detectChanges();
         });
@@ -547,15 +612,20 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   shiftDate(deltaDays: number): void {
-    const current = this.dateControl.value;
-    if (!current) return;
-
-    const next = new Date(current);
-    next.setDate(current.getDate() + deltaDays);
-
-    this.dateControl.setValue(next);
-    this.onDateChange(next);
+  let current = this.dateControl.value;
+  if (!current) return;
+  
+  // Ako je current Moment objekat, konvertuj u native Date
+  if (moment.isMoment(current)) {
+    current = current.toDate();
   }
+  
+  // current je sada garantovano Date
+  const next: Date = new Date(current);
+  next.setDate(current.getDate() + deltaDays);
+  this.dateControl.setValue(next);
+  this.onDateChange(next);
+}
 
   formatTime(time: number): string {
     const h = Math.floor(time);

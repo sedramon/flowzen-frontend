@@ -5,7 +5,7 @@
       <span class="title" *ngIf="selectedDate"><mat-icon>schedule</mat-icon>Raspored za zaposlene</span>
     </div>
     <div class="toolbar-item datepicker-container" [@dateAnim]="toolbarState">
-      <button mat-icon-button (click)="shiftDate(-1)" style="margin-right: 20px;">
+      <button mat-icon-button (click)="shiftDate(-1)" style="margin-right: 20px; cursor: pointer;">
         <mat-icon>chevron_left</mat-icon>
       </button>
       <mat-form-field appearance="outline" class="date-picker">
@@ -15,7 +15,7 @@
         <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
       </mat-form-field>
-      <button mat-icon-button (click)="shiftDate(1)" style="margin-left: 20px;">
+      <button mat-icon-button (click)="shiftDate(1)" style="margin-left: 20px; cursor: pointer">
         <mat-icon>chevron_right</mat-icon>
       </button>
     </div>

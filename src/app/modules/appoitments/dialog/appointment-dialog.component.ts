@@ -87,4 +87,8 @@ export class AppointmentDialogComponent implements OnInit {
   onCancel(): void {
     this.dialogRef.close();
   }
+
+  onDelete(): void {
+    this.dialogRef.close({ delete: true });
+  }
 }
