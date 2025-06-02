@@ -19,6 +19,10 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
+import { MatDialog } from '@angular/material/dialog';
+import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
+import { CreateServiceDialogComponent } from './dialogs/create-service-dialog/create-service-dialog.component';
+import { MatChipsModule } from '@angular/material/chips';
 
 
 @Component({
@@ -36,7 +40,8 @@ import { MatButtonModule } from '@angular/material/button';
     MatSortModule,
     MatPaginatorModule,
     MatButtonModule,
-    MatFormFieldModule
+    MatFormFieldModule,
+    MatChipsModule
   ],
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.scss'],
@@ -45,7 +50,7 @@ import { MatButtonModule } from '@angular/material/button';
 })
 export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSourceServices = new MatTableDataSource<Service>([]);
-  displayedColumnsServices: string[] = ['name', 'price', 'durationMinutes', 'actions'];
+  displayedColumnsServices: string[] = ['name', 'price', 'durationMinutes','active', 'actions'];
 
   searchQuery: string = '';
 
@@ -62,7 +67,8 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   constructor(
     private servicesService: ServicesService,
     private authService : AuthService,
-    private snackBar: MatSnackBar
+    private snackBar: MatSnackBar,
+    private dialog: MatDialog
   ) {}
   
 
@@ -102,6 +108,63 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   clearFilters() {
     this.searchQuery = '';
     this.applyFilter();
+  }
+
+  deleteService(service: Service) {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '500px',
+      height: '250px'
+    })
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.servicesService.deleteService(service._id!).subscribe(
+          () => {
+            this.showSnackbar(`Service "${service.name}" deleted successfully`);
+            this.dataSourceServices.data = this.dataSourceServices.data.filter(s => s._id !== service._id);
+          },
+          (error) => {
+            console.error('Error deleting service:', error);
+            this.showSnackbar('Failed to delete service', true);
+          }
+        );
+      }
+    })
+  }
+
+  /** Called when you click the “+” button or the “edit” icon */
+  addOrEditService(serviceToEdit?: Service): void {
+    const dialogRef = this.dialog.open(CreateServiceDialogComponent, {
+      width: '600px',
+      data: serviceToEdit ?? null
+    });
+
+    dialogRef.afterClosed().subscribe((result: Service | undefined) => {
+      if (!result) {
+        return; // user cancelled
+      }
+
+      if (serviceToEdit) {
+        // We passed in `serviceToEdit`, so this is Edit mode:
+        this.servicesService.updateService(serviceToEdit._id!, result).subscribe((updated) => {
+          // Update the table locally:
+          const data = this.dataSourceServices.data.slice();
+          const idx = data.findIndex((s) => s._id === updated._id);
+          if (idx > -1) {
+            data[idx] = updated;
+            this.dataSourceServices.data = data;
+          }
+          this.showSnackbar(`Service "${updated.name}" updated successfully`);
+        });
+      } else {
+        // No serviceToEdit means Create mode:
+        this.servicesService.createService(result).subscribe((created) => {
+          // Append to the dataSource
+          this.dataSourceServices.data = [...this.dataSourceServices.data, created];
+        });
+        this.showSnackbar(`Service "${result.name}" created successfully`);
+      }
+    });
   }
 
   showSnackbar(message: string, isError: boolean = false) {

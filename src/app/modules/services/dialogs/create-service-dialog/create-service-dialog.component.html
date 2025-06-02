@@ -1,0 +1,64 @@
+<!-- features/services/create-service-dialog/create-service-dialog.component.html -->
+<div class="dialog-container" fxLayout="column">
+  <div mat-dialog-title>
+    {{ isEditMode ? 'Edit Service' : 'Create Service' }}
+  </div>
+
+  <div mat-dialog-content style="padding: 20px">
+    <form [formGroup]="serviceForm" fxLayout="column" fxLayoutGap="16px">
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Service Name" />
+        <mat-error *ngIf="serviceForm.get('name')?.hasError('required')">
+          Name is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Price</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="price"
+          placeholder="0.00"
+        />
+        <mat-error *ngIf="serviceForm.get('price')?.hasError('required')">
+          Price is required
+        </mat-error>
+        <mat-error *ngIf="serviceForm.get('price')?.hasError('min')">
+          Minimum price is 0
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%">
+        <mat-label>Duration (minutes)</mat-label>
+        <input
+          matInput
+          type="number"
+          formControlName="durationMinutes"
+          placeholder="e.g. 30"
+        />
+        <mat-error *ngIf="serviceForm.get('durationMinutes')?.hasError('required')">
+          Duration is required
+        </mat-error>
+        <mat-error *ngIf="serviceForm.get('durationMinutes')?.hasError('min')">
+          Minimum is 1 minute
+        </mat-error>
+      </mat-form-field>
+
+      <mat-checkbox formControlName="isActive">Active</mat-checkbox>
+    </form>
+  </div>
+
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" style="padding: 8px 24px">
+    <button
+      mat-raised-button
+      color="primary"
+      (click)="save()"
+      [disabled]="serviceForm.invalid"
+    >
+      {{ isEditMode ? 'Update' : 'Create' }}
+    </button>
+    <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+  </div>
+</div>

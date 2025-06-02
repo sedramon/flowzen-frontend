@@ -54,4 +54,15 @@ export class ServicesService {
       })
     )
   }
+
+  updateService(id: string, service: Service): Observable<Service> {
+    return this.http.put<Service>(`${this.apiUrl}/services/${id}`, service).pipe(
+      tap((updated) => {
+        const list = this.servicesSubject.value.map((s) =>
+          s._id === id ? updated : s
+        );
+        this.servicesSubject.next(list);
+      })
+    );
+  }
 }

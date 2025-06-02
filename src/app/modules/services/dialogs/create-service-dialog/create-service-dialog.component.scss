@@ -1,0 +1,62 @@
+.mat-form-field-css {
+    margin-bottom: 25px;
+}
+
+button {
+    width: 250px;
+}
+
+.dialog-container {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    border: 1px white solid;
+    border-radius: 35px;
+}
+
+.dialog-content {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    min-height: 0;
+    padding: 10px;
+
+    &::-webkit-scrollbar {
+        width: 8px;
+        background: transparent;
+    }
+    &::-webkit-scrollbar-thumb {
+        background: #ff0066;
+        border-radius: 8px;
+        border: 2px solid transparent;
+        background-clip: padding-box;
+    }
+    &::-webkit-scrollbar-thumb:hover {
+        background: #e6005c;
+    }
+    &::-webkit-scrollbar-corner {
+        background: transparent;
+    }
+    &::-webkit-scrollbar-button {
+        display: none;
+        height: 0;
+        width: 0;
+    }
+    scrollbar-width: thin;
+    scrollbar-color: #ff0066 transparent;
+}
+
+.dialog-actions {
+    padding: 16px 20px;
+    z-index: 2;
+}
+
+// Highlight selected working days in datepicker (MDC)
+td.selected-working-day .mat-mdc-calendar-body-cell-content,
+td.selected-working-day > .mat-mdc-calendar-body-cell-content,
+.selected-working-day.mdc-calendar-day,
+.selected-working-day .mat-mdc-calendar-body-cell-content,
+.selected-working-day > .mat-mdc-calendar-body-cell-content {
+  background: #ff0066 !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+}

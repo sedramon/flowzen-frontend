@@ -5,5 +5,6 @@ export interface Service {
     durationMinutes: number;
     description?: string;
     discountedPrice?: string;
+    isActive: boolean;
     tenant: string;
 }

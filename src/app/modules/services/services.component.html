@@ -10,7 +10,7 @@
         </mat-card-subtitle>
       </mat-card-header>
       <mat-divider></mat-divider>
-       <mat-card-content class="table-card">
+      <mat-card-content class="table-card">
         <div class="table-wrapper">
           <div *ngIf="dataSourceServices.data.length; else noServices">
             <table mat-table #servicesSort="matSort" [dataSource]="dataSourceServices" matSort>
@@ -33,24 +33,34 @@
                 <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.durationMinutes }}</td>
               </ng-container>
 
+              <!-- Active -->
+              <ng-container matColumnDef="active">
+                <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
+                <td mat-cell *matCellDef="let service">
+                    <mat-chip *ngIf="service.isActive" style="background-color: rgba(172, 255, 47, 0.722);">Active</mat-chip>
+                    <mat-chip *ngIf="!service.isActive" style="background-color: rgba(255, 0, 0, 0.722);">Inactive</mat-chip>
+                </td>
+              </ng-container>
+
 
               <!-- Actions -->
               <ng-container matColumnDef="actions">
                 <th mat-header-cell *matHeaderCellDef>
                   <div fxLayout="row" fxLayoutAlign="end center">
                     Actions
-                    <button mat-icon-button (click)="$event.stopPropagation()"
+                    <button mat-icon-button (click)="addOrEditService(); $event.stopPropagation()"
                       style="margin-left: 8px;">
                       <mat-icon style="color: greenyellow;">add</mat-icon>
                     </button>
                   </div>
                 </th>
-                <td mat-cell *matCellDef="let client" (click)="$event.stopPropagation()">
+                <td mat-cell *matCellDef="let service" (click)="$event.stopPropagation()">
                   <div fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button (click)="$event.stopPropagation()"
+                    <button mat-icon-button (click)="deleteService(service); $event.stopPropagation()"
                       style="margin: 0 4px; color: red;">
                       <mat-icon>delete</mat-icon>
                     </button>
+                    Delete service
                   </div>
                 </td>
               </ng-container>
@@ -58,8 +68,8 @@
 
               <!-- Header & Row Declarations -->
               <tr mat-header-row *matHeaderRowDef="displayedColumnsServices" class="custom-header-row"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsServices"
-                class="custom-row"></tr>
+              <tr mat-row *matRowDef="let service; columns: displayedColumnsServices" class="custom-row"
+                (click)="addOrEditService(service)"></tr>
             </table>
 
 
@@ -83,5 +93,5 @@
       <mat-divider></mat-divider>
     </mat-card>
   </div>
-  
+
 </div>
