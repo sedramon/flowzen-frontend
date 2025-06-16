@@ -23,6 +23,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { CreateServiceDialogComponent } from './dialogs/create-service-dialog/create-service-dialog.component';
 import { MatChipsModule } from '@angular/material/chips';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
 
 @Component({
@@ -41,7 +42,9 @@ import { MatChipsModule } from '@angular/material/chips';
     MatPaginatorModule,
     MatButtonModule,
     MatFormFieldModule,
-    MatChipsModule
+    MatChipsModule,
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './services.component.html',
   styleUrls: ['./services.component.scss'],

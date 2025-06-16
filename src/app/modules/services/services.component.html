@@ -91,6 +91,14 @@
         </mat-card-title>
       </mat-card-header>
       <mat-divider></mat-divider>
+       <mat-card-content fxLayout="column" style="margin-top: 20px">
+        <mat-form-field appearance="outline">
+          <mat-label>Search Services</mat-label>
+          <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Name…" />
+        </mat-form-field>
+
+        <button mat-flat-button color="accent" (click)="clearFilters()">Clear</button>
+      </mat-card-content>
     </mat-card>
   </div>
 

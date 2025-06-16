@@ -238,6 +238,13 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
       panelClass: isError ? ['snackbar-error'] : ['snackbar-success']
     });
   }
+
+  deleteEmployee() {
+    this.employeesService.deleteEmployee(this.data.employee._id).subscribe(() => {
+      this.dialogRef.close();
+      this.showSnackbar('Employee deleted successfully!', true);
+    })
+  }
 }
 
 // Custom validator

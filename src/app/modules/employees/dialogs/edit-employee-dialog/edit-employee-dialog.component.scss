@@ -48,9 +48,12 @@ button {
 .dialog-actions {
     padding: 16px 20px;
     z-index: 2;
+
+    button {
+        width: 200px;
+    }
 }
 
-// Highlight selected working days in datepicker (MDC)
 td.selected-working-day .mat-mdc-calendar-body-cell-content,
 td.selected-working-day > .mat-mdc-calendar-body-cell-content,
 .selected-working-day.mdc-calendar-day,

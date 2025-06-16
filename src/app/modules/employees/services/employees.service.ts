@@ -65,4 +65,13 @@ export class EmployeesService {
         return this.http.post<{ url: string }>(`${this.apiUrl}/employees/upload`, formData);
     }
 
+    deleteEmployee(id: string): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/employees/${id}`).pipe(
+            tap(() => {
+                const list = this.employeesSubject.value.filter((e) => e._id !== id);
+                this.employeesSubject.next(list);
+            })
+        );
+    }
+
 }
