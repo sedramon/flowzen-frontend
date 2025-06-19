@@ -1,7 +1,9 @@
-html, body {
+html,
+body {
     height: 100%;
     margin: 0;
-    overflow: hidden; /* Prevent scrolling on the entire page */
+    overflow: hidden;
+    /* Prevent scrolling on the entire page */
 }
 
 
@@ -9,103 +11,46 @@ html, body {
     width: 100%;
 }
 
-.example-sidenav {
-    width: 250px;
-    height: 100vh;
+.menu-content {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    padding: 0px 12px;
+}
+
+.topbar {
     position: fixed;
     top: 0;
     left: 0;
-    background-color: #14131e;
-    color: white;
-    box-shadow: 2px 0px 6px rgba(0, 0, 0, 0.15);
+    right: 0;
+    height: 64px;
+    /* match your toolbar height */
+    z-index: 1000;
+    /* above everything else */
 }
 
-mat-sidenav-content {
-    flex-grow: 1;
+.main-content {
     margin-top: 64px;
-    overflow-y: auto; /* Enables scrolling for the routed content */
-    display: flex;
-    flex-direction: column;
-}
-  
-.menu-content {
-    display: flex;
-    flex-direction: column;
-    height: calc(100% - 20px);
-    padding: 0 10px;
-}
-  
-.menu-item {
-    color: white !important;
-    background-color: #ff0066;
-    border-radius: 4px;
-    padding: 16px;
-    margin: 8px 0;
-    text-decoration: none;
-    box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.1);
-
-    div {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-    }
 }
 
-  
-.menu-item:hover {
-    background-color: rgba(174, 3, 106, 0.613);
-    transform: scale(1.05);
-    transition: 100ms;
-}
-  
-.toggle-button {
-    width: 40px; /* Adjust width */
-    height: 40px; /* Adjust height */
-    font-size: 24px; /* Increases button size */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    margin-right: 25px;
-    background-color: #ff0066; /* Optional: Background color */
-    color: white !important;
+.nav-btn {
+    /* smooth zoom */
+    transition: transform 0.15s ease-in-out;
 }
 
-.toggle-button:hover {
-    background-color: rgba(174, 3, 106, 0.613); /* Slightly lighter on hover */
-    transform: scale(1.1); /* Increases size on hover */
-    transition: 0.2s;
+.nav-btn:hover {
+    transform: scale(1.2);
 }
 
-/* Increase the size of the icon */
-.toggle-button mat-icon {
-    font-size: 24px; /* Bigger menu icon */
+/* highlight “active” state if you like */
+.nav-btn.active mat-icon {
+    color: #d16aff;
 }
 
 
-/* The fixed header that starts AFTER the sidenav */
-.fixed-header {
-    position: fixed;
-    top: 0;
-    z-index: 1000; /* On top of other elements */
-    height: 64px;  /* Typical toolbar height */
-    display: flex;
-    align-items: center;
-    width: 100%;
-    padding: 0 16px;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-
-
-    .header-title {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-
-        mat-icon {
-            margin-right: 5px;
-        }
-    }
-  }
-
-  
+.app-title {
+    font-size: 20px;
+    font-weight: bold;
+    color: #d16aff;
+}

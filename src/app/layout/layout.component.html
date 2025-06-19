@@ -1,79 +1,81 @@
-<mat-sidenav-container>
-  <!-- Sidenav -->
-  <mat-sidenav #sidenav mode="side" [(opened)]="opened" class="example-sidenav">
-    <div class="menu-content" fxLayout="column" fxLayoutAlign="space-between none">
-      <mat-nav-list>
-        <a mat-list-item routerLink="/home" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>home</mat-icon>
-            <span>Home</span>
-          </div>
-        </a>
-        <a mat-list-item routerLink="/appoitments" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>event</mat-icon>
-            <span>Appointments</span>
-          </div>
-        </a>
-        <a mat-list-item routerLink="/clients" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>people</mat-icon>
-            <span>Clients</span>
-          </div>
-        </a>
-        <a mat-list-item routerLink="/employees" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>supervisor_account</mat-icon>
-            <span>Employees</span>
-          </div>
+<mat-toolbar color="primary" class="topbar">
 
-        </a>
-        <a mat-list-item routerLink="/user-administration" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>admin_panel_settings</mat-icon>
-            <span>User Administration</span>
-          </div>
-        </a>
-        <a mat-list-item routerLink="/services" routerLinkActive="active" class="menu-item">
-          <div>
-            <mat-icon>miscellaneous_services</mat-icon>
-            <span>Services</span>
-          </div>
-        </a>
+  <div class="menu-content">
+    <img src="/flowzen-logo.png" alt="flowzen" width="50">
+    <span class="app-title">Flowzen</span>
 
-        <!-- Additional menu items -->
-      </mat-nav-list>
-      <div>
-        <div fxLayout="row" fxLayoutAlign="center center">
-          <h2>{{ currentUser?.username }}</h2>
-          <button mat-icon-button>
-            <mat-icon>account_circle</mat-icon>
-          </button>
-        </div>
-        <div fxLayout="column" fxLayoutAlign="center center" class="logout-container">
-          <button mat-raised-button class="logout-button" style="background-color: red; color: white;"
-            (click)="logout()">Logout</button>
-        </div>
+    <button mat-icon-button matTooltip="Home" matTooltipPosition="below" routerLink="/home" routerLinkActive="active"
+      class="nav-btn">
+      <mat-icon>home</mat-icon>
+    </button>
 
-      </div>
-    </div>
-  </mat-sidenav>
+    <button mat-icon-button matTooltip="Appointments" matTooltipPosition="below" routerLink="/appoitments"
+      routerLinkActive="active" class="nav-btn">
+      <mat-icon>event</mat-icon>
+    </button>
 
-  <!-- Main Content -->
-  <mat-sidenav-content>
-    <!-- Global Fixed Header -->
-    <mat-toolbar color="primary" class="fixed-header">
-      <button mat-icon-button (click)="toggleMenu()" class="toggle-button">
-        <mat-icon>{{ opened ? 'close' : 'menu' }}</mat-icon>
-      </button>
-      <span class="header-title">
-        <mat-icon>{{ currentIcon }}</mat-icon>
-        {{ currentTitle }}
-      </span>
-    </mat-toolbar>
+    <button mat-icon-button matTooltip="Clients" matTooltipPosition="below" routerLink="/clients"
+      routerLinkActive="active" class="nav-btn">
+      <mat-icon>sentiment_very_satisfied</mat-icon>
+    </button>
 
-   
-      <router-outlet></router-outlet> <!-- Routed content goes here -->
+    <button mat-icon-button matTooltip="Employees" matTooltipPosition="below" routerLink="/employees"
+      routerLinkActive="active" class="nav-btn">
+      <mat-icon>supervisor_account</mat-icon>
+    </button>
 
-  </mat-sidenav-content>
-</mat-sidenav-container>
+    <button mat-icon-button matTooltip="User Administration" matTooltipPosition="below"
+      routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
+      <mat-icon>admin_panel_settings</mat-icon>
+    </button>
+
+    <button mat-icon-button matTooltip="Services" matTooltipPosition="below" routerLink="/services"
+      routerLinkActive="active" class="nav-btn">
+      <mat-icon>miscellaneous_services</mat-icon>
+    </button>
+
+    <!-- Dropdown Menu A trigger -->
+    <button mat-button [matMenuTriggerFor]="menuA" class="nav-btn text-btn">
+      Menu A
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menuA="matMenu">
+      <button mat-menu-item>Placeholder A1</button>
+      <button mat-menu-item>Placeholder A2</button>
+      <button mat-menu-item>Placeholder A3</button>
+    </mat-menu>
+
+    <!-- Dropdown Menu B trigger -->
+    <button mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
+      Menu B
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menuB="matMenu">
+      <button mat-menu-item>Placeholder B1</button>
+      <button mat-menu-item>Placeholder B2</button>
+    </mat-menu>
+    <!-- Dropdown Menu C trigger -->
+    <button mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
+      Menu C
+      <mat-icon>arrow_drop_down</mat-icon>
+    </button>
+    <mat-menu #menuB="matMenu">
+      <button mat-menu-item>Placeholder C1</button>
+      <button mat-menu-item>Placeholder C2</button>
+    </mat-menu>
+  </div>
+
+  <div fxLayout="row" fxLayoutAlign="end center" class="toolbar-right">
+    <span>{{ currentUser?.username }}</span>
+    <button mat-icon-button>
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <button mat-raised-button style="background-color: red; color: white; margin-left: 10px;"
+      (click)="logout()">Logout</button>
+  </div>
+
+</mat-toolbar>
+
+<div class="main-content">
+  <router-outlet></router-outlet>
+</div>

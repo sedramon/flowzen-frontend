@@ -9,6 +9,9 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 import { AuthService } from '../core/services/auth.service';
 import { AuthenticatedUser } from '../models/AuthenticatedUser';
 import { filter, map } from 'rxjs';
+import { MatTooltip } from '@angular/material/tooltip';
+import { MatMenuModule } from '@angular/material/menu';
+
 
 
 @Component({
@@ -21,7 +24,9 @@ import { filter, map } from 'rxjs';
     MatButtonModule,
     MatToolbarModule,
     MatIconModule,
-    FlexLayoutModule
+    FlexLayoutModule,
+    MatTooltip,
+    MatMenuModule
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
