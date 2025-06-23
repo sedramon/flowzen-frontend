@@ -23,9 +23,7 @@ import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import {
-  MatFormField,
-  MatFormFieldModule,
-  MatLabel,
+  MatFormFieldModule    
 } from '@angular/material/form-field';
 import { MatOption } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
@@ -161,9 +159,7 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  openEditClientDialog(client: Client) {
-    /* … */
-  }
+
 
   deleteClient(id: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
