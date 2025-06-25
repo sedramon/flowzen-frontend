@@ -4,12 +4,13 @@ import { BehaviorSubject, Observable } from 'rxjs';
 import { jwtDecode } from 'jwt-decode';
 import { Router } from '@angular/router';
 import { AuthenticatedUser } from '../../models/AuthenticatedUser';
+import { environment } from '../../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:3000';
+  private readonly apiUrl = environment.apiUrl;
   private readonly TOKEN_KEY = 'access_token';
 
   private userSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
