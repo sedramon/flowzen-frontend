@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { environmentDev } from "../../../../environments/environment";
+import { environment } from "../../../../environments/environment";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Employee } from "../../../models/Employee";
@@ -8,7 +8,7 @@ import { Employee } from "../../../models/Employee";
     providedIn: "root",
 })
 export class EmployeesService {
-    private apiUrl = environmentDev.apiUrl;
+    private apiUrl = environment.apiUrl;
 
     // Initialize with an empty array to ensure consistent typing
     private employeesSubject = new BehaviorSubject<Employee[]>([]);

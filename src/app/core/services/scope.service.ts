@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { environmentDev } from "../../../environments/environment";
+import { environment } from "../../../environments/environment";
 import { Scope } from "../../models/Scope";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 
@@ -14,7 +14,7 @@ export class ScopeService {
   constructor(private http: HttpClient) { }
 
   fetchScopes(): Observable<Scope[]> {
-    return this.http.get<Scope[]>(`${environmentDev.apiUrl}/scopes`).pipe(
+    return this.http.get<Scope[]>(`${environment.apiUrl}/scopes`).pipe(
       tap((scopes) => this.scopesSubject.next(scopes))
     )
   }

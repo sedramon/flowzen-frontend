@@ -13,7 +13,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeesService } from '../../services/employees.service';
-import { environmentDev } from '../../../../../environments/environment';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-edit-employee-dialog',
@@ -57,7 +57,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
 
   avatarPreview: string | ArrayBuffer | null = null;
   selectedAvatarFile: File | null = null;
-  private apiUrl = environmentDev.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   showMonthPicker = false;
   selectedMonth: Date | null = null;

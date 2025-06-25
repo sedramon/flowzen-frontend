@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
-import { environmentDev } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { Service } from '../../../models/Service';
 
 
@@ -9,7 +9,7 @@ import { Service } from '../../../models/Service';
   providedIn: 'root'
 })
 export class ServicesService {
-  private apiUrl = environmentDev.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   private servicesSubject = new BehaviorSubject<Service[]>([]);
   services$ = this.servicesSubject.asObservable();

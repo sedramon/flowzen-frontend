@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { AddEmployeeDialogComponent } from './dialogs/add-employee-dialog/add-employee-dialog.component';
 import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit-employee-dialog.component';
 import { map, Observable, of } from 'rxjs';
-import { environmentDev } from '../../../environments/environment';
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 
 @Component({
@@ -40,7 +40,7 @@ export class EmployeesComponent implements OnInit {
   filteredEmployees$: Observable<Employee[]> = of([]);
   searchExpanded = false;
   searchQuery = '';
-  apiUrl = environmentDev.apiUrl;
+  apiUrl = environment.apiUrl;
 
   constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar, private authService: AuthService) { }
 

@@ -4,7 +4,7 @@ import { map, switchMap } from 'rxjs/operators';
 import { EmployeesService } from '../../employees/services/employees.service';
 import { Employee } from '../../../models/Employee';
 import { HttpClient } from '@angular/common/http';
-import { environmentDev } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 
 export interface Appointment {
   id: string; // string now
@@ -24,7 +24,7 @@ export interface ScheduleData {
   providedIn: 'root'
 })
 export class ScheduleService {
-  private apiUrl = environmentDev.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   employees$: Observable<Employee[]> = of([]);
   employeesDb: Employee[] = [];

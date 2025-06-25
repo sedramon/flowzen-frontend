@@ -1,5 +1,5 @@
 import { Injectable } from "@angular/core";
-import { environmentDev } from "../../../../environments/environment";
+import { environment } from "../../../../environments/environment";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Facility } from "../../../models/Facility";
 import { HttpClient, HttpParams } from "@angular/common/http";
@@ -8,7 +8,7 @@ import { HttpClient, HttpParams } from "@angular/common/http";
     providedIn: 'root',
 })
 export class SettingsService {
-    private apiUrl = environmentDev.apiUrl;
+    private apiUrl = environment.apiUrl;
 
     private facilitiesSubject = new BehaviorSubject<Facility[]>([]);
     facilities$ = this.facilitiesSubject.asObservable();

@@ -1,6 +1,6 @@
 import { HttpClient } from "@angular/common/http";
 import { Injectable } from "@angular/core";
-import { environmentDev } from "../../../../environments/environment";
+import { environment } from "../../../../environments/environment";
 import { User } from "../../../models/User";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Role } from "../../../models/Role";
@@ -9,7 +9,7 @@ import { AuthService } from "../../../core/services/auth.service";
 
 @Injectable({ providedIn: 'root' })
 export class UserAdministrationService {
-    private apiUrl = environmentDev.apiUrl;
+    private apiUrl = environment.apiUrl;
 
     private usersSubject = new BehaviorSubject<User[]>([]);
     public users$ = this.usersSubject.asObservable();

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { environmentDev } from '../../../../environments/environment';
+import { environment } from '../../../../environments/environment';
 import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Client } from '../../../models/Client';
 import { HttpClient, HttpParams } from '@angular/common/http';
@@ -8,7 +8,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
   providedIn: 'root',
 })
 export class ClientsService {
-  private apiUrl = environmentDev.apiUrl;
+  private apiUrl = environment.apiUrl;
 
   private clientsSubject = new BehaviorSubject<Client[]>([]);
   clients$ = this.clientsSubject.asObservable();
