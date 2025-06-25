@@ -11,6 +11,7 @@ import { AuthenticatedUser } from '../models/AuthenticatedUser';
 import { filter, map } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
+import { NgIf } from '@angular/common';
 
 
 
@@ -26,7 +27,8 @@ import { MatMenuModule } from '@angular/material/menu';
     MatIconModule,
     FlexLayoutModule,
     MatTooltip,
-    MatMenuModule
+    MatMenuModule,
+    NgIf
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'
@@ -37,7 +39,7 @@ export class LayoutComponent implements OnInit{
   currentTitle = 'Flowzen';
   currentIcon = '';
 
-  constructor(private authService: AuthService, private router: Router, private route: ActivatedRoute) {}
+  constructor(public authService: AuthService, private router: Router, private route: ActivatedRoute) {}
 
   ngOnInit() {
     this.authService.user$.subscribe((user) => {

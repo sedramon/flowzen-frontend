@@ -21,22 +21,24 @@ export class AuthService {
 
   login(email: string, password: string): Observable<any> {
     return new Observable((observer) => {
-      this.http.post(`${this.apiUrl}/auth/login`, { email, password }).subscribe({
-        next: (response: any) => {
-          const token = response.access_token;
-          this.saveToken(token);
-          this.setUserFromToken(token);
+      this.http
+        .post(`${this.apiUrl}/auth/login`, { email, password })
+        .subscribe({
+          next: (response: any) => {
+            const token = response.access_token;
+            this.saveToken(token);
+            this.setUserFromToken(token);
 
-          // Redirekcija nakon prijave
-          const returnUrl = localStorage.getItem('returnUrl') || '/home'; // Preuzmi returnUrl ili default na /home
-          localStorage.removeItem('returnUrl'); // Očisti returnUrl
-          this.router.navigate([returnUrl]);
+            // Redirekcija nakon prijave
+            const returnUrl = localStorage.getItem('returnUrl') || '/home'; // Preuzmi returnUrl ili default na /home
+            localStorage.removeItem('returnUrl'); // Očisti returnUrl
+            this.router.navigate([returnUrl]);
 
-          observer.next(response);
-          observer.complete();
-        },
-        error: (err) => observer.error(err),
-      });
+            observer.next(response);
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
     });
   }
 
@@ -85,7 +87,7 @@ export class AuthService {
       }
 
       return true;
-    } catch (error)  {
+    } catch (error) {
       console.error('Invalid token:', error);
       this.clearToken(); // Clear corrupted token
       return false;
@@ -94,7 +96,8 @@ export class AuthService {
 
   private setUserFromToken(token: string): void {
     try {
-      const decodedToken: AuthenticatedUser = jwtDecode<AuthenticatedUser>(token);
+      const decodedToken: AuthenticatedUser =
+        jwtDecode<AuthenticatedUser>(token);
       this.userSubject.next(decodedToken);
     } catch {
       this.userSubject.next(null);
@@ -117,5 +120,16 @@ export class AuthService {
     const availableScopes = user?.role?.availableScopes || [];
     return availableScopes.map((scope) => scope.name);
   }
+
+  isModuleEnabled(moduleName: string): boolean {
+  const scopes = this.getScopes();
+
+  const normalizedScopes = scopes.map(s => s.toLowerCase().trim());
+  const normalizedModule = moduleName.toLowerCase().trim();
+
+  const has = normalizedScopes.includes(normalizedModule);
+
+  return has;
+}
 
 }

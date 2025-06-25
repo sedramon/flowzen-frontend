@@ -11,6 +11,7 @@ import { UnauthorizedComponent } from './modules/unauthorized/unauthorized.compo
 import { UserAdministrationComponent } from './modules/user-administration/user-administration.component';
 import { ServicesComponent } from './modules/services/services.component';
 import { ClientDetailViewComponent } from './modules/clients/client-detail-view/client-detail-view.component';
+import { SettingsComponent } from './modules/settings/settings.component';
 
 export const routes: Routes = [
   {
@@ -84,7 +85,17 @@ export const routes: Routes = [
         data: {
           scope: 'scope_services',
           title: 'Services',
-          icon: 'miscellaneous_services'
+          icon: 'content_cut'
+        }
+      },
+      {
+        path: 'settings',
+        component: SettingsComponent,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_settings',
+          title: 'Settings',
+          icon: 'settings'
         }
       },
       {
@@ -97,7 +108,7 @@ export const routes: Routes = [
         component: UnauthorizedComponent,
         data: {
           title: 'Unauthorized',
-          icon: 'lock' // optional
+          icon: 'lock'
         }
       }
     ],

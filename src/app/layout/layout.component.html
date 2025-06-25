@@ -4,35 +4,44 @@
     <img src="/flowzen-logo.png" alt="flowzen" width="50">
     <span class="app-title">Flowzen</span>
 
-    <button mat-icon-button matTooltip="Home" matTooltipPosition="below" routerLink="/home" routerLinkActive="active"
-      class="nav-btn">
+    
+    <button *ngIf="authService.isModuleEnabled('scope_home')" mat-icon-button matTooltip="Home" matTooltipPosition="below"
+      routerLink="/home" routerLinkActive="active" class="nav-btn">
       <mat-icon>home</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="Appointments" matTooltipPosition="below" routerLink="/appoitments"
-      routerLinkActive="active" class="nav-btn">
+    <button *ngIf="authService.isModuleEnabled('scope_appoitments')" mat-icon-button matTooltip="Appointments"
+      matTooltipPosition="below" routerLink="/appoitments" routerLinkActive="active" class="nav-btn">
       <mat-icon>event</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="Clients" matTooltipPosition="below" routerLink="/clients"
-      routerLinkActive="active" class="nav-btn">
+    <button *ngIf="authService.isModuleEnabled('scope_clients')" mat-icon-button matTooltip="Clients"
+      matTooltipPosition="below" routerLink="/clients" routerLinkActive="active" class="nav-btn">
       <mat-icon>sentiment_very_satisfied</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="Employees" matTooltipPosition="below" routerLink="/employees"
-      routerLinkActive="active" class="nav-btn">
+    <button *ngIf="authService.isModuleEnabled('scope_employees')" mat-icon-button matTooltip="Employees"
+      matTooltipPosition="below" routerLink="/employees" routerLinkActive="active" class="nav-btn">
       <mat-icon>supervisor_account</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="User Administration" matTooltipPosition="below"
-      routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
+    <button *ngIf="authService.isModuleEnabled('scope_user_administration')" mat-icon-button matTooltip="User Administration"
+      matTooltipPosition="below" routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
       <mat-icon>admin_panel_settings</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="Services" matTooltipPosition="below" routerLink="/services"
-      routerLinkActive="active" class="nav-btn">
-      <mat-icon>miscellaneous_services</mat-icon>
+    <button *ngIf="authService.isModuleEnabled('scope_services')" mat-icon-button matTooltip="Services"
+      matTooltipPosition="below" routerLink="/services" routerLinkActive="active" class="nav-btn">
+      <mat-icon>content_cut</mat-icon>
     </button>
+
+    <button *ngIf="authService.isModuleEnabled('scope_settings')" mat-icon-button matTooltip="Settings"
+      matTooltipPosition="below" routerLink="/settings" routerLinkActive="active" class="nav-btn">
+      <mat-icon>settings</mat-icon>
+    </button>
+
+
+
 
     <!-- Dropdown Menu A trigger -->
     <button mat-button [matMenuTriggerFor]="menuA" class="nav-btn text-btn">
