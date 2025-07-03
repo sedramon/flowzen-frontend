@@ -1,0 +1,23 @@
+.dialog-gradient {
+//   background: linear-gradient(to bottom, #8c0055, #b3006e);
+  border-radius: 18px;
+  padding: 24px 18px 18px 18px;
+  color: #fff;
+  min-width: 340px;
+}
+
+h2 {
+  margin-bottom: 18px;
+  color: #fff;
+}
+
+mat-form-field, .shift-select {
+  margin-top: 18px;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}

@@ -1,0 +1,82 @@
+<div class="main-container">
+  <mat-card class="shift-form-card">
+    <h2 class="title">
+      <mat-icon>calendar_month</mat-icon> Pregled radnih dana zaposlenog
+    </h2>
+    <form [formGroup]="form" (ngSubmit)="loadSchedule()" class="shift-form">
+      <mat-form-field appearance="outline">
+        <mat-label>Zaposleni</mat-label>
+        <mat-select formControlName="employeeId" required>
+          <mat-option *ngFor="let emp of employees" [value]="emp._id">
+            {{ emp.firstName }} {{ emp.lastName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Samo dugme za otvaranje datepickera -->
+      <button mat-stroked-button type="button" (click)="picker.open()">
+        <mat-icon>event</mat-icon>
+        Izaberi mesec
+      </button>
+      <!-- Skriveni input potreban za mat-datepicker -->
+      <input
+        matInput
+        [matDatepicker]="picker"
+        formControlName="month"
+        tabindex="-1"
+        style="display:none"
+        readonly
+      >
+      <mat-datepicker
+        #picker
+        startView="multi-year"
+        (monthSelected)="chosenMonthHandler($event, picker)"
+        [startView]="'year'"
+        [touchUi]="true"
+        panelClass="month-picker"
+      ></mat-datepicker>
+
+      <!-- Prikaz izabranog meseca -->
+      <span *ngIf="form.value.month" style="margin-left:16px; font-weight:500;">
+        {{ form.value.month | date:'MMMM yyyy' : undefined : 'sr-RS' }}
+      </span>
+
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" style="margin-left:16px;">
+        Prikaži kalendar
+      </button>
+    </form>
+  </mat-card>
+
+  <!-- Prikaz kalendara ostaje isti -->
+  <div *ngIf="weeks.length > 0" class="calendar-card">
+    <mat-card class="shift-schedule-card">
+      <h3 class="schedule-title">
+        Raspored za {{ form.value?.month ? (form.value.month | date:'MMMM yyyy' : undefined : 'sr-RS') : '' }}
+      </h3>
+      <table class="calendar-table">
+        <thead>
+          <tr>
+            <th *ngFor="let d of [0,1,2,3,4,5,6]">
+              {{ getWeekdayName(d) }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let week of weeks">
+            <td *ngFor="let day of week" (click)="day && openEditDialogForDay(day)" [class.filled]="day?.shift">
+              <div class="day-cell" *ngIf="day">
+                <span class="date-number">{{ day.date.getDate() }}</span>
+                <div class="shift-info" *ngIf="day.shift">
+                  <span class="shift-label" [style.background]="getShiftType(day.shift.shiftType).color">
+                    {{ getShiftType(day.shift.shiftType).label }}
+                  </span>
+                  <span class="shift-note" *ngIf="day.shift.note">{{ day.shift.note }}</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </mat-card>
+  </div>
+</div>

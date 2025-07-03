@@ -1,0 +1,29 @@
+<div class="dialog-gradient">
+  <h2 mat-dialog-title>Radni dan zaposlenog</h2>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <mat-slide-toggle formControlName="works" color="accent">
+      Radi tog dana
+    </mat-slide-toggle>
+
+    <div *ngIf="form.value.works" class="shift-select">
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Tip smene</mat-label>
+        <mat-select formControlName="shiftType">
+          <mat-option *ngFor="let t of shiftTypes" [value]="t.value">
+            {{ t.label }} ({{ t.time }})
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <mat-form-field appearance="outline" style="width: 100%;">
+      <mat-label>Napomena</mat-label>
+      <input matInput formControlName="note" maxlength="200">
+    </mat-form-field>
+
+    <div class="dialog-actions">
+      <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Sačuvaj</button>
+    </div>
+  </form>
+</div>

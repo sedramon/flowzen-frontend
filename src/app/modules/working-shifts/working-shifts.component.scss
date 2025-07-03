@@ -1,0 +1,112 @@
+.shift-form-card {
+  max-width: 900px;
+  margin: 50px auto 32px auto;
+  border-radius: 24px;
+  background: #292929;
+  box-shadow: 0 4px 24px #0008;
+  padding: 32px 24px;
+}
+
+.shift-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+mat-form-field {
+  min-width: 180px;
+  flex: 1 1 180px;
+}
+
+.title {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 24px;
+  color: #b3006e;
+}
+
+/* Kalendarski prikaz */
+.calendar-card {
+  max-width: 900px;
+  margin: 30px auto;
+}
+
+.shift-schedule-card {
+  background: #292929;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 4px 24px #0008;
+}
+
+.schedule-title {
+  color: #b3006e;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.calendar-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.calendar-table th,
+.calendar-table td {
+  width: 14.28%;
+  border: 1px solid #444;
+  padding: 8px;
+  cursor: pointer;
+  vertical-align: top;
+}
+
+.calendar-table td {
+  height: 80px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.calendar-table td:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.day-cell {
+  position: absolute;
+  top: 4px;
+  left: 4px;
+  right: 4px;
+  bottom: 4px;
+  display: flex;
+  flex-direction: column;
+}
+
+.date-number {
+  font-size: 0.9em;
+  color: #ccc;
+}
+
+.shift-info {
+  margin-top: auto;
+}
+
+.shift-label {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 8px;
+  font-size: 0.8em;
+  color: #fff;
+}
+
+.shift-note {
+  display: block;
+  font-size: 0.75em;
+  color: #aaa;
+}
+
+table {
+  width: 100%;
+  margin-top: 16px;
+}
