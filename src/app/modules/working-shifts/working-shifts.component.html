@@ -13,18 +13,18 @@
         </mat-select>
       </mat-form-field>
 
-      <!-- Samo dugme za otvaranje datepickera -->
+      <!-- Dugme za otvaranje datepickera -->
       <button mat-stroked-button type="button" (click)="picker.open()">
         <mat-icon>event</mat-icon>
         Izaberi mesec
       </button>
-      <!-- Skriveni input potreban za mat-datepicker -->
+      <!-- Input je uvek tu, ali je potpuno nevidljiv i ne zauzima prostor -->
       <input
         matInput
         [matDatepicker]="picker"
         formControlName="month"
         tabindex="-1"
-        style="display:none"
+        style="position: absolute; left: -9999px; width: 0; height: 0; opacity: 0; pointer-events: none;"
         readonly
       >
       <mat-datepicker
@@ -36,9 +36,9 @@
         panelClass="month-picker"
       ></mat-datepicker>
 
-      <!-- Prikaz izabranog meseca -->
-      <span *ngIf="form.value.month" style="margin-left:16px; font-weight:500;">
-        {{ form.value.month | date:'MMMM yyyy' : undefined : 'sr-RS' }}
+      <!-- Prikaz izabranog meseca odmah pored dugmeta -->
+      <span *ngIf="form.value.month" style="font-weight:500;">
+        {{ form.value.month | date:'MMMM yyyy' }}
       </span>
 
       <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid" style="margin-left:16px;">
@@ -47,36 +47,135 @@
     </form>
   </mat-card>
 
-  <!-- Prikaz kalendara ostaje isti -->
+  <!-- KALENDAR ILI UREDJIVANJE SMENA -->
   <div *ngIf="weeks.length > 0" class="calendar-card">
     <mat-card class="shift-schedule-card">
       <h3 class="schedule-title">
-        Raspored za {{ form.value?.month ? (form.value.month | date:'MMMM yyyy' : undefined : 'sr-RS') : '' }}
+        {{ editShiftsMode ? 'Uredi smene' : ('Raspored za ' + (form.value?.month ? (form.value.month | date:'MMMM yyyy') : '')) }}
       </h3>
-      <table class="calendar-table">
-        <thead>
-          <tr>
-            <th *ngFor="let d of [0,1,2,3,4,5,6]">
-              {{ getWeekdayName(d) }}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let week of weeks">
-            <td *ngFor="let day of week" (click)="day && openEditDialogForDay(day)" [class.filled]="day?.shift">
-              <div class="day-cell" *ngIf="day">
-                <span class="date-number">{{ day.date.getDate() }}</span>
-                <div class="shift-info" *ngIf="day.shift">
-                  <span class="shift-label" [style.background]="getShiftType(day.shift.shiftType).color">
-                    {{ getShiftType(day.shift.shiftType).label }}
+      <div class="calendar-header-row" style="display: flex;align-items: center;gap: 30px;margin: 16px 0;justify-content: center;">
+        <mat-form-field appearance="outline" style="max-width: 200px; margin: 0;" *ngIf="!editShiftsMode">
+          <mat-label>Aktivna smena</mat-label>
+          <mat-select [(ngModel)]="activeShiftType" name="activeShiftType">
+            <mat-option *ngFor="let shift of shiftTypes" [value]="shift.value">
+              <span [style.color]="shift.color">&#9679;</span>
+              {{ shift.label }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <button mat-stroked-button color="primary" (click)="toggleEditShifts()">
+          <mat-icon>{{ editShiftsMode ? 'calendar_month' : 'edit' }}</mat-icon>
+          {{ editShiftsMode ? 'Prikaži raspored' : 'Uredi smene' }}
+        </button>
+      </div>
+
+      <!-- UREDJIVANJE SMENA -->
+      <div *ngIf="editShiftsMode">
+        <div class="shifts-edit-container">
+          <form #shiftFormDir="ngForm" [formGroup]="shiftForm" (ngSubmit)="saveShift()" class="shifts-edit-form">
+            <div class="shifts-form-fields">
+              <mat-form-field>
+                <mat-label>Vrednost</mat-label>
+                <mat-select formControlName="value" required>
+                  <mat-option *ngFor="let opt of shiftEnumOptions" [value]="opt.value">{{ opt.label }}</mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Labela</mat-label>
+                <input matInput formControlName="label" required>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Boja</mat-label>
+                <input matInput formControlName="color" required type="color">
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Početak</mat-label>
+                <mat-select formControlName="startHour" required>
+                  <mat-option *ngFor="let t of timeOptions" [value]="t">
+                    {{ formatTime(t) }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+              <mat-form-field>
+                <mat-label>Kraj</mat-label>
+                <mat-select formControlName="endHour" required>
+                  <mat-option *ngFor="let t of timeOptions" [value]="t">
+                    {{ formatTime(t) }}
+                  </mat-option>
+                </mat-select>
+              </mat-form-field>
+            </div>
+            <div class="shifts-form-actions">
+              <button mat-raised-button color="primary" type="submit">
+                {{ editingShift ? 'Sačuvaj izmene' : 'Dodaj smenu' }}
+              </button>
+              <button mat-button type="button" (click)="cancelEditShift()" *ngIf="editingShift">Otkaži</button>
+            </div>
+          </form>
+          <div class="shifts-list-wrapper">
+            <mat-list>
+              <mat-list-item *ngFor="let shift of shiftTypes">
+                <div class="shift-list-row">
+                  <span class="shift-dot" [style.background]="shift.color"></span>
+                  <span class="shift-list-label">{{ shift.label }}</span>
+                  <span class="shift-list-value">({{ shift.value }})</span>
+                  <span class="shift-list-hours" *ngIf="shift.startHour !== undefined && shift.endHour !== undefined">
+                    {{ formatTime(shift.startHour) }} - {{ formatTime(shift.endHour) }}h
                   </span>
-                  <span class="shift-note" *ngIf="day.shift.note">{{ day.shift.note }}</span>
+                  <span class="shift-list-color" [style.background]="shift.color"></span>
+                  <span class="shift-list-actions">
+                    <button mat-icon-button color="primary" (click)="editShift(shift)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" (click)="deleteShift(shift)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </span>
                 </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              </mat-list-item>
+            </mat-list>
+          </div>
+        </div>
+      </div>
+
+      <!-- KALENDAR -->
+      <div *ngIf="!editShiftsMode">
+        <table class="calendar-table">
+          <thead>
+            <tr>
+              <th *ngFor="let d of [0,1,2,3,4,5,6]">
+                {{ getWeekdayName(d) }}
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let week of weeks">
+              <td *ngFor="let day of week"
+                  (click)="onDayClick(day)"
+                  [ngClass]="{
+                    'filled': day?.shift,
+                    'rotate': day?.animate
+                  }"
+                  [style.background]="getShiftType(day?.shift?.shiftType).color">
+                <div class="day-cell" *ngIf="day">
+                  <span 
+                    class="date-number"
+                    [ngClass]="{'shift-colored': day?.shift}"
+                  >{{ day.date.getDate() }}</span>
+                  <div class="shift-info" *ngIf="day.shift">
+                    <span class="shift-label">
+                      {{ getShiftType(day.shift.shiftType).label }}
+                    </span>
+                    <!-- <span class="shift-list-hours" *ngIf="day.shift.startHour !== undefined && day.shift.endHour !== undefined">
+                      {{ formatTime(day.shift.startHour) }} - {{ formatTime(day.shift.endHour) }}h
+                    </span> -->
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
     </mat-card>
   </div>
 </div>

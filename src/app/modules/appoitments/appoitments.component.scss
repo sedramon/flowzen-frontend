@@ -183,6 +183,7 @@
         color: #fff;         
         opacity: 0.8; 
         cursor: not-allowed;
+        border-radius: 20px;
       }
       .employee-column:last-child {
         border-bottom-right-radius: 20px;
@@ -248,4 +249,29 @@
 .custom-backdrop {
   background: rgba(0, 0, 0, 0.5);
   overflow: hidden;
+}
+
+.time-slot.unavailable {
+  background-color: #333 !important;
+  color: #fff;
+  opacity: 0.8;
+  pointer-events: none;
+  cursor: not-allowed;
+  border: none;
+}
+.employee-column.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.not-working-overlay {
+  cursor: not-allowed;
+  position: absolute;
+  left: 0;
+  right: 0;
+  background: #333;
+  opacity: 0.8;
+  z-index: 1;
+  pointer-events: none;
+  border-radius: 20px;
 }

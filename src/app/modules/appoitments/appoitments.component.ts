@@ -218,7 +218,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.isDragging = true;
             event.target.setAttribute('data-dragging', 'true');
             const target = event.target as HTMLElement;
-            target.style.zIndex = '1';
+            target.style.zIndex = '1000'; // <-- OVDE!
             const apId = target.getAttribute('data-appointment-id') || '';
             const rect = target.getBoundingClientRect();
             this.dragOffset[apId] = {
@@ -250,29 +250,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const target = event.target as HTMLElement;
             target.style.transition = 'none';
             target.style.transform = 'none';
+            target.style.zIndex = '3'; // <-- VRATI NA DEFAULT!
             document.removeEventListener('mousemove', this.mouseMoveListener);
             target.style.zIndex = '1';
             void target.offsetWidth;
             target.style.transition = 'transform 0.1s ease';
-            const apId = target.getAttribute('data-appointment-id') || '';
-            const ap = this.appointments.find((a) => a.id === apId);
-            if (ap) {
-              this.fixOverlapsLive(ap.employeeId);
-              this.cd.detectChanges();
-
-              // Pozovi updateAppointment nakon drag & drop
-              this.scheduleService.updateAppointment(ap.id, {
-                ...ap,
-                date: this.selectedDateStr
-              }).subscribe({
-                next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
-                error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
-              });
-            }
             setTimeout(() => {
               event.target.removeAttribute('data-dragging');
               this.isDragging = false;
             }, 0);
+            // PATCH: Ne radi update ovde! Update se radi samo u dropzone handleru!
           },
         },
       })
@@ -341,10 +328,27 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const apId = event.target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
+              // PATCH: Validacija pre update-a!
+              const employee = this.employees.find(e => e._id === ap.employeeId);
+              if (
+                !employee ||
+                !employee.workingShift ||
+                ap.startHour < employee.workingShift.startHour ||
+                ap.endHour > employee.workingShift.endHour
+              ) {
+                this.snackBar.open(
+                  'Nije moguće promeniti trajanje termina van radnog vremena zaposlenog',
+                  'Zatvori',
+                  { duration: 3000 }
+                );
+                this.cd.detectChanges();
+                return;
+              }
+
               this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
 
-              // Pozovi updateAppointment nakon resize
+              // Pozovi updateAppointment nakon resize SAMO AKO JE VALIDACIJA PROŠLA
               this.scheduleService.updateAppointment(ap.id, {
                 ...ap,
                 date: this.selectedDateStr
@@ -369,7 +373,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const ap = this.appointments.find((a) => a.id === apId);
         if (!ap) return;
 
-        if (employee && !employee.workingDays.includes(this.selectedDateStr)) {
+        if (
+          !employee ||
+          !employee.workingShift ||
+          employee.workingShift.date !== this.selectedDateStr
+        ) {
           appointmentEl.style.transition = 'transform 0.3s ease';
           appointmentEl.style.transform = 'none';
           this.snackBar.open(
@@ -380,6 +388,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           return;
         }
 
+        // Izračunaj novi start/end
         const colRect = empEl.getBoundingClientRect();
         const pointerY = event.dragEvent.clientY;
         const offsetY = this.dragOffset[apId]?.y || 0;
@@ -389,56 +398,45 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const duration = ap.endHour - ap.startHour;
         let newEndHour = newStartHour + duration;
 
-        const colApps = this.appointments
-          .filter((a) => a.employeeId === employeeId && a.id !== apId)
-          .sort((a, b) => a.startHour - b.startHour);
-
-        let overlap = colApps.find(other =>
-          newStartHour < other.endHour && newEndHour > other.startHour
-        );
-
-        if (overlap) {
-          if (newStartHour < overlap.startHour) {
-            newEndHour = overlap.startHour;
-            newStartHour = newEndHour - duration;
-            if (newStartHour < 8) {
-              newStartHour = 8;
-              newEndHour = 8 + duration;
-            }
-          } else {
-            newStartHour = overlap.endHour;
-            newEndHour = newStartHour + duration;
-            if (newEndHour > 22) {
-              newEndHour = 22;
-              newStartHour = 22 - duration;
-            }
-          }
+        // Provera: da li je novi termin u okviru radnog vremena zaposlenog
+        if (
+          newStartHour < employee.workingShift.startHour ||
+          newEndHour > employee.workingShift.endHour
+        ) {
+          appointmentEl.style.transition = 'transform 0.3s ease';
+          appointmentEl.style.transform = 'none';
+          this.snackBar.open(
+            'Nije moguće postaviti uslugu van radnog vremena zaposlenog',
+            'Zatvori',
+            { duration: 3000 }
+          );
+          return;
         }
 
-        if (newStartHour < 8) {
-          newEndHour += 8 - newStartHour;
-          newStartHour = 8;
-        }
-        if (newEndHour > 22) {
-          newStartHour -= newEndHour - 22;
-          newEndHour = 22;
-        }
-
+        // ...ostatak koda (overlap, granice, update ap.startHour/endHour itd.)...
         ap.startHour = newStartHour;
         ap.endHour = newEndHour;
         ap.employeeId = employeeId;
         appointmentEl.style.transform = 'none';
         appointmentEl.style.zIndex = '1';
         this.cd.detectChanges();
+
+        // PATCH: Pozovi updateAppointment SAMO AKO JE VALIDACIJA PROŠLA
+        this.scheduleService.updateAppointment(ap.id, {
+          ...ap,
+          date: this.selectedDateStr
+        }).subscribe({
+          next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 }),
+          error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
+        });
       },
     });
   }
 
   onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
     if (this.isDragging) return;
-    if (!emp.workingDays.includes(this.selectedDateStr)) {
-      return;
-    }
+    if (!emp.workingShift) return;
+
     const empColRect = (
       event.currentTarget as HTMLElement
     ).getBoundingClientRect();
@@ -446,6 +444,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
     const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
     const appointmentStart = 8 + snappedMinutes / 60;
+
+    // Dozvoli klik samo ako je slot u okviru radnog vremena
+    if (!this.isSlotAvailable(emp, appointmentStart)) return;
 
     const dialogData: AppointmentDialogData = {
       employeeId: emp._id!, // string
@@ -461,25 +462,21 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        // Prvo napravi objekat bez id-a
         const newAp: Appointment = {
-          // id: Math.random().toString(36).substring(2, 12), // više ne koristi random id
           employeeId: emp._id!,
           startHour: result.startHour,
           endHour: result.startHour + 1,
           serviceName: result.service,
           date: this.selectedDateStr,
-          id: '' // privremeno prazan
+          id: ''
         };
 
-        // Pozovi backend i koristi odgovor
         this.scheduleService.createAppointment(newAp).subscribe({
           next: (created: any) => {
-            // Dodaj pravi termin iz baze (sa pravim id-jem)
             this.appointments.push({
               ...newAp,
               ...created,
-              id: created._id || created.id // koristi id iz baze
+              id: created._id || created.id
             });
             this.fixOverlapsLive(emp._id!);
             this.cd.detectChanges();
@@ -642,7 +639,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   isColumnDisabled(emp: Employee): boolean {
-    // Provera da li zaposleni radi tog dana
-    return !emp.workingDays.includes(this.selectedDateStr);
+    // Kolona je disabled ako nema workingShift za taj dan
+    return !emp.workingShift;
+  }
+
+  // Da li je slot u okviru radnog vremena zaposlenog
+  isSlotAvailable(emp: Employee, slotHour: number): boolean {
+    if (!emp.workingShift) return false;
+    return slotHour >= emp.workingShift.startHour && slotHour < emp.workingShift.endHour;
   }
 }

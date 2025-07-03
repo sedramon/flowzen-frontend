@@ -5,6 +5,7 @@ import { EmployeesService } from '../../employees/services/employees.service';
 import { Employee } from '../../../models/Employee';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
+import { AuthService } from '../../../core/services/auth.service';
 
 export interface Appointment {
   id: string; // string now
@@ -28,14 +29,17 @@ export class ScheduleService {
 
   employees$: Observable<Employee[]> = of([]);
   employeesDb: Employee[] = [];
+  private tenantId: string;
 
   constructor(
     private employeesService: EmployeesService,
-    private http: HttpClient
+    private http: HttpClient,
+    private authService: AuthService
   ) {
-    const tenantId = '67bcf25a3311448ed3af993f';
+    const currentUser = this.authService.getCurrentUser();
+    this.tenantId = currentUser?.tenant || '';
     this.employees$ = this.employeesService.employees$;
-    this.employeesService.getAllEmployees(tenantId).subscribe();
+    this.employeesService.getAllEmployees(this.tenantId).subscribe();
     this.employees$.subscribe(list => (this.employeesDb = list));
   }
 
@@ -57,8 +61,7 @@ export class ScheduleService {
 
   getScheduleSimple(date: Date): Observable<ScheduleData> {
     const selectedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const employees$ = this.http.get<Employee[]>(`${this.apiUrl}/employees?tenant=67bcf25a3311448ed3af993f`);
-    // const appointments$ = this.http.get<any[]>(`${this.apiUrl}/appointments`);
+    const employees$ = this.getEmployeesWithWorkingShift(selectedDate);
     const appointments$ = this.getAllAppoitements().pipe(
       map(appointments => {
         if (appointments.length > 0) {
@@ -72,14 +75,15 @@ export class ScheduleService {
     );
 
     return employees$.pipe(
-      map(employees =>
-        employees
+      map(employees => {
+        console.log('Employees with working shift:', employees); // <-- LOGUJ OVDE
+        return employees
           .filter(e => e.includeInAppoitments)
           .map(e => ({
             ...e,
             avatarUrl: e.avatarUrl ? this.apiUrl + e.avatarUrl : undefined
           }))
-      ),
+      }),
       switchMap(filteredEmployees =>
         appointments$.pipe(
           map(appointments => {
@@ -109,5 +113,14 @@ export class ScheduleService {
         )
       )
     );
+  }
+
+  getEmployeesWithWorkingShift(date: string): Observable<any[]> {
+    return this.http.get<any[]>(`${this.apiUrl}/employees/with-working-shift`, {
+      params: {
+        tenant: this.tenantId,
+        date
+      }
+    });
   }
 }

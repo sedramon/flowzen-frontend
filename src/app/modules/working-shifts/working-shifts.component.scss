@@ -9,9 +9,10 @@
 
 .shift-form {
   display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
   align-items: center;
+  gap: 30px;
+  margin-top: 16px;
+  justify-content: center;
 }
 
 mat-form-field {
@@ -67,10 +68,23 @@ mat-form-field {
   height: 80px;
   position: relative;
   transition: background 0.2s;
+  background: transparent; // UKLONI !important !!!
+  cursor: pointer;
 }
 
 .calendar-table td:hover {
   background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-table td.filled {
+  /* Pozadina se postavlja inline iz komponente */
+  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
+  border-radius: 12px;
+  /* Ukloni background ovde */
+}
+
+.calendar-table td:not(.filled):hover {
+  background: rgba(0, 0, 0, 0.08) !important;
 }
 
 .day-cell {
@@ -88,16 +102,21 @@ mat-form-field {
   color: #ccc;
 }
 
+.date-number.shift-colored {
+  color: #222 !important; // ista boja kao shift-label
+  font-weight: 600;
+}
+
 .shift-info {
   margin-top: auto;
 }
 
 .shift-label {
-  display: inline-block;
-  padding: 2px 6px;
+  color: #222 !important; // Samo na labeli!
+  background: transparent !important;
+  font-weight: 600;
   border-radius: 8px;
-  font-size: 0.8em;
-  color: #fff;
+  padding: 2px 8px;
 }
 
 .shift-note {
@@ -109,4 +128,127 @@ mat-form-field {
 table {
   width: 100%;
   margin-top: 16px;
+}
+
+.calendar-table td.rotate {
+  animation: rotateColor 0.5s;
+}
+
+@keyframes rotateColor {
+  0% {
+    transform: rotateY(0deg);
+    filter: brightness(1.2);
+  }
+  50% {
+    transform: rotateY(90deg);
+    filter: brightness(1.5);
+  }
+  100% {
+    transform: rotateY(0deg);
+    filter: brightness(1);
+  }
+}
+
+.shifts-edit-container {
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+  align-items: center;
+  margin: 24px 0 0 0;
+}
+
+.shifts-edit-form {
+  width: 100%;
+  max-width: 700px;
+  background: #232323;
+  border-radius: 12px;
+  padding: 24px 24px 16px 24px;
+  box-shadow: 0 2px 12px #0004;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+}
+
+.shifts-form-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 24px;
+  width: 100%;
+  justify-content: center;
+}
+
+.shifts-form-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.shifts-list-wrapper {
+  width: 100%;
+  max-width: 700px;
+  background: #232323;
+  border-radius: 12px;
+  padding: 16px 24px;
+  box-shadow: 0 2px 12px #0004;
+}
+
+mat-list-item {
+  display: flex !important;
+  align-items: center;
+  gap: 18px;
+  padding: 10px 0 !important;
+  border-bottom: 1px solid #333;
+}
+
+.shift-dot {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  border: 2px solid #fff2;
+  box-shadow: 0 1px 4px #0002;
+}
+
+.shift-list-row {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 14px;
+}
+
+.shift-list-label {
+  font-weight: 600;
+  font-size: 1.1em;
+  color: #fff;
+  margin-right: 4px;
+}
+
+.shift-list-value {
+  color: #aaa;
+  font-size: 0.95em;
+  margin-right: 8px;
+}
+
+.shift-list-hours {
+  color: #bdbdbd;
+  font-size: 0.95em;
+  margin-right: 8px;
+}
+
+.shift-list-color {
+  width: 32px;
+  height: 12px;
+  border-radius: 6px;
+  display: inline-block;
+  margin-right: 8px;
+  border: 1px solid #fff2;
+}
+
+.shift-list-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
 }

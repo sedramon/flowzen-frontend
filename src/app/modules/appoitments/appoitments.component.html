@@ -61,18 +61,34 @@
                [ngClass]="{ 'not-working': isColumnDisabled(emp) }"
                [class.disabled]="isColumnDisabled(emp)"
                (click)="!isColumnDisabled(emp) && onEmptyColumnClick(emp, $event)">
-            <!-- Appointment blokovi -->
+  
+            <!-- OVERLAYI PRVI! -->
+            <div *ngIf="emp.workingShift"
+                 class="not-working-overlay"
+                 [style.top.%]="0"
+                 [style.height.%]="((emp.workingShift.startHour - 8) / 14) * 100">
+            </div>
+            <div *ngIf="emp.workingShift"
+                 class="not-working-overlay"
+                 [style.top.%]="((emp.workingShift.endHour - 8) / 14) * 100"
+                 [style.height.%]="((22 - emp.workingShift.endHour) / 14) * 100">
+            </div>
+
+            <!-- SVE OSTALO POSLE OVERLAYA -->
+            <ng-container *ngFor="let t of timeSlots">
+              <div class="time-slot" [class.unavailable]="!isSlotAvailable(emp, t)"></div>
+            </ng-container>
+
             <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id || '')"
-              [attr.data-appointment-id]="ap.id" [style.top.%]="calculateTop(ap.startHour)"
+              [attr.data-appointment-id]="ap.id"
+              [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">
               <div class="appointment-info">
                 <div class="service">{{ ap.serviceName }}</div>
-
                 <div class="time">
                   {{ formatTime(ap.startHour) }} - {{ formatTime(ap.endHour) }}
                 </div>
-
                 <div class="date">
                   {{ ap.date | date : "dd MMM yyyy" }}
                 </div>

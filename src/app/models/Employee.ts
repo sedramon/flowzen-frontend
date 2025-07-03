@@ -10,5 +10,11 @@ export interface Employee {
     includeInAppoitments: boolean;
     tenant: string;
     avatarUrl?: string;
-    workingDays: string[];
+    workingShift?: {
+        date: string;
+        shiftType: string;
+        startHour: number;
+        endHour: number;
+        note?: string;
+    };
 }

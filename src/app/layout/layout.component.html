@@ -15,6 +15,11 @@
       <mat-icon>event</mat-icon>
     </button>
 
+    <button mat-icon-button matTooltip="Working Shifts" matTooltipPosition="below" routerLink="/working-shifts"
+      routerLinkActive="active" class="nav-btn">
+      <mat-icon>calendar_month</mat-icon>
+    </button>
+
     <button *ngIf="authService.isModuleEnabled('scope_clients')" mat-icon-button matTooltip="Clients"
       matTooltipPosition="below" routerLink="/clients" routerLinkActive="active" class="nav-btn">
       <mat-icon>sentiment_very_satisfied</mat-icon>

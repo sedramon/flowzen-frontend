@@ -12,6 +12,7 @@ import { UserAdministrationComponent } from './modules/user-administration/user-
 import { ServicesComponent } from './modules/services/services.component';
 import { ClientDetailViewComponent } from './modules/clients/client-detail-view/client-detail-view.component';
 import { SettingsComponent } from './modules/settings/settings.component';
+import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.component';
 
 export const routes: Routes = [
   {
@@ -37,6 +38,16 @@ export const routes: Routes = [
           scope: 'scope_appoitments',
           title: 'Appointments',
           icon: 'event'
+        }
+      },
+      {
+        path: 'working-shifts',
+        component: WorkingShiftsComponent,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_working_shifts',
+          title: 'Working Shifts',
+          icon: 'calendar_month'
         }
       },
       {
