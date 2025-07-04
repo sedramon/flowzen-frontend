@@ -7,8 +7,13 @@ body {
 }
 
 
-.logout-button {
+.logout-btn {
     width: 100%;
+    transition: 0.3s ease-in-out;
+
+    &:hover {
+        transform: scale(1.05);
+    }
 }
 
 .menu-content {
