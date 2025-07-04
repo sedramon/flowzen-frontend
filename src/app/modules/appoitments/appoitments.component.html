@@ -1,4 +1,4 @@
-<mat-card class="appointments-container">
+<mat-card class="appointments-container" [class.resizing]="isResizing">
   <!-- Toolbar -->
   <mat-toolbar class="toolbar-custom">
     <div class="toolbar-item title-container" [@titleAnim]="toolbarState">
@@ -38,17 +38,23 @@
         <!-- Horizontalne linije -->
         <div class="horizontal-lines">
           <ng-container *ngFor="let t of timeSlots; let i = index">
-            <div class="horizontal-line" *ngIf="i !== 0 && i !== timeSlots.length - 1"
-              [style.top.%]="((t - 8) / 14) * 100">
-            </div>
+            <div
+              class="horizontal-line"
+              *ngIf="i < slotCount - 1"
+              [style.top.%]="(i / (slotCount - 1)) * 100"
+            ></div>
           </ng-container>
         </div>
 
         <!-- Vremenska kolona -->
         <div class="time-column" #timeColumn>
           <ng-container *ngFor="let t of timeSlots; let i = index">
-            <div class="time-cell" [ngClass]="{ 'header': i === 0 }" [style.top.%]="((t - 8) / 14) * 100">
-              {{ i === 0 ? 'time' : formatTime(t) }}
+            <div
+              class="time-cell"
+              [style.top.%]="(i / (slotCount - 1)) * 100"
+              [style.transform]="'translateY(-100%)'"
+            >
+              <span>{{ formatTime(t) }}</span>
             </div>
           </ng-container>
         </div>
@@ -76,7 +82,21 @@
 
             <!-- SVE OSTALO POSLE OVERLAYA -->
             <ng-container *ngFor="let t of timeSlots">
-              <div class="time-slot" [class.unavailable]="!isSlotAvailable(emp, t)"></div>
+              <div
+                class="time-slot"
+                [class.unavailable]="!isSlotAvailable(emp, t)"
+                [matTooltip]="formatTime(t)"
+                [matTooltipDisabled]="
+                  isDragging ||
+                  isResizing ||
+                  !isSlotAvailable(emp, t) ||
+                  isSlotCovered(emp, t)
+                "
+                matTooltipPosition="right"
+                [style.pointerEvents]="
+                  isSlotAvailable(emp, t) && !isSlotCovered(emp, t) ? 'auto' : 'none'
+                "
+              ></div>
             </ng-container>
 
             <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id || '')"

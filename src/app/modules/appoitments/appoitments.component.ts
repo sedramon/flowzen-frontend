@@ -47,6 +47,7 @@ import { Employee } from '../../models/Employee';
 import { MatMomentDateModule, MomentDateAdapter, MAT_MOMENT_DATE_ADAPTER_OPTIONS } from '@angular/material-moment-adapter';
 import { MAT_DATE_FORMATS, DateAdapter, MAT_DATE_LOCALE } from '@angular/material/core';
 import moment from 'moment';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 export const CUSTOM_DATE_FORMATS = {
   parse: {
@@ -74,7 +75,8 @@ export const CUSTOM_DATE_FORMATS = {
     MatToolbarModule,
     MatCardModule,
     FlexLayoutModule,
-    MatIconModule
+    MatIconModule,
+    MatTooltipModule
   ],
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
@@ -135,7 +137,21 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   animateSchedule: boolean = false;
   toolbarState: 'centered' | 'spaced' = 'centered';
 
-  timeSlots: number[] = Array.from({ length: 29 }, (_, i) => 8 + i * 0.5);
+  workStartHour = 8;
+  workEndHour = 22;
+
+  // Generiši slotove prema radnom vremenu
+  get timeSlots(): number[] {
+    const slots: number[] = [];
+    for (let t = this.workStartHour; t <= this.workEndHour; t += 0.25) {
+      slots.push(Number(t.toFixed(2)));
+    }
+    return slots;
+  }
+
+  get slotCount(): number {
+    return this.timeSlots.length;
+  }
 
   employees: Employee[] = [];
   appointments: Appointment[] = [];
@@ -188,6 +204,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   isDragging = false;
+  justResized = false;
+  isResizing = false;
 
   ngAfterViewInit(): void {
     const boundingFn = () => {
@@ -275,6 +293,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         inertia: false,
         listeners: {
           start: (event) => {
+            this.isResizing = true;
             document.addEventListener('mousemove', this.mouseMoveListener, {
               passive: false,
             });
@@ -284,19 +303,39 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const apId = target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (!ap) return;
+            const employee = this.employees.find(e => e._id === ap.employeeId);
+            if (!employee || !employee.workingShift) return;
+
             let newHeightPx = event.rect.height;
             const fiveMinuteFraction = 5 / 60;
             let computedDuration = (newHeightPx / this.gridBodyHeight) * 14;
             let newDuration =
               Math.round(computedDuration / fiveMinuteFraction) *
               fiveMinuteFraction;
-            if (newDuration < 0.5) {
-              newDuration = 0.5;
-              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
-            }
-            ap.endHour = ap.startHour + newDuration;
-            target.style.height = newHeightPx + 'px';
-            const colApps = this.appointments
+
+          // Minimalno trajanje
+          if (newDuration < 0.5) {
+            newDuration = 0.5;
+            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+          }
+
+          // Maksimalno trajanje: ne može preko kraja radnog vremena
+          const maxEndHour = employee.workingShift.endHour;
+          if (ap.startHour + newDuration > maxEndHour) {
+            newDuration = maxEndHour - ap.startHour;
+            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+          }
+
+          // Ne dozvoli da endHour bude pre startHour
+          if (ap.startHour + newDuration < ap.startHour + 0.5) {
+            newDuration = 0.5;
+            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+          }
+
+          ap.endHour = ap.startHour + newDuration;
+          target.style.height = newHeightPx + 'px';
+
+          const colApps = this.appointments
               .filter((a) => a.employeeId === ap.employeeId)
               .sort((a, b) => a.startHour - b.startHour);
             const currentIndex = colApps.findIndex((a) => a.id === apId);
@@ -322,6 +361,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.cd.detectChanges();
           },
           end: (event) => {
+            this.isResizing = false;
             document.removeEventListener('mousemove', this.mouseMoveListener);
             const apId = event.target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
@@ -333,6 +373,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 ap.startHour < employee.workingShift.startHour ||
                 ap.endHour > employee.workingShift.endHour
               ) {
+                // Vrati na dozvoljeno
+                ap.endHour = Math.min(
+                  Math.max(ap.endHour, (employee?.workingShift?.startHour ?? 8) + 0.5),
+                  employee?.workingShift?.endHour ?? 22
+                );
                 this.snackBar.open(
                   'Nije moguće promeniti trajanje termina van radnog vremena zaposlenog',
                   'Zatvori',
@@ -354,6 +399,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
               });
             }
+            // Spreči click dijalog odmah nakon resize
+            this.justResized = true;
+            setTimeout(() => {
+              this.justResized = false;
+            }, 0);
           },
         },
       });
@@ -438,7 +488,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     ).getBoundingClientRect();
     const localY = event.clientY - empColRect.top;
     const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-    const snappedMinutes = Math.round(minutesFromTop / 5) * 5;
+    // Snap na 15 minuta
+    const snappedMinutes = Math.round(minutesFromTop / 15) * 15;
     const appointmentStart = 8 + snappedMinutes / 60;
 
     // Dozvoli klik samo ako je slot u okviru radnog vremena
@@ -485,7 +536,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
-    if (this.isDragging) return;
+    if (this.isDragging || this.justResized) return;
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
 
@@ -643,5 +694,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   isSlotAvailable(emp: Employee, slotHour: number): boolean {
     if (!emp.workingShift) return false;
     return slotHour >= emp.workingShift.startHour && slotHour < emp.workingShift.endHour;
+  }
+
+  isSlotCovered(emp: Employee, t: number): boolean {
+    const appointments = this.getAppointmentsForEmployee(emp._id || '');
+    return appointments.some(ap => t >= ap.startHour && t < ap.endHour);
   }
 }

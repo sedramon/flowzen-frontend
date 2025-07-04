@@ -93,7 +93,7 @@
     flex-direction: row;
     background-color: transparent;
     padding: 8px 0;
-    border-bottom: 1px solid rgba(204, 204, 204, 0.25);
+    // border-bottom: 1px solid rgba(204, 204, 204, 0.25);
     
     .time-header-cell {
       width: 109px;
@@ -153,16 +153,15 @@
       border-right: 1px solid #ccc;
 
       .time-cell {
-        position: absolute; 
+        position: absolute;
         left: 0;
         right: 0;
-        margin-top: -28px; 
         text-align: center;
-        font-weight: 600;
-        
-        .time-cell.header {
-          font-weight: bold;
-        }
+        font-weight: 400;
+        height: 18px;
+        line-height: 20px;
+        pointer-events: none;
+        z-index: 3;
       }
     }
     
@@ -177,6 +176,24 @@
         position: relative;
         border-left: 1px solid rgba(204, 204, 204, 0.25);
         cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+
+        .time-slot {
+          flex: 0 0 auto;
+          height: calc(100% / 57); // 57 slotova
+          width: 100%;
+          border-bottom: 1px solid transparent;
+          box-sizing: border-box;
+          cursor: pointer;
+          background: transparent;
+          transition: background 0.2s;
+          z-index: 2;
+          padding: 0;
+          margin: 0;
+          line-height: 1;
+        }
       }
       .employee-column.not-working {
         background-color: #333;
@@ -206,6 +223,10 @@
   overflow: hidden;
   z-index: 3;
   transition: transform 0.1s ease;
+}
+
+.appointment-block[data-dragging="true"] {
+  z-index: 1000 !important;
 }
 
 .appointment-info {
@@ -252,9 +273,6 @@
 }
 
 .time-slot.unavailable {
-  background-color: #333 !important;
-  color: #fff;
-  opacity: 0.8;
   pointer-events: none;
   cursor: not-allowed;
   border: none;
@@ -274,4 +292,20 @@
   z-index: 1;
   pointer-events: none;
   border-radius: 20px;
+}
+
+.schedule-grid,
+.grid-body,
+.employee-columns,
+.employee-column,
+.time-slot,
+.appointment-block {
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.resizing .time-slot {
+  pointer-events: none !important;
+  cursor: ns-resize !important;
 }
