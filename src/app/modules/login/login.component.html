@@ -1,7 +1,7 @@
 <div class="main-container" fxLayout="column" fxLayoutAlign="center center">
   <form class="login-form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
     <img src="flowzen-logo.png" alt="flowzen" style="width: 200px;">
-    <h2>Login</h2>
+    <h2>Flowzen</h2>
     <div class="form-group">
       <mat-form-field appearance="outline" color="accent">
         <mat-label>Username</mat-label>
@@ -33,7 +33,7 @@
       class="login-button"
       [disabled]="loginForm.invalid"
     >
-      Login
+      LOGIN
     </button>
     <div *ngIf="loginError" class="error-message">
       <mat-error>Invalid username or password</mat-error>
