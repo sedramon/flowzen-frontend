@@ -118,7 +118,7 @@ export const CUSTOM_DATE_FORMATS = {
             style({ opacity: 0 }),
             stagger(100, [animate('0.5s ease-out', style({ opacity: 1 }))]),
           ],
-          { optional: true } // <-- dodaj ovo!
+          { optional: true }
         ),
       ]),
     ]),
@@ -169,13 +169,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private authService: AuthService,
-    private ngZone: NgZone // dodaj ovo
+    private ngZone: NgZone
   ) {}
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
       return;
     }
 
@@ -218,7 +217,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.isDragging = true;
             event.target.setAttribute('data-dragging', 'true');
             const target = event.target as HTMLElement;
-            target.style.zIndex = '1000'; // <-- OVDE!
+            target.style.zIndex = '1000';
             const apId = target.getAttribute('data-appointment-id') || '';
             const rect = target.getBoundingClientRect();
             this.dragOffset[apId] = {
@@ -259,7 +258,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               event.target.removeAttribute('data-dragging');
               this.isDragging = false;
             }, 0);
-            // PATCH: Ne radi update ovde! Update se radi samo u dropzone handleru!
           },
         },
       })
@@ -328,7 +326,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const apId = event.target.getAttribute('data-appointment-id') || '';
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
-              // PATCH: Validacija pre update-a!
               const employee = this.employees.find(e => e._id === ap.employeeId);
               if (
                 !employee ||
@@ -413,7 +410,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           return;
         }
 
-        // ...ostatak koda (overlap, granice, update ap.startHour/endHour itd.)...
         ap.startHour = newStartHour;
         ap.endHour = newEndHour;
         ap.employeeId = employeeId;
@@ -449,7 +445,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     if (!this.isSlotAvailable(emp, appointmentStart)) return;
 
     const dialogData: AppointmentDialogData = {
-      employeeId: emp._id!, // string
+      employeeId: emp._id!,
       appointmentStart,
       services: this.services,
     };

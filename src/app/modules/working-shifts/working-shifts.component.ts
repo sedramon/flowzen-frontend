@@ -1,25 +1,40 @@
-import { CommonModule } from '@angular/common';
+/* eslint-disable max-lines */
+/* Potpuno refaktorisana logika komponente uz dodatne komentare.  */
+
+import { CommonModule }                 from '@angular/common';
 import { Component, OnInit, ViewChild } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule, FormGroupDirective } from '@angular/forms';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import {
+  FormBuilder,
+  FormGroup,
+  Validators,
+  FormGroupDirective,
+  ReactiveFormsModule,
+  FormsModule,
+} from '@angular/forms';
+import { HttpClient }                   from '@angular/common/http';
+
+/* Angular-Material */
+import { DateAdapter, MatNativeDateModule }     from '@angular/material/core';
+import { MatCardModule }             from '@angular/material/card';
+import { MatFormFieldModule }        from '@angular/material/form-field';
+import { MatInputModule }            from '@angular/material/input';
+import { MatSelectModule }           from '@angular/material/select';
 import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
-import { MatNativeDateModule, DateAdapter } from '@angular/material/core';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatButtonModule }           from '@angular/material/button';
+import { MatIconModule }             from '@angular/material/icon';
+import { MatDialog, MatDialogModule }from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { HttpClient } from '@angular/common/http';
-import { Employee } from '../../models/Employee';
-import { WorkingShiftsService } from './services/working-shifts.service';
+import { MatListModule }             from '@angular/material/list';
+
+/* Aplikacijski modeli / servisi */
+import { environment }               from '../../../environments/environment';
+import { Employee }                  from '../../models/Employee';
+import { AuthService }               from '../../core/services/auth.service';
+import { WorkingShiftsService }      from './services/working-shifts.service';
+import { ShiftsService }             from './services/shifts.service';
 import { EditWorkingDayDialogComponent } from './dialogs/edit-working-day-dialog/edit-working-day-dialog.component';
-import { FormControl } from '@angular/forms';
-import { ShiftsService } from './services/shifts.service'; // importuj servis
-import { MatListModule } from '@angular/material/list';
-import { environment } from '../../../environments/environment';
-import { AuthService } from '../../core/services/auth.service';
+
+/* ────────────────────────── Tipovi ────────────────────────── */
 
 interface CalendarDay {
   date: Date;
@@ -33,12 +48,18 @@ interface CalendarDay {
   animate?: boolean;
 }
 
+/* ───────────────────────── Komponenta ───────────────────────── */
+
 @Component({
-  selector: 'app-working-shifts',
-  standalone: true,
-  imports: [
+  selector   : 'app-working-shifts',
+  standalone : true,
+  imports    : [
+    /* Angular core */
     CommonModule,
     ReactiveFormsModule,
+    FormsModule,
+
+    /* Angular-Material */
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
@@ -49,91 +70,101 @@ interface CalendarDay {
     MatIconModule,
     MatDialogModule,
     MatSnackBarModule,
-    FormsModule,
-    MatListModule
+    MatListModule,
   ],
-  templateUrl: './working-shifts.component.html',
-  styleUrls: ['./working-shifts.component.scss']
+  templateUrl : './working-shifts.component.html',
+  styleUrls   : ['./working-shifts.component.scss'],
 })
 export class WorkingShiftsComponent implements OnInit {
-  
-  @ViewChild('shiftFormDir') private shiftFormDir!: FormGroupDirective;
 
-  form: FormGroup;
-  employees: Employee[] = [];
-  weeks: CalendarDay[][] = [];
-  loading = false;
-  editShiftsMode = false; // Dodaj ovu promenljivu
+  /* ------------------------------ ViewChild ------------------------------ */
+  @ViewChild('shiftFormDir', { static: false })
+  private shiftFormDir!: FormGroupDirective;
 
-  shiftTypes: any[] = []; // više nema zakucanih vrednosti, backend puni ovo
-  activeShiftType: string = '';
+  /* ----------------------------- Forme / state --------------------------- */
+  form      : FormGroup;     // izbor zaposlenog + meseca
+  shiftForm : FormGroup;     // forma za tip smene
 
-  shiftEnumOptions = [
-    { value: 'morning', label: 'Jutarnja' },
+  employees : Employee[]          = [];
+  weeks     : CalendarDay[][]     = [];
+
+  shiftTypes      : any[] = [];      // puni backend
+  activeShiftType : string = '';     // trenutno „četkica“ boje u kalendaru
+  editShiftsMode  = false;
+  timeOptions     : number[] = [];
+
+  editingShift: any = null;          // trenutni shift u modal nom
+
+  /* backend korisnik (tenant, id…) */
+  currentUser: any;
+
+  /* Statične opcije, kada se kreira NOVI tip smene */
+  readonly shiftEnumOptions = [
+    { value: 'morning',   label: 'Jutarnja'   },
     { value: 'afternoon', label: 'Popodnevna' },
-    { value: 'evening', label: 'Večernja' },
-    { value: 'full', label: 'Cela smena' },
-    { value: 'custom', label: 'Custom' }
+    { value: 'evening',   label: 'Večernja'   },
+    { value: 'full',      label: 'Cela smena' },
+    { value: 'custom',    label: 'Custom'     },
   ];
 
-  timeOptions: number[] = [];
-
-  startAt = new Date();
-  shiftForm: FormGroup;
-  editingShift: any = null;
-
-  currentUser: any; // Dodaj property
-
+  /* ─────────────────────────── Konstruktori ─────────────────────────── */
   constructor(
-    private fb: FormBuilder,
-    private wsService: WorkingShiftsService,
-    private http: HttpClient,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog,
-    private dateAdapter: DateAdapter<Date>,
+    private fb           : FormBuilder,
+    private http         : HttpClient,
+    private wsService    : WorkingShiftsService,
     private shiftsService: ShiftsService,
-    private authService: AuthService // Dodaj u konstruktor
+    private authService  : AuthService,
+    private snackBar     : MatSnackBar,
+    private dialog       : MatDialog,
+    private dateAdapter  : DateAdapter<Date>,
   ) {
-    // this.dateAdapter.setLocale('sr-RS');
+    /* Locale za datepicker (SR) */
+    this.dateAdapter.setLocale('en-US');
+    this.dateAdapter.setLocale('en-US');
+
+    /* -------- glavna forma (zaposleni + mesec) -------- */
     this.form = this.fb.group({
-      employeeId: [null, Validators.required],
-      month: [null, Validators.required] // sada je Date objekat
+      employeeId : [null, Validators.required],
+      month      : [null, Validators.required],
     });
-    this.timeOptions = [];
-    for (let h = 0; h <= 23.5; h += 0.5) {
-      this.timeOptions.push(h);
-    }
-    this.timeOptions.push(24); // Dodaj i 24:00 kao opciju
+
+    /* -------- forma za pojedinačni tip smene -------- */
     this.shiftForm = this.fb.group({
-      value: ['', Validators.required],
-      label: ['', Validators.required],
-      color: ['#ffe082', Validators.required],
-      startHour: [null, Validators.required],
-      endHour: [null, Validators.required]
+      value     : ['', Validators.required],
+      label     : ['', Validators.required],
+      color     : ['#ffe082', Validators.required],
+      startHour : [null, Validators.required],
+      endHour   : [null, Validators.required],
     });
+
+    /* Polusatni slotovi 0–24h (0, 0.5, 1 … 23.5, 24) */
+    for (let h = 0; h <= 24; h += 0.5) { this.timeOptions.push(h); }
   }
 
-  ngOnInit() {
-    this.currentUser = this.authService.getCurrentUser(); // Učitaj jednom
+  /* ────────────────────────── Lifecycle ────────────────────────── */
+  ngOnInit(): void {
+    this.currentUser = this.authService.getCurrentUser();
     this.loadEmployees();
     this.loadShifts();
   }
 
-  loadEmployees() {
+  /* ────────────────────────── HTTP pozivi ───────────────────────── */
+
+  /** Učitaj sve zaposlene za tenant-a. */
+  private loadEmployees(): void {
     const tenantId = this.currentUser?.tenant;
-    this.http.get<Employee[]>(`${environment.apiUrl}/employees?tenant=${tenantId}`)
-      .subscribe(res => {
-        this.employees = res.filter(e => e.includeInAppoitments);
-      });
+    this.http
+      .get<Employee[]>(`${environment.apiUrl}/employees?tenant=${tenantId}`)
+      .subscribe(res => this.employees = res.filter(e => e.includeInAppoitments));
   }
 
-  loadShifts() {
+  /** Učitaj listu DEFINISANIH tipova smena (boje, vreme). */
+  private loadShifts(): void {
     const tenantId = this.currentUser?.tenant;
     this.shiftsService.getAllShifts(tenantId).subscribe(shifts => {
-      this.shiftTypes = shifts || [];
-      // Postavi podrazumevanu smenu samo ako postoji bar jedna smena
-      if (this.shiftTypes.length > 0) {
-        // Ako prethodno selektovana više ne postoji, uzmi prvu
+      this.shiftTypes = shifts ?? [];
+      /* Ako je prethodni activeShiftType nestao, uzmi prvi */
+      if (this.shiftTypes.length) {
         if (!this.shiftTypes.find(s => s.value === this.activeShiftType)) {
           this.activeShiftType = this.shiftTypes[0].value;
         }
@@ -143,195 +174,209 @@ export class WorkingShiftsComponent implements OnInit {
     });
   }
 
-  loadSchedule() {
-    if (this.form.invalid) return;
-    const monthVal: Date = this.form.value.month;
-    const employeeId = this.form.value.employeeId;
-    const tenantId = this.currentUser?.tenant;
-    this.weeks = [];
-    this.buildCalendar(monthVal);
+  /* ────────────────────────── KALENDAR ───────────────────────── */
 
-    // Učitaj smene iz baze
-    this.wsService.getShiftsForEmployeeMonth(employeeId, monthVal.getMonth(), monthVal.getFullYear(), tenantId)
+  /** Klik na „Prikaži kalendar“. */
+  loadSchedule(): void {
+    if (this.form.invalid) return;
+
+    const selectedMonth : Date = this.form.value.month;
+    const employeeId    = this.form.value.employeeId;
+    const tenantId      = this.currentUser?.tenant;
+
+    this.buildCalendar(selectedMonth);
+
+    /* Učitaj smene u tom mesecu */
+    this.wsService
+      .getShiftsForEmployeeMonth(
+        employeeId,
+        selectedMonth.getMonth(),
+        selectedMonth.getFullYear(),
+        tenantId,
+      )
       .subscribe(shifts => {
         for (const week of this.weeks) {
           for (const day of week) {
             if (!day) continue;
-            const found = shifts.find(s => (new Date(s.date)).toDateString() === day.date.toDateString());
+            const found = shifts.find(s =>
+              new Date(s.date).toDateString() === day.date.toDateString(),
+            );
             if (found) {
               day.shift = {
                 shiftType: found.shiftType,
-                note: found.note,
+                note     : found.note,
                 startHour: found.startHour,
-                endHour: found.endHour
+                endHour  : found.endHour,
               };
               day._id = found._id;
             } else {
               day.shift = undefined;
-              day._id = undefined;
+              day._id   = undefined;
             }
           }
         }
       });
   }
 
-  buildCalendar(monthDate: Date) {
-    if (!monthDate) return;
-    const year = monthDate.getFullYear();
-    const month = monthDate.getMonth(); // 0-based
-    const firstDay = new Date(year, month, 1);
-    const lastDay = new Date(year, month + 1, 0);
+  /** Kreiraj matricu nedelja (pon–ned) za dati mesec. */
+  private buildCalendar(monthDate: Date): void {
+    const y = monthDate.getFullYear();
+    const m = monthDate.getMonth();
+
+    const firstDay = new Date(y, m, 1);
+    const lastDay  = new Date(y, m + 1, 0);
 
     const weeks: CalendarDay[][] = [];
-    let currentWeek: CalendarDay[] = [];
+    let current: CalendarDay[]   = [];
 
-    const firstWeekDay = (firstDay.getDay() + 6) % 7;
-    for (let i = 0; i < firstWeekDay; i++) {
-      currentWeek.push(null!);
-    }
+    /* Offset tako da nedelja počinje od ponedeljka */
+    const offset = (firstDay.getDay() + 6) % 7;
+    for (let i = 0; i < offset; i++) current.push(null!);
 
     for (let d = 1; d <= lastDay.getDate(); d++) {
-      const date = new Date(year, month, d);
-      currentWeek.push({ date });
-      if (currentWeek.length === 7) {
-        weeks.push(currentWeek);
-        currentWeek = [];
+      current.push({ date: new Date(y, m, d) });
+      if (current.length === 7) {
+        weeks.push(current);
+        current = [];
       }
     }
-    if (currentWeek.length > 0) {
-      while (currentWeek.length < 7) {
-        currentWeek.push(null!);
-      }
-      weeks.push(currentWeek);
-    }
+
+    while (current.length && current.length < 7) current.push(null!);
+    if (current.length) weeks.push(current);
 
     this.weeks = weeks;
   }
 
-  openEditDialogForDay(day: CalendarDay) {
-    const data = {
-      date: day.date,
-      employeeId: this.form.value.employeeId,
-      shift: day.shift || { shiftType: null, note: '' },
-      shiftTypes: this.shiftTypes
-    };
+  /* ────────────────────────── Klik na dan ───────────────────────── */
 
-    const dialogRef = this.dialog.open(EditWorkingDayDialogComponent, {
-      width: '400px',
-      data
-    });
-
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        day.shift = result.shiftType ? { shiftType: result.shiftType, note: result.note } : undefined;
-        this.snackBar.open('Radni dan izmenjen!', 'Zatvori', { duration: 2000 });
-      }
-    });
-  }
-
-  onDayClick(day: CalendarDay) {
+  onDayClick(day: CalendarDay): void {
     if (!day) return;
+
     const employeeId = this.form.value.employeeId;
-    const tenantId = this.currentUser?.tenant;
-    const dateStr = toLocalDateString(day.date);
+    const tenantId   = this.currentUser?.tenant;
+    const dateStr    = this.toLocalDateString(day.date);
 
+    /* Kratka animacija „flip“ */
     day.animate = true;
-    setTimeout(() => day.animate = false, 500);
+    setTimeout(() => (day.animate = false), 500);
 
-    // Ako već ima istu smenu, briši
+    /* Ako ISTA smena već postoji → briši je */
     if (day.shift && day.shift.shiftType === this.activeShiftType) {
       day.shift = undefined;
-      this.wsService.deleteShiftByEmployeeDate(employeeId, dateStr, tenantId).subscribe();
+      this.wsService.deleteShiftByEmployeeDate(employeeId, dateStr, tenantId)
+        .subscribe();
       return;
     }
 
-    // Pronađi izabranu smenu iz shiftTypes
-    const selectedShift = this.shiftTypes.find(s => s.value === this.activeShiftType);
-
-    // Upsert sa kopiranim satnicama iz shiftTypes
+    /* Inače upsert nove smene */
+    const s = this.shiftTypes.find(t => t.value === this.activeShiftType);
     day.shift = { shiftType: this.activeShiftType };
+
     this.wsService.upsertShift({
       employeeId,
-      date: dateStr,
+      date     : dateStr,
       shiftType: this.activeShiftType,
-      startHour: selectedShift?.startHour ?? null,
-      endHour: selectedShift?.endHour ?? null,
-      tenantId
+      startHour: s?.startHour ?? null,
+      endHour  : s?.endHour   ?? null,
+      tenantId,
     }).subscribe();
   }
 
-  getWeekdayName(dayIndex: number): string {
-    const names = ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'];
-    return names[dayIndex];
+  /* ───────────────────────── Modal za detalj ──────────────────────── */
+
+  openEditDialogForDay(day: CalendarDay): void {
+    const ref = this.dialog.open(EditWorkingDayDialogComponent, {
+      width: '400px',
+      data : {
+        date      : day.date,
+        employeeId: this.form.value.employeeId,
+        shift     : day.shift ?? { shiftType: null, note: '' },
+        shiftTypes: this.shiftTypes,
+      },
+    });
+
+    ref.afterClosed().subscribe(res => {
+      if (!res) return;
+      day.shift = res.shiftType
+        ? { shiftType: res.shiftType, note: res.note }
+        : undefined;
+
+      this.snackBar.open('Radni dan izmenjen!', 'Zatvori', { duration: 2000 });
+    });
   }
 
-  getShiftType(value: string | undefined) {
-    return this.shiftTypes.find(t => t.value === value) || { label: '', color: '' };
-  }
+  /* ────────────────────── Uređivanje tipova smena ───────────────────── */
 
-  chosenMonthHandler(normalizedMonth: Date, datepicker: MatDatepicker<Date>) {
-    this.form.get('month')?.setValue(normalizedMonth);
-    this.weeks = []; // Resetuj kalendar odmah po izboru meseca
-    this.form.get('month')?.updateValueAndValidity(); // Forsiraj promenu
-    datepicker.close();
-  }
+  toggleEditShifts(): void { this.editShiftsMode = !this.editShiftsMode; }
 
-  toggleEditShifts() {
-    this.editShiftsMode = !this.editShiftsMode;
-  }
+  saveShift(): void {
+    if (this.shiftForm.invalid) return;
 
-  saveShift() {
-    if (this.shiftForm.invalid) { return; }
-
-    const tenantId = this.currentUser?.tenant;
-    const shift = { ...this.shiftForm.value, tenantId };
-
-    const req$ = this.editingShift
-        ? this.shiftsService.updateShift(this.editingShift._id, shift)
-        : this.shiftsService.createShift(shift);
+    const payload = { ...this.shiftForm.value, tenantId: this.currentUser?.tenant };
+    const req$    = this.editingShift
+      ? this.shiftsService.updateShift(this.editingShift._id, payload)
+      : this.shiftsService.createShift(payload);
 
     req$.subscribe(() => {
-        this.loadShifts();       // osveži listu
-        this.resetShiftForm();   // očisti polja + submitted state
+      this.loadShifts();   // refresh liste
+      this.resetShiftForm();
     });
   }
 
-  resetShiftForm() {
+  private resetShiftForm(): void {
     this.shiftFormDir.resetForm({
-      value: '',
-      label: '',
-      color: '#ffe082',
-      startHour: null,
-      endHour: null
+      value: '', label: '', color: '#ffe082', startHour: null, endHour: null,
     });
     this.editingShift = null;
   }
 
-  cancelEditShift() {
+  cancelEditShift(): void {
     this.editingShift = null;
-    this.shiftFormDir.resetForm({
-      color: '#ffe082'
-    });
+    this.shiftFormDir.resetForm({ color: '#ffe082' });
   }
 
-  editShift(shift: any) {
+  editShift(shift: any): void {
     this.editingShift = shift;
     this.shiftForm.patchValue(shift);
   }
 
-  deleteShift(shift: any) {
+  deleteShift(shift: any): void {
     this.shiftsService.deleteShift(shift._id).subscribe(() => this.loadShifts());
   }
 
-  formatTime(t: number): string {
-    if (t === 24) return '24:00';
-    return t % 1 === 0 ? `${t}:00` : `${Math.floor(t)}:30`;
-  }
-}
+  /* ────────────────────────── Helpers ───────────────────────── */
 
-function toLocalDateString(date: Date): string {
-  const year = date.getFullYear();
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const dayNum = date.getDate().toString().padStart(2, '0');
-  return `${year}-${month}-${dayNum}`;
+  /** Format hh:mm ili hh:30 */
+  formatTime(t: number): string {
+    return t === 24
+      ? '24:00'
+      : t % 1 === 0
+      ? `${t}:00`
+      : `${Math.floor(t)}:30`;
+  }
+
+  /** Naziv dana pon–ned (lokalizovano) */
+  getWeekdayName(i: number): string {
+    return ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'][i];
+  }
+
+  /** YYYY-MM-DD lokalni string (bez time-zone pomeranja) */
+  private toLocalDateString(d: Date): string {
+    return [
+      d.getFullYear(),
+      String(d.getMonth() + 1).padStart(2, '0'),
+      String(d.getDate()).padStart(2, '0'),
+    ].join('-');
+  }
+
+  /** Handle za datepicker: postavi mesec i resetuj kalendar */
+  chosenMonthHandler(month: Date, dp: MatDatepicker<Date>): void {
+    this.form.get('month')?.setValue(month);
+    this.weeks = [];
+    dp.close();
+  }
+
+  getShiftType(value?: string) {
+    return this.shiftTypes.find(t => t.value === value) ?? { label: '', color: '' };
+  }
 }

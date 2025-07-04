@@ -1,18 +1,40 @@
+/* ==============================================================
+   THEME TOKENS
+   ============================================================== */
+$clr-bg-dark:        #292929;
+$clr-bg-darker:      #232323;
+$clr-primary:        #b3006e;
+$clr-shadow-card:    rgba(0, 0, 0, .5);
+$clr-border:         #444;
+$clr-text-light:     #ccc;
+$clr-text-muted:     #aaa;
+
+/* ==============================================================
+   LAYOUT – GLOBAL
+   ============================================================== */
+
+.main-container {
+  display: block; // rezervisano za eventualni flex/grid parent
+}
+
+/* -------------------------------------------------- */
+/*  FORM (izbor zaposlenog + meseca)                  */
+/* -------------------------------------------------- */
 .shift-form-card {
   max-width: 900px;
-  margin: 50px auto 32px auto;
-  border-radius: 24px;
-  background: #292929;
-  box-shadow: 0 4px 24px #0008;
+  margin: 50px auto 32px;
   padding: 32px 24px;
+  border-radius: 24px;
+  background: $clr-bg-dark;
+  box-shadow: 0 4px 24px $clr-shadow-card;
 }
 
 .shift-form {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 30px;
   margin-top: 16px;
-  justify-content: center;
 }
 
 mat-form-field {
@@ -21,177 +43,154 @@ mat-form-field {
 }
 
 .title {
-  font-size: 1.5em;
-  font-weight: bold;
   display: flex;
   align-items: center;
   gap: 8px;
   margin-bottom: 24px;
-  color: #b3006e;
+  font: { size: 1.5em; weight: bold; }
+  color: $clr-primary;
 }
 
-/* Kalendarski prikaz */
+/* -------------------------------------------------- */
+/*  KALENDAR — WRAPPER KARTICA                        */
+/* -------------------------------------------------- */
 .calendar-card {
   max-width: 900px;
   margin: 30px auto;
 }
 
 .shift-schedule-card {
-  background: #292929;
-  border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 4px 24px #0008;
+  border-radius: 16px;
+  background: $clr-bg-dark;
+  box-shadow: 0 4px 24px $clr-shadow-card;
 }
 
 .schedule-title {
-  color: #b3006e;
   margin-bottom: 16px;
   text-align: center;
+  color: $clr-primary;
 }
 
+/* -------------------------------------------------- */
+/*  KALENDAR — TABELA                                 */
+/* -------------------------------------------------- */
 .calendar-table {
   width: 100%;
   border-collapse: collapse;
   text-align: center;
+
+  th,
+  td {
+    width: 14.28%;
+    padding: 8px;
+    border: 1px solid $clr-border;
+    vertical-align: top;
+    cursor: pointer;
+  }
+
+  td {
+    position: relative;
+    height: 80px;
+    transition: background .2s;
+    background: transparent;
+
+    &:hover               { background: rgba(255, 255, 255, .10); }
+    &:not(.filled):hover  { background: rgba(0, 0, 0, .08); }
+
+    &.filled {
+      /* boja dolazi inline iz komponente */
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .07);
+      border-radius: 12px;
+    }
+
+    &.rotate { animation: rotateColor .5s; }
+  }
 }
 
-.calendar-table th,
-.calendar-table td {
-  width: 14.28%;
-  border: 1px solid #444;
-  padding: 8px;
-  cursor: pointer;
-  vertical-align: top;
+/*  Animacija „flip“ pri kliku  */
+@keyframes rotateColor {
+  0%   { transform: rotateY(0);   filter: brightness(1.2); }
+  50%  { transform: rotateY(90deg); filter: brightness(1.5); }
+  100% { transform: rotateY(0);   filter: brightness(1); }
 }
 
-.calendar-table td {
-  height: 80px;
-  position: relative;
-  transition: background 0.2s;
-  background: transparent; // UKLONI !important !!!
-  cursor: pointer;
-}
-
-.calendar-table td:hover {
-  background: rgba(255, 255, 255, 0.1);
-}
-
-.calendar-table td.filled {
-  /* Pozadina se postavlja inline iz komponente */
-  box-shadow: 0 2px 8px 0 rgba(0, 0, 0, 0.07);
-  border-radius: 12px;
-  /* Ukloni background ovde */
-}
-
-.calendar-table td:not(.filled):hover {
-  background: rgba(0, 0, 0, 0.08) !important;
-}
-
+/*  Dan u ćeliji  */
 .day-cell {
   position: absolute;
-  top: 4px;
-  left: 4px;
-  right: 4px;
-  bottom: 4px;
+  inset: 4px;
   display: flex;
   flex-direction: column;
 }
 
 .date-number {
-  font-size: 0.9em;
-  color: #ccc;
+  font-size: .9em;
+  color: $clr-text-light;
+
+  &.shift-colored {
+    color: #222 !important;
+    font-weight: 600;
+  }
 }
 
-.date-number.shift-colored {
-  color: #222 !important; // ista boja kao shift-label
-  font-weight: 600;
-}
-
-.shift-info {
-  margin-top: auto;
-}
+.shift-info  { margin-top: auto; }
 
 .shift-label {
-  color: #222 !important; // Samo na labeli!
-  background: transparent !important;
-  font-weight: 600;
-  border-radius: 8px;
   padding: 2px 8px;
+  font-weight: 600;
+  color: #222 !important;
+  background: transparent !important;
 }
 
-.shift-note {
-  display: block;
-  font-size: 0.75em;
-  color: #aaa;
-}
-
-table {
-  width: 100%;
-  margin-top: 16px;
-}
-
-.calendar-table td.rotate {
-  animation: rotateColor 0.5s;
-}
-
-@keyframes rotateColor {
-  0% {
-    transform: rotateY(0deg);
-    filter: brightness(1.2);
-  }
-  50% {
-    transform: rotateY(90deg);
-    filter: brightness(1.5);
-  }
-  100% {
-    transform: rotateY(0deg);
-    filter: brightness(1);
-  }
-}
-
+/* -------------------------------------------------- */
+/*  EDIT - SHIFT TYPES                                */
+/* -------------------------------------------------- */
 .shifts-edit-container {
   display: flex;
   flex-direction: column;
-  gap: 32px;
   align-items: center;
-  margin: 24px 0 0 0;
+  gap: 32px;
+  margin-top: 24px;
 }
 
 .shifts-edit-form {
   width: 100%;
   max-width: 700px;
-  background: #232323;
+  padding: 24px 24px 16px;
   border-radius: 12px;
-  padding: 24px 24px 16px 24px;
-  box-shadow: 0 2px 12px #0004;
+  background: $clr-bg-darker;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
   display: flex;
   flex-direction: column;
-  gap: 16px;
   align-items: center;
+  gap: 16px;
 }
 
 .shifts-form-fields {
   display: flex;
   flex-wrap: wrap;
+  justify-content: center;
   gap: 24px;
   width: 100%;
-  justify-content: center;
 }
 
 .shifts-form-actions {
   display: flex;
-  gap: 16px;
   justify-content: center;
+  gap: 16px;
   margin-top: 8px;
 }
 
+/* -------------------------------------------------- */
+/*  SHIFT LIST (mat-list)                             */
+/* -------------------------------------------------- */
 .shifts-list-wrapper {
   width: 100%;
   max-width: 700px;
-  background: #232323;
-  border-radius: 12px;
   padding: 16px 24px;
-  box-shadow: 0 2px 12px #0004;
+  border-radius: 12px;
+  background: $clr-bg-darker;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, .25);
 }
 
 mat-list-item {
@@ -205,46 +204,35 @@ mat-list-item {
 .shift-dot {
   width: 24px;
   height: 24px;
-  border-radius: 50%;
-  display: inline-block;
   margin-right: 8px;
+  border-radius: 50%;
   border: 2px solid #fff2;
-  box-shadow: 0 1px 4px #0002;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, .12);
 }
 
 .shift-list-row {
   display: flex;
   align-items: center;
-  width: 100%;
   gap: 14px;
+  width: 100%;
 }
 
 .shift-list-label {
-  font-weight: 600;
-  font-size: 1.1em;
-  color: #fff;
   margin-right: 4px;
+  font: { size: 1.1em; weight: 600; }
+  color: #fff;
 }
 
 .shift-list-value {
-  color: #aaa;
-  font-size: 0.95em;
   margin-right: 8px;
+  font-size: .95em;
+  color: $clr-text-muted;
 }
 
 .shift-list-hours {
+  margin-right: 8px;
+  font-size: .95em;
   color: #bdbdbd;
-  font-size: 0.95em;
-  margin-right: 8px;
-}
-
-.shift-list-color {
-  width: 32px;
-  height: 12px;
-  border-radius: 6px;
-  display: inline-block;
-  margin-right: 8px;
-  border: 1px solid #fff2;
 }
 
 .shift-list-actions {
