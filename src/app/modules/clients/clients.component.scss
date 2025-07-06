@@ -5,8 +5,16 @@
     border-bottom-right-radius: 10px;
 
     mat-card-header {
-        background-color: #003ea8;
-        margin: 20px;
+        background: linear-gradient(60deg,
+                #f72585,
+                #7209b7,
+                #3a0ca3,
+                #4361ee,
+                #f72585);
+        background-size: 300% 300%;
+        animation: gradientPan 70s ease infinite;
+        padding: 1rem;
+        margin: 1rem;
         border-radius: 25px;
     }
 
