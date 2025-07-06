@@ -25,7 +25,7 @@ export const routes: Routes = [
         component: HomeComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_home',
+          scope: 'scope_home:access',
           title: 'Home',
           icon: 'home'
         }
@@ -35,7 +35,7 @@ export const routes: Routes = [
         component: AppoitmentsComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_appoitments',
+          scope: 'scope_appoitments:access',
           title: 'Appointments',
           icon: 'event'
         }
@@ -45,7 +45,7 @@ export const routes: Routes = [
         component: WorkingShiftsComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_working_shifts',
+          scope: 'scope_working_shifts:access',
           title: 'Working Shifts',
           icon: 'calendar_month'
         }
@@ -55,7 +55,7 @@ export const routes: Routes = [
         component: ClientsComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_clients',
+          scope: 'scope_clients:access',
           title: 'Clients',
           icon: 'people'
         }
@@ -64,7 +64,7 @@ export const routes: Routes = [
         component: ClientDetailViewComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_clients',
+          scope: 'scope_clients:access',
           title: 'Clients',
           icon: 'people'
         }
@@ -74,7 +74,7 @@ export const routes: Routes = [
         component: EmployeesComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_employees',
+          scope: 'scope_employees:access',
           title: 'Employees',
           icon: 'supervisor_account'
         }
@@ -84,7 +84,7 @@ export const routes: Routes = [
         component: UserAdministrationComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_user_administration',
+          scope: 'scope_user_administration:access',
           title: 'User Administration',
           icon: 'admin_panel_settings'
         }
@@ -94,7 +94,7 @@ export const routes: Routes = [
         component: ServicesComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_services',
+          scope: 'scope_services:access',
           title: 'Services',
           icon: 'content_cut'
         }
@@ -104,7 +104,7 @@ export const routes: Routes = [
         component: SettingsComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_settings',
+          scope: 'scope_settings:access',
           title: 'Settings',
           icon: 'settings'
         }

@@ -10,37 +10,37 @@
       <mat-icon>home</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_appoitments')" mat-icon-button matTooltip="Appointments"
+    <button *ngIf="authService.isModuleEnabled('scope_appoitments:access')" mat-icon-button matTooltip="Appointments"
       matTooltipPosition="below" routerLink="/appoitments" routerLinkActive="active" class="nav-btn">
       <mat-icon>event</mat-icon>
     </button>
 
-    <button mat-icon-button matTooltip="Working Shifts" matTooltipPosition="below" routerLink="/working-shifts"
+    <button *ngIf="authService.isModuleEnabled('scope_working_shifts:access')" mat-icon-button matTooltip="Working Shifts" matTooltipPosition="below" routerLink="/working-shifts"
       routerLinkActive="active" class="nav-btn">
       <mat-icon>calendar_month</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_clients')" mat-icon-button matTooltip="Clients"
+    <button *ngIf="authService.isModuleEnabled('scope_clients:access')" mat-icon-button matTooltip="Clients"
       matTooltipPosition="below" routerLink="/clients" routerLinkActive="active" class="nav-btn">
       <mat-icon>sentiment_very_satisfied</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_employees')" mat-icon-button matTooltip="Employees"
+    <button *ngIf="authService.isModuleEnabled('scope_employees:access')" mat-icon-button matTooltip="Employees"
       matTooltipPosition="below" routerLink="/employees" routerLinkActive="active" class="nav-btn">
       <mat-icon>supervisor_account</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_user_administration')" mat-icon-button matTooltip="User Administration"
+    <button *ngIf="authService.isModuleEnabled('scope_user_administration:access')" mat-icon-button matTooltip="User Administration"
       matTooltipPosition="below" routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
       <mat-icon>admin_panel_settings</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_services')" mat-icon-button matTooltip="Services"
+    <button *ngIf="authService.isModuleEnabled('scope_services:access')" mat-icon-button matTooltip="Services"
       matTooltipPosition="below" routerLink="/services" routerLinkActive="active" class="nav-btn">
       <mat-icon>content_cut</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_settings')" mat-icon-button matTooltip="Settings"
+    <button *ngIf="authService.isModuleEnabled('scope_settings:access')" mat-icon-button matTooltip="Settings"
       matTooltipPosition="below" routerLink="/settings" routerLinkActive="active" class="nav-btn">
       <mat-icon>settings</mat-icon>
     </button>

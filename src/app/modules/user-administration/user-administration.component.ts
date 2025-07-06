@@ -1,10 +1,21 @@
-import { AfterViewInit, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  OnInit,
+  QueryList,
+  ViewChild,
+  ViewChildren,
+} from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { UserAdministrationService } from './services/user-administration.service';
 import { User } from '../../models/User';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import { MatTable, MatTableDataSource, MatTableModule } from '@angular/material/table';
+import {
+  MatTable,
+  MatTableDataSource,
+  MatTableModule,
+} from '@angular/material/table';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatIconModule } from '@angular/material/icon';
@@ -21,13 +32,25 @@ import { EditUserDialogComponent } from './dialogs/edit-user-dialog/edit-user-di
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatChipsModule } from '@angular/material/chips';
 
-
 @Component({
   selector: 'app-user-administration',
   standalone: true,
-  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule, MatChipsModule, MatDividerModule, MatCardModule],
+  imports: [
+    FlexLayoutModule,
+    CommonModule,
+    MatPaginatorModule,
+    MatTableModule,
+    MatSortModule,
+    MatIconModule,
+    MatIconButton,
+    MatDividerModule,
+    MatSnackBarModule,
+    MatChipsModule,
+    MatDividerModule,
+    MatCardModule,
+  ],
   templateUrl: './user-administration.component.html',
-  styleUrl: './user-administration.component.scss'
+  styleUrl: './user-administration.component.scss',
 })
 export class UserAdministrationComponent implements OnInit, AfterViewInit {
   users: User[] = [];
@@ -36,10 +59,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   displayedColumnsUsers: string[] = ['name', 'email', 'role', 'actions'];
   dataSourceUsers = new MatTableDataSource<User>(this.users);
 
-  displayedColumnsRoles: string[] = [
-    'name',
-    'actions'
-  ];
+  displayedColumnsRoles: string[] = ['name', 'actions'];
   dataSourceRoles = new MatTableDataSource<Role>(this.roles);
 
   // Use @ViewChildren instead of @ViewChild to get multiple paginators
@@ -58,8 +78,13 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     }
   }
 
-
-  constructor(private userAdministrationService: UserAdministrationService, private authService: AuthService, private dialog: MatDialog, private userAdminService: UserAdministrationService, private snackBar: MatSnackBar) { }
+  constructor(
+    private userAdministrationService: UserAdministrationService,
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private userAdminService: UserAdministrationService,
+    private snackBar: MatSnackBar
+  ) { }
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
@@ -70,21 +95,21 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     // Učitavanje podataka sa API-ja
     this.userAdministrationService.fetchUsers(currentUser.tenant).subscribe({
       next: (data) => {
-        console.log("Users fetched:", data);
+        console.log('Users fetched:', data);
         this.dataSourceUsers.data = data;
       },
       error: (err) => {
-        console.error("Error fetching users:", err);
+        console.error('Error fetching users:', err);
       },
     });
 
-    this.userAdministrationService.fetchRoles().subscribe({
+    this.userAdministrationService.fetchRoles(this.authService.getCurrentUser()!.tenant).subscribe({
       next: (data) => {
-        console.log("Roles fetched:", data);
+        console.log('Roles fetched:', data);
         this.dataSourceRoles.data = data;
       },
       error: (err) => {
-        console.error("Error fetching roles:", err);
+        console.error('Error fetching roles:', err);
       },
     });
 
@@ -92,7 +117,6 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     this.userAdministrationService.users$.subscribe((data) => {
       this.users = data;
     });
-
 
     this.userAdministrationService.roles$.subscribe((data) => {
       this.roles = data;
@@ -111,7 +135,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
       width: '600px',
       height: '500px',
-      data: { role }
+      data: { role },
     });
 
     dialogRef.afterClosed().subscribe((updatedData) => {
@@ -119,7 +143,9 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
         this.userAdminService.updateRole(role._id!, updatedData).subscribe(
           (updatedRole) => {
             this.showSnackbar(`Role "${role.name}" updated successfully`);
-            this.dataSourceRoles.data = this.dataSourceRoles.data.map(r => r._id === updatedRole._id ? updatedRole : r);
+            this.dataSourceRoles.data = this.dataSourceRoles.data.map((r) =>
+              r._id === updatedRole._id ? updatedRole : r
+            );
           },
           (error) => {
             console.error('Error updating role:', error);
@@ -130,21 +156,21 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     });
   }
 
-
-
   openEditUserDialog(user: User) {
     const dialogRef = this.dialog.open(EditUserDialogComponent, {
       width: '600px',
       height: '500px',
-      data: { user }
-    })
+      data: { user },
+    });
 
     dialogRef.afterClosed().subscribe((updatedData) => {
       if (updatedData) {
         this.userAdminService.updateUser(user._id!, updatedData).subscribe(
           (updatedUser) => {
             this.showSnackbar(`User "${user.name}" updated successfully`);
-            this.dataSourceUsers.data = this.dataSourceUsers.data.map(u => u._id === updatedUser._id ? updatedUser : u);
+            this.dataSourceUsers.data = this.dataSourceUsers.data.map((u) =>
+              u._id === updatedUser._id ? updatedUser : u
+            );
           },
           (error) => {
             console.error('Error updating user:', error);
@@ -159,7 +185,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(AddRoleDialogComponent, {
       width: '600px',
       height: '500px',
-    })
+    });
 
     dialogRef.afterClosed().subscribe((role: Role | undefined) => {
       if (role) {
@@ -201,47 +227,53 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     });
   }
 
-
   deleteUser(user: User) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
-      data: user.name
+      data: user.name,
     });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         this.userAdministrationService.deleteUser(user._id!).subscribe({
           next: () => {
-            this.dataSourceUsers.data = this.dataSourceUsers.data.filter(u => u._id !== user._id);
+            this.dataSourceUsers.data = this.dataSourceUsers.data.filter(
+              (u) => u._id !== user._id
+            );
             this.showSnackbar(`User "${user.name}" deleted successfully`);
           },
           error: (err) => {
             this.showSnackbar('Failed to delete user', true);
-          }
+          },
         });
       }
     });
   }
 
-
   deleteRole(selectedRole: Role) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
-    })
+    });
 
-    dialogRef.afterClosed().subscribe(result => {
+    dialogRef.afterClosed().subscribe((result) => {
       if (result) {
-        this.userAdministrationService.deleteRole(selectedRole!._id!).subscribe({
-          next: () => {
-            this.dataSourceRoles.data = this.dataSourceRoles.data.filter(r => r._id !== selectedRole!._id);
-            this.showSnackbar(`Role "${selectedRole!.name}" deleted successfully`);
-          },
-          error: (err) => {
-            this.showSnackbar('Failed to delete role', true);
-          }
-        });
+        this.userAdministrationService
+          .deleteRole(selectedRole!._id!)
+          .subscribe({
+            next: () => {
+              this.dataSourceRoles.data = this.dataSourceRoles.data.filter(
+                (r) => r._id !== selectedRole!._id
+              );
+              this.showSnackbar(
+                `Role "${selectedRole!.name}" deleted successfully`
+              );
+            },
+            error: (err) => {
+              this.showSnackbar('Failed to delete role', true);
+            },
+          });
       }
     });
   }
@@ -251,10 +283,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       duration: 3000, // 3 seconds
       horizontalPosition: 'center',
       verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'], // Ensure it's an array
     });
   }
-
-
-
 }

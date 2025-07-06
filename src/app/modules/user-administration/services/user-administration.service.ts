@@ -1,4 +1,4 @@
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Injectable } from "@angular/core";
 import { environment } from "../../../../environments/environment";
 import { User } from "../../../models/User";
@@ -30,13 +30,15 @@ export class UserAdministrationService {
         );
     }
 
-    fetchRoles(): Observable<Role[]> {
+    fetchRoles(tenant: string): Observable<Role[]> {
         if(this.rolesSubject.value.length > 0 ) {
             console.log('RETURNING CACHED ROLES');
             return this.roles$;
         }
 
-        return this.http.get<Role[]>(`${this.apiUrl}/roles`).pipe(
+        const params = new HttpParams().set('tenant', tenant);
+
+        return this.http.get<Role[]>(`${this.apiUrl}/roles`, {params}).pipe(
             tap((roles) => this.rolesSubject.next(roles)) // Čuvanje podataka u BehaviorSubject
         );
     }
