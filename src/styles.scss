@@ -2,7 +2,7 @@
 @import "app/themes/themestheme.css";
 
 
-.main-container{
+.main-container {
   color: white;
   // height: calc(100vh - 20px);
   min-height: calc(100vh - 64px);
@@ -27,7 +27,7 @@ body {
   background-color: #4caf50 !important;
   color: white !important;
 }
-  
+
 ::ng-deep .snackbar-error {
   background-color: #f44336 !important;
   color: white !important;
@@ -43,3 +43,63 @@ body {
   align-items: center;
   padding-right: 25px;
 }
+
+.dialog-container {
+  background-color: #303030;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  h2 {
+    background: linear-gradient(60deg,
+        #f72585,
+        #7209b7,
+        #3a0ca3,
+        #4361ee,
+        #4cc9f0,
+        #f72585);
+    background-size: 300% 300%;
+    animation: gradientPan 15s ease infinite;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 25px;
+    text-align: center;
+
+    span {
+      color: white;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      font-weight: bold;
+    }
+  }
+
+  form {
+    padding: 25px !important;
+  }
+
+  .mat-dialog-buttons {
+    button {
+      width: 200px;
+      transition: 0.2s ease-in-out;
+      color: white !important;
+    }
+
+    button:hover {
+      transform: scale(1.05);
+      background-color: #8c0055;
+    }
+  }
+}
+
+@keyframes gradientPan {
+    0% {
+      background-position: 0% 50%;
+    }
+
+    50% {
+      background-position: 100% 50%;
+    }
+
+    100% {
+      background-position: 0% 50%;
+    }
+  }

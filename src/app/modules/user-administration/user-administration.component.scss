@@ -8,20 +8,20 @@
 }
 
 
-.component-title > .mat-icon {
+.component-title>.mat-icon {
     margin-right: 10px;
     height: 50px;
     width: 50px;
     font-size: 50px;
 }
 
-.table-wrapper > mat-paginator {
+.table-wrapper>mat-paginator {
     background-color: #232323;
 }
 
 .mat-table-container {
-    flex-grow: 1; /* Ensures table takes up available space */
-    min-height: 300px; /* Adjust based on your layout */
+    flex-grow: 1;
+    min-height: 300px;
 }
 
 
@@ -53,17 +53,28 @@ mat-card {
     }
 
     mat-card-header {
-        background-color: #003ea8;
-        margin: 20px;
+        background: linear-gradient(60deg,
+                #f72585,
+                #7209b7,
+                #3a0ca3,
+                #4361ee,
+                #4cc9f0,
+                #f72585);
+        background-size: 300% 300%;
+        animation: gradientPan 70s ease infinite;
+        padding: 1rem;
+        margin: 1rem;
         border-radius: 25px;
     }
+
+
 
     .table-wrapper {
         display: flex;
         flex-direction: column;
-        justify-content: space-between; /* Push table to top, paginator to bottom */
-        min-height: 450px; /* Ensure table wrapper has enough height */
-        border: 5px solid #ff0066; /* Matches your design */
+        justify-content: space-between;
+        min-height: 450px;
+        border: 5px solid #ff0066;
         padding: 6px;
         border-radius: 25px;
         background-color: #232323;
@@ -79,15 +90,14 @@ mat-paginator {
 }
 
 .mat-column-actions {
-    text-align: right; /* Align text and buttons to the right */
+    text-align: right;
 }
 
 
 .custom-row {
     height: 80px;
+
     td {
         border-bottom: 1px solid #ffffff;
     }
 }
-
-

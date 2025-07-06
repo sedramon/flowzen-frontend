@@ -1,73 +1,178 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import { Component, Inject } from '@angular/core';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldControl, MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { Component, Inject, OnInit } from '@angular/core';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { Scope } from '../../../../models/Scope';
-import { ScopeService } from '../../../../core/services/scope.service';
+import { MatCheckboxModule } from '@angular/material/checkbox';
+import { MatInputModule } from '@angular/material/input';
+import { MatButtonModule } from '@angular/material/button';
+import {
+  MatDialogModule,
+  MAT_DIALOG_DATA,
+  MatDialogRef,
+} from '@angular/material/dialog';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { ScopeService } from '../../../../core/services/scope.service';
+import { MatIconModule } from '@angular/material/icon';
+import { MatCard, MatCardModule } from '@angular/material/card';
+import { MatToolbarModule } from '@angular/material/toolbar';
 
 @Component({
   selector: 'app-edit-role-dialog',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, MatSelectModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatInputModule, FlexLayoutModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatFormFieldModule,
+    MatSelectModule,
+    MatCheckboxModule,
+    MatInputModule,
+    MatButtonModule,
+    MatDialogModule,
+    FlexLayoutModule,
+    MatIconModule,
+    MatCardModule,
+    MatToolbarModule,
+  ],
   templateUrl: './edit-role-dialog.component.html',
-  styleUrl: './edit-role-dialog.component.scss'
+  styleUrls: ['./edit-role-dialog.component.scss'],
 })
-export class EditRoleDialogComponent {
+export class EditRoleDialogComponent implements OnInit {
+  /** The reactive form */
   roleForm = new FormGroup({
-    name: new FormControl<string>('', [Validators.required]),
-    availableScopes: new FormControl<string[]>([], [Validators.required]) // Ensure it's an array
+    name: new FormControl<string>('', Validators.required),
+    entity: new FormControl<string>('', Validators.required),
+    actions: new FormGroup({
+      access: new FormControl<boolean>(false),
+      read: new FormControl<boolean>(false),
+      create: new FormControl<boolean>(false),
+      update: new FormControl<boolean>(false),
+      delete: new FormControl<boolean>(false),
+    }),
   });
 
-  allScopes: any[] = []; // Holds all available scopes
+  allScopes: any[] = [];
+  scopeGroups: Record<string, Record<string, string>> = {};
+  uniqueEntities: string[] = [];
+
+  existingScopeIds: string[] = [];
 
   constructor(
     public dialogRef: MatDialogRef<EditRoleDialogComponent>,
-    private http: HttpClient,
     private scopeService: ScopeService,
-    @Inject(MAT_DIALOG_DATA) public data: any
-  ) {
-    this.roleForm = new FormGroup({
-      name: new FormControl<string>(data.role.name || ''), // Ensure non-null name
-      availableScopes: new FormControl<string[]>([]) // Initialize empty until scopes load
-    });
+    @Inject(MAT_DIALOG_DATA) public data: { role: any }
+  ) {}
 
-    this.getAllScopes();
-  }
+  ngOnInit(): void {
+    this.roleForm.controls.name.setValue(this.data.role.name || '');
 
-  getAllScopes() {
-    this.scopeService.fetchScopes().subscribe(
-      (scopes) => {
+    this.scopeService.fetchScopes().subscribe({
+      next: (scopes) => {
         this.allScopes = scopes;
+        this.groupScopes();
+        this.existingScopeIds = this.normalizeIds(
+          this.data.role.availableScopes
+        );
 
-        // Set the selected scopes after loading all scopes
-        const selectedScopeIds = this.data.role.availableScopes.map((s: any) => s._id);
-        this.roleForm.controls.availableScopes.setValue(selectedScopeIds);
+        this.prefillFromExisting();
+
+        this.roleForm.controls.entity.valueChanges.subscribe((entity) =>
+          this.populateActionsFor(entity!)
+        );
       },
-      (error) => {
-        console.error('Error fetching scopes:', error);
-      }
+      error: (err) => console.error(err),
+    });
+  }
+
+  get availableActions(): string[] {
+    const entity = this.roleForm.controls.entity.value;
+    return entity && this.scopeGroups[entity]
+      ? Object.keys(this.scopeGroups[entity])
+      : [];
+  }
+
+  private normalizeIds(raw: any[]): string[] {
+    return raw
+      .map((s) => {
+        if (!s._id) return null;
+        if (typeof s._id === 'string') return s._id;
+        if (typeof s._id === 'object' && '$oid' in s._id) return s._id.$oid;
+        if (typeof s._id.toString === 'function') return s._id.toString();
+        return null;
+      })
+      .filter((x): x is string => !!x);
+  }
+
+  private groupScopes() {
+    this.scopeGroups = {};
+    for (const s of this.allScopes) {
+      const m = s.name.match(/^scope_(\w+):(\w+)$/);
+      if (!m) continue;
+      const [, entity, action] = m;
+      this.scopeGroups[entity] ||= {};
+      this.scopeGroups[entity][action] = s._id;
+    }
+    this.uniqueEntities = Object.keys(this.scopeGroups);
+  }
+
+  private prefillFromExisting() {
+    for (const entity of this.uniqueEntities) {
+      const actionsMap = this.scopeGroups[entity];
+      if (
+        !Object.values(actionsMap).some((id) =>
+          this.existingScopeIds.includes(id)
+        )
+      )
+        continue;
+
+      this.roleForm.controls.entity.setValue(entity);
+      this.populateActionsFor(entity);
+      break;
+    }
+  }
+
+  private populateActionsFor(entity: string) {
+    const grp = this.roleForm.controls.actions as FormGroup;
+    for (const action of Object.keys(grp.controls)) {
+      const scopeId = this.scopeGroups[entity]?.[action] ?? null;
+      grp.controls[action].setValue(
+        !!scopeId && this.existingScopeIds.includes(scopeId)
+      );
+    }
+  }
+
+  save(): void {
+    const entity = this.roleForm.controls.entity.value!;
+    const actions = (this.roleForm.controls.actions as FormGroup)
+      .value as Record<string, boolean>;
+
+    const selectedForModule: string[] = [];
+    for (const [action, checked] of Object.entries(actions)) {
+      const id = this.scopeGroups[entity]?.[action];
+      if (checked && id) selectedForModule.push(id);
+    }
+
+    const allForModule = Object.values(this.scopeGroups[entity] || {});
+
+    const filtered = this.existingScopeIds.filter(
+      (id) => !allForModule.includes(id)
     );
+
+    const updatedFullIds = [...filtered, ...selectedForModule];
+
+    this.dialogRef.close({
+      name: this.roleForm.controls.name.value,
+      availableScopes: updatedFullIds,
+      tenant: this.data.role.tenant,
+    });
   }
 
-  updateRole() {
-    const updatedData = {
-      name: this.roleForm.get('name')?.value || '',
-      availableScopes: this.roleForm.get('availableScopes')?.value || [],
-      tenant: this.data.role.tenant
-    };
-  
-    // Close the dialog and pass the updated role data back to the parent component
-    this.dialogRef.close(updatedData);
-  }
-  
-
-  closeDialog() {
+  cancel(): void {
     this.dialogRef.close();
   }
 }

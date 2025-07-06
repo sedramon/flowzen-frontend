@@ -133,13 +133,16 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openEditRoleDialog(role: Role) {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
-      width: '600px',
-      height: '500px',
+      width: '800px',
+      height: '600px',
       data: { role },
     });
 
+    
+
     dialogRef.afterClosed().subscribe((updatedData) => {
       if (updatedData) {
+        console.log('Role to edit:', updatedData);
         this.userAdminService.updateRole(role._id!, updatedData).subscribe(
           (updatedRole) => {
             this.showSnackbar(`Role "${role.name}" updated successfully`);
@@ -207,7 +210,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
   openAddUserDialog() {
     const dialogRef = this.dialog.open(AddUserDialogComponent, {
       width: '600px',
-      height: '500px',
+      height: '600px',
     });
 
     dialogRef.afterClosed().subscribe((user: User | undefined) => {

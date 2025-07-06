@@ -1,4 +1,5 @@
-<h2 mat-dialog-title>Add Role</h2>
+<div class="dialog-container">
+  <h2 mat-dialog-title>Add Role</h2>
 <div mat-dialog-content style="padding: 20px;">
 
   <!-- Role Name Input -->
@@ -20,8 +21,10 @@
   </mat-form-field>
 
 </div>
-<div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+<div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
   
   <button mat-raised-button color="primary" (click)="createRole()" [disabled]="roleForm.invalid">Save</button>
   <button mat-raised-button (click)="closeDialog()">Cancel</button>
 </div>
+</div>
+
