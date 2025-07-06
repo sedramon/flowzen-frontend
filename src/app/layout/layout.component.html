@@ -5,7 +5,7 @@
     <span class="app-title">Flowzen</span>
 
     
-    <button *ngIf="authService.isModuleEnabled('scope_home')" mat-icon-button matTooltip="Home" matTooltipPosition="below"
+    <button *ngIf="authService.isModuleEnabled('scope_home:access')" mat-icon-button matTooltip="Home" matTooltipPosition="below"
       routerLink="/home" routerLinkActive="active" class="nav-btn">
       <mat-icon>home</mat-icon>
     </button>
