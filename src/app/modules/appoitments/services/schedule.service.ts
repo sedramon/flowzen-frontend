@@ -44,11 +44,17 @@ export class ScheduleService {
   }
 
   createAppointment(appointment: Appointment) {
-    return this.http.post(`${this.apiUrl}/appointments`, appointment);
+    return this.http.post(`${this.apiUrl}/appointments`, {
+      ...appointment,
+      tenantId: this.tenantId
+    });
   }
 
   updateAppointment(id: string, appointment: Appointment) {
-    return this.http.put(`${this.apiUrl}/appointments/${id}`, appointment);
+    return this.http.put(`${this.apiUrl}/appointments/${id}`, {
+      ...appointment,
+      tenantId: this.tenantId
+    });
   }
 
   deleteAppointment(id: string): Observable<void> {
@@ -56,7 +62,9 @@ export class ScheduleService {
   }
 
   getAllAppoitements(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/appointments`);
+    return this.http.get<any[]>(`${this.apiUrl}/appointments`, {
+      params: { tenantId: this.tenantId }
+    });
   }
 
   getScheduleSimple(date: Date): Observable<ScheduleData> {
