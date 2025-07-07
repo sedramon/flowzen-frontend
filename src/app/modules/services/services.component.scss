@@ -1,8 +1,8 @@
 .services-table {
-    box-shadow: black 5px 5px 5px;
-    background-color: #303030;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
+    background-color: #2b2b2b;
+    border-radius: 12px;
+
 
     mat-card-header {
         background: linear-gradient(60deg,
@@ -18,21 +18,26 @@
         border-radius: 25px;
     }
 
+    mat-card {
+        height: 100%;
+    }
+
     mat-card-title {
-        text-align: start;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
         margin-bottom: 10px;
-        font-weight: bold;
-        font-size: 25px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+
+        mat-icon {
+            margin-right: 10px;
+        }
     }
 
     mat-card-subtitle {
         margin-bottom: 10px;
-        font-weight: bold;
-        font-size: large;
+        font-size: 0.9rem;
+        opacity: 0.8;
     }
 
     .custom-row,
@@ -47,18 +52,21 @@
 }
 
 .filter-column>mat-card {
-    box-shadow: black 5px 5px 5px;
-    background-color: #303030;
-    margin-right: 20px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
+    background-color: #2b2b2b;
+    border-radius: 12px;
     height: 100%;
 
     mat-card-title {
-        text-align: start;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
         margin-bottom: 10px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+
+        mat-icon {
+            margin-right: 10px;
+        }
     }
 }
 
@@ -66,11 +74,8 @@
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    min-height: 50vh;
-    border: 5px solid #ff0066;
-    padding: 6px;
-    border-radius: 25px;
-    background-color: #232323;
+    background-color: transparent;
+    height: 100%; 
 
 
     table {
@@ -78,16 +83,21 @@
     }
 
     mat-paginator {
-        background-color: #232323;
+        background-color: transparent;
     }
 }
 
 .table-card {
-    padding: 10px;
     margin: 20px;
-    border-radius: 25px;
-    box-shadow: #1c1c1c 5px 5px 5px 5px;
-    background-color: #303030;
+    height: 100%;
+    padding: 0px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
+    background-color: #2b2b2b;
+}
+
+.table-container {
+  flex: 1 1 auto;
+  overflow: auto;
 }
 
 .custom-row {
@@ -95,10 +105,31 @@
 
     td {
         border-bottom: 1px solid #ffffff;
+    }
 
+    td.mat-cell {
+        padding: 16px;
+        border-bottom: none;
+    }
+
+    &:nth-child(odd) {
+        background-color: rgba(255, 255, 255, 0.02);
+    }
+
+    &:hover {
+        background-color: rgba(255, 255, 255, 0.05);
     }
 }
 
 .custom-header-row {
-    font-weight: bold;
+    background-color: #333;
+    color: white;
+    font-weight: 600;
+    padding: 16px;
+    border-bottom: none;
+}
+
+.bottom-paginator {
+  margin-top: auto;
+  align-self: flex-end;
 }

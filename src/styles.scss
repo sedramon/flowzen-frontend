@@ -2,19 +2,26 @@
 @import "app/themes/themestheme.css";
 
 
+
+
+
 .main-container {
+  width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
+
   color: white;
-  // height: calc(100vh - 20px);
   min-height: calc(100vh - 64px);
   overflow: hidden;
   text-align: center;
-  flex-direction: column;
-  padding: 0px;
+  padding: 25px;
   background-color: #232323;
 }
 
+
 body {
   font-family: 'Roboto', Arial, sans-serif;
+  background-color: var(--mat-sys-background);
   padding: 0px;
   margin: 0;
 }
@@ -90,15 +97,15 @@ body {
 }
 
 @keyframes gradientPan {
-    0% {
-      background-position: 0% 50%;
-    }
-
-    50% {
-      background-position: 100% 50%;
-    }
-
-    100% {
-      background-position: 0% 50%;
-    }
+  0% {
+    background-position: 0% 50%;
   }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}

@@ -62,7 +62,7 @@
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers" class="custom-header-row"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers" class="custom-row"></tr>
           </table>
         </div>
@@ -119,7 +119,7 @@
               </td>
             </ng-container>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles"></tr>
+            <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles" class="custom-header-row"></tr>
             <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles" class="custom-row"></tr>
           </table>
         </div>

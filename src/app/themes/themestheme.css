@@ -35,7 +35,7 @@ html {
   --mat-sys-on-tertiary-fixed-variant: light-dark(#004f51, #004f51);
 
   /* Neutral palette variables */
-  --mat-sys-background: light-dark(#fcf9f8, #232323);
+  --mat-sys-background: #232323;
   --mat-sys-on-background: light-dark(#1b1c1c, #ffffff);
   --mat-sys-surface: light-dark(#fcf9f8, #181818);
   --mat-sys-surface-dim: light-dark(#dcd9d9, #181818);

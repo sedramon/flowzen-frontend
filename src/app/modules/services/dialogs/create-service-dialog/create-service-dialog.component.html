@@ -1,8 +1,8 @@
 <!-- features/services/create-service-dialog/create-service-dialog.component.html -->
 <div class="dialog-container" fxLayout="column">
-  <div mat-dialog-title>
+  <h2 mat-dialog-title>
     {{ isEditMode ? 'Edit Service' : 'Create Service' }}
-  </div>
+  </h2>
 
   <div mat-dialog-content style="padding: 20px">
     <form [formGroup]="serviceForm" fxLayout="column" fxLayoutGap="16px">
@@ -50,7 +50,7 @@
     </form>
   </div>
 
-  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" style="padding: 8px 24px">
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
     <button
       mat-raised-button
       color="primary"
