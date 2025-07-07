@@ -1,4 +1,5 @@
 <div class="dialog-container" fxLayout="column">
+  <h2>Add Employee</h2>
   <div class="dialog-content">
     <div mat-dialog-content #dialogContent style="padding: 20px;">
       <div style="display: flex; align-items: center;">
@@ -87,31 +88,10 @@
       </mat-form-field>
       </div>
   
-      <!-- Working Days Input -->
-      <mat-form-field appearance="outline" style="width: 50%">
-        <mat-label>Add Working Day</mat-label>
-        <input
-          matInput
-          [matDatepicker]="workingDayPicker"
-          [formControl]="workingDayControl"
-          placeholder="Choose a date"
-          (dateChange)="addWorkingDay($event.value)"
-        >
-        <mat-datepicker-toggle matSuffix [for]="workingDayPicker"></mat-datepicker-toggle>
-        <mat-datepicker #workingDayPicker></mat-datepicker>
-      </mat-form-field>
-  
-      <mat-chip-listbox >
-        <mat-chip *ngFor="let day of employeeForm.controls['workingDays'].value; let i = index" (removed)="removeWorkingDay(i)">
-          {{ day }}
-          <button matChipRemove>
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-      </mat-chip-listbox>
+
     </div>
   </div>
-  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center">
+  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
     <button mat-raised-button color="primary" (click)="createEmployee()" [disabled]="employeeForm.invalid">Create</button>
     <button mat-raised-button (click)="closeDialog()">Cancel</button>
   </div>

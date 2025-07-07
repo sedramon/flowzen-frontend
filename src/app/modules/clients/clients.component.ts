@@ -1,13 +1,14 @@
 import {
   AfterViewInit,
   Component,
+  OnDestroy,
   OnInit,
   QueryList,
   ViewChild,
   ViewChildren,
 } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { Observable, of } from 'rxjs';
+import { Observable, of, Subscription, tap } from 'rxjs';
 import { Client } from '../../models/Client';
 import { ClientsService } from './services/clients.service';
 import { MatDialog } from '@angular/material/dialog';
@@ -22,16 +23,20 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import {
-  MatFormFieldModule    
-} from '@angular/material/form-field';
-import { MatOption } from '@angular/material/core';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatOption, provideNativeDateAdapter } from '@angular/material/core';
 import { MatSelectModule } from '@angular/material/select';
 import { MatInputModule } from '@angular/material/input';
 import { CreateClientDialogComponent } from './dialogs/create-client-dialog/create-client-dialog.component';
 import { Router } from '@angular/router';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
+import { PagedResponse } from '../../models/PagedResponse';
+import {
+  MatDatepicker,
+  MatDatepickerModule,
+  MatDateRangePicker,
+} from '@angular/material/datepicker';
 
 @Component({
   selector: 'app-clients',
@@ -55,11 +60,13 @@ import { AuthService } from '../../core/services/auth.service';
     MatButtonModule,
     FormsModule,
     ReactiveFormsModule,
+    MatDatepickerModule,
   ],
+  providers: [provideNativeDateAdapter()],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.scss',
 })
-export class ClientsComponent implements OnInit, AfterViewInit {
+export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSourceClients = new MatTableDataSource<Client>([]);
   displayedColumnsClients: string[] = [
     'firstName',
@@ -70,17 +77,26 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     'updatedAt',
     'actions',
   ];
-  selectedStatus: string = '';
 
+  sortBy: string = '';
+  sortDir: 'asc' | 'desc' = 'desc';
+
+  sortOptions = [
+    { value: 'firstName', view: 'First Name' },
+    { value: 'lastName', view: 'Last Name' },
+    { value: 'createdAt', view: 'Created At' },
+    { value: 'updatedAt', view: 'Updated At' },
+  ];
+
+  totalItems = 0;
   searchQuery = '';
+  createdFrom?: Date;
+  createdTo?: Date;
 
-  @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-  @ViewChild('clientSort')
-  set clientSort(ms: MatSort) {
-    if (ms) {
-      this.dataSourceClients.sort = ms;
-    }
-  }
+  private tenantId!: string;
+  private subs = new Subscription();
+
+  @ViewChild(MatPaginator) paginator!: MatPaginator;
 
   constructor(
     private clientsService: ClientsService,
@@ -90,46 +106,69 @@ export class ClientsComponent implements OnInit, AfterViewInit {
     private authService: AuthService
   ) {}
 
-  ngOnInit(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) {
-      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
-      return;
-    }
-
-    this.clientsService
-      .getAllClients(currentUser.tenant)
-      .subscribe((clients) => {
-        this.dataSourceClients.data = clients;
-
-        // set up combined search+status filter
-        this.dataSourceClients.filterPredicate = (data: Client) => {
-          const matchesName =
-            data.firstName
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase()) ||
-            data.lastName
-              .toLowerCase()
-              .includes(this.searchQuery.toLowerCase());
-
-          return matchesName;
-        };
-      });
+  ngOnInit() {
+    const user = this.authService.getCurrentUser();
+    if (!user) return;
+    this.tenantId = user.tenant;
   }
 
   ngAfterViewInit() {
-    if (this.paginators.length) {
-      this.dataSourceClients.paginator = this.paginators.first;
-    }
+    // paginator
+    this.subs.add(
+      this.paginator.page.pipe(tap(() => this.loadPage())).subscribe()
+    );
+
+    // initial load
+    this.loadPage();
   }
 
-  applyFilter() {
-    this.dataSourceClients.filter = '' + Math.random();
+  ngOnDestroy() {
+    this.subs.unsubscribe();
+  }
+
+  loadPage() {
+  const page  = this.paginator.pageIndex + 1;
+  const limit = this.paginator.pageSize || 25;
+
+  this.clientsService
+    .getClients(
+      this.tenantId,
+      this.searchQuery,
+      page,
+      limit,
+      this.sortBy,     // send from dropdown
+      this.sortDir,    // send from dropdown
+      this.createdFrom,
+      this.createdTo
+    )
+    .subscribe(({ data, total }) => {
+      this.dataSourceClients.data = data;
+      this.totalItems             = total;
+    });
+}
+
+  onSearchClick() {
+    this.paginator.firstPage();
+    this.loadPage();
+  }
+  onDateRangeChange(from: Date | null, to: Date | null) {
+    this.createdFrom = from ?? undefined;
+    this.createdTo = to ?? undefined;
+    this.paginator.firstPage();
+    this.loadPage();
+  }
+
+  onSortChange() {
+    this.paginator.firstPage();
+    this.loadPage();
   }
 
   clearFilters() {
     this.searchQuery = '';
-    this.applyFilter();
+    this.createdFrom = undefined;
+    this.createdTo = undefined;
+    this.paginator.firstPage();
+    this.loadPage();
   }
 
   // stub methods for dialogs/actions
@@ -158,8 +197,6 @@ export class ClientsComponent implements OnInit, AfterViewInit {
       }
     });
   }
-
-
 
   deleteClient(id: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {

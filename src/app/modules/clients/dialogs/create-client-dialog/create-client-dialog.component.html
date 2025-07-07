@@ -1,5 +1,5 @@
 <div class="dialog-container" fxLayout="column">
-    <div mat-dialog-title>Create Client</div>
+    <h2 mat-dialog-title>Create Client</h2>
     <div mat-dialog-content style="padding: 20px">
         <div fxLayout="row" fxLayoutAlign="space-between center">
             <!-- Name Input -->
@@ -48,7 +48,7 @@
                 </mat-form-field>
             </div>
     </div>
-    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
     <button mat-raised-button (click)="createClient()" [disabled]="clientForm.invalid">Create</button>
     <button mat-raised-button style="background-color: red; color: black;" (click)="closeDialog()">Cancel</button>
   </div>

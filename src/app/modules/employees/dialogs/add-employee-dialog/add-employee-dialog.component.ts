@@ -133,36 +133,7 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     }
   }
 
-  addWorkingDay(date: Date | null) {
-    if (!date) return;
-    const iso = date.getFullYear() + '-' +
-      String(date.getMonth() + 1).padStart(2, '0') + '-' +
-      String(date.getDate()).padStart(2, '0');
-    const current = this.employeeForm.controls['workingDays'].value || [];
-    if (!current.includes(iso)) {
-      this.employeeForm.controls['workingDays'].setValue([...current, iso]);
-    }
-    this.workingDayControl.setValue(null);
-    setTimeout(() => this.scrollToBottom(), 0);
-  }
 
-  removeWorkingDay(index: number) {
-    const current = this.employeeForm.controls['workingDays'].value || [];
-    current.splice(index, 1);
-    this.employeeForm.controls['workingDays'].setValue([...current]);
-  }
-
-  dateClass = (d: Date) => {
-    // Formate like 'YYYY-MM-DD'
-    const date =
-      d.getFullYear() +
-      '-' +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(d.getDate()).padStart(2, '0');
-    const selected = this.employeeForm.controls['workingDays'].value || [];
-    return selected.includes(date) ? 'selected-working-day' : '';
-  };
 
   private scrollToBottom() {
     if (this.dialogContent) {

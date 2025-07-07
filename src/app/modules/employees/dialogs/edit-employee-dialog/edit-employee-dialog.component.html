@@ -1,4 +1,5 @@
 <div class="dialog-container" fxLayout="column">
+  <h2>Edit Employee</h2>
   <div class="dialog-content" #dialogContent>
     <div style="padding: 20px;">
       <!-- User Image -->
@@ -107,60 +108,11 @@
         </mat-form-field>
       </div>
 
-      <div fxLayout="row" fxLayoutAlign="space-between baseline">
-      <!-- Working Days Input -->
-        <mat-form-field appearance="outline" style="width: 50%">
-          <mat-label>Add Working Day</mat-label>
-          <input
-            matInput
-            [matDatepicker]="workingDayPicker"
-            [formControl]="workingDayControl"
-            placeholder="Choose a date"
-            (dateChange)="addWorkingDay($event.value)"
-          >
-          <mat-datepicker-toggle matSuffix [for]="workingDayPicker"></mat-datepicker-toggle>
-          <mat-datepicker #workingDayPicker [dateClass]="dateClass"></mat-datepicker>
-        </mat-form-field>
-
-        <div style="margin-top: 24px;">
-          <button mat-stroked-button color="primary" (click)="toggleMonthPicker()">
-            <mat-icon>calendar_month</mat-icon>
-            Dodaj ceo mesec
-          </button>
-          <!-- Hidden input for month picker -->
-          <input
-            matInput
-            [matDatepicker]="monthPicker"
-            style="display: none"
-            readonly
-          >
-        </div>
-      </div>
-
-
-      <mat-datepicker
-        #monthPicker
-        startView="multi-year"
-        (monthSelected)="onMonthSelected($event, monthPicker)"
-        panelClass="month-picker"
-        [startAt]="today"
-        [startView]="'year'"
-        [touchUi]="true">
-      </mat-datepicker>
-
-      <mat-chip-listbox>
-        <mat-chip *ngFor="let day of employeeForm.controls['workingDays'].value; let i = index" (removed)="removeWorkingDay(i)">
-          {{ day }}
-          <button matChipRemove>
-            <mat-icon>cancel</mat-icon>
-          </button>
-        </mat-chip>
-      </mat-chip-listbox>
     </div>
   </div>
 
   <!-- Dialog Actions -->
-  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center">
+  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
     <button mat-raised-button color="primary" (click)="updateEmployee()" [disabled]="employeeForm.invalid">
       Save
     </button>

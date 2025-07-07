@@ -49,7 +49,6 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     isActive: new FormControl(true, Validators.required),
     includeInAppoitments: new FormControl(true, Validators.required),
     tenant: new FormControl('', Validators.required),
-    workingDays: new FormControl<string[]>([], arrayRequiredValidator()),
     avatarUrl: new FormControl('')
   });
 
@@ -86,7 +85,6 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
       isActive: emp.isActive ?? true,
       includeInAppoitments: emp.includeInAppoitments ?? true,
       tenant: emp.tenant || '',
-      workingDays: emp.workingDays || [],
       avatarUrl: emp.avatarUrl || '',
     });
     this.avatarPreview = emp.avatarUrl ? this.apiUrl + emp.avatarUrl : 'user-profile-image.png';
@@ -140,36 +138,6 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     }
   }
 
-  addWorkingDay(date: Date | null) {
-    if (!date) return;
-    const iso = date.getFullYear() + '-' +
-      String(date.getMonth() + 1).padStart(2, '0') + '-' +
-      String(date.getDate()).padStart(2, '0');
-    const current = this.employeeForm.controls['workingDays'].value || [];
-    if (!current.includes(iso)) {
-      this.employeeForm.controls['workingDays'].setValue([...current, iso]);
-    }
-    this.workingDayControl.setValue(null);
-    this.cdr.detectChanges();
-    setTimeout(() => this.scrollToBottom(), 0);
-  }
-
-  removeWorkingDay(index: number) {
-    const current = this.employeeForm.controls['workingDays'].value || [];
-    current.splice(index, 1);
-    this.employeeForm.controls['workingDays'].setValue([...current]);
-  }
-
-  dateClass = (d: Date) => {
-    const date =
-      d.getFullYear() +
-      '-' +
-      String(d.getMonth() + 1).padStart(2, '0') +
-      '-' +
-      String(d.getDate()).padStart(2, '0');
-    const selected = this.employeeForm.controls['workingDays'].value || [];
-    return selected.includes(date) ? 'selected-working-day' : '';
-  };
 
   private scrollToBottom() {
     if (this.dialogContent) {
@@ -184,51 +152,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     }
   }
 
-  toggleMonthPicker() {
-    this.showMonthPicker = true;
-    setTimeout(() => {
-      this.monthPicker.open();
-    }, 0);
-  }
 
-  onMonthSelected(event: any, datepicker?: any) {
-    this.selectedMonth = event;
-    if (datepicker) {
-      datepicker.close();
-    }
-    if (this.selectedMonth) {
-      this.addWholeMonth();
-    }
-  }
-
-  addWholeMonth() {
-    if (!this.selectedMonth) return;
-    const year = this.selectedMonth.getFullYear();
-    const month = this.selectedMonth.getMonth();
-
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const newDays: string[] = [];
-    const current: string[] = this.employeeForm.controls['workingDays'].value || [];
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = new Date(year, month, day);
-      if (date.getDay() !== 0 && date.getDay() !== 6) {
-        const iso =
-          date.getFullYear() +
-          '-' +
-          String(date.getMonth() + 1).padStart(2, '0') +
-          '-' +
-          String(date.getDate()).padStart(2, '0');
-        if (!current.includes(iso)) {
-          newDays.push(iso);
-        }
-      }
-    }
-    this.employeeForm.controls['workingDays'].setValue([...current, ...newDays]);
-    this.showSnackbar('Dodati svi radni dani za izabrani mesec!');
-    this.cdr.detectChanges(); // Forsiraj detekciju pre skrolovanja
-    setTimeout(() => this.scrollToBottom(), 0);
-  }
 
   showSnackbar(message: string, isError: boolean = false) {
     this.snackBar.open(message, 'Zatvori', {

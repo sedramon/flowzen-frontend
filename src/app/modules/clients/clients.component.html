@@ -14,42 +14,42 @@
       <mat-divider></mat-divider>
       <mat-card-content class="table-card">
         <div class="table-wrapper">
-          <div *ngIf="dataSourceClients.data.length; else noClients">
-            <table mat-table #clientSort="matSort" [dataSource]="dataSourceClients" matSort>
+          <div *ngIf="dataSourceClients.data.length;">
+            <table mat-table [dataSource]="dataSourceClients">
 
               <!-- First Name -->
               <ng-container matColumnDef="firstName">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>First Name</th>
+                <th mat-header-cell *matHeaderCellDef >First Name</th>
                 <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.firstName }}</td>
               </ng-container>
 
               <!-- Last Name -->
               <ng-container matColumnDef="lastName">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Last Name</th>
+                <th mat-header-cell *matHeaderCellDef >Last Name</th>
                 <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.lastName }}</td>
               </ng-container>
 
               <!-- Email -->
               <ng-container matColumnDef="contactEmail">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
+                <th mat-header-cell *matHeaderCellDef >Email</th>
                 <td mat-cell *matCellDef="let client">{{ client.contactEmail }}</td>
               </ng-container>
 
               <!-- Phone -->
               <ng-container matColumnDef="contactPhone">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
+                <th mat-header-cell *matHeaderCellDef >Phone</th>
                 <td mat-cell *matCellDef="let client">{{ client.contactPhone }}</td>
               </ng-container>
 
               <!-- Created At -->
               <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Created At</th>
+                <th mat-header-cell *matHeaderCellDef >Created At</th>
                 <td mat-cell *matCellDef="let client">{{ client.createdAt | date }}</td>
               </ng-container>
 
               <!-- Updated At -->
               <ng-container matColumnDef="updatedAt">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Updated At</th>
+                <th mat-header-cell *matHeaderCellDef>Updated At</th>
                 <td mat-cell *matCellDef="let client">{{ client.updatedAt | date }}</td>
               </ng-container>
 
@@ -83,12 +83,14 @@
 
 
           </div>
-          <mat-paginator [pageSizeOptions]="[10,25, 50]" showFirstLastButtons></mat-paginator>
+          <mat-paginator #paginator [length]="totalItems" [pageSize]="10" [pageSizeOptions]="[10,25,50]"
+            showFirstLastButtons>
+          </mat-paginator>
         </div>
 
-        <ng-template #noClients>
-          <p>No clients found.</p>
-        </ng-template>
+
+        <p *ngIf="!dataSourceClients.data.length">No clients found.</p>
+
       </mat-card-content>
     </mat-card>
   </div>
@@ -102,22 +104,56 @@
         </mat-card-title>
       </mat-card-header>
       <mat-divider></mat-divider>
-      <mat-card-content fxLayout="column" style="margin-top: 20px">
+      <mat-card-content fxLayout="column" fxLayoutGap="16px" style="margin-top: 20px">
+
+        <!-- Search box with icon button -->
         <mat-form-field appearance="outline">
           <mat-label>Search Clients</mat-label>
-          <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Name…" />
+          <input matInput [(ngModel)]="searchQuery" placeholder="Name or email…" />
+          <button mat-icon-button matSuffix (click)="onSearchClick()" aria-label="Search">
+            <mat-icon>search</mat-icon>
+          </button>
         </mat-form-field>
 
-        <!-- <mat-form-field appearance="outline" class="w-full mb-4">
-          <mat-label>Status</mat-label>
-          <mat-select [(ngModel)]="selectedStatus" (selectionChange)="applyFilter()">
-            <mat-option value="">All</mat-option>
-            <mat-option value="active">Active</mat-option>
-            <mat-option value="inactive">Inactive</mat-option>
-          </mat-select>
-        </mat-form-field> -->
+        <!-- Created From datepicker -->
+        <mat-form-field appearance="outline">
+          <mat-label>Created From</mat-label>
+          <input matInput [matDatepicker]="fromPicker" (dateChange)="onDateRangeChange($event.value, createdTo!)" />
+          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+          <mat-datepicker #fromPicker></mat-datepicker>
+        </mat-form-field>
 
-        <button mat-flat-button color="accent" (click)="clearFilters()">Clear</button>
+        <!-- Created To datepicker -->
+        <mat-form-field appearance="outline">
+          <mat-label>Created To</mat-label>
+          <input matInput [matDatepicker]="toPicker" (dateChange)="onDateRangeChange(createdFrom!, $event.value)" />
+          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+          <mat-datepicker #toPicker></mat-datepicker>
+        </mat-form-field>
+
+        <!-- Sort Field -->
+        <mat-form-field appearance="outline">
+          <mat-label>Sort By</mat-label>
+          <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
+            <mat-option *ngFor="let opt of sortOptions" [value]="opt.value">
+              {{ opt.view }}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <!-- Sort Direction -->
+        <mat-form-field appearance="outline">
+          <mat-label>Direction</mat-label>
+          <mat-select [(ngModel)]="sortDir" (selectionChange)="onSortChange()">
+            <mat-option value="asc">Ascending</mat-option>
+            <mat-option value="desc">Descending</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <button mat-flat-button color="accent" (click)="clearFilters()">
+          Clear All
+        </button>
+
       </mat-card-content>
     </mat-card>
   </div>
