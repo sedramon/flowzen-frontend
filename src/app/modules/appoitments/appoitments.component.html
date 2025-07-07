@@ -67,7 +67,7 @@
                [ngClass]="{ 'not-working': isColumnDisabled(emp) }"
                [class.disabled]="isColumnDisabled(emp)"
                (click)="!isColumnDisabled(emp) && onEmptyColumnClick(emp, $event)">
-  
+
             <!-- OVERLAYI PRVI! -->
             <div *ngIf="emp.workingShift"
                  class="not-working-overlay"
@@ -99,10 +99,13 @@
               ></div>
             </ng-container>
 
-            <div class="appointment-block" *ngFor="let ap of getAppointmentsForEmployee(emp._id || '')"
+            <div class="appointment-block"
+              *ngFor="let ap of getAppointmentsForEmployee(emp._id || ''); trackBy: trackByAppointmentId"
               [attr.data-appointment-id]="ap.id"
               [style.top.%]="calculateTop(ap.startHour)"
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
+              [style.width.%]="100 / getAppointmentOverlapCount(ap, emp._id || '')"
+              [style.left.%]="getAppointmentOverlapIndex(ap, emp._id || '') * (100 / getAppointmentOverlapCount(ap, emp._id || ''))"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">
               <div class="appointment-info">
                 <div class="service">{{ ap.serviceName }}</div>

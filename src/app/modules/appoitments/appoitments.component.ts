@@ -7,6 +7,7 @@ import {
   ViewChild,
   ChangeDetectorRef,
   NgZone,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { FlexLayoutModule } from '@angular/flex-layout';
@@ -125,6 +126,7 @@ export const CUSTOM_DATE_FORMATS = {
       ]),
     ]),
   ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppoitmentsComponent implements OnInit, AfterViewInit {
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
@@ -256,18 +258,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const newX = prevX + event.dx;
             const newY = prevY + event.dy;
             target.style.transform = `translate(${newX}px, ${newY}px)`;
-            const apId = target.getAttribute('data-appointment-id') || '';
-            const ap = this.appointments.find((a) => a.id === apId);
-            if (ap) {
-              this.fixOverlapsLive(ap.employeeId);
-              this.cd.detectChanges();
-            }
+            this.cd.detectChanges();
           },
           end: (event) => {
             const target = event.target as HTMLElement;
             target.style.transition = 'none';
             target.style.transform = 'none';
-            target.style.zIndex = '3'; // <-- VRATI NA DEFAULT!
+            target.style.zIndex = '3';
             document.removeEventListener('mousemove', this.mouseMoveListener);
             target.style.zIndex = '1';
             void target.offsetWidth;
@@ -313,51 +310,26 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               Math.round(computedDuration / fiveMinuteFraction) *
               fiveMinuteFraction;
 
-          // Minimalno trajanje
-          if (newDuration < 0.5) {
-            newDuration = 0.5;
-            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
-          }
-
-          // Maksimalno trajanje: ne može preko kraja radnog vremena
-          const maxEndHour = employee.workingShift.endHour;
-          if (ap.startHour + newDuration > maxEndHour) {
-            newDuration = maxEndHour - ap.startHour;
-            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
-          }
-
-          // Ne dozvoli da endHour bude pre startHour
-          if (ap.startHour + newDuration < ap.startHour + 0.5) {
-            newDuration = 0.5;
-            newHeightPx = (newDuration / 14) * this.gridBodyHeight;
-          }
-
-          ap.endHour = ap.startHour + newDuration;
-          target.style.height = newHeightPx + 'px';
-
-          const colApps = this.appointments
-              .filter((a) => a.employeeId === ap.employeeId)
-              .sort((a, b) => a.startHour - b.startHour);
-            const currentIndex = colApps.findIndex((a) => a.id === apId);
-            let maxAllowedDuration = 22 - ap.startHour;
-            if (currentIndex >= 0 && currentIndex < colApps.length - 1) {
-              const next = colApps[currentIndex + 1];
-              maxAllowedDuration = next.startHour - ap.startHour;
-            }
-            if (newDuration > maxAllowedDuration) {
-              newDuration = maxAllowedDuration;
+            if (newDuration < 0.5) {
+              newDuration = 0.5;
               newHeightPx = (newDuration / 14) * this.gridBodyHeight;
             }
-            ap.endHour = ap.startHour + newDuration;
-            for (let i = currentIndex + 1; i < colApps.length; i++) {
-              let prev = colApps[i - 1];
-              let curr = colApps[i];
-              if (curr.startHour < prev.endHour) {
-                const duration = curr.endHour - curr.startHour;
-                curr.startHour = prev.endHour;
-                curr.endHour = curr.startHour + duration;
-              }
+
+            const maxEndHour = employee.workingShift.endHour;
+            if (ap.startHour + newDuration > maxEndHour) {
+              newDuration = maxEndHour - ap.startHour;
+              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
             }
+
+            if (ap.startHour + newDuration < ap.startHour + 0.5) {
+              newDuration = 0.5;
+              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+            }
+
+            ap.endHour = ap.startHour + newDuration;
+            target.style.height = newHeightPx + 'px';
+
+            // Više nema logike za overlapp
             this.cd.detectChanges();
           },
           end: (event) => {
@@ -373,7 +345,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 ap.startHour < employee.workingShift.startHour ||
                 ap.endHour > employee.workingShift.endHour
               ) {
-                // Vrati na dozvoljeno
                 ap.endHour = Math.min(
                   Math.max(ap.endHour, (employee?.workingShift?.startHour ?? 8) + 0.5),
                   employee?.workingShift?.endHour ?? 22
@@ -387,10 +358,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 return;
               }
 
-              this.fixOverlapsLive(ap.employeeId);
               this.cd.detectChanges();
 
-              // Pozovi updateAppointment nakon resize SAMO AKO JE VALIDACIJA PROŠLA
               this.scheduleService.updateAppointment(ap.id, {
                 ...ap,
                 date: this.selectedDateStr
@@ -399,7 +368,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
                 error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 2000 })
               });
             }
-            // Spreči click dijalog odmah nakon resize
             this.justResized = true;
             setTimeout(() => {
               this.justResized = false;
@@ -435,7 +403,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           return;
         }
 
-        // Izračunaj novi start/end
         const colRect = empEl.getBoundingClientRect();
         const pointerY = event.dragEvent.clientY;
         const offsetY = this.dragOffset[apId]?.y || 0;
@@ -445,7 +412,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const duration = ap.endHour - ap.startHour;
         let newEndHour = newStartHour + duration;
 
-        // Provera: da li je novi termin u okviru radnog vremena zaposlenog
         if (
           newStartHour < employee.workingShift.startHour ||
           newEndHour > employee.workingShift.endHour
@@ -467,7 +433,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         appointmentEl.style.zIndex = '1';
         this.cd.detectChanges();
 
-        // PATCH: Pozovi updateAppointment SAMO AKO JE VALIDACIJA PROŠLA
         this.scheduleService.updateAppointment(ap.id, {
           ...ap,
           date: this.selectedDateStr
@@ -525,7 +490,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               ...created,
               id: created._id || created.id
             });
-            this.fixOverlapsLive(emp._id!);
             this.cd.detectChanges();
             this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 2000 });
           },
@@ -556,7 +520,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result?.delete) {
-        // Pozovi backend za brisanje
         this.scheduleService.deleteAppointment(ap.id).subscribe({
           next: () => {
             this.appointments = this.appointments.filter(a => a.id !== ap.id);
@@ -566,14 +529,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           error: () => this.snackBar.open('Greška pri brisanju termina!', 'Zatvori', { duration: 2000 })
         });
       } else if (result) {
-        // Ažuriraj termin
         ap.startHour = result.startHour;
         ap.endHour = result.endHour;
         ap.serviceName = result.service;
-        this.fixOverlapsLive(ap.employeeId);
         this.cd.detectChanges();
 
-        // Pozovi update na backendu
         this.scheduleService.updateAppointment(ap.id, {
           ...ap,
           date: this.selectedDateStr
@@ -585,26 +545,34 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  private fixOverlapsLive(employeeId: string): void {
-    let colApps = this.appointments.filter((a) => a.employeeId === employeeId);
-    colApps.sort((a, b) => a.startHour - b.startHour);
-    for (let i = 0; i < colApps.length - 1; i++) {
-      let current = colApps[i];
-      let next = colApps[i + 1];
-      if (current.endHour > next.startHour) {
-        const duration = next.endHour - next.startHour;
-        next.startHour = current.endHour;
-        next.endHour = next.startHour + duration;
-      }
-    }
-    let last = colApps[colApps.length - 1];
-    if (last && last.endHour > 22) {
-      const diff = last.endHour - 22;
-      for (let ap of colApps) {
-        ap.startHour = Math.max(8, ap.startHour - diff);
-        ap.endHour = Math.max(ap.startHour + 0.25, ap.endHour - diff);
-      }
-    }
+  // --- NOVA LOGIKA ZA OVERLAP ---
+
+  // Vraća sve termine koji se preklapaju sa zadatim (uključujući njega)
+  getOverlappingAppointments(ap: Appointment, employeeId: string): Appointment[] {
+    return this.appointments
+      .filter(a =>
+        a.employeeId === employeeId &&
+        a.date === ap.date &&
+        a.startHour < ap.endHour &&
+        a.endHour > ap.startHour
+      );
+  }
+
+  // Vraća stabilan indeks termina u overlapp grupi (sortirano samo po id)
+  getAppointmentOverlapIndex(ap: Appointment, employeeId: string): number {
+    const overlapping = this.getOverlappingAppointments(ap, employeeId)
+      .map(a => a.id)
+      .sort(); // stabilno po id-u
+    return overlapping.indexOf(ap.id);
+  }
+
+  // Vraća broj overlappovanih termina u toj grupi
+  getAppointmentOverlapCount(ap: Appointment, employeeId: string): number {
+    return this.getOverlappingAppointments(ap, employeeId).length;
+  }
+
+  trackByAppointmentId(index: number, ap: Appointment) {
+    return ap.id;
   }
 
   getAppointmentsForEmployee(employeeId: string): Appointment[] {

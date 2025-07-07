@@ -211,8 +211,8 @@
 
 .appointment-block {
   position: absolute;
-  left: 4px;
-  right: 4px;
+  /* left i width sada se dinamički postavljaju iz template-a */
+  top: 0;
   color: #fff;
   padding: 4px;
   border-radius: 10px;
@@ -222,7 +222,7 @@
   box-sizing: border-box;
   overflow: hidden;
   z-index: 3;
-  transition: transform 0.1s ease;
+  transition: transform 0.1s ease, left 0.2s, width 0.2s;
 }
 
 .appointment-block[data-dragging="true"] {
