@@ -40,7 +40,7 @@
       </div>
 
       <!-- Telo grida -->
-      <div class="grid-body" [style.height.px]="gridBodyHeight">
+      <div class="grid-body" #gridBody [style.height.px]="gridBodyHeight">
         <!-- Horizontalne linije -->
         <div class="horizontal-lines">
           <ng-container *ngFor="let t of timeSlots; let i = index">

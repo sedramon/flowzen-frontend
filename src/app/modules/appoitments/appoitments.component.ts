@@ -132,6 +132,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
   @ViewChild('employeeColumns', { static: false })
   employeeColumnsRef!: ElementRef;
+  @ViewChild('gridBody', { static: false }) gridBodyRef!: ElementRef<HTMLElement>;
 
   dateControl = new FormControl<Date | null>(null);
   selectedDate: Date | null = null;
@@ -223,17 +224,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   isResizing = false;
 
   ngAfterViewInit(): void {
-    const boundingFn = () => {
-      const timeR = this.timeColumnRef.nativeElement.getBoundingClientRect();
-      const colsR =
-        this.employeeColumnsRef.nativeElement.getBoundingClientRect();
-      return {
-        top: colsR.top,
-        left: timeR.right,
-        bottom: colsR.bottom,
-        right: colsR.right,
-      };
-    };
+    if (!this.gridBodyRef?.nativeElement) {
+      setTimeout(() => this.ngAfterViewInit(), 100);
+      return;
+    }
+
+    const gridBodyEl = this.gridBodyRef.nativeElement;
 
     interact('.appointment-block')
       .draggable({
@@ -241,7 +237,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         autoScroll: false,
         modifiers: [
           interact.modifiers.restrictRect({
-            restriction: boundingFn,
+            restriction: gridBodyEl,
             endOnly: false,
           }),
         ],
@@ -268,20 +264,31 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             );
             const prevX = match ? parseFloat(match[1]) : 0;
             const prevY = match ? parseFloat(match[2]) : 0;
-            const newX = prevX + event.dx;
+            let newX = prevX + event.dx;
             const newY = prevY + event.dy;
+
+            // OGRANIČENJE NA DESNU IVICU TIME KOLONE
+            const gridBodyRect = this.gridBodyRef.nativeElement.getBoundingClientRect();
+            const timeColRect = this.timeColumnRef.nativeElement.getBoundingClientRect();
+            const blockRect = target.getBoundingClientRect();
+
+            // Računaj pomeraj u odnosu na grid-body
+            const minLeft = timeColRect.right - gridBodyRect.left;
+            if (blockRect.left - gridBodyRect.left + newX < minLeft) {
+              newX = minLeft - (blockRect.left - gridBodyRect.left);
+            }
+
             target.style.transform = `translate(${newX}px, ${newY}px)`;
             this.cd.detectChanges();
           },
           end: (event) => {
             const target = event.target as HTMLElement;
-            target.style.transition = 'none';
+            target.style.transition = 'transform 0.1s ease, left 0.2s, width 0.2s'; // animacija na drop
             target.style.transform = 'none';
             target.style.zIndex = '3';
             document.removeEventListener('mousemove', this.mouseMoveListener);
             target.style.zIndex = '1';
             void target.offsetWidth;
-            target.style.transition = 'transform 0.1s ease';
             setTimeout(() => {
               event.target.removeAttribute('data-dragging');
               this.isDragging = false;
@@ -293,8 +300,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         edges: { bottom: '.resize-handle' },
         modifiers: [
           interact.modifiers.restrictEdges({
-            outer: boundingFn,
+            outer: gridBodyEl, // koristi DOM element
             endOnly: true,
+            // elementRect nije dozvoljen ovde!
           }),
           interact.modifiers.restrictSize({
             min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight },
