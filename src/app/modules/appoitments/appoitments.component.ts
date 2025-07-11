@@ -138,6 +138,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // Kontrola prikaza rasporeda u DOM-u
   animateSchedule: boolean = false;
   toolbarState: 'centered' | 'spaced' = 'centered';
+  loading = true;
 
   workStartHour = 8;
   workEndHour = 22;
@@ -160,7 +161,19 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   services: Service[] = [];
 
   private totalMinutes = 14 * 60;
-  gridBodyHeight: number = 1020;
+
+  // Ove vrednosti su za 8-22, 57 slotova, height 1300px, line-height 20px
+  get gridBodyHeight(): number {
+    // 57 slotova za 8-22, 1300px
+    // 1300 / 57 = 22.8 px po slotu
+    // slotCount = this.timeSlots.length
+    return Math.round((1300 / 57) * this.slotCount);
+  }
+
+  // get timeCellLineHeight(): number {
+  //   // 20px za 57 slotova, proporcionalno
+  //   return Math.round((20 / 57) * this.slotCount);
+  // }
 
   // Čuvamo offsete tokom drag operacije
   dragOffset: { [id: string]: { x: number; y: number } } = {};
@@ -580,15 +593,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   loadSchedule(date: Date): void {
-    console.log('Pozivam loadSchedule', date);
+    this.loading = true;
     this.scheduleService.getScheduleSimple(date).subscribe({
       next: (data) => {
-        console.log('Loaded schedule data:', data);
         this.employees = data.employees;
         this.appointments = data.appointments;
+        this.loading = false;
         this.cd.detectChanges();
       },
       error: (err) => {
+        this.loading = false;
         console.error('Schedule loading error:', err);
       }
     });

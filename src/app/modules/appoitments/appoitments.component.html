@@ -21,7 +21,13 @@
     </div>
   </mat-toolbar>
 
-  <ng-container *ngIf="selectedDate && animateSchedule">
+  <ng-container *ngIf="loading">
+    <div class="loading-spinner-container">
+      <div class="spinner"></div>
+      <div class="loading-text">Učitavanje rasporeda...</div>
+    </div>
+  </ng-container>
+  <ng-container *ngIf="!loading && selectedDate && animateSchedule">
     <div class="schedule-grid" [@scheduleChange]="selectedDate.getTime()">
       <!-- Zaglavlje -->
       <div class="grid-header">
@@ -34,7 +40,7 @@
       </div>
 
       <!-- Telo grida -->
-      <div class="grid-body">
+      <div class="grid-body" [style.height.px]="gridBodyHeight">
         <!-- Horizontalne linije -->
         <div class="horizontal-lines">
           <ng-container *ngFor="let t of timeSlots; let i = index">
