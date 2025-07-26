@@ -6,13 +6,17 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
 import { Service } from '../../../models/Service';
+import { Client } from '../../../models/Client';
+import { Employee } from '../../../models/Employee';
 
 export interface AppointmentDialogData {
-  employeeId: string;
   appointmentStart: number;
   appointmentEnd?: number;
   service?: string;
   services: Service[];
+  client?: string;
+  clients: Client[];
+  employee: string;
 }
 
 @Component({
@@ -49,12 +53,14 @@ export class AppointmentDialogComponent implements OnInit {
   selectedService!: string;
   selectedHour!: number;
   selectedMinute!: number;
+  selectedClient!: string;
   endHour!: number;
   endMinute!: number;
   hours: number[] = [];
   minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
 
   ngOnInit(): void {
+    console.log(this.data);
     for (let i = 8; i <= 22; i++) {
       this.hours.push(i);
     }
@@ -74,15 +80,18 @@ export class AppointmentDialogComponent implements OnInit {
       this.endMinute = this.selectedMinute;
     }
     this.selectedService = this.data.service || '';
+    this.selectedClient = this.data.client || '';
   }
 
   onSave(): void {
     this.dialogRef.close({
       service: this.selectedService,
+      client: this.selectedClient,
       startHour: this.selectedHour + this.selectedMinute / 60,
       endHour: this.endHour + this.endMinute / 60
     });
   }
+
 
   onCancel(): void {
     this.dialogRef.close();

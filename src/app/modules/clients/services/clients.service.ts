@@ -47,6 +47,13 @@ getClients(
     return this.http.post<Client>(`${this.apiUrl}/clients`, client);
   }
 
+  getClientsAll(tenant: string) : Observable<Client[]> {
+    let params = new HttpParams();
+    params = params.set('tenant', tenant);
+
+    return this.http.get<Client[]>(`${this.apiUrl}/clients/all`, { params });
+  }
+
   updateClient(id: string, client: Client): Observable<Client> {
     return this.http.put<Client>(`${this.apiUrl}/clients/${id}`, client);
   }

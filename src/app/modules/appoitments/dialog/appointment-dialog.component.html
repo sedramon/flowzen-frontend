@@ -1,14 +1,22 @@
 <div class="outer-dialog-container">
   <div [@dialogPop] class="dialog-container">
     <h2 class="dialog-title">
-      {{ data.service ? data.service : 'Nova usluga' }}
+      {{ data.service ? 'Azuriraj uslugu' : 'Nova usluga' }}
     </h2>
     <div class="dialog-content">
+      <mat-form-field appearance="outline" class="dialog-field">
+        <mat-label>Izaberite Klijenta</mat-label>
+        <mat-select [(value)]="selectedClient">
+          <mat-option *ngFor="let client of data.clients" [value]="client._id">
+            {{client.firstName}} {{client.lastName}}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
       <!-- Dropdown za usluge -->
-      <mat-form-field appearance="fill" class="dialog-field">
+      <mat-form-field appearance="outline" class="dialog-field">
         <mat-label>Izaberi uslugu</mat-label>
         <mat-select [(value)]="selectedService">
-          <mat-option *ngFor="let service of data.services" [value]="service.name">
+          <mat-option *ngFor="let service of data.services" [value]="service._id">
             {{ service.name }}
           </mat-option>
         </mat-select>
@@ -17,7 +25,7 @@
       <!-- Početak termina -->
       <div class="section-label">Početak</div>
       <div class="time-picker">
-        <mat-form-field appearance="fill" class="dialog-field time-field">
+        <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Početak - Sati</mat-label>
           <mat-select [(value)]="selectedHour">
             <mat-option *ngFor="let hour of hours" [value]="hour">
@@ -25,7 +33,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="fill" class="dialog-field time-field">
+        <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Početak - Minuti</mat-label>
           <mat-select [(value)]="selectedMinute">
             <mat-option *ngFor="let min of minutes" [value]="min">
@@ -38,7 +46,7 @@
       <!-- Kraj termina -->
       <div class="section-label">Kraj</div>
       <div class="time-picker">
-        <mat-form-field appearance="fill" class="dialog-field time-field">
+        <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Kraj - Sati</mat-label>
           <mat-select [(value)]="endHour">
             <mat-option *ngFor="let hour of hours" [value]="hour">
@@ -46,7 +54,7 @@
             </mat-option>
           </mat-select>
         </mat-form-field>
-        <mat-form-field appearance="fill" class="dialog-field time-field">
+        <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Kraj - Minuti</mat-label>
           <mat-select [(value)]="endMinute">
             <mat-option *ngFor="let min of minutes" [value]="min">

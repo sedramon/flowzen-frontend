@@ -18,6 +18,10 @@
       <button mat-icon-button (click)="shiftDate(1)" style="margin-left: 20px; cursor: pointer">
         <mat-icon>chevron_right</mat-icon>
       </button>
+      <button mat-raised-button (click)="setToday()" style="margin-left: 16px; color: white;">
+    <mat-icon>today</mat-icon>
+    Danas
+  </button>
     </div>
   </mat-toolbar>
 
@@ -112,9 +116,11 @@
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               [style.width.%]="100 / getAppointmentOverlapCount(ap, emp._id || '')"
               [style.left.%]="getAppointmentOverlapIndex(ap, emp._id || '') * (100 / getAppointmentOverlapCount(ap, emp._id || ''))"
-              (click)="onAppointmentClick(ap, $event); $event.stopPropagation()">
-              <div class="appointment-info">
-                <div class="service">{{ ap.serviceName }}</div>
+              (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
+              >
+              <div class="appointment-info">   
+                <div class="service">{{ ap.service.name }}</div>
+                <div>Klijent : {{ap.client.firstName}} {{ap.client.lastName}}</div>
                 <div class="time">
                   {{ formatTime(ap.startHour) }} - {{ formatTime(ap.endHour) }}
                 </div>

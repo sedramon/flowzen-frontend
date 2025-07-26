@@ -6,8 +6,9 @@ import { Employee } from '../../../models/Employee';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
+import { Appointment, UpdateAndCreateAppointmentDto } from '../../../models/Appointment';
 
-export interface Appointment {
+export interface AppointmentOld {
   id: string; // string now
   employeeId: string; // string now
   startHour: number;
@@ -24,7 +25,7 @@ export interface ScheduleData {
 @Injectable({
   providedIn: 'root'
 })
-export class ScheduleService {
+export class AppointmentsService {
   private apiUrl = environment.apiUrl;
 
   employees$: Observable<Employee[]> = of([]);
@@ -43,14 +44,14 @@ export class ScheduleService {
     this.employees$.subscribe(list => (this.employeesDb = list));
   }
 
-  createAppointment(appointment: Appointment) {
+  createAppointment(appointment: UpdateAndCreateAppointmentDto) {
     return this.http.post(`${this.apiUrl}/appointments`, {
       ...appointment,
-      tenantId: this.tenantId
+      tenant: this.tenantId
     });
   }
 
-  updateAppointment(id: string, appointment: Appointment) {
+  updateAppointment(id: string, appointment: any) {
     return this.http.put(`${this.apiUrl}/appointments/${id}`, {
       ...appointment,
       tenantId: this.tenantId
@@ -107,13 +108,13 @@ export class ScheduleService {
                   return match;
                 })
                 .map(app => ({
-                  id: typeof app.id === 'string' ? app.id : app.id?.toString() ?? app._id?.toString() ?? '',
-                  employeeId: typeof app.employeeId === 'string'
-                    ? app.employeeId
-                    : app.employeeId?._id ?? '',
+                  id: app.id,
+                  employee: app.employee,
+                  client: app.client,
+                  service: app.service,
+                  tenant: app.tenant,
                   startHour: app.startHour,
                   endHour: app.endHour,
-                  serviceName: app.serviceName,
                   date: app.date
                 }))
             })
