@@ -92,6 +92,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
       return;
     }
+
     // Učitavanje podataka sa API-ja
     this.userAdministrationService.fetchUsers(currentUser.tenant).subscribe({
       next: (data) => {

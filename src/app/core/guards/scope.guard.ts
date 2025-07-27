@@ -16,11 +16,8 @@ export class ScopeGuard {
     return this.authService.user$.pipe(
       take(1),
       map(user => {
-        // read the flat scopes array from your decoded token
-        const rawScopes = user?.role?.availableScopes || [];
-        const userScopes = rawScopes.map(scope => scope.name);
 
-        if (userScopes.includes(requiredScope)) {
+        if (user?.scopes.includes(requiredScope)) {
           return true;
         }
 

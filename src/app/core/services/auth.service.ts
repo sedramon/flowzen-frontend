@@ -118,8 +118,7 @@ export class AuthService {
 
   getScopes(): string[] {
     const user = this.userSubject.getValue();
-    const availableScopes = user?.role?.availableScopes || [];
-    return availableScopes.map((scope) => scope.name);
+    return user?.scopes || [];
   }
 
   isModuleEnabled(moduleName: string): boolean {

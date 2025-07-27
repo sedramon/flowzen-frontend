@@ -20,25 +20,25 @@ export class UserAdministrationService {
     constructor(private http: HttpClient, private authService: AuthService) { }
 
     fetchUsers(tenant: string): Observable<User[]> {
-        if(this.usersSubject.value.length > 0 ) {
+        if (this.usersSubject.value.length > 0) {
             console.log('RETURNING CACHED USERS');
             return this.users$;
         }
-        
+
         return this.http.get<User[]>(`${this.apiUrl}/users/tenant/${tenant}`).pipe(
             tap((users) => this.usersSubject.next(users)) // Čuvanje podataka u BehaviorSubject
         );
     }
 
     fetchRoles(tenant: string): Observable<Role[]> {
-        if(this.rolesSubject.value.length > 0 ) {
+        if (this.rolesSubject.value.length > 0) {
             console.log('RETURNING CACHED ROLES');
             return this.roles$;
         }
 
         const params = new HttpParams().set('tenant', tenant);
 
-        return this.http.get<Role[]>(`${this.apiUrl}/roles`, {params}).pipe(
+        return this.http.get<Role[]>(`${this.apiUrl}/roles`, { params }).pipe(
             tap((roles) => this.rolesSubject.next(roles)) // Čuvanje podataka u BehaviorSubject
         );
     }
@@ -114,17 +114,16 @@ export class UserAdministrationService {
         return this.http.delete<Role>(`${this.apiUrl}/roles/${id}`);
     }
 
-    mapUserToAuthenticatedUser(user: User): AuthenticatedUser {
+    mapUserToAuthenticatedUser(user: any): AuthenticatedUser {
         return {
-            sub: user._id!, // assuming _id exists after an update
-            username: user.name,
-            role: typeof user.role === 'string' ? { _id: user.role } as Role : user.role,
-            tenant:
-                typeof user.tenant === 'string'
-                    ? user.tenant
-                    : // If tenant is an object, assume it has an _id property; adjust if needed
-                    (user.tenant as any)._id || user.tenant.toString(),
+            sub: user.userId || user.sub,
+            username: user.username,
+            role: typeof user.role === 'string' ? user.role : user.role?._id,
+            tenant: user.tenant,
+            scopes: user.scopes || [],
         };
     }
+
+
 
 }
