@@ -710,7 +710,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   ): Appointment[] {
     return this.appointments.filter(
       (a) =>
-        // a.employee === employeeId &&
+        // only consider overlaps within the same employee column
+        (a.employee._id === employeeId) &&
         a.date === ap.date &&
         a.startHour < ap.endHour &&
         a.endHour > ap.startHour
@@ -817,11 +818,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   calculateTop(startHour: number): number {
-    return ((startHour - 8) / 14) * 100;
+    // Position relative to dynamic working hours
+    return ((startHour - this.workStartHour) / (this.workEndHour - this.workStartHour)) * 100;
   }
 
   calculateHeight(startHour: number, endHour: number): number {
-    return ((endHour - startHour) / 14) * 100;
+    // Height relative to dynamic working hours duration
+    return ((endHour - startHour) / (this.workEndHour - this.workStartHour)) * 100;
   }
 
   isColumnDisabled(emp: Employee): boolean {
