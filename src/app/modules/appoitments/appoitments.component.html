@@ -72,10 +72,11 @@
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
           <div class="employee-column"
-               *ngFor="let emp of employees"
+               *ngFor="let emp of employees; let i = index"
                [attr.data-employee-id]="emp._id"
                [ngClass]="{ 'not-working': isColumnDisabled(emp) }"
                [class.disabled]="isColumnDisabled(emp)"
+               #firstEmployeeColumn=""
                (click)="!isColumnDisabled(emp) && onEmptyColumnClick(emp, $event)">
 
             <!-- OVERLAYI PRVI! -->
