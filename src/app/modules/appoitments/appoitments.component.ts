@@ -300,6 +300,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         listeners: {
           start: (event) => {
             this.isDragging = true;
+            this.cd.detectChanges();
             const target = event.target as HTMLElement;
             target.setAttribute('data-dragging', 'true');
             target.style.zIndex = '1000';
@@ -340,6 +341,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             setTimeout(() => {
               target.removeAttribute('data-dragging');
               this.isDragging = false;
+              this.cd.detectChanges();
             }, 0);
           },
         },

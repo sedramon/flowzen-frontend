@@ -118,6 +118,9 @@
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               [style.width.%]="100 / getAppointmentOverlapCount(ap, emp._id || '')"
               [style.left.%]="getAppointmentOverlapIndex(ap, emp._id || '') * (100 / getAppointmentOverlapCount(ap, emp._id || ''))"
+              [matTooltip]="formatTime(ap.startHour) + ' - ' + formatTime(ap.endHour)"
+              matTooltipPosition="above"
+              [matTooltipDisabled]="isDragging"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
               >
               <div class="appointment-info">   
