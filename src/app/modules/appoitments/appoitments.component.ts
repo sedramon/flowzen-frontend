@@ -151,6 +151,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   employeeColumnsRef!: ElementRef;
   @ViewChild('gridBody', { static: false })
   gridBodyRef!: ElementRef<HTMLElement>;
+  @ViewChild('firstEmployeeColumn', { static: false })
+  firstEmployeeColumnRef!: ElementRef;
 
   dateControl = new FormControl<Date | null>(null);
   selectedDate: Date | null = null;
@@ -196,7 +198,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // }
 
   // Čuvamo offsete tokom drag operacije
-  dragOffset: { [id: string]: { x: number; y: number } } = {};
+  private dragOffset: { [id: string]: { x: number; y: number } } = {};
+  private initialPosition: { [id: string]: { left: number; top: number } } = {};
 
   // Sprečavamo default ponašanje selektovanja teksta
   private mouseMoveListener = (ev: MouseEvent) => {
@@ -256,12 +259,32 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   isResizing = false;
 
   ngAfterViewInit(): void {
-    if (!this.gridBodyRef?.nativeElement) {
-      setTimeout(() => this.ngAfterViewInit(), 100);
+    // Initialize interact.js after view initialization
+    setTimeout(() => this.initializeInteractJS(), 0);
+  }
+
+  private initializeInteractJS(): void {
+    // Guard: ensure viewchildren are available
+    if (!this.gridBodyRef?.nativeElement || !this.timeColumnRef?.nativeElement || !this.employeeColumnsRef?.nativeElement) {
       return;
     }
-
+    // Očisti postojeće interact.js instance
+    interact('.appointment-block').unset();
+    interact('.employee-column').unset();
+    
     const gridBodyEl = this.gridBodyRef.nativeElement;
+    const timeColEl = this.timeColumnRef.nativeElement;
+    const employeeColumnsEl = this.employeeColumnsRef.nativeElement;
+    // Precompute drag boundary: top of grid-body to bottom, left at timeCol right, right at employee columns right
+    const gridRect = gridBodyEl.getBoundingClientRect();
+    const timeRect = timeColEl.getBoundingClientRect();
+    const empRect = employeeColumnsEl.getBoundingClientRect();
+    const dragBoundary = {
+      top: gridRect.top,
+      left: timeRect.right,
+      bottom: gridRect.bottom,
+      right: empRect.right,
+    };
 
     interact('.appointment-block')
       .draggable({
@@ -269,15 +292,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         autoScroll: false,
         modifiers: [
           interact.modifiers.restrictRect({
-            restriction: gridBodyEl,
+            restriction: employeeColumnsEl,
             endOnly: false,
+            elementRect: { top: 0, left: 0, bottom: 1, right: 1 }
           }),
         ],
         listeners: {
           start: (event) => {
             this.isDragging = true;
-            event.target.setAttribute('data-dragging', 'true');
+            this.cd.detectChanges();
             const target = event.target as HTMLElement;
+            target.setAttribute('data-dragging', 'true');
             target.style.zIndex = '1000';
             const apId = target.getAttribute('data-appointment-id') || '';
             const rect = target.getBoundingClientRect();
@@ -285,48 +310,38 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               x: event.clientX - rect.left,
               y: event.clientY - rect.top,
             };
-            document.addEventListener('mousemove', this.mouseMoveListener, {
-              passive: false,
-            });
+            target.setAttribute('data-x', '0');
+            target.setAttribute('data-y', '0');
+            document.addEventListener('mousemove', this.mouseMoveListener, { passive: false });
           },
           move: (event) => {
             const target = event.target as HTMLElement;
-            const match = target.style.transform.match(
-              /translate\(([-\d.]+)px,\s*([-\d.]+)px\)/
-            );
-            const prevX = match ? parseFloat(match[1]) : 0;
-            const prevY = match ? parseFloat(match[2]) : 0;
-            let newX = prevX + event.dx;
-            const newY = prevY + event.dy;
-
-            // OGRANIČENJE NA DESNU IVICU TIME KOLONE
-            const gridBodyRect =
-              this.gridBodyRef.nativeElement.getBoundingClientRect();
-            const timeColRect =
-              this.timeColumnRef.nativeElement.getBoundingClientRect();
-            const blockRect = target.getBoundingClientRect();
-
-            // Računaj pomeraj u odnosu na grid-body
-            const minLeft = timeColRect.right - gridBodyRect.left;
-            if (blockRect.left - gridBodyRect.left + newX < minLeft) {
-              newX = minLeft - (blockRect.left - gridBodyRect.left);
-            }
-
-            target.style.transform = `translate(${newX}px, ${newY}px)`;
+            const apId = target.getAttribute('data-appointment-id') || '';
+            const offset = this.dragOffset[apId];
+            if (!offset) return;
+            // Accumulate dx/dy and apply transform, restriction handled by restrictRect
+            const dx = event.dx;
+            const dy = event.dy;
+            const x0 = parseFloat(target.getAttribute('data-x') || '0');
+            const y0 = parseFloat(target.getAttribute('data-y') || '0');
+            const x = x0 + dx;
+            const y = y0 + dy;
+            target.style.transform = `translate(${x}px, ${y}px)`;
+            target.setAttribute('data-x', x.toString());
+            target.setAttribute('data-y', y.toString());
             this.cd.detectChanges();
           },
           end: (event) => {
             const target = event.target as HTMLElement;
-            target.style.transition =
-              'transform 0.1s ease, left 0.2s, width 0.2s'; // animacija na drop
+            target.style.transition = 'transform 0.1s ease, left 0.2s, width 0.2s';
             target.style.transform = 'none';
             target.style.zIndex = '3';
             document.removeEventListener('mousemove', this.mouseMoveListener);
-            target.style.zIndex = '1';
             void target.offsetWidth;
             setTimeout(() => {
-              event.target.removeAttribute('data-dragging');
+              target.removeAttribute('data-dragging');
               this.isDragging = false;
+              this.cd.detectChanges();
             }, 0);
           },
         },
@@ -335,9 +350,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         edges: { bottom: '.resize-handle' },
         modifiers: [
           interact.modifiers.restrictEdges({
-            outer: gridBodyEl, // koristi DOM element
+            outer: gridBodyEl, // koristi grid body kao restriction
             endOnly: true,
-            // elementRect nije dozvoljen ovde!
           }),
           interact.modifiers.restrictSize({
             min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight },
@@ -447,7 +461,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     interact('.employee-column').dropzone({
       accept: '.appointment-block',
-      overlap: 0.5,
+      overlap: 0.3, // Smanjujemo overlap za precizniji drop
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
         const employeeId = empEl.getAttribute('data-employee-id') || '';
@@ -455,7 +469,25 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const appointmentEl = event.relatedTarget as HTMLElement;
         const apId = appointmentEl.getAttribute('data-appointment-id') || '';
         const ap = this.appointments.find((a) => a.id === apId);
-        if (!ap) return;
+        
+        // Dodatna provera da li je drop validan
+        if (!ap || !employee) {
+          appointmentEl.style.transition = 'transform 0.3s ease';
+          appointmentEl.style.transform = 'none';
+          return;
+        }
+
+        // Provera da li je employee kolona validna za drop
+        if (this.isColumnDisabled(employee)) {
+          appointmentEl.style.transition = 'transform 0.3s ease';
+          appointmentEl.style.transform = 'none';
+          this.snackBar.open(
+            'Nije moguće postaviti uslugu jer zaposleni ne radi',
+            'Zatvori',
+            { duration: 3000 }
+          );
+          return;
+        }
 
         if (
           !employee ||
@@ -474,10 +506,23 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
         const colRect = empEl.getBoundingClientRect();
         const pointerY = event.dragEvent.clientY;
+        const pointerX = event.dragEvent.clientX;
         const offsetY = this.dragOffset[apId]?.y || 0;
         let localY = pointerY - colRect.top - offsetY;
-        const minutesFromTop =
-          (localY / this.gridBodyHeight) * this.totalMinutes;
+        
+        // Osiguraj da je localY unutar granica
+        localY = Math.max(0, Math.min(localY, this.gridBodyHeight));
+        
+        // Proveri da li je drop tačno u ovoj koloni
+        const localX = pointerX - colRect.left;
+        if (localX < 0 || localX > colRect.width) {
+          // Drop nije u ovoj koloni, vrati appointment na mesto
+          appointmentEl.style.transition = 'transform 0.3s ease';
+          appointmentEl.style.transform = 'none';
+          return;
+        }
+        
+        const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
         let newStartHour = 8 + (Math.round(minutesFromTop / 5) * 5) / 60;
         const duration = ap.endHour - ap.startHour;
         let newEndHour = newStartHour + duration;
@@ -511,7 +556,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         ap.employee = employee;
         appointmentEl.style.transform = 'none';
         appointmentEl.style.zIndex = '1';
-        this.cd.detectChanges();
+        
+        // Osiguraj da se granice pravilno računaju nakon drop-a
+        setTimeout(() => {
+          this.cd.detectChanges();
+        }, 0);
 
         this.appointmentsService.updateAppointment(ap.id!, dto).subscribe({
           next: () =>
@@ -663,7 +712,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   ): Appointment[] {
     return this.appointments.filter(
       (a) =>
-        // a.employee === employeeId &&
+        // only consider overlaps within the same employee column
+        (a.employee._id === employeeId) &&
         a.date === ap.date &&
         a.startHour < ap.endHour &&
         a.endHour > ap.startHour
@@ -700,6 +750,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         this.appointments = data.appointments;
         this.loading = false;
         this.cd.detectChanges();
+        // Reinicijalizuj interact.js nakon renderovanja termina
+        setTimeout(() => this.initializeInteractJS(), 0);
       },
       error: (err) => {
         this.loading = false;
@@ -768,11 +820,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   calculateTop(startHour: number): number {
-    return ((startHour - 8) / 14) * 100;
+    // Position relative to dynamic working hours
+    return ((startHour - this.workStartHour) / (this.workEndHour - this.workStartHour)) * 100;
   }
 
   calculateHeight(startHour: number, endHour: number): number {
-    return ((endHour - startHour) / 14) * 100;
+    // Height relative to dynamic working hours duration
+    return ((endHour - startHour) / (this.workEndHour - this.workStartHour)) * 100;
   }
 
   isColumnDisabled(emp: Employee): boolean {

@@ -72,22 +72,23 @@
         <!-- Kolone zaposlenih -->
         <div class="employee-columns" #employeeColumns>
           <div class="employee-column"
-               *ngFor="let emp of employees"
+               *ngFor="let emp of employees; let i = index"
                [attr.data-employee-id]="emp._id"
                [ngClass]="{ 'not-working': isColumnDisabled(emp) }"
                [class.disabled]="isColumnDisabled(emp)"
+               #firstEmployeeColumn=""
                (click)="!isColumnDisabled(emp) && onEmptyColumnClick(emp, $event)">
 
             <!-- OVERLAYI PRVI! -->
             <div *ngIf="emp.workingShift"
                  class="not-working-overlay"
                  [style.top.%]="0"
-                 [style.height.%]="((emp.workingShift.startHour - 8) / 14) * 100">
+                 [style.height.%]="((emp.workingShift.startHour - workStartHour) / (workEndHour - workStartHour)) * 100">
             </div>
             <div *ngIf="emp.workingShift"
                  class="not-working-overlay"
-                 [style.top.%]="((emp.workingShift.endHour - 8) / 14) * 100"
-                 [style.height.%]="((22 - emp.workingShift.endHour) / 14) * 100">
+                 [style.top.%]="((emp.workingShift.endHour - workStartHour) / (workEndHour - workStartHour)) * 100"
+                 [style.height.%]="((workEndHour - emp.workingShift.endHour) / (workEndHour - workStartHour)) * 100">
             </div>
 
             <!-- SVE OSTALO POSLE OVERLAYA -->
@@ -106,7 +107,8 @@
                 [style.pointerEvents]="
                   isSlotAvailable(emp, t) && !isSlotCovered(emp, t) ? 'auto' : 'none'
                 "
-              ></div>
+                [style.height.px]="gridBodyHeight / slotCount"
+                ></div>
             </ng-container>
 
             <div class="appointment-block"
@@ -116,6 +118,9 @@
               [style.height.%]="calculateHeight(ap.startHour, ap.endHour)"
               [style.width.%]="100 / getAppointmentOverlapCount(ap, emp._id || '')"
               [style.left.%]="getAppointmentOverlapIndex(ap, emp._id || '') * (100 / getAppointmentOverlapCount(ap, emp._id || ''))"
+              [matTooltip]="formatTime(ap.startHour) + ' - ' + formatTime(ap.endHour)"
+              matTooltipPosition="above"
+              [matTooltipDisabled]="isDragging"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
               >
               <div class="appointment-info">   
