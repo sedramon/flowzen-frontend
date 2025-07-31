@@ -1,4 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
+import { SuppliersService } from './services/suppliers.service';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-suppliers',
@@ -6,6 +8,12 @@ import { Component } from '@angular/core';
   templateUrl: './suppliers.html',
   styleUrl: './suppliers.scss'
 })
-export class Suppliers {
+export class Suppliers implements OnInit{
+  constructor(private suppliersService: SuppliersService, private authService: AuthService) {}
+
+
+  ngOnInit(): void {
+    this.suppliersService.getAllSuppliers(this.authService.getCurrentUser()!.tenant).subscribe();
+  }
 
 }

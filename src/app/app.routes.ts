@@ -13,6 +13,7 @@ import { ServicesComponent } from './modules/services/services.component';
 import { ClientDetailViewComponent } from './modules/clients/client-detail-view/client-detail-view.component';
 import { SettingsComponent } from './modules/settings/settings.component';
 import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.component';
+import { Suppliers } from './modules/suppliers/suppliers';
 
 export const routes: Routes = [
   {
@@ -113,6 +114,16 @@ export const routes: Routes = [
         path: '',
         redirectTo: 'home',
         pathMatch: 'full'
+      },
+      {
+        path: 'suppliers',
+        component: Suppliers,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_suppliers:access',
+          title: 'Suppliers',
+          icon: 'suppliers'
+        }
       },
       {
         path: 'unauthorized',
