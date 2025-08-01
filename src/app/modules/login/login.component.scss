@@ -4,7 +4,8 @@
     align-items: center;
     width: 100%;
     max-width: 400px;
-    border: 1px solid #ff0066;
+    background-color: #2b2b2b;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
     padding: 50px;
     border-radius: 25px;
 
@@ -14,11 +15,7 @@
       color: red;
       margin-top: 25px;
     }
-  
-    h2 {
-      margin-bottom: 20px;
-      color: #7E57C2;
-    }
+
   
     .form-group {
       display: flex;

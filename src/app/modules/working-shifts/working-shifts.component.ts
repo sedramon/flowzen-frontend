@@ -33,6 +33,7 @@ import { AuthService }               from '../../core/services/auth.service';
 import { WorkingShiftsService }      from './services/working-shifts.service';
 import { ShiftsService }             from './services/shifts.service';
 import { EditWorkingDayDialogComponent } from './dialogs/edit-working-day-dialog/edit-working-day-dialog.component';
+import { FlexLayoutModule } from '@angular/flex-layout';
 
 /* ────────────────────────── Tipovi ────────────────────────── */
 
@@ -70,7 +71,7 @@ interface CalendarDay {
     MatIconModule,
     MatDialogModule,
     MatSnackBarModule,
-    MatListModule,
+    MatListModule
   ],
   templateUrl : './working-shifts.component.html',
   styleUrls   : ['./working-shifts.component.scss'],
