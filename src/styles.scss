@@ -17,6 +17,125 @@
   background-color: #232323;
 }
 
+mat-card.card {
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
+  background-color: #2b2b2b;
+  border-radius: 12px;
+
+
+  mat-card-header {
+    background: linear-gradient(60deg,
+        #f72585,
+        #7209b7,
+        #3a0ca3,
+        #4361ee,
+        #f72585);
+    background-size: 300% 300%;
+    animation: gradientPan 70s ease infinite;
+    padding: 8px 1rem;
+    margin: 1rem;
+    border-radius: 25px;
+  }
+
+  mat-card-title {
+    margin-bottom: 10px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+
+    mat-icon {
+      margin-right: 10px;
+    }
+  }
+
+  mat-card-subtitle {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+    opacity: 0.8;
+  }
+
+  .custom-row,
+  .mat-row {
+    transition: background-color 150ms ease;
+
+    &:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      cursor: pointer;
+    }
+  }
+
+}
+
+.table-wrapper {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background-color: transparent;
+  height: 100%;
+  min-height: 400px;
+
+
+  table {
+    background-color: #232323;
+  }
+
+  mat-paginator {
+    background-color: transparent;
+  }
+}
+
+.table-card {
+  margin: 20px;
+  height: 100%;
+  padding: 0px !important;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
+  background-color: #2b2b2b;
+}
+
+.table-container {
+  flex: 1 1 auto;
+  overflow: auto;
+}
+
+.custom-row {
+  height: 80px !important;
+
+  td {
+    border-bottom: 1px solid #ffffff !important;
+  }
+
+  td.mat-cell {
+    padding: 16px;
+    border-bottom: none;
+  }
+
+  &:nth-child(odd) {
+    background-color: rgba(255, 255, 255, 0.02);
+  }
+
+  &:hover {
+    background-color: rgba(255, 255, 255, 0.05);
+  }
+}
+
+.custom-header-row {
+  background-color: #333 !important;
+  color: white;
+  font-weight: 600 !important;
+  padding: 16px;
+  border-bottom: none;
+}
+
+.bottom-paginator {
+  margin-top: auto;
+  align-self: flex-end;
+}
+
+.no-data-block {
+  margin-top: 16px;
+}
+
 
 body {
   font-family: 'Roboto', Arial, sans-serif;
@@ -66,6 +185,26 @@ body {
     background-size: 300% 300%;
     animation: gradientPan 15s ease infinite;
     padding: 1rem;
+    margin: 1rem;
+    border-radius: 25px;
+    text-align: center;
+
+    span {
+      color: white;
+      text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+      font-weight: bold;
+    }
+  }
+
+  h3 {
+    background: linear-gradient(60deg,
+        #f72585,
+        #7209b7,
+        #3a0ca3,
+        #4361ee,
+        #f72585);
+    background-size: 300% 300%;
+    animation: gradientPan 15s ease infinite;
     margin: 1rem;
     border-radius: 25px;
     text-align: center;

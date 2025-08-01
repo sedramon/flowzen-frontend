@@ -2,7 +2,7 @@ import {
   Component, OnInit, OnDestroy, ElementRef, ViewChild,
   ViewChildren,
   QueryList,
-  AfterViewInit, 
+  AfterViewInit,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatInputModule } from '@angular/material/input';
@@ -24,6 +24,7 @@ import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialo
 import { CreateServiceDialogComponent } from './dialogs/create-service-dialog/create-service-dialog.component';
 import { MatChipsModule } from '@angular/material/chips';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
+import { catchError, EMPTY, filter, switchMap, tap } from 'rxjs';
 
 
 @Component({
@@ -41,7 +42,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
     MatSortModule,
     MatPaginatorModule,
     MatButtonModule,
-    MatFormFieldModule,
     MatChipsModule,
     ReactiveFormsModule,
     FormsModule
@@ -53,27 +53,27 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 })
 export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   dataSourceServices = new MatTableDataSource<Service>([]);
-  displayedColumnsServices: string[] = ['name', 'price', 'durationMinutes','active', 'actions'];
+  displayedColumnsServices: string[] = ['name', 'price', 'durationMinutes', 'active', 'actions'];
 
   searchQuery: string = '';
 
   @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-    @ViewChild('servicesSort')
-    set servicesSort(ms: MatSort) {
-      if (ms) {
-        this.dataSourceServices.sort = ms;
-      }
+  @ViewChild('servicesSort')
+  set servicesSort(ms: MatSort) {
+    if (ms) {
+      this.dataSourceServices.sort = ms;
     }
+  }
 
 
 
   constructor(
     private servicesService: ServicesService,
-    private authService : AuthService,
+    private authService: AuthService,
     private snackBar: MatSnackBar,
     private dialog: MatDialog
-  ) {}
-  
+  ) { }
+
 
   ngOnInit() {
     const currentUser = this.authService.getCurrentUser();
@@ -95,13 +95,13 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit(): void {
-    if(this.paginators.length) {
+    if (this.paginators.length) {
       this.dataSourceServices.paginator = this.paginators.first;
     }
   }
 
   ngOnDestroy() {
-    
+
   }
 
   applyFilter() {
@@ -119,20 +119,19 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
       height: '250px'
     })
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.servicesService.deleteService(service._id!).subscribe(
-          () => {
-            this.showSnackbar(`Service "${service.name}" deleted successfully`);
-            this.dataSourceServices.data = this.dataSourceServices.data.filter(s => s._id !== service._id);
-          },
-          (error) => {
-            console.error('Error deleting service:', error);
-            this.showSnackbar('Failed to delete service', true);
-          }
-        );
-      }
-    })
+    dialogRef.afterClosed().pipe(
+      filter(confirmed => !!confirmed),
+      switchMap(() => this.servicesService.deleteService(service._id!)),
+      tap(() => {
+        this.showSnackbar(`Service ${service.name} deleted succesfully!`)
+        this.dataSourceServices.data = this.dataSourceServices.data.filter(s => s._id !== service._id)
+      }),
+      catchError(err => {
+        console.error('Error deleting service', err)
+        this.showSnackbar(`Failed to delete ${service.name} service`, true);
+        return EMPTY;
+      })
+    ).subscribe();
   }
 
   /** Called when you click the “+” button or the “edit” icon */

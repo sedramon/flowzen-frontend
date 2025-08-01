@@ -21,7 +21,7 @@
     mat-card {
         height: 100%;
     }
-
+ 
     mat-card-title {
         margin-bottom: 10px;
         font-size: 1.25rem;
@@ -68,68 +68,4 @@
             margin-right: 10px;
         }
     }
-}
-
-.table-wrapper {
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    background-color: transparent;
-    height: 100%; 
-
-
-    table {
-        background-color: #232323;
-    }
-
-    mat-paginator {
-        background-color: transparent;
-    }
-}
-
-.table-card {
-    margin: 20px;
-    height: 100%;
-    padding: 0px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-}
-
-.table-container {
-  flex: 1 1 auto;
-  overflow: auto;
-}
-
-.custom-row {
-    height: 80px;
-
-    td {
-        border-bottom: 1px solid #ffffff;
-    }
-
-    td.mat-cell {
-        padding: 16px;
-        border-bottom: none;
-    }
-
-    &:nth-child(odd) {
-        background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-}
-
-.custom-header-row {
-    background-color: #333;
-    color: white;
-    font-weight: 600;
-    padding: 16px;
-    border-bottom: none;
-}
-
-.bottom-paginator {
-  margin-top: auto;
-  align-self: flex-end;
 }
