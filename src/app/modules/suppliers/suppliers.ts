@@ -17,6 +17,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { catchError, EMPTY, filter, switchMap, tap } from 'rxjs';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { EditCreateSupplierDialog } from './dialogs/edit-create-supplier-dialog/edit-create-supplier-dialog';
 
 @Component({
   selector: 'app-suppliers',
@@ -66,7 +67,26 @@ export class Suppliers implements OnInit, AfterViewInit {
 
   applyFilters() { }
 
-  editSupplier(){}
+  editSupplier(supplier: Supplier){
+    const dialogRef = this.dialog.open(EditCreateSupplierDialog, {
+      width: '600px',
+      data: supplier
+    })
+
+    dialogRef.afterClosed().pipe(
+      filter(result => !!result),
+      switchMap((result) => this.suppliersService.updateSupplier(supplier._id!, result)),
+      tap((updateSupplier) => {
+        this.snackBar.open('Supplier update succesfully', 'Okay', {duration: 2000})
+        this.dataSourceSuppliers.data = this.dataSourceSuppliers.data.map(s => s._id === supplier._id ? updateSupplier : s);
+      }),
+      catchError(err => {
+        console.error('Error updating supplier:', err);
+        this.snackBar.open('Failed to update supplier', 'Okay', {duration: 2000});
+        return EMPTY;
+      })
+    ).subscribe();
+  }
 
   deleteSupplier(supplier: Supplier) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
@@ -91,5 +111,26 @@ export class Suppliers implements OnInit, AfterViewInit {
 
   activitySupplier(){}
 
-  addSuplier(){}
+  addSuplier(){
+    const dialogRef = this.dialog.open(EditCreateSupplierDialog,{
+      width: '600px'
+    })
+
+    dialogRef.afterClosed().pipe(
+      filter(result => !!result),
+      switchMap((result) => this.suppliersService.createSupplier(result)),
+      tap((newSupplier) => {
+        this.snackBar.open('Supplier created succesfully', 'Okay', {duration: 2000});
+        this.dataSourceSuppliers.data = [
+          ...this.dataSourceSuppliers.data,
+          newSupplier
+        ]
+      }),
+      catchError(err => {
+        console.error('Error creating supplier:', err);
+        this.snackBar.open('Failed to create supplier', 'Okay', {duration: 2000});
+        return EMPTY;
+      })
+    ).subscribe();
+  }
 }

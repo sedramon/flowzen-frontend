@@ -63,7 +63,7 @@
                                     <button mat-icon-button (click)="activitySupplier(); $event.stopPropagation()">
                                         <mat-icon style="color: aqua;">trending_up</mat-icon>
                                     </button>
-                                    <button mat-icon-button (click)="editSupplier(); $event.stopPropagation()">
+                                    <button mat-icon-button (click)="editSupplier(supplier); $event.stopPropagation()">
                                         <mat-icon style="color: yellow;">edit</mat-icon>
                                     </button>
                                     <button mat-icon-button (click)="deleteSupplier(supplier); $event.stopPropagation()">
