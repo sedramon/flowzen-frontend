@@ -3,3 +3,7 @@
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
 }
+
+.grid-dialog-content > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}

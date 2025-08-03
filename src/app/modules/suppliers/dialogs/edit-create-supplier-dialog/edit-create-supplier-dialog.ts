@@ -8,10 +8,11 @@ import { MatInputModule } from '@angular/material/input';
 import { Supplier } from '../../../../models/Supplier';
 import { AuthService } from '../../../../core/services/auth.service';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { MatSelect, MatSelectModule } from '@angular/material/select';
 
 @Component({
   selector: 'app-edit-create-supplier-dialog',
-  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule],
+  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule, MatSelectModule],
   templateUrl: './edit-create-supplier-dialog.html',
   styleUrl: './edit-create-supplier-dialog.scss'
 })
@@ -21,8 +22,14 @@ export class EditCreateSupplierDialog implements OnInit {
   supplierForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),
     address: new FormControl<string>('', [Validators.required]),
+    city: new FormControl<string>('', [Validators.required]),
     contactPhone: new FormControl<string>('', [Validators.required]),
-    contactEmail: new FormControl<string>('', [Validators.required]),
+    contactEmail: new FormControl<string>('', [Validators.required, Validators.email]),
+    contactLandline: new FormControl<string>(''),
+    contactPerson: new FormControl<string>(''),
+    pib: new FormControl<string>(''),
+    remark: new FormControl<string>(''),
+    isActive: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required])
   });
 
@@ -35,13 +42,19 @@ export class EditCreateSupplierDialog implements OnInit {
 
 
   ngOnInit(): void {
-    if(this.data){
+    if (this.data) {
       this.isEditMode = true;
       this.supplierForm.patchValue({
         name: this.data.name,
         address: this.data.address,
+        city: this.data.city,
         contactPhone: this.data.contactPhone,
-        contactEmail: this.data.contactEmail
+        contactEmail: this.data.contactEmail,
+        contactLandline: this.data.contactLandline,
+        contactPerson: this.data.contactPerson,
+        pib: this.data.pib,
+        remark: this.data.remark,
+        isActive: this.data.isActive
       })
     }
 
@@ -50,7 +63,7 @@ export class EditCreateSupplierDialog implements OnInit {
 
 
   save() {
-    if(this.supplierForm.invalid){
+    if (this.supplierForm.invalid) {
       return;
     }
 
