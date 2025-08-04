@@ -13,7 +13,7 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 @Component({
   selector: 'app-edit-create-supplier-dialog',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule],
+  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule, MatSelectModule],
   templateUrl: './edit-create-supplier-dialog.html',
   styleUrl: './edit-create-supplier-dialog.scss'
 })
