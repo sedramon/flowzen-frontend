@@ -14,6 +14,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { EmployeesService } from '../../services/employees.service';
 import { environment } from '../../../../../environments/environment';
+import { Facility } from '../../../../models/Facility';
+import { AppointmentsService } from '../../../appoitments/services/appointment.service';
 
 @Component({
   selector: 'app-edit-employee-dialog',
@@ -39,6 +41,8 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
   @ViewChild('monthPicker') monthPicker!: MatDatepicker<Date>;
 
+  facilities: Facility[] = [];
+
   employeeForm = new FormGroup({
     firstName: new FormControl('', Validators.required),
     lastName: new FormControl('', Validators.required),
@@ -49,6 +53,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     isActive: new FormControl(true, Validators.required),
     includeInAppoitments: new FormControl(true, Validators.required),
     tenant: new FormControl('', Validators.required),
+    facility: new FormControl(''),
     avatarUrl: new FormControl('')
   });
 
@@ -69,12 +74,25 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     @Inject(MAT_DIALOG_DATA) public data: any,
     private employeesService: EmployeesService,
     private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private appointmentsService: AppointmentsService
   ) {
   }
 
   ngOnInit(): void {
+    // Load facilities for the current tenant
+    this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {
+      this.facilities = facilities;
+    });
+
     const emp = this.data.employee;
+    
+    // Handle facility object from autopopulate
+    let facilityId = emp.facility;
+    if (typeof emp.facility === 'object' && emp.facility !== null) {
+      facilityId = (emp.facility as any)._id || (emp.facility as any).id;
+    }
+
     this.employeeForm.patchValue({
       firstName: emp.firstName || '',
       lastName: emp.lastName || '',
@@ -85,13 +103,14 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
       isActive: emp.isActive ?? true,
       includeInAppoitments: emp.includeInAppoitments ?? true,
       tenant: emp.tenant || '',
+      facility: facilityId || '',
       avatarUrl: emp.avatarUrl || '',
     });
     this.avatarPreview = emp.avatarUrl ? this.apiUrl + emp.avatarUrl : 'user-profile-image.png';
   }
 
   ngAfterViewInit() {
-    this.scrollToBottom();
+    // this.scrollToBottom();
   }
 
   closeDialog() {
@@ -114,14 +133,12 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
 
   updateEmployee() {
     if (this.employeeForm.valid) {
-      let avatarUrl = this.employeeForm.value.avatarUrl;
       if (this.selectedAvatarFile) {
         this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
           next: (res) => {
-            avatarUrl = res.url;
             const employee = {
               ...this.employeeForm.value,
-              avatarUrl,
+              avatarUrl: res.url,
             };
             this.dialogRef.close(employee);
           },
@@ -130,6 +147,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
           }
         });
       } else {
+        // Keep existing avatarUrl if no new file is selected
         const employee = {
           ...this.employeeForm.value
         };

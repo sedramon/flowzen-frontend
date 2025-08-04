@@ -48,7 +48,18 @@ export class EmployeesService {
     }
 
     updateEmployee(id: string, employee: Employee): Observable<Employee> {
-        return this.http.put<Employee>(`${this.apiUrl}/employees/${id}`, employee).pipe(
+        // Handle tenant object from autopopulate
+        let tenantId = employee.tenant;
+        if (typeof employee.tenant === 'object' && employee.tenant !== null) {
+            tenantId = (employee.tenant as any)._id || (employee.tenant as any).id;
+        }
+
+        const updateData = {
+            ...employee,
+            tenant: tenantId
+        };
+
+        return this.http.put<Employee>(`${this.apiUrl}/employees/${id}`, updateData).pipe(
             tap((updated) => {
                 const list = this.employeesSubject.value.map((e) =>
                     e._id === id ? updated : e

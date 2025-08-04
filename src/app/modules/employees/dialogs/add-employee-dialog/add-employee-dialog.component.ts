@@ -18,7 +18,8 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeesService } from '../../services/employees.service';
-
+import { Facility } from '../../../../models/Facility';
+import { AppointmentsService } from '../../../appoitments/services/appointment.service';
 
 @Component({
   selector: 'app-add-employee-dialog',
@@ -45,6 +46,7 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
 
   avatarPreview: string | ArrayBuffer | null = null;
   selectedAvatarFile: File | null = null;
+  facilities: Facility[] = [];
 
   employeeForm = new FormGroup({
     firstName: new FormControl<string>('', [Validators.required]),
@@ -62,7 +64,7 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     isActive: new FormControl<boolean>(true, [Validators.required]),
     includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required]),
-    workingDays: new FormControl<string[]>([], [Validators.required]),
+    facility: new FormControl<string>(''),
     avatarUrl: new FormControl<string>('')
   });
 
@@ -71,22 +73,46 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
   constructor(
     private authService: AuthService,
     private dialogRef: MatDialogRef<AddEmployeeDialogComponent>,
-    private employeesService: EmployeesService
+    private employeesService: EmployeesService,
+    private appointmentsService: AppointmentsService
   ) {}
 
   ngOnInit(): void {
     this.employeeForm
       .get('tenant')
       ?.setValue(this.authService.getCurrentUser()!.tenant);
+    
+    // Load facilities for the current tenant
+    this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {
+      this.facilities = facilities;
+    });
   }
 
   ngAfterViewInit() {
-    this.scrollToBottom();
+    // this.scrollToBottom();
   }
 
   createEmployee() {
-    const employee = this.employeeForm.value;
-    this.dialogRef.close(employee);
+    if (this.employeeForm.valid) {
+      if (this.selectedAvatarFile) {
+        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
+          next: (res) => {
+            const employee = {
+              ...this.employeeForm.value,
+              avatarUrl: res.url,
+            };
+            this.dialogRef.close(employee);
+          },
+          error: () => {
+            alert('Greška pri uploadu slike!');
+          }
+        });
+      } else {
+        // Remove avatarUrl if no file is selected
+        const { avatarUrl, ...employeeData } = this.employeeForm.value;
+        this.dialogRef.close(employeeData);
+      }
+    }
   }
 
   closeDialog() {

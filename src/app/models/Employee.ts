@@ -8,7 +8,8 @@ export interface Employee {
     jobRole: string;
     isActive: boolean;
     includeInAppoitments: boolean;
-    tenant: string;
+    tenant: string | { _id: string; name: string }; // Support both string and object
+    facility?: string | { _id: string; name: string }; // Support both string and object
     avatarUrl?: string;
     workingShift?: {
         date: string;
