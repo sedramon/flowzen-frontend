@@ -123,7 +123,11 @@ export class Suppliers implements OnInit, AfterViewInit {
   deleteSupplier(supplier: Supplier) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
-      height: '250px'
+      height: '250px',
+      data: {
+        title: 'Delete Supplier',
+        message: `Are you sure you want to delete ${supplier.name}?`,
+      }
     })
 
     dialogRef.afterClosed().pipe(

@@ -22,6 +22,8 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CreateEditFacilityDialog } from './dialogs/create-edit-facility-dialog/create-edit-facility-dialog';
+import { catchError, EMPTY, filter, switchMap, tap } from 'rxjs';
 
 @Component({
   selector: 'app-settings',
@@ -32,7 +34,6 @@ import { MatSnackBar } from '@angular/material/snack-bar';
     MatIconModule,
     MatDividerModule,
     MatButtonModule,
-    NgSwitchCase,
     FormsModule,
     ReactiveFormsModule,
     CommonModule,
@@ -100,10 +101,54 @@ export class SettingsComponent implements OnInit, AfterViewInit {
     }
   }
 
-  openAddFacilityDialog() {}
+  openAddFacilityDialog() {
+    const dialogRef = this.dialog.open(CreateEditFacilityDialog,{
+      width: '800px'
+    })
+
+    dialogRef.afterClosed().pipe(
+      filter(result => !!result),
+      switchMap((result) => this.settingsService.createFacility(result)),
+      tap((newFacility) => {
+        this.dataSourceFacilities.data = [
+          ...this.dataSourceFacilities.data,
+          newFacility
+        ],
+        this.snackBar.open('Succesfully created facility', 'Okay', {duration: 2000})
+      }),
+      catchError(err => {
+        console.warn('Failed to create facility!', err);
+        this.snackBar.open('Failed to create facility', 'Okay', {duration: 2000})
+        return EMPTY;
+      })
+    ).subscribe();
+  }
+
+  editFacility(facility: Facility) {
+    const dialogRef = this.dialog.open(CreateEditFacilityDialog,{
+      width: '800px',
+      data: facility
+    })
+
+    dialogRef.afterClosed().pipe(
+      filter(result => !!result),
+      switchMap((result) => this.settingsService.updateFacility(facility._id!, result)),
+      tap((updatedFacility) => {
+        this.dataSourceFacilities.data = this.dataSourceFacilities.data.map(f => f._id === facility._id ? updatedFacility : f)
+        this.snackBar.open('Succesfully updated facility', 'Okay', {duration: 2000})
+      }),
+      catchError(err => {
+        console.warn('Failed to create facility!', err);
+        this.snackBar.open('Failed to create facility', 'Okay', {duration: 2000})
+        return EMPTY;
+      })
+    ).subscribe();
+  }
 
   deleteFacility(facility: Facility) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      width: '500px',
+      height: '250px',
       data: {
         title: 'Delete Facility',
         message: `Are you sure you want to delete ${facility.name}?`,

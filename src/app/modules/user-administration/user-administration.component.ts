@@ -235,7 +235,10 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
-      data: user.name,
+      data: {
+        title: 'Delete Facility',
+        message: `Are you sure you want to delete ${user.name}?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {
@@ -259,6 +262,10 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
+      data: {
+        title: 'Delete Facility',
+        message: `Are you sure you want to delete ${selectedRole.name}?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

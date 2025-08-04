@@ -1,7 +1,7 @@
 <div class="dialog-container" fxLayout="column">
   <h3 mat-dialog-title>Confirm Delete</h3>
   <div mat-dialog-content>
-    <p style="font-size: 1rem;">Are you sure you want to delete <strong>{{ data }}</strong>?</p>
+    <p style="font-size: 1rem;">{{data.message}}</p>
   </div>
   <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center">
     <button mat-raised-button (click)="confirmDelete()" style="background-color: greenyellow; color: black;">Yes</button>
