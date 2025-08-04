@@ -41,7 +41,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { Service } from '../../models/Service';
 import { Employee } from '../../models/Employee';
-import { Facility, FacilityUtils } from '../../models/Facility';
+import { Facility } from '../../models/Facility';
 import {
   MatMomentDateModule,
   MomentDateAdapter,
@@ -791,7 +791,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     this.loading = true;
     this.appointmentsService.getScheduleSimple(date, this.selectedFacility).subscribe({
       next: (data) => {
-        console.log('LOAD SCHEDULE : ', data);
         this.employees = data.employees;
         this.appointments = data.appointments;
         this.loading = false;
@@ -895,14 +894,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   updateWorkHours(facility: Facility): void {
-    try {
-      this.workStartHour = FacilityUtils.getOpeningHourAsNumber(facility);
-      this.workEndHour = FacilityUtils.getClosingHourAsNumber(facility);
-      console.log(`Updated work hours for facility ${facility.name}: ${this.workStartHour} - ${this.workEndHour}`);
-    } catch (error) {
-      console.error('Error updating work hours:', error);
-      this.workStartHour = 8;
-      this.workEndHour = 22;
+    if (facility.openingHour && facility.closingHour) {
+      this.workStartHour = parseFloat(facility.openingHour);
+      this.workEndHour = parseFloat(facility.closingHour);
     }
   }
 }

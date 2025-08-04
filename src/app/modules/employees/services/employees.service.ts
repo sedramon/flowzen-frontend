@@ -16,14 +16,18 @@ export class EmployeesService {
 
     constructor(private http: HttpClient) {}
 
-    getAllEmployees(tenant: string): Observable<Employee[]> {
+    getAllEmployees(tenant: string, facilityId?: string): Observable<Employee[]> {
          // If cached data exists and is not empty, return it
          if (this.employeesSubject.value.length > 0) {
             console.log("RETURNING CACHED EMPLOYEES")
             return this.employees$;
         }
 
-        const params = new HttpParams().set('tenant', tenant);
+        let params = new HttpParams().set('tenant', tenant);
+        
+        if (facilityId) {
+            params = params.set('facility', facilityId);
+        }
 
         // If no cached data, make the API call and update the BehaviorSubject
         return this.http.get<Employee[]>(`${this.apiUrl}/employees`, { params }).pipe(
