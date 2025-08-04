@@ -17,7 +17,15 @@
         <mat-label>Address</mat-label>
         <input matInput formControlName="address" placeholder="Address" />
         <mat-error *ngIf="supplierForm.get('address')?.hasError('required')">
-            Address is required
+          Address is required
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>City</mat-label>
+        <input matInput formControlName="city" placeholder="City" />
+        <mat-error *ngIf="supplierForm.get('city')?.hasError('required')">
+          City is required
         </mat-error>
       </mat-form-field>
 
@@ -25,7 +33,10 @@
         <mat-label>Email</mat-label>
         <input matInput formControlName="contactEmail" placeholder="Contact Email" />
         <mat-error *ngIf="supplierForm.get('contactEmail')?.hasError('required')">
-            Email is required
+          Email is required
+        </mat-error>
+        <mat-error *ngIf="supplierForm.get('contactEmail')?.hasError('email')">
+          Email is not in right format
         </mat-error>
       </mat-form-field>
 
@@ -33,20 +44,45 @@
         <mat-label>Phone</mat-label>
         <input matInput formControlName="contactPhone" placeholder="Contact Phone" />
         <mat-error *ngIf="supplierForm.get('contactPhone')?.hasError('required')">
-            Phone is required
+          Phone is required
         </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Landline</mat-label>
+        <input matInput formControlName="contactLandline" placeholder="Contact Landline" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Contact Person</mat-label>
+        <input matInput formControlName="contactPerson" placeholder="Contact Person" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>PIB</mat-label>
+        <input matInput formControlName="pib" placeholder="PIB" />
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Active</mat-label>
+        <mat-select formControlName="isActive">
+          <mat-option [value]="true">True</mat-option>
+          <mat-option [value]="false">False</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <div></div>
+
+      <mat-form-field appearance="outline" style="width: 100%;">
+        <mat-label>Remark</mat-label>
+        <textarea matInput formControlName="remark" rows="4" placeholder="Any notes or comments"></textarea>
       </mat-form-field>
 
     </form>
   </div>
 
   <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-around center" class="mat-dialog-buttons">
-    <button
-      mat-raised-button
-      color="primary"
-      (click)="save()"
-      [disabled]="supplierForm.invalid"
-    >
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="supplierForm.invalid">
       {{ isEditMode ? 'Update' : 'Create' }}
     </button>
     <button mat-raised-button color="warn" (click)="close()">Cancel</button>
