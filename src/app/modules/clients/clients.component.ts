@@ -202,6 +202,10 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       width: '500px',
       height: '250px',
+      data: {
+        title: 'Delete Facility',
+        message: `Are you sure you want to delete?`,
+      },
     });
 
     dialogRef.afterClosed().subscribe((result) => {

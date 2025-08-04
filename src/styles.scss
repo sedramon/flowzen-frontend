@@ -136,6 +136,16 @@ mat-card.card {
   margin-top: 16px;
 }
 
+.grid-dialog-content {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.grid-dialog-content > :last-child:nth-child(odd) {
+  grid-column: 1 / -1;
+}
+
 
 body {
   font-family: 'Roboto', Arial, sans-serif;

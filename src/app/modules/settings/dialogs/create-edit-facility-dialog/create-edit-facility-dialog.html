@@ -1,0 +1,49 @@
+<div class="dialog-container">
+    <h2 mat-dialog-title>
+    {{ isEditMode ? 'Edit Facility' : 'Create Facility' }}
+  </h2>
+  <div mat-dialog-content style="padding: 20px;">  
+    <form [formGroup]="facilityForm" class="grid-dialog-content">
+        <mat-form-field appearance="outline">
+            <mat-label>Name</mat-label>
+            <input matInput formControlName="name" placeholder="Facility Name"/>
+            <mat-error *ngIf="this.facilityForm.get('name')?.hasError('required')">
+                Name is required
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Address</mat-label>
+            <input matInput formControlName="address" placeholder="Facility Address"/>
+            <mat-error *ngIf="this.facilityForm.get('address')?.hasError('required')">
+                Address is required
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Opening Hour</mat-label>
+            <input matInput formControlName="openingHour" placeholder="Facility Opening Hour"/>
+            <mat-hint>
+                Format : HH:MM
+            </mat-hint>
+            <mat-error *ngIf="this.facilityForm.get('openingHour')?.hasError('required')">
+                Opening Hour is required
+            </mat-error>
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+            <mat-label>Closing Hour</mat-label>
+            <input matInput formControlName="closingHour" placeholder="Facility Closing Hour"/>
+            <mat-hint>
+                Format : HH:MM
+            </mat-hint>
+            <mat-error *ngIf="this.facilityForm.get('closingHour')?.hasError('required')">
+                Closing Hour is required
+            </mat-error>
+        </mat-form-field>
+    </form>
+  </div>
+  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-around center" class="mat-dialog-buttons">
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="facilityForm.invalid">
+      {{ isEditMode ? 'Update' : 'Create' }}
+    </button>
+    <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+  </div>
+</div>
