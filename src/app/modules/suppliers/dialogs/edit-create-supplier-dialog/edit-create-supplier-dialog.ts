@@ -11,6 +11,7 @@ import { FlexLayoutModule } from '@angular/flex-layout';
 
 @Component({
   selector: 'app-edit-create-supplier-dialog',
+  standalone: true,
   imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule],
   templateUrl: './edit-create-supplier-dialog.html',
   styleUrl: './edit-create-supplier-dialog.scss'

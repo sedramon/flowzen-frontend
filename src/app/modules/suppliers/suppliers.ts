@@ -21,6 +21,7 @@ import { EditCreateSupplierDialog } from './dialogs/edit-create-supplier-dialog/
 
 @Component({
   selector: 'app-suppliers',
+  standalone: true,
   imports: [
     CommonModule,
     MatCardModule,

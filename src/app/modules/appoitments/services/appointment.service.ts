@@ -7,6 +7,8 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { Appointment, UpdateAndCreateAppointmentDto } from '../../../models/Appointment';
+import { SettingsService } from '../../settings/services/settings.service';
+import { Facility } from '../../../models/Facility';
 
 export interface AppointmentOld {
   id: string; // string now
@@ -35,7 +37,8 @@ export class AppointmentsService {
   constructor(
     private employeesService: EmployeesService,
     private http: HttpClient,
-    private authService: AuthService
+    private authService: AuthService,
+    private settingsService: SettingsService
   ) {
     const currentUser = this.authService.getCurrentUser();
     this.tenantId = currentUser?.tenant || '';
@@ -62,16 +65,23 @@ export class AppointmentsService {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
   }
 
-  getAllAppoitements(): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/appointments`, {
-      params: { tenantId: this.tenantId }
-    });
+  getAllAppoitements(facilityId?: string): Observable<any[]> {
+    const params: any = { tenantId: this.tenantId };
+    if (facilityId) {
+      params.facilityId = facilityId;
+    }
+    
+    return this.http.get<any[]>(`${this.apiUrl}/appointments`, { params });
   }
 
-  getScheduleSimple(date: Date): Observable<ScheduleData> {
+  getFacilities(): Observable<Facility[]> {
+    return this.settingsService.getAllFacilities(this.tenantId);
+  }
+
+  getScheduleSimple(date: Date, facilityId?: string): Observable<ScheduleData> {
     const selectedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
     const employees$ = this.getEmployeesWithWorkingShift(selectedDate);
-    const appointments$ = this.getAllAppoitements().pipe(
+    const appointments$ = this.getAllAppoitements(facilityId).pipe(
       map(appointments => {
         if (appointments.length > 0) {
           console.log('Fetched appointments:', appointments);
@@ -112,6 +122,7 @@ export class AppointmentsService {
                   employee: app.employee,
                   client: app.client,
                   service: app.service,
+                  facility: app.facility,
                   tenant: app.tenant,
                   startHour: app.startHour,
                   endHour: app.endHour,

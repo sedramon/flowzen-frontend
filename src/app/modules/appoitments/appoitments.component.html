@@ -4,6 +4,23 @@
     <div class="toolbar-item title-container" [@titleAnim]="toolbarState">
       <span class="title" *ngIf="selectedDate"><mat-icon>schedule</mat-icon>Raspored za zaposlene</span>
     </div>
+    
+    <!-- Facility Selector -->
+    <div class="toolbar-item facility-container" [@dateAnim]="toolbarState">
+      <mat-form-field appearance="outline" class="facility-selector">
+        <mat-label>Izaberi objekat</mat-label>
+        <mat-select [formControl]="facilityControl">
+          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
+            {{ facility.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+      <div class="work-hours-display" *ngIf="currentFacility">
+        <mat-icon>access_time</mat-icon>
+        <span>{{ workHoursString }}</span>
+      </div>
+    </div>
+    
     <div class="toolbar-item datepicker-container" [@dateAnim]="toolbarState">
       <button mat-icon-button (click)="shiftDate(-1)" style="margin-right: 20px; cursor: pointer;">
         <mat-icon>chevron_left</mat-icon>

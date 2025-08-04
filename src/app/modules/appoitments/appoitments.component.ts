@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { MatSelectModule } from '@angular/material/select';
 import interact from 'interactjs';
 import {
   trigger,
@@ -40,6 +41,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { Service } from '../../models/Service';
 import { Employee } from '../../models/Employee';
+import { Facility, FacilityUtils } from '../../models/Facility';
 import {
   MatMomentDateModule,
   MomentDateAdapter,
@@ -90,7 +92,8 @@ export const CUSTOM_DATE_FORMATS = {
     FlexLayoutModule,
     MatIconModule,
     MatTooltipModule,
-    MatButtonModule
+    MatButtonModule,
+    MatSelectModule
   ],
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
@@ -155,7 +158,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   firstEmployeeColumnRef!: ElementRef;
 
   dateControl = new FormControl<Date | null>(null);
+  facilityControl = new FormControl<string>('');
   selectedDate: Date | null = null;
+  selectedFacility: string = '';
   // Kontrola prikaza rasporeda u DOM-u
   animateSchedule: boolean = false;
   toolbarState: 'centered' | 'spaced' = 'centered';
@@ -164,7 +169,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   workStartHour = 8;
   workEndHour = 22;
 
-  // Generiši slotove prema radnom vremenu
+  // Generate time slots based on working hours
   get timeSlots(): number[] {
     const slots: number[] = [];
     for (let t = this.workStartHour; t <= this.workEndHour; t += 0.25) {
@@ -181,13 +186,14 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   appointments: Appointment[] = [];
   services: Service[] = [];
   clients: Client[] = [];
+  facilities: Facility[] = [];
 
   private totalMinutes = 14 * 60;
 
-  // Ove vrednosti su za 8-22, 57 slotova, height 1300px, line-height 20px
+  // Grid calculations for 8-22, 57 slots, height 1300px, line-height 20px
   get gridBodyHeight(): number {
-    // 57 slotova za 8-22, 1300px
-    // 1300 / 57 = 22.8 px po slotu
+    // 57 slots for 8-22, 1300px
+    // 1300 / 57 = 22.8 px per slot
     // slotCount = this.timeSlots.length
     return Math.round((1300 / 57) * this.slotCount);
   }
@@ -197,11 +203,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   //   return Math.round((20 / 57) * this.slotCount);
   // }
 
-  // Čuvamo offsete tokom drag operacije
+  // Store offsets during drag operations
   private dragOffset: { [id: string]: { x: number; y: number } } = {};
   private initialPosition: { [id: string]: { left: number; top: number } } = {};
 
-  // Sprečavamo default ponašanje selektovanja teksta
+  // Prevent default text selection behavior
   private mouseMoveListener = (ev: MouseEvent) => {
     if (window.getSelection) {
       window.getSelection()?.removeAllRanges();
@@ -218,6 +224,18 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       '-' +
       String(this.selectedDate.getDate()).padStart(2, '0')
     );
+  }
+
+  get currentFacility(): Facility | undefined {
+    return this.facilities.find(f => f._id === this.selectedFacility);
+  }
+
+  get workHoursString(): string {
+    const facility = this.currentFacility;
+    if (facility) {
+      return `${facility.openingHour} - ${facility.closingHour}`;
+    }
+    return `${this.workStartHour}:00 - ${this.workEndHour}:00`;
   }
 
   constructor(
@@ -237,6 +255,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       return;
     }
 
+    // Load facilities and initialize work hours
+    this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {
+      this.facilities = facilities;
+      if (facilities.length > 0) {
+        this.selectedFacility = facilities[0]._id || '';
+        this.facilityControl.setValue(this.selectedFacility);
+        this.updateWorkHours(facilities[0]);
+      }
+    });
+
     this.servicesService
       .getAllServices(currentUser.tenant)
       .subscribe((fetchedServices) => {
@@ -244,7 +272,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
         const today = new Date();
         this.dateControl.setValue(today);
-        this.onDateChange(today); // manually trigger date load
+        this.onDateChange(today);
       });
 
     this.clientService
@@ -252,6 +280,18 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       .subscribe((fetchedClients) => {
         this.clients = fetchedClients;
       });
+
+    // Listen for facility changes
+    this.facilityControl.valueChanges.subscribe((facilityId) => {
+      if (facilityId && this.selectedDate) {
+        this.selectedFacility = facilityId;
+        const selectedFacility = this.facilities.find(f => f._id === facilityId);
+        if (selectedFacility) {
+          this.updateWorkHours(selectedFacility);
+        }
+        this.loadSchedule(this.selectedDate);
+      }
+    });
   }
 
   isDragging = false;
@@ -268,14 +308,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     if (!this.gridBodyRef?.nativeElement || !this.timeColumnRef?.nativeElement || !this.employeeColumnsRef?.nativeElement) {
       return;
     }
-    // Očisti postojeće interact.js instance
+    // Clear existing interact.js instances
     interact('.appointment-block').unset();
     interact('.employee-column').unset();
     
     const gridBodyEl = this.gridBodyRef.nativeElement;
     const timeColEl = this.timeColumnRef.nativeElement;
     const employeeColumnsEl = this.employeeColumnsRef.nativeElement;
-    // Precompute drag boundary: top of grid-body to bottom, left at timeCol right, right at employee columns right
     const gridRect = gridBodyEl.getBoundingClientRect();
     const timeRect = timeColEl.getBoundingClientRect();
     const empRect = employeeColumnsEl.getBoundingClientRect();
@@ -350,7 +389,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         edges: { bottom: '.resize-handle' },
         modifiers: [
           interact.modifiers.restrictEdges({
-            outer: gridBodyEl, // koristi grid body kao restriction
+            outer: gridBodyEl, // Use grid body as restriction
             endOnly: true,
           }),
           interact.modifiers.restrictSize({
@@ -461,7 +500,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     interact('.employee-column').dropzone({
       accept: '.appointment-block',
-      overlap: 0.3, // Smanjujemo overlap za precizniji drop
+      overlap: 0.3, // Reduce overlap for more precise drop
       ondrop: (event) => {
         const empEl = event.target as HTMLElement;
         const employeeId = empEl.getAttribute('data-employee-id') || '';
@@ -477,7 +516,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           return;
         }
 
-        // Provera da li je employee kolona validna za drop
+        // Check if employee column is valid for drop
         if (this.isColumnDisabled(employee)) {
           appointmentEl.style.transition = 'transform 0.3s ease';
           appointmentEl.style.transform = 'none';
@@ -510,13 +549,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const offsetY = this.dragOffset[apId]?.y || 0;
         let localY = pointerY - colRect.top - offsetY;
         
-        // Osiguraj da je localY unutar granica
+        // Ensure localY is within boundaries
         localY = Math.max(0, Math.min(localY, this.gridBodyHeight));
         
-        // Proveri da li je drop tačno u ovoj koloni
+        // Check if drop is exactly in this column
         const localX = pointerX - colRect.left;
         if (localX < 0 || localX > colRect.width) {
-          // Drop nije u ovoj koloni, vrati appointment na mesto
+          // Drop is not in this column, return appointment to place
           appointmentEl.style.transition = 'transform 0.3s ease';
           appointmentEl.style.transform = 'none';
           return;
@@ -545,6 +584,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           employee: employeeId,
           client: ap.client._id!,
           service: ap.service._id!,
+          facility: ap.facility._id!,
           tenant: ap.tenant._id!,
           date: this.selectedDateStr,
           startHour: newStartHour,
@@ -557,7 +597,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         appointmentEl.style.transform = 'none';
         appointmentEl.style.zIndex = '1';
         
-        // Osiguraj da se granice pravilno računaju nakon drop-a
+        // Ensure boundaries are properly calculated after drop
         setTimeout(() => {
           this.cd.detectChanges();
         }, 0);
@@ -585,11 +625,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     ).getBoundingClientRect();
     const localY = event.clientY - empColRect.top;
     const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-    // Snap na 15 minuta
+    // Snap to 15 minutes
     const snappedMinutes = Math.round(minutesFromTop / 15) * 15;
     const appointmentStart = 8 + snappedMinutes / 60;
 
-    // Dozvoli klik samo ako je slot u okviru radnog vremena
+    // Allow click only if slot is within working hours
     if (!this.isSlotAvailable(emp, appointmentStart)) return;
 
     const dialogData: AppointmentDialogData = {
@@ -597,6 +637,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       appointmentStart,
       services: this.services,
       clients: this.clients,
+      facilities: this.facilities,
+      facility: this.selectedFacility, // Add currently selected facility
     };
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
@@ -613,6 +655,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           endHour: result.startHour + 1,
           service: result.service,
           client: result.client,
+          facility: result.facility || this.selectedFacility,
           tenant: this.authService.getCurrentUser()!.tenant,
           date: this.selectedDateStr,
         };
@@ -651,6 +694,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       clients: this.clients,
       client: ap.client._id,
       services: this.services,
+      facilities: this.facilities,
+      facility: ap.facility._id, // Use facility from existing appointment
     };
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
@@ -679,6 +724,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           employee: ap.employee._id!,
           client: result.client,
           tenant: ap.tenant._id,
+          facility: result.facility || ap.facility._id,
           service: result.service,
           startHour: result.startHour,
           endHour: result.endHour,
@@ -703,16 +749,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // --- NOVA LOGIKA ZA OVERLAP ---
+  // --- NEW OVERLAP LOGIC ---
 
-  // Vraća sve termine koji se preklapaju sa zadatim (uključujući njega)
+  // Returns all appointments that overlap with the given one (including itself)
   getOverlappingAppointments(
     ap: Appointment,
     employeeId: string
   ): Appointment[] {
     return this.appointments.filter(
       (a) =>
-        // only consider overlaps within the same employee column
+        // Only consider overlaps within the same employee column
         (a.employee._id === employeeId) &&
         a.date === ap.date &&
         a.startHour < ap.endHour &&
@@ -720,15 +766,15 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Vraća stabilan indeks termina u overlapp grupi (sortirano samo po id)
+  // Returns stable index of appointment in overlap group (sorted only by id)
   getAppointmentOverlapIndex(ap: Appointment, employeeId: string): number {
     const overlapping = this.getOverlappingAppointments(ap, employeeId)
       .map((a) => a.id)
-      .sort(); // stabilno po id-u
+      .sort(); // Stable by id
     return overlapping.indexOf(ap.id);
   }
 
-  // Vraća broj overlappovanih termina u toj grupi
+  // Returns number of overlapped appointments in that group
   getAppointmentOverlapCount(ap: Appointment, employeeId: string): number {
     return this.getOverlappingAppointments(ap, employeeId).length;
   }
@@ -743,14 +789,14 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   loadSchedule(date: Date): void {
     this.loading = true;
-    this.appointmentsService.getScheduleSimple(date).subscribe({
+    this.appointmentsService.getScheduleSimple(date, this.selectedFacility).subscribe({
       next: (data) => {
         console.log('LOAD SCHEDULE : ', data);
         this.employees = data.employees;
         this.appointments = data.appointments;
         this.loading = false;
         this.cd.detectChanges();
-        // Reinicijalizuj interact.js nakon renderovanja termina
+        // Reinitialize interact.js after rendering appointments
         setTimeout(() => this.initializeInteractJS(), 0);
       },
       error: (err) => {
@@ -762,7 +808,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
   onDateChange(dateValue: any): void {
     if (dateValue) {
-      // Ako je dateValue Moment objekt, konvertuj ga u Date
+      // If dateValue is Moment object, convert to Date
       const nativeDate = dateValue.toDate ? dateValue.toDate() : dateValue;
       if (
         !this.selectedDate ||
@@ -801,12 +847,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     let current = this.dateControl.value;
     if (!current) return;
 
-    // Ako je current Moment objekat, konvertuj u native Date
+    // If current is Moment object, convert to native Date
     if (moment.isMoment(current)) {
       current = current.toDate();
     }
 
-    // current je sada garantovano Date
+    // Current is now guaranteed to be Date
     const next: Date = new Date(current);
     next.setDate(current.getDate() + deltaDays);
     this.dateControl.setValue(next);
@@ -830,11 +876,11 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   }
 
   isColumnDisabled(emp: Employee): boolean {
-    // Kolona je disabled ako nema workingShift za taj dan
+    // Column is disabled if there's no workingShift for that day
     return !emp.workingShift;
   }
 
-  // Da li je slot u okviru radnog vremena zaposlenog
+  // Check if slot is within employee working hours
   isSlotAvailable(emp: Employee, slotHour: number): boolean {
     if (!emp.workingShift) return false;
     return (
@@ -846,5 +892,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   isSlotCovered(emp: Employee, t: number): boolean {
     const appointments = this.getAppointmentsForEmployee(emp._id || '');
     return appointments.some((ap) => t >= ap.startHour && t < ap.endHour);
+  }
+
+  updateWorkHours(facility: Facility): void {
+    try {
+      this.workStartHour = FacilityUtils.getOpeningHourAsNumber(facility);
+      this.workEndHour = FacilityUtils.getClosingHourAsNumber(facility);
+      console.log(`Updated work hours for facility ${facility.name}: ${this.workStartHour} - ${this.workEndHour}`);
+    } catch (error) {
+      console.error('Error updating work hours:', error);
+      this.workStartHour = 8;
+      this.workEndHour = 22;
+    }
   }
 }

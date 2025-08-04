@@ -4,6 +4,16 @@
       {{ data.service ? 'Azuriraj uslugu' : 'Nova usluga' }}
     </h2>
     <div class="dialog-content">
+      <!-- Facility Selection -->
+      <mat-form-field appearance="outline" class="dialog-field">
+        <mat-label>Izaberi objekat</mat-label>
+        <mat-select [(value)]="selectedFacility" disabled>
+          <mat-option *ngFor="let facility of data.facilities" [value]="facility._id">
+            {{ facility.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
       <mat-form-field appearance="outline" class="dialog-field">
         <mat-label>Izaberite Klijenta</mat-label>
         <mat-select [(value)]="selectedClient">
@@ -66,7 +76,7 @@
     </div>
     <div class="dialog-actions">
       <button mat-button (click)="onCancel()">Odustani</button>
-      <button mat-raised-button color="primary" (click)="onSave()">Sačuvaj</button>
+      <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!selectedFacility || !selectedService || !selectedClient">Sačuvaj</button>
       <button mat-raised-button color="warn" *ngIf="data.service" (click)="onDelete()">Obriši</button>
     </div>
   </div>
