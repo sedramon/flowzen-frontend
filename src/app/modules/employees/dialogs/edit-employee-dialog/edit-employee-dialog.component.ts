@@ -1,21 +1,27 @@
 import { CommonModule } from '@angular/common';
-import { Component, Inject, ViewChild, ElementRef, AfterViewInit, OnInit, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, Inject } from '@angular/core';
 import { FlexLayoutModule } from '@angular/flex-layout';
-import { FormControl, FormGroup, ReactiveFormsModule, Validators, ValidatorFn, AbstractControl } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatDatepickerModule, MatDatepickerInputEvent, MatDatepicker } from '@angular/material/datepicker';
-import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatDatepickerModule } from '@angular/material/datepicker';
+import { provideNativeDateAdapter } from '@angular/material/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeesService } from '../../services/employees.service';
-import { environment } from '../../../../../environments/environment';
 import { Facility } from '../../../../models/Facility';
 import { AppointmentsService } from '../../../appoitments/services/appointment.service';
+import { Employee } from '../../../../models/Employee';
+import { environment } from '../../../../../environments/environment';
 
 @Component({
   selector: 'app-edit-employee-dialog',
@@ -35,82 +41,124 @@ import { AppointmentsService } from '../../../appoitments/services/appointment.s
     MatChipsModule,
   ],
   templateUrl: './edit-employee-dialog.component.html',
-  styleUrl: './edit-employee-dialog.component.scss'
+  styleUrl: './edit-employee-dialog.component.scss',
 })
 export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
   @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
-  @ViewChild('monthPicker') monthPicker!: MatDatepicker<Date>;
-
-  facilities: Facility[] = [];
-
-  employeeForm = new FormGroup({
-    firstName: new FormControl('', Validators.required),
-    lastName: new FormControl('', Validators.required),
-    contactEmail: new FormControl('', [Validators.required, Validators.email]),
-    contactPhone: new FormControl('', [Validators.required, Validators.pattern(/^\d{10}$/)]),
-    dateOfBirth: new FormControl(new Date(), Validators.required),
-    jobRole: new FormControl('', Validators.required),
-    isActive: new FormControl(true, Validators.required),
-    includeInAppoitments: new FormControl(true, Validators.required),
-    tenant: new FormControl('', Validators.required),
-    facility: new FormControl(''),
-    avatarUrl: new FormControl('')
-  });
-
-  workingDayControl = new FormControl<Date | null>(null);
 
   avatarPreview: string | ArrayBuffer | null = null;
   selectedAvatarFile: File | null = null;
-  private apiUrl = environment.apiUrl;
+  facilities: Facility[] = [];
+  employee: Employee;
 
-  showMonthPicker = false;
-  selectedMonth: Date | null = null;
-  today = new Date();
-
-  selectedWorkDays: Date[] = [];
+  employeeForm = new FormGroup({
+    firstName: new FormControl<string>('', [Validators.required]),
+    lastName: new FormControl<string>('', [Validators.required]),
+    contactEmail: new FormControl<string>('', [
+      Validators.required,
+      Validators.email,
+    ]),
+    contactPhone: new FormControl<string>('', [
+      Validators.required,
+      Validators.pattern(/^\d{10}$/),
+    ]),
+    dateOfBirth: new FormControl<Date>(new Date(), [Validators.required]),
+    jobRole: new FormControl<string>('', [Validators.required]),
+    isActive: new FormControl<boolean>(true, [Validators.required]),
+    includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
+    tenant: new FormControl<string>('', [Validators.required]),
+    facilities: new FormControl<string[]>([]),
+    avatarUrl: new FormControl<string>('')
+  });
 
   constructor(
+    private authService: AuthService,
     private dialogRef: MatDialogRef<EditEmployeeDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any,
     private employeesService: EmployeesService,
-    private snackBar: MatSnackBar,
-    private cdr: ChangeDetectorRef,
-    private appointmentsService: AppointmentsService
+    private appointmentsService: AppointmentsService,
+    @Inject(MAT_DIALOG_DATA) public data: { employee: Employee }
   ) {
+    this.employee = data.employee;
   }
 
   ngOnInit(): void {
+    this.employeeForm
+      .get('tenant')
+      ?.setValue(this.authService.getCurrentUser()!.tenant);
+    
     // Load facilities for the current tenant
     this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {
       this.facilities = facilities;
     });
 
-    const emp = this.data.employee;
-    
-    // Handle facility object from autopopulate
-    let facilityId = emp.facility;
-    if (typeof emp.facility === 'object' && emp.facility !== null) {
-      facilityId = (emp.facility as any)._id || (emp.facility as any).id;
-    }
-
-    this.employeeForm.patchValue({
-      firstName: emp.firstName || '',
-      lastName: emp.lastName || '',
-      contactEmail: emp.contactEmail || '',
-      contactPhone: emp.contactPhone || '',
-      dateOfBirth: emp.dateOfBirth ? new Date(emp.dateOfBirth) : new Date(),
-      jobRole: emp.jobRole || '',
-      isActive: emp.isActive ?? true,
-      includeInAppoitments: emp.includeInAppoitments ?? true,
-      tenant: emp.tenant || '',
-      facility: facilityId || '',
-      avatarUrl: emp.avatarUrl || '',
-    });
-    this.avatarPreview = emp.avatarUrl ? this.apiUrl + emp.avatarUrl : 'user-profile-image.png';
+    // Populate form with employee data
+    this.populateForm();
   }
 
   ngAfterViewInit() {
     // this.scrollToBottom();
+  }
+
+  populateForm() {
+    if (this.employee) {
+      // Handle tenant - extract ID if it's an object
+      let tenantId: string = '';
+      if (typeof this.employee.tenant === 'string') {
+        tenantId = this.employee.tenant;
+      } else if (typeof this.employee.tenant === 'object' && this.employee.tenant !== null) {
+        tenantId = (this.employee.tenant as any)._id || (this.employee.tenant as any).id || '';
+      }
+
+      this.employeeForm.patchValue({
+        firstName: this.employee.firstName,
+        lastName: this.employee.lastName,
+        contactEmail: this.employee.contactEmail,
+        contactPhone: this.employee.contactPhone,
+        dateOfBirth: new Date(this.employee.dateOfBirth),
+        jobRole: this.employee.jobRole,
+        isActive: this.employee.isActive,
+        includeInAppoitments: this.employee.includeInAppoitments,
+        tenant: tenantId,
+        facilities: this.employee.facilities?.map(f => typeof f === 'string' ? f : f._id) || [],
+        avatarUrl: this.employee.avatarUrl
+      });
+
+      if (this.employee.avatarUrl) {
+        this.avatarPreview = `${environment.apiUrl}${this.employee.avatarUrl}`;
+      }
+    }
+  }
+
+  updateEmployee() {
+    if (this.employeeForm.valid) {
+      let avatarUrl = this.employeeForm.value.avatarUrl;
+      if (this.selectedAvatarFile) {
+        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
+          next: (res) => {
+            avatarUrl = res.url;
+            const employee = {
+              ...this.employeeForm.value,
+              avatarUrl,
+            };
+            this.dialogRef.close(employee);
+          },
+          error: () => {
+            alert('Greška pri uploadu slike!');
+          }
+        });
+      } else {
+        const employee = {
+          ...this.employeeForm.value
+        };
+        this.dialogRef.close(employee);
+      }
+    }
+  }
+
+  deleteEmployee() {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      this.dialogRef.close({ action: 'delete', employeeId: this.employee._id });
+    }
   }
 
   closeDialog() {
@@ -126,73 +174,28 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
     if (file) {
       this.selectedAvatarFile = file;
       const reader = new FileReader();
-      reader.onload = e => this.avatarPreview = reader.result;
+      reader.onload = e => this.avatarPreview = reader.result as string;
       reader.readAsDataURL(file);
     }
   }
 
-  updateEmployee() {
-    if (this.employeeForm.valid) {
-      if (this.selectedAvatarFile) {
-        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
-          next: (res) => {
-            const employee = {
-              ...this.employeeForm.value,
-              avatarUrl: res.url,
-            };
-            this.dialogRef.close(employee);
-          },
-          error: () => {
-            alert('Greška pri uploadu slike!');
-          }
-        });
-      } else {
-        // Keep existing avatarUrl if no new file is selected
-        const employee = {
-          ...this.employeeForm.value
-        };
-        this.dialogRef.close(employee);
-      }
-    }
+  removeFacility(facilityId: string) {
+    const currentFacilities = this.employeeForm.controls['facilities'].value || [];
+    const updatedFacilities = currentFacilities.filter(id => id !== facilityId);
+    this.employeeForm.controls['facilities'].setValue(updatedFacilities);
   }
 
+  getFacilityName(facilityId: string): string {
+    const facility = this.facilities.find(f => f._id === facilityId);
+    return facility ? facility.name : 'Unknown Facility';
+  }
 
   private scrollToBottom() {
     if (this.dialogContent) {
-      // Prvo instant na dno, pa onda smooth još jednom za svaki slučaj
-      this.dialogContent.nativeElement.scrollTop = this.dialogContent.nativeElement.scrollHeight;
-      setTimeout(() => {
-        this.dialogContent.nativeElement.scrollTo({
-          top: this.dialogContent.nativeElement.scrollHeight,
-          behavior: 'smooth'
-        });
-      }, 10);
+      this.dialogContent.nativeElement.scrollTo({
+        top: this.dialogContent.nativeElement.scrollHeight,
+        behavior: 'smooth'
+      });
     }
   }
-
-
-
-  showSnackbar(message: string, isError: boolean = false) {
-    this.snackBar.open(message, 'Zatvori', {
-      duration: 3000,
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success']
-    });
-  }
-
-  deleteEmployee() {
-    this.employeesService.deleteEmployee(this.data.employee._id).subscribe(() => {
-      this.dialogRef.close();
-      this.showSnackbar('Employee deleted successfully!', true);
-    })
-  }
-}
-
-// Custom validator
-function arrayRequiredValidator(): ValidatorFn {
-  return (control: AbstractControl) => {
-    const value = control.value;
-    return Array.isArray(value) && value.length > 0 ? null : { required: true };
-  };
 }

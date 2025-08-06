@@ -45,10 +45,10 @@ export class AppointmentsService {
     return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
   }
 
-  getAllAppoitements(facilityId?: string, date?: string): Observable<any[]> {
-    const params: any = { tenantId: this.tenantId };
-    if (facilityId) {
-      params.facilityId = facilityId;
+  getAllAppoitements(facility?: string, date?: string): Observable<any[]> {
+    const params: any = { tenant: this.tenantId };
+    if (facility) {
+      params.facility = facility;
     }
     if (date) {
       params.date = date;
@@ -61,10 +61,10 @@ export class AppointmentsService {
     return this.settingsService.getAllFacilities(this.tenantId);
   }
 
-  getScheduleSimple(date: Date, facilityId?: string): Observable<ScheduleData> {
+  getScheduleSimple(date: Date, facility?: string): Observable<ScheduleData> {
     const selectedDate = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-    const employees$ = this.getEmployeesWithWorkingShift(selectedDate, facilityId);
-    const appointments$ = this.getAllAppoitements(facilityId, selectedDate);
+    const employees$ = this.getEmployeesWithWorkingShift(selectedDate, facility);
+    const appointments$ = this.getAllAppoitements(facility, selectedDate);
 
     return employees$.pipe(
       map(employees => {
@@ -96,14 +96,14 @@ export class AppointmentsService {
     );
   }
 
-  getEmployeesWithWorkingShift(date: string, facilityId?: string): Observable<any[]> {
+  getEmployeesWithWorkingShift(date: string, facility?: string): Observable<any[]> {
     const params: any = {
       tenant: this.tenantId,
       date
     };
     
-    if (facilityId) {
-      params.facility = facilityId;
+    if (facility) {
+      params.facility = facility;
     }
     
     return this.http.get<any[]>(`${this.apiUrl}/employees/with-working-shift`, { params });

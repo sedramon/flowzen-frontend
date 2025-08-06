@@ -68,16 +68,28 @@
         <mat-error *ngIf="employeeForm.controls['jobRole'].hasError('required')">Job Role is required</mat-error>
       </mat-form-field>
 
-      <!-- Facility Selector -->
+      <!-- Facilities Multi-Selector -->
       <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-        <mat-label>Facility</mat-label>
-        <mat-select [formControl]="employeeForm.controls['facility']">
-          <mat-option value="">No facility assigned</mat-option>
+        <mat-label>Facilities</mat-label>
+        <mat-select [formControl]="employeeForm.controls['facilities']" multiple>
           <mat-option *ngFor="let facility of facilities" [value]="facility._id">
             {{ facility.name }}
           </mat-option>
         </mat-select>
+        <mat-hint>Select one or more facilities where employee works</mat-hint>
       </mat-form-field>
+
+      <!-- Selected Facilities Chips -->
+      <div *ngIf="employeeForm.controls['facilities'].value && employeeForm.controls['facilities'].value.length > 0" style="margin-bottom: 16px;">
+        <mat-chip-listbox>
+          <mat-chip-option *ngFor="let facilityId of employeeForm.controls['facilities'].value" 
+                   [removable]="true" 
+                   (removed)="removeFacility(facilityId)">
+            {{ getFacilityName(facilityId) }}
+            <mat-icon matChipRemove>cancel</mat-icon>
+          </mat-chip-option>
+        </mat-chip-listbox>
+      </div>
     
       <div fxLayout="row" fxLayoutAlign="space-between center">
         <!-- Active Checkbox -->

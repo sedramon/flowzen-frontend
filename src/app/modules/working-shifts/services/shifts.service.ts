@@ -9,8 +9,12 @@ export class ShiftsService {
 
   constructor(private http: HttpClient) {}
 
-  getAllShifts(tenantId: string): Observable<any[]> {
-    return this.http.get<any[]>(`${this.apiUrl}/shifts?tenantId=${tenantId}`);
+  getAllShifts(tenant: string, facility?: string): Observable<any[]> {
+    let url = `${this.apiUrl}/shifts?tenant=${tenant}`;
+    if (facility) {
+      url += `&facility=${facility}`;
+    }
+    return this.http.get<any[]>(url);
   }
 
   createShift(shift: any): Observable<any> {

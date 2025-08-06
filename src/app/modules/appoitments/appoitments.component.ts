@@ -282,10 +282,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       });
 
     // Listen for facility changes
-    this.facilityControl.valueChanges.subscribe((facilityId) => {
-      if (facilityId && this.selectedDate) {
-        this.selectedFacility = facilityId;
-        const selectedFacility = this.facilities.find(f => f._id === facilityId);
+    this.facilityControl.valueChanges.subscribe((facility) => {
+      if (facility && this.selectedDate) {
+        this.selectedFacility = facility;
+        const selectedFacility = this.facilities.find(f => f._id === facility);
         if (selectedFacility) {
           this.updateWorkHours(selectedFacility);
         }
@@ -792,6 +792,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     this.appointmentsService.getScheduleSimple(date, this.selectedFacility).subscribe({
       next: (data) => {
         this.employees = data.employees;
+        console.log(this.employees);
         this.appointments = data.appointments;
         this.loading = false;
         this.cd.detectChanges();

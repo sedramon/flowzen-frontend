@@ -31,18 +31,19 @@ export class WorkingShiftsService {
     return this.http.post<any>(`${this.apiUrl}/working-shifts/upsert`, shift);
   }
 
-  deleteShiftByEmployeeDate(employeeId: string, date: string, tenantId: string) {
+  deleteShiftByEmployeeDate(employee: string, date: string, tenant: string, facility: string) {
     return this.http.delete<any>(
-      `${this.apiUrl}/working-shifts/by-employee-date?employeeId=${employeeId}&date=${date}&tenantId=${tenantId}`
+      `${this.apiUrl}/working-shifts/by-employee-date?employee=${employee}&date=${date}&tenant=${tenant}&facility=${facility}`
     );
   }
 
-  getShiftsForEmployeeMonth(employeeId: string, month: number, year: number, tenantId: string) {
+  getShiftsForEmployeeMonth(employee: string, month: number, year: number, tenant: string, facility: string) {
     // month je 0-based
     return this.http.get<any[]>(`${this.apiUrl}/working-shifts`, {
       params: {
-        employeeId,
-        tenantId,
+        employee,
+        tenant,
+        facility,
         month: month.toString(),
         year: year.toString()
       }

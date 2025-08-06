@@ -64,7 +64,7 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     isActive: new FormControl<boolean>(true, [Validators.required]),
     includeInAppoitments: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required]),
-    facility: new FormControl<string>(''),
+    facilities: new FormControl<string[]>([]),
     avatarUrl: new FormControl<string>('')
   });
 
@@ -159,7 +159,16 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     }
   }
 
+  removeFacility(facilityId: string) {
+    const currentFacilities = this.employeeForm.controls['facilities'].value || [];
+    const updatedFacilities = currentFacilities.filter(id => id !== facilityId);
+    this.employeeForm.controls['facilities'].setValue(updatedFacilities);
+  }
 
+  getFacilityName(facilityId: string): string {
+    const facility = this.facilities.find(f => f._id === facilityId);
+    return facility ? facility.name : 'Unknown Facility';
+  }
 
   private scrollToBottom() {
     if (this.dialogContent) {

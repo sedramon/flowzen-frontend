@@ -12,6 +12,7 @@ import {
   FormsModule,
 } from '@angular/forms';
 import { HttpClient }                   from '@angular/common/http';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
 /* Angular-Material */
 import { DateAdapter, MatNativeDateModule }     from '@angular/material/core';
@@ -34,6 +35,7 @@ import { WorkingShiftsService }      from './services/working-shifts.service';
 import { ShiftsService }             from './services/shifts.service';
 import { EditWorkingDayDialogComponent } from './dialogs/edit-working-day-dialog/edit-working-day-dialog.component';
 import { FlexLayoutModule } from '@angular/flex-layout';
+import { SettingsService }           from '../settings/services/settings.service';
 
 /* ────────────────────────── Tipovi ────────────────────────── */
 
@@ -45,7 +47,7 @@ interface CalendarDay {
     startHour?: number;
     endHour?: number;
   };
-  _id?: string;
+  id?: string;
   animate?: boolean;
 }
 
@@ -87,12 +89,14 @@ export class WorkingShiftsComponent implements OnInit {
   shiftForm : FormGroup;     // forma za tip smene
 
   employees : Employee[]          = [];
+  facilities: any[]              = [];
   weeks     : CalendarDay[][]     = [];
 
   shiftTypes      : any[] = [];      // puni backend
-  activeShiftType : string = '';     // trenutno „četkica“ boje u kalendaru
+  activeShiftType : string = '';     // trenutno „četkica" boje u kalendaru
   editShiftsMode  = false;
   timeOptions     : number[] = [];
+  facilityWorkingHours: { opening: number; closing: number } | null = null;
 
   editingShift: any = null;          // trenutni shift u modal nom
 
@@ -118,24 +122,27 @@ export class WorkingShiftsComponent implements OnInit {
     private snackBar     : MatSnackBar,
     private dialog       : MatDialog,
     private dateAdapter  : DateAdapter<Date>,
+    private settingsService: SettingsService,
   ) {
     /* Locale za datepicker (SR) */
     this.dateAdapter.setLocale('en-US');
     this.dateAdapter.setLocale('en-US');
 
-    /* -------- glavna forma (zaposleni + mesec) -------- */
+    /* -------- glavna forma (zaposleni + facility + mesec) -------- */
     this.form = this.fb.group({
-      employeeId : [null, Validators.required],
-      month      : [null, Validators.required],
+      employee : [null, Validators.required],
+      facility : [null, Validators.required],
+      month    : [null, Validators.required]
     });
 
     /* -------- forma za pojedinačni tip smene -------- */
     this.shiftForm = this.fb.group({
-      value     : ['', Validators.required],
-      label     : ['', Validators.required],
-      color     : ['#ffe082', Validators.required],
-      startHour : [null, Validators.required],
-      endHour   : [null, Validators.required],
+      value: ['', Validators.required],
+      label: ['', Validators.required],
+      color: ['#ffe082', Validators.required],
+      startHour: [null],
+      endHour: [null],
+      facility: [null, Validators.required]
     });
 
     /* Polusatni slotovi 0–24h (0, 0.5, 1 … 23.5, 24) */
@@ -146,7 +153,24 @@ export class WorkingShiftsComponent implements OnInit {
   ngOnInit(): void {
     this.currentUser = this.authService.getCurrentUser();
     this.loadEmployees();
+    this.loadFacilities();
     this.loadShifts();
+
+    // Automatsko ažuriranje kalendara kada se promeni bilo koje polje
+    // + mogućnost ručnog poziva preko dugmeta "Prikaži kalendar"
+    this.form.valueChanges.pipe(debounceTime(500), distinctUntilChanged())
+      .subscribe(() => {
+        // Učitaj shifts kada se promeni facility
+        if (this.form.get('facility')?.valid) {
+          this.loadShifts();
+          this.updateTimeOptions();
+        }
+        
+        // Automatsko učitavanje kalendara kada su sva polja validna
+        if (this.form.valid) {
+          this.loadSchedule();
+        }
+      });
   }
 
   /* ────────────────────────── HTTP pozivi ───────────────────────── */
@@ -159,10 +183,52 @@ export class WorkingShiftsComponent implements OnInit {
       .subscribe(res => this.employees = res.filter(e => e.includeInAppoitments));
   }
 
+  /** Učitaj sve facilities za tenant-a. */
+  private loadFacilities(): void {
+    const tenantId = this.currentUser?.tenant;
+    this.settingsService.getAllFacilities(tenantId).subscribe((res: any[]) => {
+      this.facilities = res;
+      this.updateTimeOptions();
+    });
+  }
+
+  /** Ažuriraj timeOptions na osnovu odabranog facility-ja */
+  private updateTimeOptions(): void {
+    const selectedFacility = this.facilities.find(f => f._id === this.form.value.facility);
+    
+    if (selectedFacility) {
+      const openingHour = parseInt(selectedFacility.openingHour.split(':')[0]);
+      const closingHour = parseInt(selectedFacility.closingHour.split(':')[0]);
+      
+      this.facilityWorkingHours = { opening: openingHour, closing: closingHour };
+      
+      // Generiši timeOptions samo za radne sate facility-ja
+      this.timeOptions = [];
+      for (let h = openingHour; h <= closingHour; h += 0.5) {
+        this.timeOptions.push(h);
+      }
+    } else {
+      this.facilityWorkingHours = null;
+      // Fallback na standardne sate
+      this.timeOptions = [];
+      for (let h = 0; h <= 24; h += 0.5) { 
+        this.timeOptions.push(h); 
+      }
+    }
+  }
+
   /** Učitaj listu DEFINISANIH tipova smena (boje, vreme). */
   private loadShifts(): void {
     const tenantId = this.currentUser?.tenant;
-    this.shiftsService.getAllShifts(tenantId).subscribe(shifts => {
+    const facilityId = this.form.value.facility;
+    
+    if (!facilityId) {
+      this.shiftTypes = [];
+      this.activeShiftType = '';
+      return;
+    }
+
+    this.shiftsService.getAllShifts(tenantId, facilityId).subscribe(shifts => {
       this.shiftTypes = shifts ?? [];
       /* Ako je prethodni activeShiftType nestao, uzmi prvi */
       if (this.shiftTypes.length) {
@@ -177,12 +243,13 @@ export class WorkingShiftsComponent implements OnInit {
 
   /* ────────────────────────── KALENDAR ───────────────────────── */
 
-  /** Klik na „Prikaži kalendar“. */
+  /** Klik na „Prikaži kalendar". */
   loadSchedule(): void {
     if (this.form.invalid) return;
 
     const selectedMonth : Date = this.form.value.month;
-    const employeeId    = this.form.value.employeeId;
+    const employeeId    = this.form.value.employee;
+    const facilityId    = this.form.value.facility;
     const tenantId      = this.currentUser?.tenant;
 
     this.buildCalendar(selectedMonth);
@@ -194,6 +261,7 @@ export class WorkingShiftsComponent implements OnInit {
         selectedMonth.getMonth(),
         selectedMonth.getFullYear(),
         tenantId,
+        facilityId
       )
       .subscribe(shifts => {
         for (const week of this.weeks) {
@@ -209,10 +277,10 @@ export class WorkingShiftsComponent implements OnInit {
                 startHour: found.startHour,
                 endHour  : found.endHour,
               };
-              day._id = found._id;
+              day.id = found.id;
             } else {
               day.shift = undefined;
-              day._id   = undefined;
+              day.id   = undefined;
             }
           }
         }
@@ -253,18 +321,19 @@ export class WorkingShiftsComponent implements OnInit {
   onDayClick(day: CalendarDay): void {
     if (!day) return;
 
-    const employeeId = this.form.value.employeeId;
-    const tenantId   = this.currentUser?.tenant;
+    const employee = this.form.value.employee;
+    const facility = this.form.value.facility;
+    const tenant   = this.currentUser?.tenant;
     const dateStr    = this.toLocalDateString(day.date);
 
-    /* Kratka animacija „flip“ */
+    /* Kratka animacija „flip" */
     day.animate = true;
     setTimeout(() => (day.animate = false), 500);
 
     /* Ako ISTA smena već postoji → briši je */
     if (day.shift && day.shift.shiftType === this.activeShiftType) {
       day.shift = undefined;
-      this.wsService.deleteShiftByEmployeeDate(employeeId, dateStr, tenantId)
+      this.wsService.deleteShiftByEmployeeDate(employee, dateStr, tenant, facility)
         .subscribe();
       return;
     }
@@ -274,12 +343,13 @@ export class WorkingShiftsComponent implements OnInit {
     day.shift = { shiftType: this.activeShiftType };
 
     this.wsService.upsertShift({
-      employeeId,
+      employee,
+      facility,
       date     : dateStr,
       shiftType: this.activeShiftType,
       startHour: s?.startHour ?? null,
       endHour  : s?.endHour   ?? null,
-      tenantId,
+      tenant,
     }).subscribe();
   }
 
@@ -290,7 +360,8 @@ export class WorkingShiftsComponent implements OnInit {
       width: '400px',
       data : {
         date      : day.date,
-        employeeId: this.form.value.employeeId,
+        employee: this.form.value.employee,
+        facility: this.form.value.facility,
         shift     : day.shift ?? { shiftType: null, note: '' },
         shiftTypes: this.shiftTypes,
       },
@@ -311,11 +382,27 @@ export class WorkingShiftsComponent implements OnInit {
   toggleEditShifts(): void { this.editShiftsMode = !this.editShiftsMode; }
 
   saveShift(): void {
-    if (this.shiftForm.invalid) return;
+    // Postavi facility u shiftForm pre validacije
+    this.shiftForm.patchValue({ facility: this.form.value.facility });
+    
+    if (this.shiftForm.invalid) {
+      return;
+    }
 
-    const payload = { ...this.shiftForm.value, tenantId: this.currentUser?.tenant };
-    const req$    = this.editingShift
-      ? this.shiftsService.updateShift(this.editingShift._id, payload)
+    const payload = { 
+      ...this.shiftForm.value, 
+      tenant: this.currentUser?.tenant,
+      facility: this.form.value.facility
+    };
+    
+    // Proveri da li editingShift ima id pre update-a
+    if (this.editingShift && !this.editingShift.id) {
+      this.snackBar.open('Greška: Nedostaje ID smene', 'Zatvori', { duration: 3000 });
+      return;
+    }
+    
+    const req$ = this.editingShift
+      ? this.shiftsService.updateShift(this.editingShift.id, payload)
       : this.shiftsService.createShift(payload);
 
     req$.subscribe(() => {
@@ -326,7 +413,7 @@ export class WorkingShiftsComponent implements OnInit {
 
   private resetShiftForm(): void {
     this.shiftFormDir.resetForm({
-      value: '', label: '', color: '#ffe082', startHour: null, endHour: null,
+      value: '', label: '', color: '#ffe082', startHour: null, endHour: null, facility: null,
     });
     this.editingShift = null;
   }
@@ -337,12 +424,18 @@ export class WorkingShiftsComponent implements OnInit {
   }
 
   editShift(shift: any): void {
+    if (!shift || !shift.id) {
+      return;
+    }
     this.editingShift = shift;
     this.shiftForm.patchValue(shift);
   }
 
   deleteShift(shift: any): void {
-    this.shiftsService.deleteShift(shift._id).subscribe(() => this.loadShifts());
+    if (!shift || !shift.id) {
+      return;
+    }
+    this.shiftsService.deleteShift(shift.id).subscribe(() => this.loadShifts());
   }
 
   /* ────────────────────────── Helpers ───────────────────────── */
@@ -373,7 +466,6 @@ export class WorkingShiftsComponent implements OnInit {
   /** Handle za datepicker: postavi mesec i resetuj kalendar */
   chosenMonthHandler(month: Date, dp: MatDatepicker<Date>): void {
     this.form.get('month')?.setValue(month);
-    this.weeks = [];
     dp.close();
   }
 

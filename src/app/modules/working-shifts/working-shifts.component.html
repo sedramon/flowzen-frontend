@@ -14,9 +14,19 @@
       <!-- Zaposleni -->
       <mat-form-field appearance="outline">
         <mat-label>Zaposleni</mat-label>
-        <mat-select formControlName="employeeId" required>
+        <mat-select formControlName="employee" required>
           <mat-option *ngFor="let emp of employees" [value]="emp._id">
             {{ emp.firstName }} {{ emp.lastName }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <!-- Facility -->
+      <mat-form-field appearance="outline">
+        <mat-label>Lokacija</mat-label>
+        <mat-select formControlName="facility" required>
+          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
+            {{ facility.name }}
           </mat-option>
         </mat-select>
       </mat-form-field>
@@ -59,6 +69,7 @@
       >
         Prikaži kalendar
       </button>
+
     </form>
   </mat-card>
 
@@ -95,6 +106,11 @@
 
       <!-- ─────────────── REŽIM UREĐIVANJA TIPOVA SMENA ─────────────── -->
       <div *ngIf="editShiftsMode">
+        <!-- Prikaz radnih sati facility-ja -->
+        <div *ngIf="facilityWorkingHours" style="padding: 12px;">
+          <strong>Radni sati facility-ja:</strong> {{ facilityWorkingHours.opening }}:00 - {{ facilityWorkingHours.closing }}:00
+        </div>
+
         <div class="shifts-edit-container">
           <form
             #shiftFormDir="ngForm"
