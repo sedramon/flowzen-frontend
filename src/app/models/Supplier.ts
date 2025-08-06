@@ -26,5 +26,5 @@ export interface CreateAndUpdateSupplierDto {
     pib?: string;
     remark?: string;
     isActive: boolean;
-    tenant: Tenant;
+    tenant: string;
 }

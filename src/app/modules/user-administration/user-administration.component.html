@@ -50,20 +50,18 @@
               </th>
               <td mat-cell *matCellDef="let user">
                 <div fxLayout="row" fxLayoutAlign="end center">
-                  <button mat-icon-button (click)="openEditUserDialog(user)" style="margin: 0px 10px;">
-                    <mat-icon style="color: aqua;">edit</mat-icon>
+                  <button mat-icon-button (click)="openEditUserDialog(user); $event.stopPropagation()" style="margin: 0px 10px;">
+                    <mat-icon style="color: orange;">edit</mat-icon>
                   </button>
-                  Edit User
-                  <button mat-icon-button (click)="deleteUser(user)" style="margin: 0px 10px;">
+                  <button mat-icon-button (click)="deleteUser(user); $event.stopPropagation()" style="margin: 0px 10px;">
                     <mat-icon style="color: red">delete</mat-icon>
                   </button>
-                  Delete User
                 </div>
               </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers" class="custom-header-row"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers" class="custom-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers" (click)="openEditUserDialog(row)" class="custom-row"></tr>
           </table>
         </div>
         <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
@@ -107,20 +105,18 @@
               </th>
               <td mat-cell *matCellDef="let role">
                 <div fxLayout="row" fxLayoutAlign="end center">
-                  <button mat-icon-button (click)="openEditRoleDialog(role)" style="margin: 0px 10px;">
-                    <mat-icon style="color: aqua;">edit</mat-icon>
+                  <button mat-icon-button (click)="openEditRoleDialog(role); $event.stopPropagation()" style="margin: 0px 10px;">
+                    <mat-icon style="color: orange;">edit</mat-icon>
                   </button>
-                  Edit Role
-                  <button mat-icon-button (click)="deleteRole(role)" style="margin: 0px 10px;">
+                  <button mat-icon-button (click)="deleteRole(role); $event.stopPropagation()" style="margin: 0px 10px;">
                     <mat-icon style="color: red">delete</mat-icon>
                   </button>
-                  Delete Role
                 </div>
               </td>
             </ng-container>
 
             <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles" class="custom-header-row"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles" class="custom-row"></tr>
+            <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles" (click)="openEditRoleDialog(row)" class="custom-row"></tr>
           </table>
         </div>
         <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>

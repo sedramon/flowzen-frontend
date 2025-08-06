@@ -40,6 +40,11 @@
       <mat-icon>content_cut</mat-icon>
     </button>
 
+    <button *ngIf="authService.isModuleEnabled('scope_articles:access')" mat-icon-button matTooltip="Articles"
+      matTooltipPosition="below" routerLink="/articles" routerLinkActive="active" class="nav-btn">
+      <mat-icon>article</mat-icon>
+    </button>
+
     <button *ngIf="authService.isModuleEnabled('scope_suppliers:access')" mat-icon-button matTooltip="Suppliers" matTooltipPosition="below"
     routerLink="/suppliers" routerLinkActive="active" class="nav-btn">
       <mat-icon>local_shipping</mat-icon>

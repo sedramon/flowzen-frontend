@@ -98,32 +98,3 @@ mat-paginator {
 
 
 
-
-.custom-row {
-    height: 80px;
-
-    td {
-        border-bottom: 1px solid #ffffff;
-    }
-
-    td.mat-cell {
-        padding: 16px;
-        border-bottom: none;
-    }
-
-    &:nth-child(odd) {
-        background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-}
-
-.custom-header-row {
-    background-color: #333;
-    color: white;
-    font-weight: 600;
-    padding: 16px;
-    border-bottom: none;
-}

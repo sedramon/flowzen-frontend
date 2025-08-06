@@ -69,7 +69,6 @@ export class Suppliers implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.suppliersService.getAllSuppliers(this.authService.getCurrentUser()!.tenant).subscribe(
       s => this.dataSourceSuppliers.data = s
-
     );
   }
 

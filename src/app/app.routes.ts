@@ -14,6 +14,7 @@ import { ClientDetailViewComponent } from './modules/clients/client-detail-view/
 import { SettingsComponent } from './modules/settings/settings.component';
 import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.component';
 import { Suppliers } from './modules/suppliers/suppliers';
+import { Articles } from './modules/articles/articles';
 
 export const routes: Routes = [
   {
@@ -123,6 +124,16 @@ export const routes: Routes = [
           scope: 'scope_suppliers:access',
           title: 'Suppliers',
           icon: 'suppliers'
+        }
+      },
+      {
+        path: 'articles',
+        component: Articles,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_articles:access',
+          title: 'Articles',
+          icon: 'articles'
         }
       },
       {

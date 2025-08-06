@@ -56,11 +56,14 @@
                 </th>
                 <td mat-cell *matCellDef="let service" (click)="$event.stopPropagation()">
                   <div fxLayout="row" fxLayoutAlign="end center">
+                    <button mat-icon-button (click)="addOrEditService(service); $event.stopPropagation()"
+                      style="margin: 0 4px; color: orange;">
+                      <mat-icon>edit</mat-icon>
+                    </button>
                     <button mat-icon-button (click)="deleteService(service); $event.stopPropagation()"
                       style="margin: 0 4px; color: red;">
                       <mat-icon>delete</mat-icon>
                     </button>
-                    Delete service
                   </div>
                 </td>
               </ng-container>

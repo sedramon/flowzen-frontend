@@ -8,7 +8,8 @@
         <mat-card-content class="filter-grid">
             <mat-form-field appearance="outline">
                 <mat-label>Name</mat-label>
-                <input #nameFilter matInput (input)="applyFilter('name', nameFilter.value)" placeholder="Filter by name" />
+                <input #nameFilter matInput (input)="applyFilter('name', nameFilter.value)"
+                    placeholder="Filter by name" />
             </mat-form-field>
 
             <mat-form-field appearance="outline">
@@ -25,12 +26,14 @@
 
             <mat-form-field appearance="outline">
                 <mat-label>Address</mat-label>
-                <input #addressFilter matInput (input)="applyFilter('address', addressFilter.value)" placeholder="Filter by address" />
+                <input #addressFilter matInput (input)="applyFilter('address', addressFilter.value)"
+                    placeholder="Filter by address" />
             </mat-form-field>
 
             <mat-form-field appearance="outline">
                 <mat-label>City</mat-label>
-                <input #cityFilter matInput (input)="applyFilter('city', cityFilter.value)" placeholder="Filter by city" />
+                <input #cityFilter matInput (input)="applyFilter('city', cityFilter.value)"
+                    placeholder="Filter by city" />
             </mat-form-field>
         </mat-card-content>
     </mat-card>
@@ -95,7 +98,7 @@
                                         <mat-icon style="color: aqua;">trending_up</mat-icon>
                                     </button>
                                     <button mat-icon-button (click)="editSupplier(supplier); $event.stopPropagation()">
-                                        <mat-icon style="color: yellow;">edit</mat-icon>
+                                        <mat-icon style="color: orange;">edit</mat-icon>
                                     </button>
                                     <button mat-icon-button
                                         (click)="deleteSupplier(supplier); $event.stopPropagation()">
@@ -106,7 +109,8 @@
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumnsSuppliers" class="custom-header-row"></tr>
-                        <tr mat-row *matRowDef="let supplier; columns: displayedColumnsSuppliers" class="custom-row" (click)="editSupplier(supplier)">
+                        <tr mat-row *matRowDef="let supplier; columns: displayedColumnsSuppliers" class="custom-row"
+                            (click)="editSupplier(supplier)">
                         </tr>
                     </table>
                 </div>

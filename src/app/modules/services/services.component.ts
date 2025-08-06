@@ -140,38 +140,44 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
 
   /** Called when you click the “+” button or the “edit” icon */
   addOrEditService(serviceToEdit?: Service): void {
-    const dialogRef = this.dialog.open(CreateServiceDialogComponent, {
-      width: '600px',
-      data: serviceToEdit ?? null
-    });
+  const dialogRef = this.dialog.open(CreateServiceDialogComponent, {
+    width: '600px',
+    data: serviceToEdit ?? null
+  });
 
-    dialogRef.afterClosed().subscribe((result: Service | undefined) => {
-      if (!result) {
-        return; // user cancelled
-      }
-
+  dialogRef.afterClosed().pipe(
+    filter(result => !!result),
+    switchMap((result) =>
+      serviceToEdit
+        ? this.servicesService.updateService(serviceToEdit._id!, result)
+        : this.servicesService.createService(result)
+    ),
+    tap((saved) => {
       if (serviceToEdit) {
-        // We passed in `serviceToEdit`, so this is Edit mode:
-        this.servicesService.updateService(serviceToEdit._id!, result).subscribe((updated) => {
-          // Update the table locally:
-          const data = this.dataSourceServices.data.slice();
-          const idx = data.findIndex((s) => s._id === updated._id);
-          if (idx > -1) {
-            data[idx] = updated;
-            this.dataSourceServices.data = data;
-          }
-          this.showSnackbar(`Service "${updated.name}" updated successfully`);
-        });
+        const data = [...this.dataSourceServices.data];
+        const idx = data.findIndex(s => s._id === saved._id);
+        if (idx > -1) data[idx] = saved;
+        this.dataSourceServices.data = data;
+        this.showSnackbar(`Service "${saved.name}" updated successfully`);
       } else {
-        // No serviceToEdit means Create mode:
-        this.servicesService.createService(result).subscribe((created) => {
-          // Append to the dataSource
-          this.dataSourceServices.data = [...this.dataSourceServices.data, created];
-        });
-        this.showSnackbar(`Service "${result.name}" created successfully`);
+        this.dataSourceServices.data = [
+          ...this.dataSourceServices.data,
+          saved
+        ];
+        this.showSnackbar(`Service "${saved.name}" created successfully`);
       }
-    });
-  }
+    }),
+    catchError(err => {
+      console.error('Service save failed:', err);
+      this.showSnackbar(
+        `Failed to ${serviceToEdit ? 'update' : 'create'} service`,
+        true
+      );
+      return EMPTY;
+    })
+  )
+  .subscribe();
+}
 
   showSnackbar(message: string, isError: boolean = false) {
     this.snackBar.open(message, 'Close', {
