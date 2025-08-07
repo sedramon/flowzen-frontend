@@ -1,0 +1,91 @@
+<div class="dialog-container" fxLayout="column">
+    <h2 mat-dialog-title>
+        {{ isEditMode ? 'Edit Supplier' : 'Create Supplier' }}
+    </h2>
+
+    <div mat-dialog-content style="padding: 20px">
+        <form [formGroup]="articleForm" class="grid-dialog-content">
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Name</mat-label>
+                <input matInput formControlName="name" placeholder="Service Name" required />
+                @if (articleForm.get('name')?.hasError('required')) {
+                <mat-error>Name is required</mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Unit of Measure</mat-label>
+                <mat-select formControlName="unitOfMeasure">
+                    <mat-option [value]="'piece'">Piece</mat-option>
+                    <mat-option [value]="'kg'">Kg</mat-option>
+                    <mat-option [value]="'liter'">Liter</mat-option>
+                    <mat-option [value]="'box'">Box</mat-option>
+                    <mat-option [value]="'mililiter'">Mililiter</mat-option>
+                </mat-select>
+                @if (articleForm.get('unitOfMeasure')?.hasError('required')) {
+                <mat-error>Unit of Measure is required</mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Price</mat-label>
+                <input type="number" matInput formControlName="price" placeholder="Price" required />
+                @if (articleForm.get('price')?.hasError('required')) {
+                <mat-error>Price is required</mat-error>
+                }
+            </mat-form-field>
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Sale Price</mat-label>
+                <input type="number" matInput formControlName="salePrice" placeholder="Sale Price" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Tax Rates</mat-label>
+                <mat-select formControlName="taxRates">
+                    <mat-option [value]="0">0 %</mat-option>
+                    <mat-option [value]="20">20 %</mat-option>
+                </mat-select>
+            </mat-form-field>
+
+            <div></div>
+
+            <mat-checkbox formControlName="isOnSale">
+                On Sale
+            </mat-checkbox>
+
+            <mat-checkbox formControlName="isActive">
+                Active
+            </mat-checkbox>
+
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Code</mat-label>
+                <input matInput formControlName="code" placeholder="Code" />
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Supplier</mat-label>
+                <mat-select formControlName="supplier">
+                    @for (supplier of data.suppliers; track (supplier.id ?? $index)) {
+                    <mat-option [value]="supplier._id">
+                        {{ supplier.name }}
+                    </mat-option>
+                    }
+
+                </mat-select>
+            </mat-form-field>
+
+
+            <mat-form-field appearance="outline" style="width: 100%">
+                <mat-label>Remark</mat-label>
+                <textarea matInput formControlName="remark" rows="4" placeholder="Any notes or comments"></textarea>
+            </mat-form-field>
+
+
+        </form>
+    </div>
+
+    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-around center" class="mat-dialog-buttons">
+        <button mat-raised-button color="primary" (click)="save()" [disabled]="articleForm.invalid">
+            {{ isEditMode ? 'Update' : 'Create' }}
+        </button>
+        <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+    </div>
+</div>

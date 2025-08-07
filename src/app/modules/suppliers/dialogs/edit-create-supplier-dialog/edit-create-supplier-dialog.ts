@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
@@ -20,43 +20,49 @@ import { MatSelect, MatSelectModule } from '@angular/material/select';
 export class EditCreateSupplierDialog implements OnInit {
 
   isEditMode = false;
-  supplierForm = new FormGroup({
-    name: new FormControl<string>('', [Validators.required]),
-    address: new FormControl<string>('', [Validators.required]),
-    city: new FormControl<string>('', [Validators.required]),
-    contactPhone: new FormControl<string>('', [Validators.required]),
-    contactEmail: new FormControl<string>('', [Validators.required, Validators.email]),
-    contactLandline: new FormControl<string>(''),
-    contactPerson: new FormControl<string>(''),
-    pib: new FormControl<string>(''),
-    remark: new FormControl<string>(''),
-    isActive: new FormControl<boolean>(true, [Validators.required]),
-    tenant: new FormControl<string>('', [Validators.required])
-  });
+  supplierForm! : FormGroup<{
+    name: FormControl<string>;
+    address: FormControl<string>;
+    city: FormControl<string>;
+    contactPhone: FormControl<string>;
+    contactEmail: FormControl<string>;
+    contactLandline: FormControl<string>;
+    contactPerson: FormControl<string>;
+    pib: FormControl<string>;
+    remark: FormControl<string>;
+    tenant: FormControl<string>;
+    isActive: FormControl<boolean>;
+  }>;
 
   constructor(
     private dialogRef: MatDialogRef<EditCreateSupplierDialog>,
     @Inject(MAT_DIALOG_DATA) public data: Supplier | null,
-    private authService: AuthService
+    private authService: AuthService,
+    private fb: FormBuilder
   ) {
   }
 
 
   ngOnInit(): void {
+    this.supplierForm = this.fb.group({
+      name: ['', Validators.required],
+      address: ['', Validators.required],
+      city: ['', Validators.required],
+      contactPhone: ['', Validators.required],
+      contactEmail: ['', Validators.required],
+      contactLandline: [''],
+      contactPerson: [''],
+      pib: [''],
+      remark: [''],
+      tenant: ['', Validators.required],
+      isActive: [true]
+    }) as typeof this.supplierForm;
+
     if (this.data) {
       this.isEditMode = true;
-      this.supplierForm.patchValue({
-        name: this.data.name,
-        address: this.data.address,
-        city: this.data.city,
-        contactPhone: this.data.contactPhone,
-        contactEmail: this.data.contactEmail,
-        contactLandline: this.data.contactLandline,
-        contactPerson: this.data.contactPerson,
-        pib: this.data.pib,
-        remark: this.data.remark,
-        isActive: this.data.isActive
-      })
+      
+      const {tenant, ...rest } = this.data;
+      this.supplierForm.patchValue(rest);
     }
 
     this.supplierForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant);

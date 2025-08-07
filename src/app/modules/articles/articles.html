@@ -31,9 +31,25 @@
                             <th mat-header-cell *matHeaderCellDef>Price</th>
                             <td mat-cell *matCellDef="let article">{{article.price}}</td>
                         </ng-container>
+                        <ng-container matColumnDef="salePrice">
+                            <th mat-header-cell *matHeaderCellDef>Sale Price</th>
+                            <td mat-cell *matCellDef="let article">{{article.salePrice}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="isOnSale">
+                            <th mat-header-cell *matHeaderCellDef>On sale</th>
+                            <td mat-cell *matCellDef="let article">{{article.isOnSale ? 'Yes' : 'No'}}</td>
+                        </ng-container>
+                        <ng-container matColumnDef="taxRates">
+                            <th mat-header-cell *matHeaderCellDef>Tax Rates</th>
+                            <td mat-cell *matCellDef="let article">{{article.taxRates}} %</td>
+                        </ng-container>
+                        <ng-container matColumnDef="supplier">
+                            <th mat-header-cell *matHeaderCellDef>Supplier</th>
+                            <td mat-cell *matCellDef="let article">{{article.supplier?.name || 'No supplier'}}</td>
+                        </ng-container>
                         <ng-container matColumnDef="isActive">
                             <th mat-header-cell *matHeaderCellDef>Active</th>
-                            <td mat-cell *matCellDef="let article">{{article.isActive}}</td>
+                            <td mat-cell *matCellDef="let article">{{article.isActive ? 'Yes' : 'No'}}</td>
                         </ng-container>
                         <ng-container matColumnDef="actions">
                             <th mat-header-cell *matHeaderCellDef>
@@ -45,10 +61,10 @@
                             </th>
                             <td mat-cell *matCellDef="let article">
                                 <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                                    <button mat-icon-button (click)="editArticle(); $event.stopPropagation()">
+                                    <button mat-icon-button (click)="editArticle(article); $event.stopPropagation()">
                                         <mat-icon style="color: orange;">edit</mat-icon>
                                     </button>
-                                    <button mat-icon-button (click)="deleteArticle(); $event.stopPropagation()">
+                                    <button mat-icon-button (click)="deleteArticle(article); $event.stopPropagation()">
                                         <mat-icon style="color: red">delete</mat-icon>
                                     </button>
                                 </div>
@@ -56,7 +72,7 @@
                         </ng-container>
 
                         <tr mat-header-row *matHeaderRowDef="displayedColumnsArticles" class="custom-header-row"></tr>
-                        <tr mat-row *matRowDef="let article; columns: displayedColumnsArticles" class="custom-row" (click)="editArticle()"></tr>
+                        <tr mat-row *matRowDef="let article; columns: displayedColumnsArticles" class="custom-row" (click)="editArticle(article)"></tr>
                     </table>
                 </div>
                 <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons class="bottom-paginator"></mat-paginator>

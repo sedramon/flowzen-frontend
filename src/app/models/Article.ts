@@ -6,7 +6,7 @@ export interface Article {
     name: string,
     unitOfMeasure: string,
     price: number,
-    salePrice: number;
+    salePrice: number | null;
     isOnSale: boolean;
     code: string;
     taxRates: number;
@@ -20,11 +20,11 @@ export interface CreateArticleDto {
     name: string;
     unitOfMeasure: string;
     price: number;
-    salePrice?: number;
+    salePrice?: number | null;
     isOnSale?: boolean;
     code?: string;
     taxRates?: number;
-    supplier?: string;
+    supplier?: string | null;
     tenant: string;
     isActive?: boolean;
     remark?: string;
