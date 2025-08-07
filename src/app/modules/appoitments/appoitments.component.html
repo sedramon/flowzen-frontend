@@ -100,12 +100,12 @@
             <div *ngIf="emp.workingShift"
                  class="not-working-overlay"
                  [style.top.%]="0"
-                 [style.height.%]="((emp.workingShift.startHour - workStartHour) / (workEndHour - workStartHour)) * 100">
+                 [style.height.%]="calculateOverlayTop(emp.workingShift.startHour)">
             </div>
             <div *ngIf="emp.workingShift"
                  class="not-working-overlay"
-                 [style.top.%]="((emp.workingShift.endHour - workStartHour) / (workEndHour - workStartHour)) * 100"
-                 [style.height.%]="((workEndHour - emp.workingShift.endHour) / (workEndHour - workStartHour)) * 100">
+                 [style.top.%]="calculateOverlayTop(emp.workingShift.endHour)"
+                 [style.height.%]="calculateOverlayHeight(emp.workingShift.endHour, workEndHour)">
             </div>
 
             <!-- SVE OSTALO POSLE OVERLAYA -->

@@ -149,6 +149,8 @@ export const CUSTOM_DATE_FORMATS = {
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppoitmentsComponent implements OnInit, AfterViewInit {
+  // ===== VIEW CHILD REFERENCES =====
+  // Angular ViewChild references for DOM elements
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
   @ViewChild('employeeColumns', { static: false })
   employeeColumnsRef!: ElementRef;
@@ -157,45 +159,90 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   @ViewChild('firstEmployeeColumn', { static: false })
   firstEmployeeColumnRef!: ElementRef;
 
+  // ===== FORM CONTROLS =====
+  // Angular form controls
   dateControl = new FormControl<Date | null>(null);
   facilityControl = new FormControl<string>('');
   selectedDate: Date | null = null;
   selectedFacility: string = '';
   // Kontrola prikaza rasporeda u DOM-u
+  // ===== UI PROPERTIES =====
+  // UI state and animation properties
   animateSchedule: boolean = false;
   toolbarState: 'centered' | 'spaced' = 'centered';
   loading = true;
 
+  // ===== WORKING HOURS =====
+  // Default working hours (8:00-22:00)
   workStartHour = 8;
   workEndHour = 22;
 
-  // Generate time slots based on working hours
+  // ===== TIME SLOTS CALCULATION =====
+  // Generate time slots based on working hours (supports overnight shifts) in 15-minute intervals
   get timeSlots(): number[] {
     const slots: number[] = [];
-    for (let t = this.workStartHour; t <= this.workEndHour; t += 0.25) {
-      slots.push(Number(t.toFixed(2)));
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts (e.g., 22:00-08:00)
+      for (let t = this.workStartHour; t < 24; t += 0.25) {
+        slots.push(Number(t.toFixed(2)));
+      }
+      for (let t = 0; t <= this.workEndHour; t += 0.25) {
+        slots.push(Number(t.toFixed(2)));
+      }
+    } else {
+      // Normal working hours (e.g., 8:00-22:00)
+      for (let t = this.workStartHour; t <= this.workEndHour; t += 0.25) {
+        slots.push(Number(t.toFixed(2)));
+      }
     }
+    
     return slots;
   }
 
+  // Get total number of time slots
   get slotCount(): number {
     return this.timeSlots.length;
   }
 
+  // ===== DATA PROPERTIES =====
+  // Component data arrays
   employees: Employee[] = [];
   appointments: Appointment[] = [];
   services: Service[] = [];
   clients: Client[] = [];
   facilities: Facility[] = [];
 
-  private totalMinutes = 14 * 60;
+  // ===== TOTAL MINUTES CALCULATION =====
+  // Calculate total working minutes (supports overnight shifts)
+  get totalMinutes(): number {
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts: from start to midnight + from midnight to end
+      const firstPart = (24 - this.workStartHour) * 60;
+      const secondPart = this.workEndHour * 60;
+      return firstPart + secondPart;
+    } else {
+      // Normal working hours
+      return (this.workEndHour - this.workStartHour) * 60;
+    }
+  }
 
-  // Grid calculations for 8-22, 57 slots, height 1300px, line-height 20px
+  // ===== GRID HEIGHT CALCULATION =====
+  // Calculate grid height based on working hours (supports overnight shifts)
   get gridBodyHeight(): number {
-    // 57 slots for 8-22, 1300px
-    // 1300 / 57 = 22.8 px per slot
-    // slotCount = this.timeSlots.length
-    return Math.round((1300 / 57) * this.slotCount);
+    const baseHeight = 1300;
+    const baseHours = 14;
+    
+    let currentHours: number;
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts: from start to midnight + from midnight to end
+      currentHours = (24 - this.workStartHour) + this.workEndHour;
+    } else {
+      // Normal working hours
+      currentHours = this.workEndHour - this.workStartHour;
+    }
+    
+    return Math.round((baseHeight / baseHours) * currentHours);
   }
 
   // get timeCellLineHeight(): number {
@@ -203,11 +250,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   //   return Math.round((20 / 57) * this.slotCount);
   // }
 
+  // ===== DRAG & DROP PROPERTIES =====
   // Store offsets during drag operations
   private dragOffset: { [id: string]: { x: number; y: number } } = {};
   private initialPosition: { [id: string]: { left: number; top: number } } = {};
 
-  // Prevent default text selection behavior
+  // ===== EVENT HANDLERS =====
+  // Prevent default text selection behavior during drag operations
   private mouseMoveListener = (ev: MouseEvent) => {
     if (window.getSelection) {
       window.getSelection()?.removeAllRanges();
@@ -215,6 +264,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     ev.preventDefault();
   };
 
+  // ===== GETTERS =====
+  // Format selected date as string (YYYY-MM-DD)
   get selectedDateStr(): string {
     if (!this.selectedDate) return '';
     return (
@@ -226,10 +277,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     );
   }
 
+  // Get current facility object
   get currentFacility(): Facility | undefined {
     return this.facilities.find(f => f._id === this.selectedFacility);
   }
 
+  // Get formatted work hours string
   get workHoursString(): string {
     const facility = this.currentFacility;
     if (facility) {
@@ -238,6 +291,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     return `${this.workStartHour}:00 - ${this.workEndHour}:00`;
   }
 
+  // ===== CONSTRUCTOR =====
+  // Dependency injection
   constructor(
     private cd: ChangeDetectorRef,
     private appointmentsService: AppointmentsService,
@@ -249,6 +304,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private ngZone: NgZone
   ) {}
 
+  // ===== COMPONENT INITIALIZATION =====
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
@@ -262,6 +318,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         this.selectedFacility = facilities[0]._id || '';
         this.facilityControl.setValue(this.selectedFacility);
         this.updateWorkHours(facilities[0]);
+        this.cd.detectChanges();
       }
     });
 
@@ -281,7 +338,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         this.clients = fetchedClients;
       });
 
-    // Listen for facility changes
+    // Listen for facility changes and update work hours
     this.facilityControl.valueChanges.subscribe((facility) => {
       if (facility && this.selectedDate) {
         this.selectedFacility = facility;
@@ -289,20 +346,26 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         if (selectedFacility) {
           this.updateWorkHours(selectedFacility);
         }
+        this.cd.detectChanges();
         this.loadSchedule(this.selectedDate);
       }
     });
   }
 
+  // ===== STATE PROPERTIES =====
+  // Component state flags
   isDragging = false;
   justResized = false;
   isResizing = false;
 
+  // ===== LIFECYCLE HOOKS =====
+  // Initialize interact.js after view initialization
   ngAfterViewInit(): void {
-    // Initialize interact.js after view initialization
     setTimeout(() => this.initializeInteractJS(), 0);
   }
 
+  // ===== INTERACT.JS INITIALIZATION =====
+  // Initialize drag & drop and resize functionality with proper guards
   private initializeInteractJS(): void {
     // Guard: ensure viewchildren are available
     if (!this.gridBodyRef?.nativeElement || !this.timeColumnRef?.nativeElement || !this.employeeColumnsRef?.nativeElement) {
@@ -412,27 +475,43 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const employee = this.employees.find((e) => e === ap.employee);
             if (!employee || !employee.workingShift) return;
 
+            // Calculate new appointment duration based on resize (supports overnight shifts)
             let newHeightPx = event.rect.height;
             const fiveMinuteFraction = 5 / 60;
-            let computedDuration = (newHeightPx / this.gridBodyHeight) * 14;
+            let totalWorkingHours = this.workStartHour > this.workEndHour ? 
+              (24 - this.workStartHour) + this.workEndHour : 
+              this.workEndHour - this.workStartHour;
+            let computedDuration = (newHeightPx / this.gridBodyHeight) * totalWorkingHours;
             let newDuration =
               Math.round(computedDuration / fiveMinuteFraction) *
               fiveMinuteFraction;
 
             if (newDuration < 0.5) {
               newDuration = 0.5;
-              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
             }
 
-            const maxEndHour = employee.workingShift.endHour;
+            // Validate max end hour for overnight shifts
+            let maxEndHour = employee.workingShift.endHour;
+            if (employee.workingShift.startHour > employee.workingShift.endHour) {
+              // For overnight shifts, check if appointment crosses midnight
+              if (ap.startHour >= employee.workingShift.startHour) {
+                // First part: can extend to midnight
+                maxEndHour = 24;
+              } else {
+                // Second part: limited by end hour
+                maxEndHour = employee.workingShift.endHour;
+              }
+            }
+            
             if (ap.startHour + newDuration > maxEndHour) {
               newDuration = maxEndHour - ap.startHour;
-              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
             }
 
             if (ap.startHour + newDuration < ap.startHour + 0.5) {
               newDuration = 0.5;
-              newHeightPx = (newDuration / 14) * this.gridBodyHeight;
+              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
             }
 
             ap.endHour = ap.startHour + newDuration;
@@ -448,19 +527,45 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const ap = this.appointments.find((a) => a.id === apId);
             if (ap) {
               const employee = this.employees.find((e) => e === ap.employee);
+              // Validate appointment time after resize (supports overnight shifts)
+              let isValidTime = false;
+              if (employee && employee.workingShift) {
+                if (employee.workingShift.startHour > employee.workingShift.endHour) {
+                  // Overnight shifts: appointment must be >= startHour OR < endHour
+                  isValidTime = (ap.startHour >= employee.workingShift.startHour || ap.startHour < employee.workingShift.endHour) &&
+                               (ap.endHour >= employee.workingShift.startHour || ap.endHour < employee.workingShift.endHour);
+                } else {
+                  // Normal working hours
+                  isValidTime = ap.startHour >= employee.workingShift.startHour && ap.endHour <= employee.workingShift.endHour;
+                }
+              }
+              
               if (
                 !employee ||
                 !employee.workingShift ||
-                ap.startHour < employee.workingShift.startHour ||
-                ap.endHour > employee.workingShift.endHour
+                !isValidTime
               ) {
-                ap.endHour = Math.min(
-                  Math.max(
-                    ap.endHour,
-                    (employee?.workingShift?.startHour ?? 8) + 0.5
-                  ),
-                  employee?.workingShift?.endHour ?? 22
-                );
+                // Reset appointment to valid working hours
+                if (employee && employee.workingShift) {
+                  if (employee.workingShift.startHour > employee.workingShift.endHour) {
+                    // Overnight shifts: ensure appointment is within working hours
+                    if (ap.startHour < employee.workingShift.startHour && ap.startHour >= employee.workingShift.endHour) {
+                      ap.startHour = employee.workingShift.startHour;
+                    }
+                    if (ap.endHour > employee.workingShift.endHour && ap.endHour <= employee.workingShift.startHour) {
+                      ap.endHour = employee.workingShift.endHour;
+                    }
+                  } else {
+                    // Normal working hours
+                    ap.endHour = Math.min(
+                      Math.max(
+                        ap.endHour,
+                        employee.workingShift.startHour + 0.5
+                      ),
+                      employee.workingShift.endHour
+                    );
+                  }
+                }
                 this.snackBar.open(
                   'Nije moguće promeniti trajanje termina van radnog vremena zaposlenog',
                   'Zatvori',
@@ -498,6 +603,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         },
       });
 
+    // ===== DROPZONE CONFIGURATION =====
+    // Configure drop zones for appointment blocks with validation
     interact('.employee-column').dropzone({
       accept: '.appointment-block',
       overlap: 0.3, // Reduce overlap for more precise drop
@@ -561,15 +668,24 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           return;
         }
         
+        // Calculate new appointment time based on drop position (supports overnight shifts)
         const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-        let newStartHour = 8 + (Math.round(minutesFromTop / 5) * 5) / 60;
+        let newStartHour = this.workStartHour + (Math.round(minutesFromTop / 5) * 5) / 60;
         const duration = ap.endHour - ap.startHour;
         let newEndHour = newStartHour + duration;
 
-        if (
-          newStartHour < employee.workingShift.startHour ||
-          newEndHour > employee.workingShift.endHour
-        ) {
+        // Validate appointment time against employee working hours
+        let isValidTime = false;
+        if (employee.workingShift.startHour > employee.workingShift.endHour) {
+          // Overnight shifts: appointment must be >= startHour OR < endHour
+          isValidTime = (newStartHour >= employee.workingShift.startHour || newStartHour < employee.workingShift.endHour) &&
+                       (newEndHour >= employee.workingShift.startHour || newEndHour < employee.workingShift.endHour);
+        } else {
+          // Normal working hours
+          isValidTime = newStartHour >= employee.workingShift.startHour && newEndHour <= employee.workingShift.endHour;
+        }
+        
+        if (!isValidTime) {
           appointmentEl.style.transition = 'transform 0.3s ease';
           appointmentEl.style.transform = 'none';
           this.snackBar.open(
@@ -616,6 +732,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== CLICK HANDLER =====
+  // Handle clicks on empty time slots to create new appointments (supports overnight shifts)
   onEmptyColumnClick(emp: Employee, event: MouseEvent): void {
     if (this.isDragging) return;
     if (!emp.workingShift) return;
@@ -624,10 +742,32 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       event.currentTarget as HTMLElement
     ).getBoundingClientRect();
     const localY = event.clientY - empColRect.top;
-    const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
-    // Snap to 15 minutes
-    const snappedMinutes = Math.round(minutesFromTop / 15) * 15;
-    const appointmentStart = 8 + snappedMinutes / 60;
+    
+    // Calculate appointment start time based on mouse position (supports overnight shifts)
+    let appointmentStart: number;
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts: calculate position relative to total working hours
+      const totalWorkingHours = (24 - this.workStartHour) + this.workEndHour;
+      const minutesFromTop = (localY / this.gridBodyHeight) * (totalWorkingHours * 60);
+      const snappedMinutes = Math.round(minutesFromTop / 15) * 15;
+      
+      if (snappedMinutes < (24 - this.workStartHour) * 60) {
+        // First part: after start hour
+        appointmentStart = this.workStartHour + snappedMinutes / 60;
+      } else {
+        // Second part: before end hour
+        const secondPartMinutes = snappedMinutes - (24 - this.workStartHour) * 60;
+        appointmentStart = secondPartMinutes / 60;
+      }
+    } else {
+      // Normal working hours
+      const minutesFromTop = (localY / this.gridBodyHeight) * this.totalMinutes;
+      const snappedMinutes = Math.round(minutesFromTop / 15) * 15;
+      appointmentStart = this.workStartHour + snappedMinutes / 60;
+    }
+    
+
 
     // Allow click only if slot is within working hours
     if (!this.isSlotAvailable(emp, appointmentStart)) return;
@@ -681,6 +821,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== APPOINTMENT INTERACTION =====
+  // Handle clicks on existing appointments to edit/delete with proper guards
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
     if (this.isDragging || this.justResized) return;
     const target = event.currentTarget as HTMLElement;
@@ -749,9 +891,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // --- NEW OVERLAP LOGIC ---
-
-  // Returns all appointments that overlap with the given one (including itself)
+  // ===== OVERLAP LOGIC =====
+  // Returns all appointments that overlap with the given one (including itself) for UI layout
   getOverlappingAppointments(
     ap: Appointment,
     employeeId: string
@@ -766,7 +907,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     );
   }
 
-  // Returns stable index of appointment in overlap group (sorted only by id)
+  // Returns stable index of appointment in overlap group (sorted by id) for UI positioning
   getAppointmentOverlapIndex(ap: Appointment, employeeId: string): number {
     const overlapping = this.getOverlappingAppointments(ap, employeeId)
       .map((a) => a.id)
@@ -774,30 +915,45 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     return overlapping.indexOf(ap.id);
   }
 
-  // Returns number of overlapped appointments in that group
+  // Returns number of overlapped appointments in that group for UI width calculation
   getAppointmentOverlapCount(ap: Appointment, employeeId: string): number {
     return this.getOverlappingAppointments(ap, employeeId).length;
   }
 
+  // Track appointment by ID for ngFor optimization and performance
   trackByAppointmentId(index: number, ap: Appointment) {
     return ap.id;
   }
 
+  // Get all appointments for a specific employee for UI rendering
   getAppointmentsForEmployee(employeeId: string): Appointment[] {
     return this.appointments.filter((a) => a.employee._id === employeeId);
   }
 
+  // ===== SCHEDULE LOADING =====
+  // Load schedule data, update work hours, and force change detection
   loadSchedule(date: Date): void {
     this.loading = true;
     this.appointmentsService.getScheduleSimple(date, this.selectedFacility).subscribe({
       next: (data) => {
         this.employees = data.employees;
-        console.log(this.employees);
         this.appointments = data.appointments;
+        
+        // Update work hours based on current facility
+        const currentFacility = this.facilities.find(f => f._id === this.selectedFacility);
+        if (currentFacility) {
+          this.updateWorkHours(currentFacility);
+        }
+        
         this.loading = false;
+        
+        // Force change detection to ensure all calculations are updated
         this.cd.detectChanges();
-        // Reinitialize interact.js after rendering appointments
-        setTimeout(() => this.initializeInteractJS(), 0);
+        setTimeout(() => {
+          this.cd.detectChanges();
+          // Reinitialize interact.js after rendering appointments
+          setTimeout(() => this.initializeInteractJS(), 0);
+        }, 0);
       },
       error: (err) => {
         this.loading = false;
@@ -806,6 +962,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== DATE NAVIGATION =====
+  // Handle date changes, reset state, and load schedule
   onDateChange(dateValue: any): void {
     if (dateValue) {
       // If dateValue is Moment object, convert to Date
@@ -835,14 +993,14 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     }
   }
 
+  // Set date to today and load schedule
   setToday(): void {
     const today = new Date();
-
     this.dateControl.setValue(today);
-
     this.onDateChange(today);
   }
 
+  // Shift date by specified number of days and load schedule
   shiftDate(deltaDays: number): void {
     let current = this.dateControl.value;
     if (!current) return;
@@ -859,45 +1017,142 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     this.onDateChange(next);
   }
 
+  // ===== UTILITY FUNCTIONS =====
+  // Format time for display (e.g., 17.5 -> "17:30") with proper padding
   formatTime(time: number): string {
     const h = Math.floor(time);
     const m = Math.round((time - h) * 60);
     return `${h}:${m < 10 ? '0' + m : m}`;
   }
 
+  // ===== POSITION CALCULATIONS =====
+  // Calculate top position for appointment blocks (supports overnight shifts) in percentage
   calculateTop(startHour: number): number {
-    // Position relative to dynamic working hours
-    return ((startHour - this.workStartHour) / (this.workEndHour - this.workStartHour)) * 100;
+    let totalWorkingHours: number;
+    let relativeStartHour: number;
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts
+      totalWorkingHours = (24 - this.workStartHour) + this.workEndHour;
+      
+      if (startHour >= this.workStartHour) {
+        // First part: after start hour
+        relativeStartHour = startHour - this.workStartHour;
+      } else {
+        // Second part: before end hour
+        relativeStartHour = (24 - this.workStartHour) + startHour;
+      }
+    } else {
+      // Normal working hours
+      totalWorkingHours = this.workEndHour - this.workStartHour;
+      relativeStartHour = startHour - this.workStartHour;
+    }
+    
+    return (relativeStartHour / totalWorkingHours) * 100;
   }
 
+  // Calculate height for appointment blocks (supports overnight shifts) in percentage
   calculateHeight(startHour: number, endHour: number): number {
-    // Height relative to dynamic working hours duration
-    return ((endHour - startHour) / (this.workEndHour - this.workStartHour)) * 100;
+    let totalWorkingHours: number;
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts
+      totalWorkingHours = (24 - this.workStartHour) + this.workEndHour;
+    } else {
+      // Normal working hours
+      totalWorkingHours = this.workEndHour - this.workStartHour;
+    }
+    
+    return ((endHour - startHour) / totalWorkingHours) * 100;
   }
 
+  // ===== OVERLAY CALCULATIONS =====
+  // Calculate top position for overlay elements (supports overnight shifts) in percentage
+  calculateOverlayTop(hour: number): number {
+    let totalWorkingHours: number;
+    let relativeHour: number;
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts
+      totalWorkingHours = (24 - this.workStartHour) + this.workEndHour;
+      
+      if (hour >= this.workStartHour) {
+        // First part: after start hour
+        relativeHour = hour - this.workStartHour;
+      } else {
+        // Second part: before end hour
+        relativeHour = (24 - this.workStartHour) + hour;
+      }
+    } else {
+      // Normal working hours
+      totalWorkingHours = this.workEndHour - this.workStartHour;
+      relativeHour = hour - this.workStartHour;
+    }
+    
+    return (relativeHour / totalWorkingHours) * 100;
+  }
+
+  // Calculate height for overlay elements (supports overnight shifts) in percentage
+  calculateOverlayHeight(startHour: number, endHour: number): number {
+    let totalWorkingHours: number;
+    
+    if (this.workStartHour > this.workEndHour) {
+      // Overnight shifts
+      totalWorkingHours = (24 - this.workStartHour) + this.workEndHour;
+    } else {
+      // Normal working hours
+      totalWorkingHours = this.workEndHour - this.workStartHour;
+    }
+    
+    return ((endHour - startHour) / totalWorkingHours) * 100;
+  }
+
+  // ===== VALIDATION METHODS =====
+  // Check if employee column is disabled (no working shift)
   isColumnDisabled(emp: Employee): boolean {
-    // Column is disabled if there's no workingShift for that day
     return !emp.workingShift;
   }
 
-  // Check if slot is within employee working hours
+  // Check if slot is within employee working hours (supports overnight shifts)
   isSlotAvailable(emp: Employee, slotHour: number): boolean {
     if (!emp.workingShift) return false;
-    return (
-      slotHour >= emp.workingShift.startHour &&
-      slotHour < emp.workingShift.endHour
-    );
+    
+    const startHour = emp.workingShift.startHour;
+    const endHour = emp.workingShift.endHour;
+    
+    if (startHour > endHour) {
+      // Overnight shifts: slot must be >= startHour OR < endHour
+      return slotHour >= startHour || slotHour < endHour;
+    } else {
+      // Normal working hours
+      return slotHour >= startHour && slotHour < endHour;
+    }
   }
 
+  // Check if slot is covered by existing appointments (supports overnight shifts)
   isSlotCovered(emp: Employee, t: number): boolean {
     const appointments = this.getAppointmentsForEmployee(emp._id || '');
-    return appointments.some((ap) => t >= ap.startHour && t < ap.endHour);
+    return appointments.some((ap) => {
+      const startHour = ap.startHour;
+      const endHour = ap.endHour;
+      
+      if (startHour > endHour) {
+        // Overnight appointments: slot must be >= startHour OR < endHour
+        return t >= startHour || t < endHour;
+      } else {
+        // Normal appointments
+        return t >= startHour && t < endHour;
+      }
+    });
   }
 
+  // ===== WORK HOURS MANAGEMENT =====
+  // Update working hours based on facility settings and force change detection
   updateWorkHours(facility: Facility): void {
     if (facility.openingHour && facility.closingHour) {
       this.workStartHour = parseFloat(facility.openingHour);
       this.workEndHour = parseFloat(facility.closingHour);
+      this.cd.detectChanges(); // Force change detection
     }
   }
 }
