@@ -3,6 +3,7 @@ import { environment } from "../../../../environments/environment";
 import { BehaviorSubject, Observable, tap } from "rxjs";
 import { Facility } from "../../../models/Facility";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { EffectiveSettings, RawSettings, UpsertSettingsDto } from "../../../models/Settings";
 
 @Injectable({
     providedIn: 'root',
@@ -13,7 +14,7 @@ export class SettingsService {
     private facilitiesSubject = new BehaviorSubject<Facility[]>([]);
     facilities$ = this.facilitiesSubject.asObservable();
 
-    constructor(private http: HttpClient) {}
+    constructor(private http: HttpClient) { }
 
     getAllFacilities(tenant: string): Observable<Facility[]> {
         if (this.facilitiesSubject.value.length > 0) {
@@ -62,5 +63,44 @@ export class SettingsService {
                 this.facilitiesSubject.next(list);
             })
         );
+    }
+
+    getEffectiveSettings(tenantId: string, userId: string): Observable<EffectiveSettings> {
+        const params = new HttpParams().set('tenant', tenantId).set('user', userId);
+        return this.http.get<EffectiveSettings>(`${this.apiUrl}/settings`, { params });
+    }
+
+    getTenantSettingsRaw(tenantId: string): Observable<RawSettings> {
+        const params = new HttpParams().set('tenant', tenantId);
+        return this.http.get<RawSettings>(`${this.apiUrl}/settings/tenant`, { params });
+    }
+
+    getUserSettingsRaw(tenantId: string, userId: string): Observable<RawSettings> {
+        const params = new HttpParams().set('tenant', tenantId).set('user', userId);
+        return this.http.get<RawSettings>(`${this.apiUrl}/settings/user`, { params });
+    }
+
+    upsertSettings(dto: UpsertSettingsDto): Observable<RawSettings> {
+        return this.http.put<RawSettings>(`${this.apiUrl}/settings`, dto);
+    }
+
+    upsertTenantSettings(tenantId: string, payload: Partial<EffectiveSettings>) {
+        const body = {
+            tenant: tenantId,
+            type: 'tenant',
+            user: null,
+            ...payload
+        };
+        return this.http.put(`${this.apiUrl}/settings`, body);
+    }
+
+    upsertUserSettings(tenantId: string, userId: string, payload: Partial<EffectiveSettings>) {
+        const body = {
+            tenant: tenantId,
+            type: 'user',
+            user: userId,
+            ...payload
+        };
+        return this.http.put(`${this.apiUrl}/settings`, body);
     }
 }

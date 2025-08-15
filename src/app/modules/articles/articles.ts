@@ -68,9 +68,11 @@ export class Articles implements OnInit, AfterViewInit {
 
   addArticle() {
     const dialogRef = this.dialog.open(EditCreateArticleDialog, {
-      width:  '800px',
-      data : { suppliers: this.suppliers }
-    })
+      width: 'min(800px, 90vw)',          // never wider than 800px or 90% viewport
+      maxWidth: '90vw',
+      maxHeight: '90vh',                  // prevent vertical overflow
+      data: { suppliers: this.suppliers }
+    });
 
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
@@ -88,11 +90,11 @@ export class Articles implements OnInit, AfterViewInit {
         return EMPTY;
       })
     ).subscribe();
-   }
+  }
 
-  editArticle(article: Article) { 
+  editArticle(article: Article) {
     const dialogRef = this.dialog.open(EditCreateArticleDialog, {
-      width:  '800px',
+      width: '800px',
       data: { article: article, suppliers: this.suppliers }
     })
 

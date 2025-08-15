@@ -32,7 +32,162 @@
             <mat-divider></mat-divider>
             <ng-container [ngSwitch]="selectedSection">
                 <mat-card-content *ngSwitchCase="'general'">
-                    <p>General Content</p>
+                    <ng-container *ngIf="loading">Loading settings…</ng-container>
+                    <ng-container *ngIf="!loading && !error">
+
+                        <!-- Tenant Defaults (editable) -->
+                        <mat-card class="block" style="margin-bottom:16px;">
+                            <mat-card-header>
+                                <mat-card-title>Tenant Defaults</mat-card-title>
+                                <mat-card-subtitle>Applies to all users unless overridden</mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <form [formGroup]="tenantForm" (ngSubmit)="saveTenantSettings()" fxLayout="row wrap"
+                                    fxLayoutGap="16px">
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Language</mat-label>
+                                        <mat-select formControlName="language">
+                                            <mat-option value="en">English</mat-option>
+                                            <mat-option value="sr">Serbian</mat-option>
+                                            <mat-option value="es">Spanish</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Currency</mat-label>
+                                        <mat-select formControlName="currency">
+                                            <mat-option value="RSD">RSD</mat-option>
+                                            <mat-option value="EUR">EUR</mat-option>
+                                            <mat-option value="USD">USD</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Theme</mat-label>
+                                        <mat-select formControlName="theme">
+                                            <mat-option value="light">Light</mat-option>
+                                            <mat-option value="dark">Dark</mat-option>
+                                            <mat-option value="system">System</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Landing Page</mat-label>
+                                        <input matInput formControlName="landingPage" placeholder="/home">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="100">
+                                        <mat-label>Navbar Shortcuts (comma separated)</mat-label>
+                                        <input matInput formControlName="navbarShortcutsCsv"
+                                            placeholder="/home, /appointments">
+                                        <mat-hint>We’ll convert this to an array on save</mat-hint>
+                                    </mat-form-field>
+
+                                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
+                                        <button mat-stroked-button type="button"
+                                            (click)="resetTenantForm()">Reset</button>
+                                        <button mat-flat-button color="primary" type="submit" style="margin-left:8px"
+                                            [disabled]="tenantForm.invalid || savingTenant">
+                                            {{ savingTenant ? 'Saving…' : 'Save Tenant Defaults' }}
+                                        </button>
+                                    </div>
+                                </form>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- User Overrides (editable) -->
+                        <mat-card class="block" style="margin-bottom:16px;">
+                            <mat-card-header>
+                                <mat-card-title>My Personal Settings</mat-card-title>
+                                <mat-card-subtitle>Overrides tenant defaults for this user only</mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <form [formGroup]="userForm" (ngSubmit)="saveUserSettings()" fxLayout="row wrap"
+                                    fxLayoutGap="16px">
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Language</mat-label>
+                                        <mat-select formControlName="language">
+                                            <mat-option [value]="null">— Inherit —</mat-option>
+                                            <mat-option value="en">English</mat-option>
+                                            <mat-option value="sr">Serbian</mat-option>
+                                            <mat-option value="es">Spanish</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Currency</mat-label>
+                                        <mat-select formControlName="currency">
+                                            <mat-option [value]="null">— Inherit —</mat-option>
+                                            <mat-option value="RSD">RSD</mat-option>
+                                            <mat-option value="EUR">EUR</mat-option>
+                                            <mat-option value="USD">USD</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Theme</mat-label>
+                                        <mat-select formControlName="theme">
+                                            <mat-option [value]="null">— Inherit —</mat-option>
+                                            <mat-option value="light">Light</mat-option>
+                                            <mat-option value="dark">Dark</mat-option>
+                                            <mat-option value="system">System</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="45">
+                                        <mat-label>Landing Page</mat-label>
+                                        <input matInput formControlName="landingPage"
+                                            placeholder="Leave empty to inherit">
+                                    </mat-form-field>
+
+                                    <mat-form-field appearance="fill" fxFlex="100">
+                                        <mat-label>Navbar Shortcuts (comma separated; leave empty to
+                                            inherit)</mat-label>
+                                        <input matInput formControlName="navbarShortcutsCsv"
+                                            placeholder="/home, /appointments">
+                                    </mat-form-field>
+
+                                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
+                                        <button mat-stroked-button type="button" color="warn"
+                                            (click)="clearUserOverrides()">
+                                            Clear All Overrides
+                                        </button>
+                                        <div>
+                                            <button mat-stroked-button type="button"
+                                                (click)="resetUserForm()">Reset</button>
+                                            <button mat-flat-button color="primary" type="submit"
+                                                style="margin-left:8px" [disabled]="userForm.invalid || savingUser">
+                                                {{ savingUser ? 'Saving…' : 'Save Personal Settings' }}
+                                            </button>
+                                        </div>
+                                    </div>
+                                </form>
+                            </mat-card-content>
+                        </mat-card>
+
+                        <!-- Effective (read-only) -->
+                        <mat-card class="block">
+                            <mat-card-header>
+                                <mat-card-title>Effective Settings</mat-card-title>
+                                <mat-card-subtitle>What the app will actually use</mat-card-subtitle>
+                            </mat-card-header>
+                            <mat-card-content>
+                                <p><strong>Language:</strong> {{ effectiveSettings?.language }}</p>
+                                <p><strong>Currency:</strong> {{ effectiveSettings?.currency }}</p>
+                                <p><strong>Theme:</strong> {{ effectiveSettings?.theme }}</p>
+                                <p><strong>Landing Page:</strong> {{ effectiveSettings?.landingPage }}</p>
+                                <p><strong>Navbar Shortcuts:</strong> {{ (effectiveSettings?.navbarShortcuts ||
+                                    []).join(', ') }}</p>
+                            </mat-card-content>
+                        </mat-card>
+
+                    </ng-container>
+
+                    <ng-container *ngIf="error">
+                        <p class="error">{{ error }}</p>
+                    </ng-container>
                 </mat-card-content>
                 <mat-card-content *ngSwitchCase="'facilities'" class="table-card">
                     <div class="table-wrapper">
@@ -58,25 +213,32 @@
                                     <th mat-header-cell *matHeaderCellDef>
                                         <div fxLayout="row" fxLayoutAlign="end center">
                                             Actions
-                                            <button mat-icon-button (click)="openAddFacilityDialog()" style="margin-left: 10px;">
+                                            <button mat-icon-button (click)="openAddFacilityDialog()"
+                                                style="margin-left: 10px;">
                                                 <mat-icon style="color: greenyellow;">add</mat-icon>
                                             </button>
                                         </div>
                                     </th>
                                     <td mat-cell *matCellDef="let facility">
                                         <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                                            <button mat-icon-button (click)="editFacility(facility); $event.stopPropagation()" style="margin: 0px 10px;">
+                                            <button mat-icon-button
+                                                (click)="editFacility(facility); $event.stopPropagation()"
+                                                style="margin: 0px 10px;">
                                                 <mat-icon style="color: orange">edit</mat-icon>
                                             </button>
-                                            <button mat-icon-button (click)="deleteFacility(facility); $event.stopPropagation()" style="margin: 0px 10px;">
+                                            <button mat-icon-button
+                                                (click)="deleteFacility(facility); $event.stopPropagation()"
+                                                style="margin: 0px 10px;">
                                                 <mat-icon style="color: red">delete</mat-icon>
                                             </button>
                                         </div>
                                     </td>
                                 </ng-container>
 
-                                <tr mat-header-row *matHeaderRowDef="displayedColumFacilities" class="custom-header-row"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedColumFacilities" class="custom-row" (click)="editFacility(row)"></tr>
+                                <tr mat-header-row *matHeaderRowDef="displayedColumFacilities"
+                                    class="custom-header-row"></tr>
+                                <tr mat-row *matRowDef="let row; columns: displayedColumFacilities" class="custom-row"
+                                    (click)="editFacility(row)"></tr>
                             </table>
                         </div>
                         <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
