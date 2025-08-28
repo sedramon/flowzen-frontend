@@ -36,9 +36,13 @@
         <mat-icon>chevron_right</mat-icon>
       </button>
       <button mat-raised-button (click)="setToday()" style="margin-left: 16px; color: white;">
-    <mat-icon>today</mat-icon>
-    Danas
-  </button>
+        <mat-icon>today</mat-icon>
+        Danas
+      </button>
+      <button mat-raised-button color="accent" (click)="openBulkAppointments()" style="margin-left: 50px;">
+        <mat-icon>file_upload</mat-icon>
+        Masovni unos termina
+      </button>
     </div>
   </mat-toolbar>
 
@@ -150,7 +154,7 @@
                   {{ ap.date | date : "dd MMM yyyy" }}
                 </div>
               </div>
-              <div class="resize-handle"></div>
+              <div class="resize-handle" (click)="$event.stopPropagation()" (mousedown)="onResizeStart($event, ap)" (touchstart)="onResizeStart($event, ap)"></div>
             </div>
           </div>
         </div>

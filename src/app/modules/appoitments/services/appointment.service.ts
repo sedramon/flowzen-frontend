@@ -37,6 +37,12 @@ export class AppointmentsService {
     });
   }
 
+  bulkCreateAppointments(appointments: UpdateAndCreateAppointmentDto[]) {
+    return this.http.post(`${this.apiUrl}/appointments/bulk`, {
+      appointments: appointments.map(a => ({ ...a, tenant: this.tenantId }))
+    });
+  }
+
   updateAppointment(id: string, appointment: any) {
     return this.http.put(`${this.apiUrl}/appointments/${id}`, appointment);
   }

@@ -1,0 +1,161 @@
+<div class="outer-dialog-container">
+  <div [@dialogPop] class="dialog-container">
+    <h2 class="dialog-title">⚡ Ultra Brzi Generator</h2>
+    <div class="dialog-content">
+  <!-- Ultra Fast Generator -->
+  <div class="section ultra-generator">
+    <div class="section-header">
+      <p class="section-subtitle">Kreiraj termine za više zaposlenih odjednom</p>
+    </div>
+    
+    <!-- Quick Scenarios First -->
+    <div class="quick-scenarios">
+      <h4>🚀 Brzi start:</h4>
+      <div class="scenario-buttons">
+        <button mat-raised-button (click)="quickScenario('morning')" color="accent" class="scenario-btn">
+          <mat-icon>wb_sunny</mat-icon>
+          <span>Jutro<br><small>9-13h</small></span>
+        </button>
+        <button mat-raised-button (click)="quickScenario('afternoon')" color="accent" class="scenario-btn">
+          <mat-icon>wb_twilight</mat-icon>
+          <span>Popodne<br><small>13-17h</small></span>
+        </button>
+        <button mat-raised-button (click)="quickScenario('fullday')" color="accent" class="scenario-btn">
+          <mat-icon>schedule</mat-icon>
+          <span>Ceo dan<br><small>9-17h</small></span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Multi-Employee Selection -->
+    <div class="form-group">
+      <h4>👥 Zaposleni</h4>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Odaberi zaposlene (možeš više odjednom)</mat-label>
+        <mat-select [(ngModel)]="bulkGenerator.employeeIds" [ngModelOptions]="{standalone: true}" multiple>
+          <mat-option *ngFor="let e of data.employees" [value]="e._id">{{ e.firstName }} {{ e.lastName }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Service Selection -->
+    <div class="form-group">
+      <h4>💼 Usluga</h4>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Odaberi uslugu</mat-label>
+        <mat-select [(ngModel)]="bulkGenerator.serviceId" [ngModelOptions]="{standalone: true}">
+          <mat-option *ngFor="let s of data.services" [value]="s._id">{{ s.name }} ({{ s.durationMinutes }}min)</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <!-- Time Settings -->
+    <div class="form-group">
+      <h4>⏰ Vreme i trajanje</h4>
+      
+      <!-- Time Slot Templates -->
+      <div class="time-templates">
+        <label>Trajanje slota:</label>
+        <div class="template-buttons">
+          <button mat-stroked-button (click)="setTimeTemplate(30)" [class.selected]="bulkGenerator.slotMinutes === 30">30min</button>
+          <button mat-stroked-button (click)="setTimeTemplate(45)" [class.selected]="bulkGenerator.slotMinutes === 45">45min</button>
+          <button mat-stroked-button (click)="setTimeTemplate(60)" [class.selected]="bulkGenerator.slotMinutes === 60">60min</button>
+          <button mat-stroked-button (click)="setTimeTemplate(90)" [class.selected]="bulkGenerator.slotMinutes === 90">90min</button>
+        </div>
+      </div>
+
+      <!-- Time Range -->
+      <div class="time-range">
+        <mat-form-field appearance="outline">
+          <mat-label>Od (HH:mm)</mat-label>
+          <input matInput [(ngModel)]="bulkGenerator.startTime" [ngModelOptions]="{standalone: true}" placeholder="09:00" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Do (HH:mm)</mat-label>
+          <input matInput [(ngModel)]="bulkGenerator.endTime" [ngModelOptions]="{standalone: true}" placeholder="17:00" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Pauza između (min)</mat-label>
+          <input matInput type="number" [(ngModel)]="bulkGenerator.gapMinutes" [ngModelOptions]="{standalone: true}" value="0" />
+        </mat-form-field>
+      </div>
+    </div>
+
+    <!-- MEGA GENERATE BUTTON -->
+    <div class="generate-section">
+      <button mat-raised-button color="primary" (click)="megaGenerate()" class="mega-btn">
+        <mat-icon>rocket_launch</mat-icon>
+        <span>GENERIŠI {{ calculateTotalSlots() }} TERMINA<br>
+        <small>za {{ bulkGenerator.employeeIds?.length || 0 }} zaposlenih</small></span>
+      </button>
+    </div>
+  </div>
+
+  <div class="actions">
+    <button mat-flat-button color="accent" (click)="import()" [disabled]="!validDrafts.length || loading">
+      <mat-icon>cloud_upload</mat-icon>
+      Importuj ({{ validDrafts.length }})
+    </button>
+    <button mat-stroked-button (click)="clearDrafts()">
+      <mat-icon>clear</mat-icon>
+      Obriši sve
+    </button>
+  </div>
+
+  <div *ngIf="errors.length" class="errors">
+    <div *ngFor="let e of errors">{{ e }}</div>
+  </div>
+
+  <div *ngIf="drafts.length">
+    <h3 style="padding: 20px;" >Preview ({{ drafts.length }})</h3>
+    <div class="draft" *ngFor="let d of drafts; let i = index" [class.invalid]="d.error">
+      <div class="row">
+        <mat-form-field appearance="outline">
+          <mat-label>Zaposleni</mat-label>
+          <mat-select [(ngModel)]="d.employeeId" [ngModelOptions]="{standalone: true}">
+            <mat-option *ngFor="let e of data.employees" [value]="e._id">{{ e.firstName }} {{ e.lastName }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Klijent</mat-label>
+          <mat-select [(ngModel)]="d.clientId" [ngModelOptions]="{standalone: true}" (selectionChange)="d.error = validateDraft(d)">
+            <mat-option *ngFor="let c of data.clients" [value]="c._id">{{ c.firstName }} {{ c.lastName }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Usluga</mat-label>
+          <mat-select [(ngModel)]="d.serviceId" [ngModelOptions]="{standalone: true}" (selectionChange)="onServiceChange(d)">
+            <mat-option *ngFor="let s of data.services" [value]="s._id">{{ s.name }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <div class="row" style="align-items: end;">
+        <mat-form-field appearance="outline">
+          <mat-label>Početak (HH:mm)</mat-label>
+          <input matInput [(ngModel)]="d.startTimeString" [ngModelOptions]="{standalone: true}" 
+                 (blur)="updateTimeFromString(d, 'start')" placeholder="09:00" />
+        </mat-form-field>
+        <mat-form-field appearance="outline">
+          <mat-label>Kraj (HH:mm)</mat-label>
+          <input matInput [(ngModel)]="d.endTimeString" [ngModelOptions]="{standalone: true}" 
+                 (blur)="updateTimeFromString(d, 'end')" placeholder="10:00" />
+        </mat-form-field>
+
+        <div class="status" *ngIf="d.error" title="{{ d.error }}">
+          <mat-icon color="warn">error</mat-icon>
+          {{ d.error }}
+        </div>
+        <div class="status ok" *ngIf="!d.error">
+          <mat-icon color="primary">check_circle</mat-icon>
+          OK
+        </div>
+      </div>
+    </div>
+  </div>
+    <div class="dialog-actions">
+      <button mat-button (click)="dialogRef.close()">Zatvori</button>
+    </div>
+  </div>
+</div>

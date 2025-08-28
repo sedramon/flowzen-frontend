@@ -1,0 +1,279 @@
+.outer-dialog-container {
+  padding: 20px;
+}
+.dialog-container {
+  border-radius: 10px;
+  padding: 0;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  max-height: 90vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transform-origin: center center;
+  will-change: transform;
+  width: 100%;
+  max-width: 1200px;
+  background: transparent;
+}
+.dialog-title {
+  margin: 0;
+  padding: 20px;
+  font-size: 1.5em;
+  text-align: center;
+  color: #ff0066;
+}
+.dialog-content {
+  padding: 20px;
+  overflow-x: hidden;
+}
+.dialog-actions {
+  display: flex;
+  justify-content: center;
+  padding: 20px;
+  background: transparent;
+}
+.dialog-actions button + button {
+  margin-left: 8px;
+}
+.full { width: 100%; }
+.actions { display: flex; gap: 8px; align-items: center; justify-content: center; }
+.errors { color: #b00020; }
+.draft { border: 1px solid #e0e0e0; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.draft.invalid { border-color: #b00020; }
+.row { display: flex; gap: 12px; justify-content: flex-start; align-items: baseline; flex-wrap: wrap; }
+.status { display: flex; align-items: center; gap: 6px; margin-left: auto; }
+.status.ok { color: #2e7d32; }
+.section { margin-top: 8px; }
+.no-wrap { white-space: pre; font-family: monospace; overflow: auto; }
+
+/* Ultra Fast Generator Styles */
+.ultra-generator {
+  background: transparent;
+  border-radius: 16px;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+}
+
+.section-header h3 {
+  background: linear-gradient(60deg, #f72585, #7209b7, #3a0ca3, #4361ee, #f72585);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+  font-size: 24px;
+  margin: 0 0 8px 0;
+}
+
+.section-subtitle {
+  color: #4361ee;
+  font-style: italic;
+  margin: 0;
+}
+
+.quick-scenarios {
+  margin-bottom: 32px;
+  text-align: center;
+}
+
+.quick-scenarios h4 {
+  color: #f72585;
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.scenario-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.scenario-btn {
+  min-width: 120px !important;
+  height: 80px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: 12px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
+  transition: all 0.3s ease !important;
+  text-align: center !important;
+}
+
+.scenario-btn:hover {
+  transform: translateY(-3px) !important;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25) !important;
+}
+
+.scenario-btn mat-icon {
+  font-size: 24px !important;
+  width: 24px !important;
+  height: 24px !important;
+  margin-bottom: 4px !important;
+  margin-left: 10px;
+}
+
+.scenario-btn span {
+  text-align: center;
+  line-height: 1.2;
+}
+
+.scenario-btn small {
+  font-size: 10px;
+  opacity: 0.8;
+}
+
+.form-group {
+  margin-bottom: 24px;
+  background: transparent;
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid rgb(116 9 183 / 52%);
+  overflow-x: hidden;
+  box-sizing: border-box;
+  transition: none;
+}
+
+.form-group:hover {
+  border: 2px solid rgb(116 9 183 / 52%);
+}
+
+.form-group h4 {
+  color: #f72585;
+  margin: 0 0 16px 0;
+  font-size: 16px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.full-width {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.time-templates {
+  margin-bottom: 20px;
+}
+
+.time-templates label {
+  display: block;
+  margin-bottom: 12px;
+  font-weight: 500;
+  color: #f72585;
+}
+
+.template-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.template-buttons button {
+  min-width: 60px;
+  border-radius: 8px !important;
+  transition: all 0.2s ease !important;
+}
+
+.template-buttons button.selected {
+  background: linear-gradient(60deg, #f72585, #7209b7) !important;
+  color: white !important;
+  transform: scale(1.05);
+}
+
+.time-range {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.time-range mat-form-field {
+  flex: 1;
+  min-width: 120px;
+  max-width: 200px;
+}
+
+.generate-section {
+  text-align: center;
+  padding: 30px;
+  background: transparent;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+}
+
+.mega-btn {
+  font-size: 18px !important;
+  padding: 16px 32px !important;
+  height: auto !important;
+  min-height: 64px !important;
+  background: linear-gradient(60deg, #f72585, #7209b7, #3a0ca3, #4361ee) !important;
+  color: white !important;
+  box-shadow: 0 6px 20px rgba(116, 9, 183, 0.4) !important;
+  transition: all 0.3s ease !important;
+  border-radius: 12px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 12px !important;
+}
+
+.mega-btn:hover {
+  transform: translateY(-3px) scale(1.02) !important;
+  box-shadow: 0 8px 25px rgba(116, 9, 183, 0.6) !important;
+}
+
+.mega-btn mat-icon {
+  font-size: 28px !important;
+  width: 28px !important;
+  height: 28px !important;
+}
+
+.mega-btn span {
+  text-align: center;
+  line-height: 1.3;
+  font-weight: 600;
+}
+
+.mega-btn small {
+  font-size: 12px;
+  opacity: 0.9;
+  font-weight: 400;
+}
+
+/* Disable all Material hover effects that might interfere */
+::ng-deep mat-form-field, ::ng-deep mat-select, ::ng-deep mat-button, ::ng-deep button {
+  transition: none !important;
+}
+
+::ng-deep mat-form-field:hover, ::ng-deep mat-select:hover {
+  border: none !important;
+  outline: none !important;
+}
+
+/* Override Angular Material's default border behavior */
+::ng-deep .mat-mdc-form-field-outline {
+  transition: none !important;
+}
+
+::ng-deep .mat-mdc-form-field:hover .mat-mdc-form-field-outline {
+  border-width: 1px !important;
+}
+
+::ng-deep .mat-mdc-form-field-focus-overlay {
+  transition: none !important;
+}

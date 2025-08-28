@@ -5,10 +5,10 @@ import { CommonModule } from '@angular/common';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { MatButtonModule } from '@angular/material/button';
-import { Service } from '../../../models/Service';
-import { Client } from '../../../models/Client';
-import { Employee } from '../../../models/Employee';
-import { Facility } from '../../../models/Facility';
+import { Service } from '../../../../models/Service';
+import { Client } from '../../../../models/Client';
+import { Employee } from '../../../../models/Employee';
+import { Facility } from '../../../../models/Facility';
 
 export interface AppointmentDialogData {
   appointmentStart: number;
@@ -130,3 +130,4 @@ export class AppointmentDialogComponent implements OnInit {
     this.dialogRef.close({ delete: true });
   }
 }
+

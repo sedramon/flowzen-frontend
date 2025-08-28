@@ -36,7 +36,7 @@ import { MatDialog } from '@angular/material/dialog';
 import {
   AppointmentDialogComponent,
   AppointmentDialogData,
-} from './dialog/appointment-dialog.component';
+} from './dialog/appointment-dialog/appointment-dialog.component';
 import { MatIconModule } from '@angular/material/icon';
 import { AuthService } from '../../core/services/auth.service';
 import { Service } from '../../models/Service';
@@ -63,6 +63,7 @@ import { ClientsService } from '../clients/services/clients.service';
 import { Client } from '../../models/Client';
 import { MatButtonModule } from '@angular/material/button';
 import { AppointmentsService } from './services/appointment.service';
+import { BulkAppointmentsDialogComponent } from './dialog/bulk-appointments-dialog/bulk-appointments-dialog.component';
 
 export const CUSTOM_DATE_FORMATS = {
   parse: {
@@ -253,7 +254,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // ===== DRAG & DROP PROPERTIES =====
   // Store offsets during drag operations
   private dragOffset: { [id: string]: { x: number; y: number } } = {};
-  private initialPosition: { [id: string]: { left: number; top: number } } = {};
+  private initialObserver: MutationObserver | null = null;
+  private interactReady = false;
 
   // ===== EVENT HANDLERS =====
   // Prevent default text selection behavior during drag operations
@@ -361,11 +363,40 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // ===== LIFECYCLE HOOKS =====
   // Initialize interact.js after view initialization
   ngAfterViewInit(): void {
-    setTimeout(() => this.initializeInteractJS(), 0);
+    // initialize once after first render
+    setTimeout(() => this.ensureInitialInteract(), 0);
   }
 
   // ===== INTERACT.JS INITIALIZATION =====
-  // Initialize drag & drop and resize functionality with proper guards
+  private ensureInitialInteract(): void {
+    if (this.interactReady) return;
+    const host = this.employeeColumnsRef?.nativeElement as HTMLElement | undefined;
+    if (!host) return;
+
+    const checkAndInit = (): boolean => {
+      const hasBlock = host.querySelector('.appointment-block');
+      const hasHandle = host.querySelector('.resize-handle');
+      if (hasBlock && hasHandle) {
+        this.initializeInteractJS();
+        this.interactReady = true;
+        if (this.initialObserver) {
+          this.initialObserver.disconnect();
+          this.initialObserver = null;
+        }
+        return true;
+      }
+      return false;
+    };
+
+    if (checkAndInit()) return;
+
+    if (this.initialObserver) this.initialObserver.disconnect();
+    this.initialObserver = new MutationObserver(() => {
+      checkAndInit();
+    });
+    this.initialObserver.observe(host, { childList: true, subtree: true });
+  }
+
   private initializeInteractJS(): void {
     // Guard: ensure viewchildren are available
     if (!this.gridBodyRef?.nativeElement || !this.timeColumnRef?.nativeElement || !this.employeeColumnsRef?.nativeElement) {
@@ -392,6 +423,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       .draggable({
         inertia: false,
         autoScroll: false,
+        ignoreFrom: '.resize-handle',
         modifiers: [
           interact.modifiers.restrictRect({
             restriction: employeeColumnsEl,
@@ -401,6 +433,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         ],
         listeners: {
           start: (event) => {
+            if (this.isResizing) { event.interaction.stop(); return; }
             this.isDragging = true;
             this.cd.detectChanges();
             const target = event.target as HTMLElement;
@@ -417,6 +450,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             document.addEventListener('mousemove', this.mouseMoveListener, { passive: false });
           },
           move: (event) => {
+            if (this.isResizing) { event.interaction.stop(); return; }
             const target = event.target as HTMLElement;
             const apId = target.getAttribute('data-appointment-id') || '';
             const offset = this.dragOffset[apId];
@@ -434,6 +468,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.cd.detectChanges();
           },
           end: (event) => {
+            if (this.isResizing) { return; }
             const target = event.target as HTMLElement;
             target.style.transition = 'transform 0.1s ease, left 0.2s, width 0.2s';
             target.style.transform = 'none';
@@ -444,160 +479,6 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               target.removeAttribute('data-dragging');
               this.isDragging = false;
               this.cd.detectChanges();
-            }, 0);
-          },
-        },
-      })
-      .resizable({
-        edges: { bottom: '.resize-handle' },
-        modifiers: [
-          interact.modifiers.restrictEdges({
-            outer: gridBodyEl, // Use grid body as restriction
-            endOnly: true,
-          }),
-          interact.modifiers.restrictSize({
-            min: { width: 40, height: (0.5 / 14) * this.gridBodyHeight },
-          }),
-        ],
-        inertia: false,
-        listeners: {
-          start: (event) => {
-            this.isResizing = true;
-            document.addEventListener('mousemove', this.mouseMoveListener, {
-              passive: false,
-            });
-          },
-          move: (event) => {
-            const target = event.target as HTMLElement;
-            const apId = target.getAttribute('data-appointment-id') || '';
-            const ap = this.appointments.find((a) => a.id === apId);
-            if (!ap) return;
-            const employee = this.employees.find((e) => e === ap.employee);
-            if (!employee || !employee.workingShift) return;
-
-            // Calculate new appointment duration based on resize (supports overnight shifts)
-            let newHeightPx = event.rect.height;
-            const fiveMinuteFraction = 5 / 60;
-            let totalWorkingHours = this.workStartHour > this.workEndHour ? 
-              (24 - this.workStartHour) + this.workEndHour : 
-              this.workEndHour - this.workStartHour;
-            let computedDuration = (newHeightPx / this.gridBodyHeight) * totalWorkingHours;
-            let newDuration =
-              Math.round(computedDuration / fiveMinuteFraction) *
-              fiveMinuteFraction;
-
-            if (newDuration < 0.5) {
-              newDuration = 0.5;
-              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
-            }
-
-            // Validate max end hour for overnight shifts
-            let maxEndHour = employee.workingShift.endHour;
-            if (employee.workingShift.startHour > employee.workingShift.endHour) {
-              // For overnight shifts, check if appointment crosses midnight
-              if (ap.startHour >= employee.workingShift.startHour) {
-                // First part: can extend to midnight
-                maxEndHour = 24;
-              } else {
-                // Second part: limited by end hour
-                maxEndHour = employee.workingShift.endHour;
-              }
-            }
-            
-            if (ap.startHour + newDuration > maxEndHour) {
-              newDuration = maxEndHour - ap.startHour;
-              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
-            }
-
-            if (ap.startHour + newDuration < ap.startHour + 0.5) {
-              newDuration = 0.5;
-              newHeightPx = (newDuration / totalWorkingHours) * this.gridBodyHeight;
-            }
-
-            ap.endHour = ap.startHour + newDuration;
-            target.style.height = newHeightPx + 'px';
-
-            // Više nema logike za overlapp
-            this.cd.detectChanges();
-          },
-          end: (event) => {
-            this.isResizing = false;
-            document.removeEventListener('mousemove', this.mouseMoveListener);
-            const apId = event.target.getAttribute('data-appointment-id') || '';
-            const ap = this.appointments.find((a) => a.id === apId);
-            if (ap) {
-              const employee = this.employees.find((e) => e === ap.employee);
-              // Validate appointment time after resize (supports overnight shifts)
-              let isValidTime = false;
-              if (employee && employee.workingShift) {
-                if (employee.workingShift.startHour > employee.workingShift.endHour) {
-                  // Overnight shifts: appointment must be >= startHour OR < endHour
-                  isValidTime = (ap.startHour >= employee.workingShift.startHour || ap.startHour < employee.workingShift.endHour) &&
-                               (ap.endHour >= employee.workingShift.startHour || ap.endHour < employee.workingShift.endHour);
-                } else {
-                  // Normal working hours
-                  isValidTime = ap.startHour >= employee.workingShift.startHour && ap.endHour <= employee.workingShift.endHour;
-                }
-              }
-              
-              if (
-                !employee ||
-                !employee.workingShift ||
-                !isValidTime
-              ) {
-                // Reset appointment to valid working hours
-                if (employee && employee.workingShift) {
-                  if (employee.workingShift.startHour > employee.workingShift.endHour) {
-                    // Overnight shifts: ensure appointment is within working hours
-                    if (ap.startHour < employee.workingShift.startHour && ap.startHour >= employee.workingShift.endHour) {
-                      ap.startHour = employee.workingShift.startHour;
-                    }
-                    if (ap.endHour > employee.workingShift.endHour && ap.endHour <= employee.workingShift.startHour) {
-                      ap.endHour = employee.workingShift.endHour;
-                    }
-                  } else {
-                    // Normal working hours
-                    ap.endHour = Math.min(
-                      Math.max(
-                        ap.endHour,
-                        employee.workingShift.startHour + 0.5
-                      ),
-                      employee.workingShift.endHour
-                    );
-                  }
-                }
-                this.snackBar.open(
-                  'Nije moguće promeniti trajanje termina van radnog vremena zaposlenog',
-                  'Zatvori',
-                  { duration: 3000 }
-                );
-                this.cd.detectChanges();
-                return;
-              }
-
-              this.cd.detectChanges();
-
-              this.appointmentsService
-                .updateAppointment(ap.id!, {
-                  ...ap,
-                  date: this.selectedDateStr,
-                })
-                .subscribe({
-                  next: () =>
-                    this.snackBar.open('Termin sačuvan!', 'Zatvori', {
-                      duration: 2000,
-                    }),
-                  error: () =>
-                    this.snackBar.open(
-                      'Greška pri čuvanju termina!',
-                      'Zatvori',
-                      { duration: 2000 }
-                    ),
-                });
-            }
-            this.justResized = true;
-            setTimeout(() => {
-              this.justResized = false;
             }, 0);
           },
         },
@@ -824,7 +705,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // ===== APPOINTMENT INTERACTION =====
   // Handle clicks on existing appointments to edit/delete with proper guards
   onAppointmentClick(ap: Appointment, event: MouseEvent): void {
-    if (this.isDragging || this.justResized) return;
+    if (this.isDragging || this.justResized || this.isResizing) return;
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
 
@@ -939,21 +820,16 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         this.employees = data.employees;
         this.appointments = data.appointments;
         
-        // Update work hours based on current facility
         const currentFacility = this.facilities.find(f => f._id === this.selectedFacility);
         if (currentFacility) {
           this.updateWorkHours(currentFacility);
         }
         
         this.loading = false;
-        
-        // Force change detection to ensure all calculations are updated
+        // Only force change detection; interact init will happen once elements appear
         this.cd.detectChanges();
-        setTimeout(() => {
-          this.cd.detectChanges();
-          // Reinitialize interact.js after rendering appointments
-          setTimeout(() => this.initializeInteractJS(), 0);
-        }, 0);
+        this.interactReady = false;
+        setTimeout(() => this.ensureInitialInteract(), 0);
       },
       error: (err) => {
         this.loading = false;
@@ -1015,6 +891,34 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     next.setDate(current.getDate() + deltaDays);
     this.dateControl.setValue(next);
     this.onDateChange(next);
+  }
+
+  openBulkAppointments(): void {
+    if (!this.selectedDate || !this.selectedFacility) {
+      this.snackBar.open('Izaberi datum i objekat', 'Zatvori', { duration: 2000 });
+      return;
+    }
+    const dialogRef = this.dialog.open(BulkAppointmentsDialogComponent, {
+      width: '1000px',
+      maxWidth: '95vw',
+      panelClass: 'bulk-appointments-wide',
+      data: {
+        employees: this.employees,
+        clients: this.clients,
+        services: this.services,
+        facilityId: this.selectedFacility,
+        date: this.selectedDateStr,
+        existingAppointments: this.appointments
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((res) => {
+      if (res?.created?.length) {
+        // Refresh schedule to reflect new items
+        this.loadSchedule(this.selectedDate!);
+        this.snackBar.open(`Kreirano ${res.created.length} termina`, 'Zatvori', { duration: 3000 });
+      }
+    });
   }
 
   // ===== UTILITY FUNCTIONS =====
@@ -1154,5 +1058,137 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       this.workEndHour = parseFloat(facility.closingHour);
       this.cd.detectChanges(); // Force change detection
     }
+  }
+
+  private activeResize = {
+    apId: '' as string,
+    startY: 0 as number,
+    startHeightPx: 0 as number,
+    totalWorkingHours: 0 as number,
+    originalEndHour: 0 as number,
+    originalHeightPx: 0 as number,
+    outOfBounds: false as boolean,
+  };
+
+  onResizeStart(ev: MouseEvent | TouchEvent, ap: Appointment): void {
+    ev.stopPropagation();
+    ev.preventDefault();
+
+    const target = (ev.currentTarget as HTMLElement)?.parentElement as HTMLElement; // appointment-block
+    if (!target) return;
+
+    const pointerY = (ev instanceof TouchEvent ? ev.touches[0].clientY : (ev as MouseEvent).clientY);
+    const rect = target.getBoundingClientRect();
+
+    const totalWorkingHours = this.workStartHour > this.workEndHour
+      ? (24 - this.workStartHour) + this.workEndHour
+      : this.workEndHour - this.workStartHour;
+
+    this.activeResize = {
+      apId: ap.id!,
+      startY: pointerY,
+      startHeightPx: rect.height,
+      totalWorkingHours,
+      originalEndHour: ap.endHour,
+      originalHeightPx: rect.height,
+      outOfBounds: false,
+    };
+
+    this.isResizing = true;
+
+    const move = (e: MouseEvent | TouchEvent) => {
+      const clientY = (e instanceof TouchEvent ? e.touches[0].clientY : (e as MouseEvent).clientY);
+      const dy = clientY - this.activeResize.startY;
+      const minHeight = (0.5 / this.activeResize.totalWorkingHours) * this.gridBodyHeight;
+      let newHeight = Math.max(minHeight, this.activeResize.startHeightPx + dy);
+
+      const a = this.appointments.find(x => x.id === this.activeResize.apId);
+      if (!a) return;
+
+      const step = 5 / 60;
+      const employee = this.employees.find(e2 => e2._id === a.employee._id) || this.employees.find(e2 => e2 === a.employee);
+
+      if (employee && employee.workingShift) {
+        let maxEnd = employee.workingShift.endHour;
+        if (employee.workingShift.startHour > employee.workingShift.endHour) {
+          maxEnd = (a.startHour >= employee.workingShift.startHour) ? 24 : employee.workingShift.endHour;
+        }
+        const maxDuration = Math.max(0.5, maxEnd - a.startHour);
+        const maxHeightPx = (maxDuration / this.activeResize.totalWorkingHours) * this.gridBodyHeight;
+        newHeight = Math.min(newHeight, maxHeightPx);
+      }
+
+      target.style.height = `${newHeight}px`;
+
+      const duration = (newHeight / this.gridBodyHeight) * this.activeResize.totalWorkingHours;
+      let snapped = Math.max(0.5, Math.round(duration / step) * step);
+
+      if (employee && employee.workingShift) {
+        let maxEnd = employee.workingShift.endHour;
+        if (employee.workingShift.startHour > employee.workingShift.endHour) {
+          maxEnd = (a.startHour >= employee.workingShift.startHour) ? 24 : employee.workingShift.endHour;
+        }
+        if (a.startHour + snapped > maxEnd) {
+          snapped = maxEnd - a.startHour;
+        }
+      }
+
+      a.endHour = a.startHour + snapped;
+      this.cd.detectChanges();
+    };
+
+    let saveTimeout: any;
+    const triggerSave = () => {
+      clearTimeout(saveTimeout);
+      saveTimeout = setTimeout(() => {
+        const a = this.appointments.find(x => x.id === this.activeResize.apId);
+        if (!a) return;
+        const employee = this.employees.find(e2 => e2._id === a.employee._id) || this.employees.find(e2 => e2 === a.employee);
+        if (!employee || !employee.workingShift) return;
+
+        const within = employee.workingShift.startHour > employee.workingShift.endHour
+          ? ((a.startHour >= employee.workingShift.startHour || a.startHour < employee.workingShift.endHour) &&
+             (a.endHour >= employee.workingShift.startHour || a.endHour < employee.workingShift.endHour))
+          : (a.startHour >= employee.workingShift.startHour && a.endHour <= employee.workingShift.endHour);
+        if (!within) {
+          if (employee.workingShift.startHour > employee.workingShift.endHour) {
+            if (a.startHour < employee.workingShift.startHour && a.startHour >= employee.workingShift.endHour) a.startHour = employee.workingShift.startHour;
+            if (a.endHour > employee.workingShift.endHour && a.endHour <= employee.workingShift.startHour) a.endHour = employee.workingShift.endHour;
+          } else {
+            a.endHour = Math.min(Math.max(a.endHour, employee.workingShift.startHour + 0.5), employee.workingShift.endHour);
+          }
+          this.cd.detectChanges();
+        }
+
+        const dto: UpdateAndCreateAppointmentDto = {
+          employee: a.employee._id!,
+          client: a.client._id!,
+          service: a.service._id!,
+          facility: a.facility._id!,
+          tenant: this.authService.getCurrentUser()!.tenant,
+          startHour: a.startHour,
+          endHour: a.endHour,
+          date: this.selectedDateStr,
+        };
+        this.appointmentsService.updateAppointment(a.id!, dto).subscribe({
+          next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 1200 }),
+          error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 1500 }),
+        });
+      }, 120);
+    };
+
+    const up = () => {
+      this.isResizing = false;
+      window.removeEventListener('mousemove', move, { capture: true } as any);
+      window.removeEventListener('mouseup', up, { capture: true } as any);
+      window.removeEventListener('touchmove', move, { capture: true } as any);
+      window.removeEventListener('touchend', up, { capture: true } as any);
+      triggerSave();
+    };
+
+    window.addEventListener('mousemove', move, { passive: false, capture: true });
+    window.addEventListener('mouseup', up, { passive: true, capture: true });
+    window.addEventListener('touchmove', move, { passive: false, capture: true });
+    window.addEventListener('touchend', up, { passive: true, capture: true });
   }
 }
