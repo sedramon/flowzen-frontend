@@ -1,0 +1,109 @@
+<mat-card class="pos-sessions-container">
+  <!-- Header -->
+  <div class="pos-header">
+    <h2>
+      <mat-icon>account_balance_wallet</mat-icon>
+      POS Sesije
+    </h2>
+    <button 
+      mat-raised-button 
+      color="primary" 
+      class="new-session-btn"
+      (click)="openNewSession()">
+      <mat-icon>add</mat-icon>
+      Nova sesija
+    </button>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Učitavanje sesija...</p>
+  </div>
+
+  <!-- Sessions Table -->
+  <div *ngIf="!loading" class="sessions-content">
+    <mat-table [dataSource]="sessions" class="sessions-table">
+      <!-- Facility Column -->
+      <ng-container matColumnDef="facility">
+        <mat-header-cell *matHeaderCellDef>Objekat</mat-header-cell>
+        <mat-cell *matCellDef="let session">{{ session.facility }}</mat-cell>
+      </ng-container>
+
+      <!-- Employee Column -->
+      <ng-container matColumnDef="employee">
+        <mat-header-cell *matHeaderCellDef>Zaposleni</mat-header-cell>
+        <mat-cell *matCellDef="let session">{{ session.employee }}</mat-cell>
+      </ng-container>
+
+      <!-- Start Time Column -->
+      <ng-container matColumnDef="startTime">
+        <mat-header-cell *matHeaderCellDef>Početak</mat-header-cell>
+        <mat-cell *matCellDef="let session">{{ formatDate(session.startTime) }}</mat-cell>
+      </ng-container>
+
+      <!-- End Time Column -->
+      <ng-container matColumnDef="endTime">
+        <mat-header-cell *matHeaderCellDef>Kraj</mat-header-cell>
+        <mat-cell *matCellDef="let session">
+          {{ session.endTime ? formatDate(session.endTime) : '-' }}
+        </mat-cell>
+      </ng-container>
+
+      <!-- Status Column -->
+      <ng-container matColumnDef="status">
+        <mat-header-cell *matHeaderCellDef>Status</mat-header-cell>
+        <mat-cell *matCellDef="let session">
+          <span class="status-badge" [class]="'status-' + session.status">
+            {{ getStatusText(session.status) }}
+          </span>
+        </mat-cell>
+      </ng-container>
+
+      <!-- Total Sales Column -->
+      <ng-container matColumnDef="totalSales">
+        <mat-header-cell *matHeaderCellDef>Broj prodaja</mat-header-cell>
+        <mat-cell *matCellDef="let session">{{ session.totalSales }}</mat-cell>
+      </ng-container>
+
+      <!-- Total Amount Column -->
+      <ng-container matColumnDef="totalAmount">
+        <mat-header-cell *matHeaderCellDef>Ukupan iznos</mat-header-cell>
+        <mat-cell *matCellDef="let session">{{ formatCurrency(session.totalAmount) }}</mat-cell>
+      </ng-container>
+
+      <!-- Actions Column -->
+      <ng-container matColumnDef="actions">
+        <mat-header-cell *matHeaderCellDef>Akcije</mat-header-cell>
+        <mat-cell *matCellDef="let session">
+          <button 
+            *ngIf="session.status === 'open'"
+            mat-icon-button 
+            color="warn"
+            matTooltip="Zatvori sesiju"
+            (click)="closeSession(session)">
+            <mat-icon>close</mat-icon>
+          </button>
+          <button 
+            mat-icon-button 
+            color="primary"
+            matTooltip="Detalji sesije">
+            <mat-icon>visibility</mat-icon>
+          </button>
+        </mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <!-- No Data State -->
+    <div *ngIf="sessions.length === 0" class="no-data">
+      <mat-icon>account_balance_wallet</mat-icon>
+      <p>Nema podataka o sesijama</p>
+      <button mat-button color="primary" (click)="openNewSession()">
+        Kreiraj prvu sesiju
+      </button>
+    </div>
+  </div>
+</mat-card>

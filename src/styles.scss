@@ -169,6 +169,31 @@ body {
   color: white !important;
 }
 
+// POS Dialog Styles
+::ng-deep .pos-receipt-dialog .mat-mdc-dialog-container {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+::ng-deep .pos-refund-dialog .mat-mdc-dialog-container {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
+::ng-deep .pos-transaction-view-dialog .mat-mdc-dialog-container {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+}
+
 .component-title {
   background-color: #131313;
   margin: 0px;

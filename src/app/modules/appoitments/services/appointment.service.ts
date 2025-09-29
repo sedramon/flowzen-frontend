@@ -94,7 +94,9 @@ export class AppointmentsService {
               tenant: app.tenant,
               startHour: app.startHour,
               endHour: app.endHour,
-              date: app.date
+              date: app.date,
+              paid: app.paid,
+              sale: app.sale
             }))
           }))
         )

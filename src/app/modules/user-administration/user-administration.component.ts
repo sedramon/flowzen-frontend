@@ -134,7 +134,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openEditRoleDialog(role: Role) {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
-      width: '800px',
+      width: '1000px',
       height: '600px',
       data: { role },
     });

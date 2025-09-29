@@ -1,0 +1,111 @@
+<div class="outer-dialog-container">
+  <div class="dialog-container">
+    <h2 class="dialog-title">Povraćaj prodaje</h2>
+    
+    <div class="dialog-content">
+    <!-- Sale Information -->
+    <div class="refund-section">
+      <div class="section-header">
+        <mat-icon color="accent">receipt_long</mat-icon>
+        <span>Informacije o prodaji</span>
+      </div>
+      <div class="sale-details">
+        <div class="sale-row">
+          <span class="label">Broj računa:</span>
+          <span class="value">{{ sale?.number }}</span>
+        </div>
+        <div class="sale-row">
+          <span class="label">Datum:</span>
+          <span class="value">{{ sale?.date | date:'dd.MM.yyyy HH:mm' }}</span>
+        </div>
+        <div class="sale-row">
+          <span class="label">Originalni iznos:</span>
+          <span class="value original-amount">{{ formatCurrency(sale?.summary?.grandTotal || 0) }}</span>
+        </div>
+        <div class="sale-row">
+          <span class="label">Status:</span>
+          <span class="value status">{{ sale?.status === 'refunded' ? 'Već povraćeno' : 'Aktivno' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Refund Form -->
+    <form [formGroup]="refundForm" class="refund-form">
+      <div class="refund-section">
+        <div class="section-header">
+          <mat-icon color="accent">edit</mat-icon>
+          <span>Detalji povraćaja</span>
+        </div>
+        <div class="form-grid">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Iznos povraćaja</mat-label>
+            <input matInput type="number" formControlName="refundAmount" [max]="getMaxRefundAmount()" step="0.01">
+            <span matSuffix>RSD</span>
+            <mat-hint>Maksimalno: {{ formatCurrency(getMaxRefundAmount()) }}</mat-hint>
+            <mat-error>{{ getRefundAmountError() }}</mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Način povraćaja</mat-label>
+            <mat-select formControlName="refundMethod">
+              <mat-option *ngFor="let method of paymentMethods" [value]="method.value">
+                {{ method.label }}
+              </mat-option>
+            </mat-select>
+            <mat-error *ngIf="refundForm.get('refundMethod')?.hasError('required')">
+              Način povraćaja je obavezan
+            </mat-error>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Razlog povraćaja</mat-label>
+            <textarea matInput formControlName="reason" rows="4" placeholder="Opišite razlog za povraćaj..."></textarea>
+            <mat-hint>Minimum 10 karaktera</mat-hint>
+            <mat-error>{{ getReasonError() }}</mat-error>
+          </mat-form-field>
+        </div>
+      </div>
+
+      <!-- Refund Summary -->
+      <div class="refund-section">
+        <div class="section-header">
+          <mat-icon color="accent">summarize</mat-icon>
+          <span>Sažetak povraćaja</span>
+        </div>
+        <div class="summary-details">
+          <div class="summary-row">
+            <span class="label">Originalni iznos:</span>
+            <span class="value">{{ formatCurrency(sale?.summary?.grandTotal || 0) }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="label">Iznos povraćaja:</span>
+            <span class="value refund-amount">{{ formatCurrency(refundForm.get('refundAmount')?.value || 0) }}</span>
+          </div>
+          <div class="summary-row total-row">
+            <span class="label">Preostali iznos:</span>
+            <span class="value remaining-amount">{{ formatCurrency((sale?.summary?.grandTotal || 0) - (refundForm.get('refundAmount')?.value || 0)) }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="refund-actions">
+        <button mat-button (click)="cancelRefund()" [disabled]="processing">
+          <mat-icon>cancel</mat-icon>
+          Otkaži
+        </button>
+        <button 
+          mat-raised-button 
+          color="warn" 
+          (click)="processRefund()" 
+          [disabled]="refundForm.invalid || processing || sale?.status === 'refunded'">
+          <mat-icon *ngIf="!processing">undo</mat-icon>
+          <mat-icon *ngIf="processing" class="spinning">refresh</mat-icon>
+          {{ processing ? 'Obrađuje se...' : 'Obrađi povraćaj' }}
+        </button>
+      </div>
+    </form>
+    </div>
+  </div>
+</div>
+

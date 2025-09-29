@@ -15,6 +15,10 @@ import { SettingsComponent } from './modules/settings/settings.component';
 import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.component';
 import { Suppliers } from './modules/suppliers/suppliers';
 import { Articles } from './modules/articles/articles';
+import { PosSalesComponent } from './modules/pos/components/pos-sales/pos-sales.component';
+import { PosSessionsComponent } from './modules/pos/components/pos-sessions/pos-sessions.component';
+import { PosReportsComponent } from './modules/pos/components/pos-reports/pos-reports.component';
+import { PosSettingsComponent } from './modules/pos/components/pos-settings/pos-settings.component';
 
 export const routes: Routes = [
   {
@@ -135,6 +139,56 @@ export const routes: Routes = [
           title: 'Articles',
           icon: 'articles'
         }
+      },
+      {
+        path: 'pos',
+        children: [
+          {
+            path: 'sales',
+            component: PosSalesComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:sale',
+              title: 'POS Sales',
+              icon: 'point_of_sale'
+            }
+          },
+          {
+            path: 'sessions',
+            component: PosSessionsComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:session',
+              title: 'POS Sessions',
+              icon: 'account_balance_wallet'
+            }
+          },
+          {
+            path: 'reports',
+            component: PosReportsComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:report',
+              title: 'POS Reports',
+              icon: 'assessment'
+            }
+          },
+          {
+            path: 'settings',
+            component: PosSettingsComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:settings',
+              title: 'POS Settings',
+              icon: 'settings'
+            }
+          },
+          {
+            path: '',
+            redirectTo: 'sales',
+            pathMatch: 'full'
+          }
+        ]
       },
       {
         path: 'unauthorized',

@@ -1,0 +1,122 @@
+<div class="outer-dialog-container">
+  <div class="dialog-container">
+    <h2 class="dialog-title-simple">Račun</h2>
+
+    <div class="dialog-content">
+      <div *ngIf="loading" class="loading-container">
+        <div class="spinner"></div>
+        <p>Učitavanje računa...</p>
+      </div>
+
+      <div *ngIf="!loading && receiptData" class="receipt-content">
+    <div class="receipt-paper">
+      <!-- Receipt Header -->
+      <div class="receipt-header-info">
+        <h3 class="facility-name-simple">{{ receiptData.facility?.name || 'Salon' }}</h3>
+        <p *ngIf="receiptData.facility?.address">{{ receiptData.facility.address }}</p>
+        <p *ngIf="receiptData.facility?.phone">Tel: {{ receiptData.facility.phone }}</p>
+        <p>PIB: 123456789</p>
+        <p>Matični broj: 12345678</p>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <!-- Receipt Details -->
+      <div class="receipt-details">
+        <div class="receipt-row">
+          <span>Broj računa:</span>
+          <span class="receipt-number">{{ receiptData.sale.number }}</span>
+        </div>
+        <div class="receipt-row">
+          <span>Datum i vreme:</span>
+          <span>{{ formatDate(receiptData.sale.date) }}</span>
+        </div>
+        <div class="receipt-row" *ngIf="receiptData.client">
+          <span>Klijent:</span>
+          <span>{{ receiptData.client.firstName }} {{ receiptData.client.lastName }}</span>
+        </div>
+        <div class="receipt-row">
+          <span>Blagajnik:</span>
+          <span>{{ receiptData.cashier?.firstName }} {{ receiptData.cashier?.lastName }}</span>
+        </div>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <!-- Items -->
+      <div class="receipt-items">
+        <div class="receipt-items-header">
+          <div class="item-name">Naziv</div>
+          <div class="item-qty">Kol.</div>
+          <div class="item-price">Cena</div>
+          <div class="item-total">Ukupno</div>
+        </div>
+        
+        <div *ngFor="let item of receiptData.sale.items" class="receipt-item">
+          <div class="item-name">{{ item.name }}</div>
+          <div class="item-qty">{{ item.qty }}</div>
+          <div class="item-price">{{ formatCurrency(item.unitPrice) }}</div>
+          <div class="item-total">{{ formatCurrency(item.total) }}</div>
+        </div>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <!-- Summary -->
+      <div class="receipt-summary">
+        <div class="receipt-row">
+          <span>Međuzbir:</span>
+          <span>{{ formatCurrency(receiptData.sale.summary?.subtotal || 0) }}</span>
+        </div>
+        <div class="receipt-row" *ngIf="receiptData.sale.summary?.discountTotal > 0">
+          <span>Popust:</span>
+          <span>-{{ formatCurrency(receiptData.sale.summary.discountTotal) }}</span>
+        </div>
+        <div class="receipt-row">
+          <span>PDV ({{ receiptData.sale.items[0]?.taxRate || 20 }}%):</span>
+          <span>{{ formatCurrency(receiptData.sale.summary?.taxTotal || 0) }}</span>
+        </div>
+        <div class="receipt-row total-row">
+          <span>UKUPNO ZA PLAĆANJE:</span>
+          <span>{{ formatCurrency(receiptData.sale.summary?.grandTotal || 0) }}</span>
+        </div>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <!-- Payments -->
+      <div class="receipt-payments">
+        <h4>Načini plaćanja:</h4>
+        <div *ngFor="let payment of receiptData.sale.payments" class="payment-row">
+          <span>{{ getPaymentMethodText(payment.method) }}:</span>
+          <span>{{ formatCurrency(payment.amount) }}</span>
+        </div>
+      </div>
+
+      <div class="receipt-divider"></div>
+
+      <!-- Footer -->
+      <div class="receipt-footer">
+        <p>Hvala na poseti!</p>
+        <p>Dobrodošli ponovo</p>
+        <div *ngIf="receiptData.sale.fiscal?.status === 'done'" class="fiscal-info">
+          <p>Fiskalni broj: {{ receiptData.sale.fiscal.fiscalNumber }}</p>
+          <p>Korisnički broj: {{ receiptData.sale.fiscal.correlationId }}</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="receipt-actions">
+      <button mat-raised-button color="primary" (click)="printReceipt()">
+        <mat-icon>print</mat-icon>
+        Štampaj račun
+      </button>
+      <button mat-button (click)="closeDialog()">
+        Zatvori
+      </button>
+    </div>
+      </div>
+    </div>
+  </div>
+</div>
+

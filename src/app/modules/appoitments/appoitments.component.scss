@@ -231,18 +231,53 @@
   }
 }
 
+@keyframes gradientPan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
 .appointment-block {
   position: absolute;
   top: 0;
   color: #fff;
   padding: 4px;
   border-radius: 10px;
-  background: linear-gradient(to bottom, #8c0055, #b3006e);
+  background: linear-gradient(60deg, #8c0055, #6a0040, #4a0028, #2d001a, #8c0055);
+  background-size: 300% 300%;
+  animation: gradientPan 15s ease infinite;
   box-shadow: 0px -20px 8px rgba(0, 0, 0, 0.1), 0 6px 20px rgba(0, 0, 0, 0.1);
   cursor: move;
   box-sizing: border-box;
   overflow: hidden;
   z-index: 10;
+  padding-bottom: 48px; // da ne preklapa sadržaj
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.3s ease;
+  
+  &.paid {
+    background: linear-gradient(60deg, #2e7d32, #1b5e20, #0d4f0d, #003300, #2e7d32);
+    background-size: 300% 300%;
+    animation: gradientPan 15s ease infinite;
+    cursor: not-allowed;
+    opacity: 0.9;
+    border-color: rgba(46, 125, 50, 0.3);
+  }
+  
+  &.fiscalized {
+    background: linear-gradient(60deg, #1565c0, #0d47a1, #0a3d91, #002171, #1565c0);
+    background-size: 300% 300%;
+    animation: gradientPan 15s ease infinite;
+    cursor: not-allowed;
+    opacity: 0.9;
+    border-color: rgba(21, 101, 192, 0.3);
+  }
 }
 
 .appointment-block[data-dragging="true"] {
@@ -260,21 +295,82 @@
   align-items: center;
   text-align: center;
   justify-content: flex-start;
+  position: relative;
+  height: 100%;
+  padding-bottom: 40px; // Ostavi prostor za dugme
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(2px);
+  border-radius: 8px;
+  padding: 8px;
+  margin: 2px;
 }
 
 .appointment-info .service {
   font-size: 1.2em;       
   font-weight: bold;      
-  margin-bottom: 4px;     
+  margin-bottom: 4px;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 .appointment-info .time {
   font-size: 0.9em;       
-  margin-bottom: 4px;     
+  margin-bottom: 4px;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
 }
 
 .appointment-info .date {
-  font-size: 0.9em;       
+  font-size: 0.9em;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  color: #ffffff;
+}
+
+.appointment-info .pay-btn {
+  position: absolute;
+  bottom: 4px;
+  right: 4px;
+  z-index: 20;
+  background: rgba(0, 0, 0, 0.3) !important;
+  backdrop-filter: blur(5px);
+  color: #fff !important;
+  font-weight: bold;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.20);
+  transition: all 0.2s ease;
+  min-height: 28px;
+  padding: 4px 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75em;
+  white-space: nowrap;
+  max-width: 80px;
+  
+  &:hover {
+    background: rgba(0, 0, 0, 0.4) !important;
+    border-color: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.30);
+  }
+  
+  .mat-icon {
+    margin-right: 4px;
+    color: #fff !important;
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+  
+  &.paid,
+  &:disabled {
+    background: rgba(0, 0, 0, 0.5) !important;
+    color: #fff !important;
+    cursor: default;
+    opacity: 0.85;
+    pointer-events: none;
+    border-color: rgba(255, 255, 255, 0.1);
+  }
 }
 
 .resize-handle {
@@ -370,4 +466,34 @@
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
+}
+
+// Responzivni stilovi za appointment blokove
+.appointment-block {
+  // Za veoma kratke termine - skrivanje teksta dugmeta
+  &[style*="height: 40px"], 
+  &[style*="height: 50px"],
+  &[style*="height: 60px"] {
+    .appointment-info .pay-btn {
+      font-size: 0.65em;
+      padding: 2px 6px;
+      min-height: 24px;
+      max-width: 60px;
+      
+      .mat-icon {
+        font-size: 14px;
+        width: 14px;
+        height: 14px;
+        margin-right: 2px;
+      }
+    }
+  }
+  
+  // Za kratke termine - skrivanje datuma
+  &[style*="height: 70px"],
+  &[style*="height: 80px"] {
+    .appointment-info .date {
+      display: none;
+    }
+  }
 }

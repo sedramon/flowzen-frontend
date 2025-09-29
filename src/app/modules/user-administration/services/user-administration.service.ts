@@ -17,7 +17,17 @@ export class UserAdministrationService {
     private rolesSubject = new BehaviorSubject<Role[]>([]);
     public roles$ = this.rolesSubject.asObservable();
 
-    constructor(private http: HttpClient, private authService: AuthService) { }
+    constructor(private http: HttpClient, private authService: AuthService) {
+        // Pretplata na promenu usera (login/logout)
+        this.authService.user$.subscribe(() => {
+            this.clearCache();
+        });
+    }
+
+    clearCache() {
+        this.usersSubject.next([]);
+        this.rolesSubject.next([]);
+    }
 
     fetchUsers(tenant: string): Observable<User[]> {
         if (this.usersSubject.value.length > 0) {

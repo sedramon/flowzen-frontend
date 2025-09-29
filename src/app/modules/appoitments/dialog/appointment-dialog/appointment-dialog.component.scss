@@ -22,6 +22,49 @@
     text-align: center;
     color: #ff0066;
   }
+
+  // Preview mode styles
+  .preview-mode {
+    .dialog-title {
+      color: #8c0055;
+    }
+  }
+
+  .preview-header {
+    border-radius: 8px;
+    padding: 16px;
+    margin: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 4px solid #8c0055;
+  }
+
+  .status-badge {
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-weight: bold;
+    color: white;
+    font-size: 0.9em;
+    
+    &.naplaćeno {
+      background: #43a047;
+    }
+    
+    &.fiskalizovano {
+      background: #1976d2;
+    }
+  }
+
+  .preview-info {
+    text-align: right;
+    
+    p {
+      margin: 4px 0;
+      color: #666;
+      font-size: 0.9em;
+    }
+  }
   
   .dialog-content {
     margin-top: 16px;

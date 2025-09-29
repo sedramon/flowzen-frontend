@@ -25,18 +25,28 @@
     </mat-form-field>
 
     <!-- 3) Action Checkboxes -->
-    <div *ngIf="roleForm.controls.entity.value" formGroupName="actions" fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="16px">
-      <mat-checkbox *ngFor="let action of availableActions" [formControlName]="action">
-        <mat-icon class="action-icon">
+    <div *ngIf="roleForm.controls.entity.value" formGroupName="actions"
+         fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="32px"
+         style="padding: 24px 0; margin-bottom: 8px; overflow-x: auto;">
+      <mat-checkbox *ngFor="let action of availableActions"
+                    [formControlName]="action"
+                    matTooltip="{{ action | titlecase }}"
+                    style="margin: 0 8px; min-width: 120px;">
+        <mat-icon style="vertical-align: middle; margin-right: 8px;">
           {{ {
-          access: 'lock_open',
-          read: 'visibility',
-          create: 'add_circle_outline',
-          update: 'autorenew',
-          delete: 'delete_outline'
-          }[action] }}
+            access: 'lock_open',
+            read: 'visibility',
+            create: 'add_circle_outline',
+            update: 'autorenew',
+            delete: 'delete_outline',
+            sale: 'point_of_sale',
+            refund: 'undo',
+            session: 'event',
+            report: 'bar_chart',
+            settings: 'settings',
+          }[action] || 'check_box'}}
         </mat-icon>
-        {{ action | titlecase }}
+        <span style="vertical-align: middle; font-size: 15px;">{{ action | titlecase }}</span>
       </mat-checkbox>
     </div>
   </form>

@@ -1,0 +1,291 @@
+.pos-settings-container {
+  padding: 24px;
+  margin: 16px;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #ffffff;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 2px solid #f0f0f0;
+
+  .settings-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0;
+    color: #8c0055;
+    font-size: 1.8em;
+    font-weight: 600;
+
+    mat-icon {
+      font-size: 1.5em;
+      width: 1.5em;
+      height: 1.5em;
+    }
+  }
+
+  .header-actions {
+    .facility-selector {
+      min-width: 200px;
+    }
+  }
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: #666;
+
+  .spinner {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #8c0055;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 16px;
+  }
+
+  p {
+    font-size: 1.1em;
+    margin: 0;
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.settings-content {
+  .settings-form {
+    .settings-tabs {
+      margin-bottom: 24px;
+
+      ::ng-deep .mat-tab-group {
+        .mat-tab-header {
+          border-bottom: 2px solid #e0e0e0;
+        }
+
+        .mat-tab-label {
+          font-weight: 500;
+          color: #666;
+          
+          &.mat-tab-label-active {
+            color: #8c0055;
+            font-weight: 600;
+          }
+        }
+
+        .mat-ink-bar {
+          background-color: #8c0055;
+        }
+      }
+    }
+
+    .tab-content {
+      padding: 24px 0;
+
+      h3 {
+        margin: 0 0 24px 0;
+        color: #333;
+        font-size: 1.4em;
+        font-weight: 600;
+        border-bottom: 1px solid #e0e0e0;
+        padding-bottom: 12px;
+      }
+
+      .payment-methods-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+
+        .payment-method-card {
+          background: #f8f9fa;
+          border-radius: 8px;
+          padding: 20px;
+          border: 1px solid #e0e0e0;
+          transition: all 0.2s;
+
+          &:hover {
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+          }
+
+          .method-header {
+            margin-bottom: 16px;
+
+            ::ng-deep .mat-slide-toggle {
+              .mat-slide-toggle-label {
+                font-weight: 600;
+                font-size: 1.1em;
+                color: #333;
+              }
+            }
+          }
+
+          .method-label {
+            width: 100%;
+          }
+        }
+      }
+
+      .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+
+        .full-width {
+          grid-column: 1 / -1;
+        }
+
+        .checkbox-field {
+          display: flex;
+          align-items: center;
+          padding: 16px 0;
+
+          ::ng-deep .mat-checkbox {
+            .mat-checkbox-label {
+              font-weight: 500;
+              color: #333;
+            }
+          }
+        }
+
+        mat-form-field {
+          width: 100%;
+
+          &.mat-form-field-appearance-outline {
+            .mat-form-field-outline {
+              color: #e0e0e0;
+            }
+
+            &.mat-focused .mat-form-field-outline-thick {
+              color: #8c0055;
+            }
+          }
+
+          .mat-form-field-label {
+            color: #666;
+            font-weight: 500;
+          }
+
+          .mat-hint {
+            color: #999;
+            font-size: 0.85em;
+          }
+
+          .mat-error {
+            color: #d32f2f;
+            font-size: 0.85em;
+          }
+        }
+      }
+    }
+
+    .form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      border-top: 2px solid #f0f0f0;
+      margin-top: 24px;
+
+      button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        font-size: 1em;
+        font-weight: 500;
+        border-radius: 8px;
+        transition: all 0.2s;
+
+        &[mat-button] {
+          color: #666;
+          border: 1px solid #e0e0e0;
+
+          &:hover {
+            background: #f8f9fa;
+            color: #333;
+          }
+        }
+
+        &[mat-raised-button] {
+          background: linear-gradient(135deg, #8c0055, #b3006e);
+          color: white;
+          box-shadow: 0 2px 8px rgba(140, 0, 85, 0.3);
+
+          &:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(140, 0, 85, 0.4);
+          }
+
+          &:disabled {
+            background: #ccc;
+            color: #999;
+            box-shadow: none;
+          }
+        }
+
+        mat-icon {
+          font-size: 1.2em;
+          width: 1.2em;
+          height: 1.2em;
+
+          &.spinning {
+            animation: spin 1s linear infinite;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .pos-settings-container {
+    margin: 8px;
+    padding: 16px;
+  }
+
+  .settings-header {
+    flex-direction: column;
+    gap: 16px;
+    align-items: stretch;
+
+    .header-actions {
+      .facility-selector {
+        min-width: auto;
+        width: 100%;
+      }
+    }
+  }
+
+  .payment-methods-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-actions {
+    flex-direction: column;
+    gap: 12px;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+}
+

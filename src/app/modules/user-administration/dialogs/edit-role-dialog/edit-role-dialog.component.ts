@@ -47,13 +47,7 @@ export class EditRoleDialogComponent implements OnInit {
   roleForm = new FormGroup({
     name: new FormControl<string>('', Validators.required),
     entity: new FormControl<string>('', Validators.required),
-    actions: new FormGroup({
-      access: new FormControl<boolean>(false),
-      read: new FormControl<boolean>(false),
-      create: new FormControl<boolean>(false),
-      update: new FormControl<boolean>(false),
-      delete: new FormControl<boolean>(false),
-    }),
+    actions: new FormGroup({}), // This will be dynamically populated
   });
 
   allScopes: any[] = [];
@@ -137,12 +131,18 @@ export class EditRoleDialogComponent implements OnInit {
   }
 
   private populateActionsFor(entity: string) {
-    const grp = this.roleForm.controls.actions as FormGroup;
-    for (const action of Object.keys(grp.controls)) {
-      const scopeId = this.scopeGroups[entity]?.[action] ?? null;
-      grp.controls[action].setValue(
-        !!scopeId && this.existingScopeIds.includes(scopeId)
-      );
+    const actionsMap = this.scopeGroups[entity] || {};
+    // Dinamički generiši FormGroup za sve akcije ovog entiteta
+    const controls: { [key: string]: FormControl } = {};
+    for (const action of Object.keys(actionsMap)) {
+      controls[action] = new FormControl(false);
+    }
+    // Zameni postojeći FormGroup novim
+    this.roleForm.setControl('actions', new FormGroup(controls));
+    // Popuni vrednosti na osnovu postojeće role
+    for (const action of Object.keys(actionsMap)) {
+      const scopeId = actionsMap[action];
+      this.roleForm.get(['actions', action])?.setValue(this.existingScopeIds.includes(scopeId));
     }
   }
 

@@ -1,0 +1,90 @@
+<div class="pos-checkout-dialog">
+  <div class="dialog-header">
+    <h2 class="dialog-title">
+      <mat-icon>point_of_sale</mat-icon>
+      Naplata
+    </h2>
+    <div class="service-info" *ngIf="data?.appointment?.service">
+      <div class="service-details">
+        <span class="service-name">{{ data.appointment.service.name || 'Usluga' }}</span>
+        <span class="service-price">{{ data.appointment.service.price || 0 | number:'1.2-2' }} RSD</span>
+      </div>
+    </div>
+  </div>
+  <form [formGroup]="form" class="checkout-form">
+    <!-- Sekcija za dodavanje artikala -->
+    <div class="articles-section">
+      <h3>Dodaj artikle</h3>
+      <div class="articles-grid">
+        <div *ngFor="let article of availableArticles" class="article-card" (click)="addArticle(article)">
+          <div class="article-name">{{ article.name }}</div>
+          <div class="article-price">{{ article.price | number:'1.2-2' }} RSD</div>
+          <div class="article-stock" *ngIf="article.stock !== undefined && article.stock > 0">Zaliha: {{ article.stock }}</div>
+          <div class="article-stock-low" *ngIf="article.stock === 0">Nema na stanju</div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Lista stavki za naplatu -->
+    <div class="items-section">
+      <h3>Stavke za naplatu</h3>
+      <div class="items-list">
+        <div *ngFor="let item of items.controls; let i = index" class="item-row">
+          <div class="item-info">
+            <span class="item-name">{{ item.value.name }}</span>
+            <span class="item-type">{{ item.value.type === 'service' ? 'Usluga' : 'Artikal' }}</span>
+          </div>
+          <div class="item-controls">
+            <button mat-icon-button (click)="removeItem(i)" color="warn">
+              <mat-icon>remove</mat-icon>
+            </button>
+            <span class="item-qty">x{{ item.value.qty }}</span>
+            <button mat-icon-button (click)="addArticle({_id: item.value.refId, name: item.value.name, price: item.value.unitPrice})" color="primary">
+              <mat-icon>add</mat-icon>
+            </button>
+          </div>
+          <div class="item-price">{{ item.value.unitPrice | number:'1.2-2' }} RSD</div>
+        </div>
+      </div>
+    </div>
+    <div class="total-row">
+      <span>Ukupno:</span>
+      <span>{{ totalSum | number:'1.2-2' }} RSD</span>
+    </div>
+    <mat-form-field appearance="outline" class="discount-field">
+      <mat-label>Popust</mat-label>
+      <input matInput type="number" formControlName="discount" min="0" />
+    </mat-form-field>
+    <div class="payments-list" formArrayName="payments">
+      <div *ngFor="let pay of payments.controls; let i = index" [formGroupName]="i" class="payment-row">
+        <mat-form-field appearance="outline" class="payment-method-field">
+          <mat-label>Način plaćanja</mat-label>
+          <mat-select formControlName="method">
+            <mat-option *ngFor="let m of paymentMethods" [value]="m.value">{{ m.label }}</mat-option>
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="payment-amount-field">
+          <mat-label>Iznos</mat-label>
+          <input matInput type="number" formControlName="amount" min="1" />
+        </mat-form-field>
+        <button mat-icon-button color="warn" (click)="removePayment(i)" *ngIf="payments.length > 1">
+          <mat-icon>delete</mat-icon>
+        </button>
+      </div>
+      <button mat-button color="accent" type="button" (click)="addPayment()">+ Dodaj način plaćanja</button>
+    </div>
+    <mat-form-field appearance="outline" class="note-field">
+      <mat-label>Napomena</mat-label>
+      <textarea matInput formControlName="note"></textarea>
+    </mat-form-field>
+    <div class="actions-row">
+      <button mat-raised-button color="accent" [disabled]="loading" (click)="submit()">
+        <mat-icon>point_of_sale</mat-icon>
+        Potvrdi i izdaj račun
+      </button>
+      <mat-spinner *ngIf="loading" diameter="32"></mat-spinner>
+    </div>
+    <div class="error-msg" *ngIf="errorMsg">{{ errorMsg }}</div>
+    <div class="success-msg" *ngIf="successMsg">{{ successMsg }}</div>
+  </form>
+</div>

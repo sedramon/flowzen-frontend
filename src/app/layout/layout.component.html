@@ -55,6 +55,11 @@
       <mat-icon>settings</mat-icon>
     </button>
 
+    <button *ngIf="authService.isModuleEnabled('scope_pos:sale')" mat-icon-button matTooltip="POS"
+      matTooltipPosition="below" routerLink="/pos/sales" routerLinkActive="active" class="nav-btn">
+      <mat-icon>point_of_sale</mat-icon>
+    </button>
+
 
 
 

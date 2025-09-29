@@ -142,6 +142,8 @@
               [matTooltip]="formatTime(ap.startHour) + ' - ' + formatTime(ap.endHour)"
               matTooltipPosition="above"
               [matTooltipDisabled]="isDragging"
+              [class.paid]="ap.paid"
+              [class.fiscalized]="ap.sale?.fiscal?.status === 'done'"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
               >
               <div class="appointment-info">   
@@ -153,12 +155,29 @@
                 <div class="date">
                   {{ ap.date | date : "dd MMM yyyy" }}
                 </div>
+            <button
+              mat-button
+              class="pay-btn"
+              [ngClass]="{ 'paid': ap.paid, 'fiscalized': ap.sale?.fiscal?.status === 'done' }"
+              [disabled]="ap.paid || ap.sale?.fiscal?.status === 'done'"
+              (click)="onPayAppointment(ap, $event)"
+            >
+              <mat-icon>point_of_sale</mat-icon>
+              {{ ap.paid ? (ap.sale?.fiscal?.status === 'done' ? 'Fisk.' : 'Napl.') : 'Naplati' }}
+            </button>
               </div>
-              <div class="resize-handle" (click)="$event.stopPropagation()" (mousedown)="onResizeStart($event, ap)" (touchstart)="onResizeStart($event, ap)"></div>
+              <div class="resize-handle" 
+                   *ngIf="!ap.paid && ap.sale?.fiscal?.status !== 'done'"
+                   (click)="$event.stopPropagation()" 
+                   (mousedown)="onResizeStart($event, ap)" 
+                   (touchstart)="onResizeStart($event, ap)"></div>
             </div>
           </div>
         </div>
       </div>
     </div>
   </ng-container>
+  
+  <!-- Hidden POS Checkout Component for Angular compiler detection -->
+  <app-pos-checkout *ngIf="false" style="display: none !important;"></app-pos-checkout>
 </mat-card>

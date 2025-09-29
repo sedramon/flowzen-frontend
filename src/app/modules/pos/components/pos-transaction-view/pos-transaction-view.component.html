@@ -1,0 +1,137 @@
+<div class="outer-dialog-container">
+  <div class="dialog-container">
+    <h2 class="dialog-title-simple">Pregled</h2>
+
+    <div class="dialog-content">
+      <div *ngIf="transaction" class="transaction-content">
+        <div class="transaction-paper">
+          <!-- Transaction Header -->
+          <div class="transaction-header-info">
+            <h3 class="facility-name-simple">{{ transaction.facility?.name || 'Salon' }}</h3>
+            <p *ngIf="transaction.facility?.address">{{ transaction.facility.address }}</p>
+            <p *ngIf="transaction.facility?.phone">Tel: {{ transaction.facility.phone }}</p>
+            <p>PIB: 123456789</p>
+            <p>Matični broj: 12345678</p>
+          </div>
+
+          <div class="transaction-divider"></div>
+
+          <!-- Transaction Details -->
+          <div class="transaction-details">
+            <div class="transaction-row">
+              <span>Broj transakcije:</span>
+              <span class="transaction-number">{{ transaction.sale?.number || transaction.sale?.id || transaction.id || 'N/A' }}</span>
+            </div>
+            <div class="transaction-row">
+              <span>Datum i vreme:</span>
+              <span>{{ formatDate(transaction.sale?.date || transaction.date) }}</span>
+            </div>
+            <div class="transaction-row" *ngIf="transaction.client">
+              <span>Klijent:</span>
+              <span>{{ transaction.client.firstName }} {{ transaction.client.lastName }}</span>
+            </div>
+            <div class="transaction-row" *ngIf="transaction.cashier">
+              <span>Blagajnik:</span>
+              <span>{{ transaction.cashier.firstName }} {{ transaction.cashier.lastName }}</span>
+            </div>
+            <div class="transaction-row">
+              <span>Status:</span>
+              <span class="status-badge" [style.color]="getStatusColor(transaction)">
+                {{ getStatusText(transaction) }}
+              </span>
+            </div>
+          </div>
+
+          <div class="transaction-divider"></div>
+
+          <!-- Items -->
+          <div class="transaction-items" *ngIf="transaction.sale?.items && transaction.sale.items.length > 0">
+            <div class="transaction-items-header">
+              <div class="item-name">Naziv</div>
+              <div class="item-qty">Kol.</div>
+              <div class="item-price">Cena</div>
+              <div class="item-total">Ukupno</div>
+            </div>
+            
+            <div *ngFor="let item of transaction.sale.items" class="transaction-item">
+              <div class="item-name">{{ item.name }}</div>
+              <div class="item-qty">{{ item.qty }}</div>
+              <div class="item-price">{{ formatCurrency(item.unitPrice) }}</div>
+              <div class="item-total">{{ formatCurrency(item.total) }}</div>
+            </div>
+          </div>
+
+          <div class="transaction-divider" *ngIf="transaction.sale?.items && transaction.sale.items.length > 0"></div>
+
+          <!-- Summary -->
+          <div class="transaction-summary" *ngIf="transaction.sale?.summary">
+            <div class="transaction-row">
+              <span>Međuzbir:</span>
+              <span>{{ formatCurrency(transaction.sale.summary.subtotal || 0) }}</span>
+            </div>
+            <div class="transaction-row" *ngIf="transaction.sale.summary.discountTotal > 0">
+              <span>Popust:</span>
+              <span>-{{ formatCurrency(transaction.sale.summary.discountTotal) }}</span>
+            </div>
+            <div class="transaction-row">
+              <span>PDV ({{ transaction.sale.items?.[0]?.taxRate || 20 }}%):</span>
+              <span>{{ formatCurrency(transaction.sale.summary.taxTotal || 0) }}</span>
+            </div>
+            <div class="transaction-row total-row">
+              <span>UKUPNO ZA PLAĆANJE:</span>
+              <span>{{ formatCurrency(transaction.sale.summary.grandTotal || 0) }}</span>
+            </div>
+          </div>
+
+          <div class="transaction-divider" *ngIf="transaction.sale?.summary"></div>
+
+          <!-- Payments -->
+          <div class="transaction-payments" *ngIf="transaction.sale?.payments && transaction.sale.payments.length > 0">
+            <h4>Načini plaćanja:</h4>
+            <div *ngFor="let payment of transaction.sale.payments" class="payment-row">
+              <span>{{ getPaymentMethodText(payment.method) }}:</span>
+              <span>{{ formatCurrency(payment.amount) }}</span>
+            </div>
+          </div>
+
+          <div class="transaction-divider" *ngIf="transaction.sale?.payments && transaction.sale.payments.length > 0"></div>
+
+          <!-- Fiscal Info -->
+          <div class="fiscal-info" *ngIf="transaction.sale?.fiscal?.status === 'done'">
+            <h4>Fiskalni podaci:</h4>
+            <div class="fiscal-row">
+              <span>Fiskalni broj:</span>
+              <span>{{ transaction.sale.fiscal.fiscalNumber }}</span>
+            </div>
+            <div class="fiscal-row">
+              <span>Korisnički broj:</span>
+              <span>{{ transaction.sale.fiscal.correlationId }}</span>
+            </div>
+            <div class="fiscal-row">
+              <span>Datum fiskalizacije:</span>
+              <span>{{ formatDate(transaction.sale.fiscal.fiscalDate) }}</span>
+            </div>
+          </div>
+
+          <div class="transaction-divider" *ngIf="transaction.sale?.fiscal?.status === 'done'"></div>
+
+          <!-- Footer -->
+          <div class="transaction-footer">
+            <p>Hvala na poseti!</p>
+            <p>Dobrodošli ponovo</p>
+          </div>
+        </div>
+
+        <div class="transaction-actions">
+          <button mat-raised-button color="primary" (click)="printTransaction()">
+            <mat-icon>print</mat-icon>
+            Štampaj transakciju
+          </button>
+          <button mat-button (click)="closeDialog()">
+            Zatvori
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

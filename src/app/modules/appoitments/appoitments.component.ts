@@ -64,6 +64,9 @@ import { Client } from '../../models/Client';
 import { MatButtonModule } from '@angular/material/button';
 import { AppointmentsService } from './services/appointment.service';
 import { BulkAppointmentsDialogComponent } from './dialog/bulk-appointments-dialog/bulk-appointments-dialog.component';
+import { PosCheckoutComponent } from '../pos/components/pos-checkout/pos-checkout.component';
+import { PosService } from '../pos/services/pos.service';
+import { firstValueFrom } from 'rxjs';
 
 export const CUSTOM_DATE_FORMATS = {
   parse: {
@@ -94,7 +97,8 @@ export const CUSTOM_DATE_FORMATS = {
     MatIconModule,
     MatTooltipModule,
     MatButtonModule,
-    MatSelectModule
+    MatSelectModule,
+    PosCheckoutComponent
   ],
   templateUrl: './appoitments.component.html',
   styleUrls: ['./appoitments.component.scss'],
@@ -303,7 +307,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     private snackBar: MatSnackBar,
     private dialog: MatDialog,
     private authService: AuthService,
-    private ngZone: NgZone
+    private ngZone: NgZone,
+    private posService: PosService
   ) {}
 
   // ===== COMPONENT INITIALIZATION =====
@@ -434,12 +439,17 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         listeners: {
           start: (event) => {
             if (this.isResizing) { event.interaction.stop(); return; }
+            const target = event.target as HTMLElement;
+            const apId = target.getAttribute('data-appointment-id') || '';
+            const appointment = this.appointments.find(ap => ap.id === apId);
+            if (appointment && ((appointment as any).paid || (appointment as any).sale?.fiscal?.status === 'done')) {
+              event.interaction.stop();
+              return;
+            }
             this.isDragging = true;
             this.cd.detectChanges();
-            const target = event.target as HTMLElement;
             target.setAttribute('data-dragging', 'true');
             target.style.zIndex = '1000';
-            const apId = target.getAttribute('data-appointment-id') || '';
             const rect = target.getBoundingClientRect();
             this.dragOffset[apId] = {
               x: event.clientX - rect.left,
@@ -708,6 +718,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     if (this.isDragging || this.justResized || this.isResizing) return;
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
+    
+    // Ako je naplaćen, otvori preview dialog
+    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'done') {
+      this.openAppointmentPreview(ap);
+      return;
+    }
 
     const dialogData: AppointmentDialogData = {
       employee: ap.employee._id!,
@@ -921,6 +937,122 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  /**
+   * Pokreće proces naplate termina iz rasporeda:
+   * 1. Priprema podatke
+   * 2. Proverava da li postoji otvorena blagajnička sesija
+   * 3. Ako ne postoji, automatski otvara sesiju
+   * 4. Otvara POS checkout dijalog
+   * 5. Obradjuje rezultat naplate
+   * 6. Loguje i prikazuje greške
+   */
+  async onPayAppointment(ap: any, event: MouseEvent) {
+    event.stopPropagation();
+
+    // Ako je već naplaćen, otvori preview dialog umesto checkout-a
+    if (ap.paid || ap.sale?.fiscal?.status === 'done') {
+      this.openAppointmentPreview(ap);
+      return;
+    }
+
+    // 1. Priprema podataka
+    const currentUser = this.authService.getCurrentUser();
+    const facilityId = ap.facility?._id || ap.facility;
+    if (!currentUser || !facilityId) {
+      this.snackBar.open('Nedostaju podaci o korisniku ili objektu.', 'Zatvori', { duration: 2000 });
+      return;
+    }
+
+    try {
+      // 2. Provera otvorene sesije
+      const getSessionsPayload = {
+        status: 'open',
+        facility: facilityId,
+        employee: currentUser.sub
+      };
+      console.log('[POS] getSessions payload:', getSessionsPayload);
+      const sessions = await firstValueFrom(this.posService.getSessions(getSessionsPayload));
+      console.log('[POS] getSessions result:', sessions);
+      let session = sessions && sessions.length ? sessions[0] : null;
+
+      // 3. Automatsko otvaranje sesije ako ne postoji
+      if (!session) {
+        const openSessionPayload = {
+          facility: facilityId,
+          openingFloat: 0
+        };
+        console.log('[POS] openSession payload:', openSessionPayload);
+        session = await firstValueFrom(this.posService.openSession(openSessionPayload));
+        console.log('[POS] openSession result:', session);
+        this.snackBar.open('Blagajnička sesija je automatski otvorena.', 'Zatvori', { duration: 2000 });
+      }
+
+      // 4. Otvaranje POS checkout dijaloga
+      const dialogData = {
+        appointment: ap,
+        client: ap.client,
+        facility: ap.facility,
+        total: ap.service?.price || 0,
+        articles: [],
+        tenant: currentUser.tenant,
+        session
+      };
+      console.log('[POS] Opening PosCheckoutComponent with data:', dialogData);
+      const dialogRef = this.dialog.open(PosCheckoutComponent, {
+        data: dialogData,
+        panelClass: 'custom-appointment-dialog',
+        backdropClass: 'custom-backdrop',
+      });
+
+      // 5. Obrada rezultata naplate
+      dialogRef.afterClosed().subscribe((res) => {
+        if (res && res.id) {
+          ap.paid = true;
+          ap.sale = res.id;
+          this.snackBar.open('Termin uspešno naplaćen!', 'Zatvori', { duration: 2000 });
+          this.cd.detectChanges();
+        }
+      });
+    } catch (err: any) {
+      // 6. Error handling
+      console.error('[POS] Error in onPayAppointment:', err);
+      this.snackBar.open(err?.error?.message || 'Greška pri otvaranju blagajničke sesije.', 'Zatvori', { duration: 3000 });
+    }
+  }
+
+  // ===== APPOINTMENT PREVIEW =====
+  // Otvori preview dialog za naplaćene termine
+  openAppointmentPreview(ap: any) {
+    const status = ap.sale?.fiscal?.status === 'done' ? 'Fiskalizovano' : 'Naplaćeno';
+    
+    const dialogData = {
+      appointment: ap,
+      status: status,
+      isPaid: true,
+      readonly: true,
+      // Dodaj potrebne podatke za dialog
+      services: this.services,
+      clients: this.clients,
+      facilities: this.facilities,
+      employee: ap.employee?._id || ap.employee,
+      facility: ap.facility?._id || ap.facility,
+      service: ap.service?._id || ap.service,
+      client: ap.client?._id || ap.client,
+      appointmentStart: ap.startHour,
+      appointmentEnd: ap.endHour
+    };
+
+    const dialogRef = this.dialog.open(AppointmentDialogComponent, {
+      data: dialogData,
+      panelClass: 'custom-appointment-dialog',
+      backdropClass: 'custom-backdrop',
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      // Preview dialog se samo zatvara, nema akcija
+    });
+  }
+
   // ===== UTILITY FUNCTIONS =====
   // Format time for display (e.g., 17.5 -> "17:30") with proper padding
   formatTime(time: number): string {
@@ -1073,6 +1205,8 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   onResizeStart(ev: MouseEvent | TouchEvent, ap: Appointment): void {
     ev.stopPropagation();
     ev.preventDefault();
+    
+    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'done') return;
 
     const target = (ev.currentTarget as HTMLElement)?.parentElement as HTMLElement; // appointment-block
     if (!target) return;

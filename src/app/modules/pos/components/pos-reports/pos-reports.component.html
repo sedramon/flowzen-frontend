@@ -1,0 +1,145 @@
+<mat-card class="pos-reports-container">
+  <!-- Header -->
+  <div class="pos-header">
+    <h2>
+      <mat-icon>assessment</mat-icon>
+      POS Izveštaji
+    </h2>
+    <button 
+      mat-raised-button 
+      color="accent" 
+      class="export-btn"
+      (click)="exportToExcel()"
+      [disabled]="reportData.length === 0">
+      <mat-icon>download</mat-icon>
+      Izvezi Excel
+    </button>
+  </div>
+
+  <!-- Filters -->
+  <div class="filters-section">
+    <div class="filters-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Datum od</mat-label>
+        <input matInput [matDatepicker]="fromPicker" [formControl]="dateFrom" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
+        <mat-datepicker #fromPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Datum do</mat-label>
+        <input matInput [matDatepicker]="toPicker" [formControl]="dateTo" (dateChange)="onFilterChange()">
+        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
+        <mat-datepicker #toPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Objekat</mat-label>
+        <mat-select [formControl]="facilityFilter" (selectionChange)="onFilterChange()">
+          <mat-option value="">Svi objekti</mat-option>
+          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
+            {{ facility.name }}
+          </mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon>shopping_cart</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3>Ukupno prodaja</h3>
+          <p class="summary-number">{{ getTotalSales() }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon>attach_money</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3>Ukupan promet</h3>
+          <p class="summary-number">{{ formatCurrency(getTotalAmount()) }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <mat-card class="summary-card">
+      <mat-card-content>
+        <div class="summary-icon">
+          <mat-icon>trending_up</mat-icon>
+        </div>
+        <div class="summary-content">
+          <h3>Prosečna vrednost</h3>
+          <p class="summary-number">{{ formatCurrency(getAverageAmount()) }}</p>
+        </div>
+      </mat-card-content>
+    </mat-card>
+  </div>
+
+  <!-- Loading State -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Učitavanje izveštaja...</p>
+  </div>
+
+  <!-- Reports Table -->
+  <div *ngIf="!loading" class="reports-content">
+    <mat-table [dataSource]="reportData" class="reports-table">
+      <!-- Date Column -->
+      <ng-container matColumnDef="date">
+        <mat-header-cell *matHeaderCellDef>Datum</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ formatDate(report.date) }}</mat-cell>
+      </ng-container>
+
+      <!-- Facility Column -->
+      <ng-container matColumnDef="facility">
+        <mat-header-cell *matHeaderCellDef>Objekat</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ report.facility }}</mat-cell>
+      </ng-container>
+
+      <!-- Employee Column -->
+      <ng-container matColumnDef="employee">
+        <mat-header-cell *matHeaderCellDef>Zaposleni</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ report.employee }}</mat-cell>
+      </ng-container>
+
+      <!-- Total Sales Column -->
+      <ng-container matColumnDef="totalSales">
+        <mat-header-cell *matHeaderCellDef>Broj prodaja</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ report.totalSales }}</mat-cell>
+      </ng-container>
+
+      <!-- Total Amount Column -->
+      <ng-container matColumnDef="totalAmount">
+        <mat-header-cell *matHeaderCellDef>Ukupan iznos</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalAmount) }}</mat-cell>
+      </ng-container>
+
+      <!-- Average Amount Column -->
+      <ng-container matColumnDef="averageAmount">
+        <mat-header-cell *matHeaderCellDef>Prosečna vrednost</mat-header-cell>
+        <mat-cell *matCellDef="let report">{{ formatCurrency(report.averageAmount) }}</mat-cell>
+      </ng-container>
+
+      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+    </mat-table>
+
+    <!-- No Data State -->
+    <div *ngIf="reportData.length === 0" class="no-data">
+      <mat-icon>assessment</mat-icon>
+      <p>Nema podataka za izabrani period</p>
+      <button mat-button color="primary" (click)="loadReports()">
+        Osveži podatke
+      </button>
+    </div>
+  </div>
+</mat-card>

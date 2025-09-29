@@ -1,0 +1,270 @@
+.outer-dialog-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  padding: 15px;      
+}
+
+.dialog-container {
+  border-radius: 10px;
+  padding: 16px;
+  width: 60vw;
+  max-width: 900px;
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+  overflow: hidden;               
+  transform-origin: center center;
+  will-change: transform;
+  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+  color: #e0e0e0;
+}
+
+.dialog-title {
+  margin: 0;
+  font-size: 1.5em;
+  text-align: center;
+  color: #cccccc;
+}
+
+.dialog-content {
+  margin-top: 16px;
+}
+
+.refund-section {
+  background: linear-gradient(135deg, #23232b, #181820);
+  border-radius: 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.18);
+  padding: 16px;
+  margin-bottom: 16px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 1.1em;
+  font-weight: 600;
+  color: #cccccc;
+  margin-bottom: 12px;
+}
+
+.sale-details {
+  .sale-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #555555;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-weight: 500;
+      color: #cccccc;
+    }
+
+    .value {
+      font-weight: 600;
+      color: #d0d0d0;
+
+      &.original-amount {
+        color: #999999;
+        font-size: 1.1em;
+      }
+
+      &.status {
+        color: #cccccc;
+        text-transform: uppercase;
+        font-size: 0.9em;
+      }
+    }
+  }
+}
+
+.refund-form {
+  .form-grid {
+    display: grid;
+    gap: 12px;
+
+    .full-width {
+      width: 100%;
+    }
+
+    mat-form-field {
+      &.mat-form-field-appearance-outline {
+        .mat-form-field-outline {
+          color: #666666;
+        }
+
+        &.mat-focused .mat-form-field-outline-thick {
+          color: #888888;
+        }
+      }
+
+      .mat-form-field-label {
+        color: #999999;
+        font-weight: 500;
+      }
+
+      .mat-hint {
+        color: #cccccc;
+        font-size: 0.85em;
+      }
+
+      .mat-error {
+        color: #ff5722;
+        font-size: 0.85em;
+      }
+
+      .mat-suffix {
+        margin-left: 8px;
+        color: #cccccc;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+.summary-details {
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .label {
+      font-weight: 500;
+      color: #cccccc;
+    }
+
+    .value {
+      font-weight: 600;
+      color: #d0d0d0;
+
+      &.refund-amount {
+        color: #cccccc;
+        font-size: 1.1em;
+      }
+
+      &.remaining-amount {
+        color: #999999;
+        font-size: 1.1em;
+      }
+    }
+
+    &.total-row {
+      background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
+      border: 1px solid #666666;
+      margin: 0;
+      padding: 12px;
+      border-radius: 8px;
+
+      .label,
+      .value {
+        font-size: 1.1em;
+        font-weight: 700;
+      }
+    }
+  }
+}
+
+.refund-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 16px;
+  margin-top: 24px;
+  padding-top: 12px;
+  border-top: 2px solid #666666;
+
+  button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    font-size: 1em;
+    font-weight: 500;
+    border-radius: 8px;
+
+    &[mat-button] {
+      color: #cccccc;
+      border: 1px solid #666666;
+
+      &:hover {
+        background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
+        color: #ffffff;
+      }
+    }
+
+    &[mat-raised-button] {
+      background: linear-gradient(135deg, #666666, #555555);
+      color: white;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      &:hover:not(:disabled) {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+      }
+
+      &:disabled {
+        background: #ccc;
+        color: #999;
+        box-shadow: none;
+      }
+    }
+
+    mat-icon {
+      font-size: 1.2em;
+      width: 1.2em;
+      height: 1.2em;
+
+      &.spinning {
+        animation: spin 1s linear infinite;
+      }
+    }
+  }
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design
+@media (max-width: 768px) {
+  .dialog-container {
+    width: 90vw;
+    padding: 12px;
+  }
+
+  .refund-actions {
+    flex-direction: column;
+    gap: 12px;
+
+    button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+
+  .sale-details .sale-row,
+  .summary-details .summary-row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+}
+
+@media (max-width: 600px) {
+  .dialog-container {
+    width: 95vw;
+    padding: 8px;
+  }
+}

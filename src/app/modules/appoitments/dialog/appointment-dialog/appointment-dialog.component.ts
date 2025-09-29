@@ -20,6 +20,11 @@ export interface AppointmentDialogData {
   employee: string;
   facility?: string;
   facilities?: Facility[];
+  // Dodatni podaci za preview
+  appointment?: any;
+  status?: string;
+  isPaid?: boolean;
+  readonly?: boolean;
 }
 
 @Component({
@@ -63,9 +68,23 @@ export class AppointmentDialogComponent implements OnInit {
   hours: number[] = [];
   minutes: number[] = [0, 5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55];
   isFacilityDisabled: boolean = true;
+  
+  // Preview mode properties
+  isPreviewMode: boolean = false;
+  appointmentData: any = null;
 
   ngOnInit(): void {
     console.log(this.data);
+    
+    // Proveri da li je preview mode
+    if (this.data.readonly && this.data.appointment) {
+      this.isPreviewMode = true;
+      this.appointmentData = this.data.appointment;
+      this.loadPreviewData();
+      return;
+    }
+    
+    // Normalni edit mode
     for (let i = 8; i <= 22; i++) {
       this.hours.push(i);
     }
@@ -100,13 +119,41 @@ export class AppointmentDialogComponent implements OnInit {
       this.selectedFacility = this.data.facilities[0]._id || '';
     }
     
-    // Omogući facility field nakon inicijalizacije
-    setTimeout(() => {
-      this.isFacilityDisabled = false;
-    }, 100);
+    // Omogući facility field nakon inicijalizacije (samo ako nije već postavljen)
+    if (!this.data.facility) {
+      setTimeout(() => {
+        this.isFacilityDisabled = false;
+      }, 100);
+    }
+  }
+
+  // Učitaj podatke za preview mode
+  loadPreviewData() {
+    if (!this.appointmentData) return;
+    
+    // Inicijalizuj hours array za preview mode
+    for (let i = 8; i <= 22; i++) {
+      this.hours.push(i);
+    }
+    
+    // Učitaj vremenske podatke
+    this.selectedHour = Math.floor(this.appointmentData.startHour);
+    this.selectedMinute = Math.round((this.appointmentData.startHour - this.selectedHour) * 60);
+    this.endHour = Math.floor(this.appointmentData.endHour);
+    this.endMinute = Math.round((this.appointmentData.endHour - this.endHour) * 60);
+    
+    // Učitaj ostale podatke
+    this.selectedService = this.appointmentData.service?._id || this.appointmentData.service;
+    this.selectedClient = this.appointmentData.client?._id || this.appointmentData.client;
+    this.selectedFacility = this.appointmentData.facility?._id || this.appointmentData.facility;
   }
 
   onSave(): void {
+    // U preview mode-u ne dozvoli čuvanje
+    if (this.isPreviewMode) {
+      return;
+    }
+    
     // Check if facility is selected
     if (!this.selectedFacility) {
       return; // Angular form will show error
@@ -127,6 +174,11 @@ export class AppointmentDialogComponent implements OnInit {
   }
 
   onDelete(): void {
+    // U preview mode-u ne dozvoli brisanje
+    if (this.isPreviewMode) {
+      return;
+    }
+    
     this.dialogRef.close({ delete: true });
   }
 }
