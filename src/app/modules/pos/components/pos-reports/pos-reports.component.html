@@ -244,7 +244,7 @@
             <!-- Session ID Column -->
             <ng-container matColumnDef="sessionId">
               <mat-header-cell *matHeaderCellDef>ID sesije</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ report.sessionId.substring(0, 8) }}...</mat-cell>
+              <mat-cell *matCellDef="let report">{{ report.sessionId?.substring(0, 8) || 'N/A' }}...</mat-cell>
             </ng-container>
 
             <!-- Cashier Column -->

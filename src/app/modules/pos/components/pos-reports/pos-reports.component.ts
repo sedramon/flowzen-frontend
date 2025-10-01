@@ -138,7 +138,10 @@ export class PosReportsComponent implements OnInit, OnDestroy {
 
   loadFacilities(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) return;
+    
+    if (!currentUser) {
+      return;
+    }
 
     this.loading = true;
     this.posService.getFacilities(currentUser.tenant)
@@ -148,9 +151,7 @@ export class PosReportsComponent implements OnInit, OnDestroy {
           this.facilities = facilities;
           if (facilities.length > 0) {
             this.facilityFilter.setValue(facilities[0]._id || '');
-            // Automatski učitaj izveštaje nakon što su facilities učitani
             this.loadReports();
-            // Takođe učitaj današnji izveštaj odmah
             this.loadTodaysReport();
           }
           this.loading = false;
@@ -164,11 +165,16 @@ export class PosReportsComponent implements OnInit, OnDestroy {
   }
 
   loadReports(): void {
-    if (!this.facilityFilter.value) return;
+    if (!this.facilityFilter.value) {
+      return;
+    }
 
     this.reportsLoading = true;
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) return;
+    
+    if (!currentUser) {
+      return;
+    }
 
     const startDate = this.dateFrom.value?.toISOString().split('T')[0];
     const endDate = this.dateTo.value?.toISOString().split('T')[0];
@@ -180,7 +186,9 @@ export class PosReportsComponent implements OnInit, OnDestroy {
   }
 
   loadTodaysReport(): void {
-    if (!this.facilityFilter.value) return;
+    if (!this.facilityFilter.value) {
+      return;
+    }
 
     const today = new Date().toISOString().split('T')[0];
     this.todayReportLoading = true;
@@ -192,15 +200,16 @@ export class PosReportsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (response: any) => {
-          if (response && response.salesCount > 0) {
+          // Today's report comes directly as data (already extracted by PosService)
+          if (response && response.date) {
             // Dodaj današnji izveštaj na vrh liste
             const todayReport = {
               date: response.date,
               facility: this.getFacilityName(response.facility),
-              salesCount: response.salesCount,
-              refundCount: response.refundCount,
-              totalSales: response.totalSales,
-              totalRefunds: response.totalRefunds,
+              salesCount: response.summary?.transactionCount || 0,
+              refundCount: response.summary?.refundCount || 0,
+              totalSales: response.summary?.totalSales || 0,
+              totalRefunds: response.summary?.totalRefunds || 0,
               paymentTotals: response.paymentTotals || {}
             };
             
@@ -239,17 +248,23 @@ export class PosReportsComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (responses: any[]) => {
+          // Handle backend response format: {success: true, data: {...}, message: '...'}
           this.dailyReports = responses
-            .filter(response => response && response.salesCount > 0)
-            .map(response => ({
-              date: response.date,
-              facility: this.getFacilityName(response.facility),
-              salesCount: response.salesCount,
-              refundCount: response.refundCount,
-              totalSales: response.totalSales,
-              totalRefunds: response.totalRefunds,
-              paymentTotals: response.paymentTotals || {}
-            }));
+            .filter(response => response && response.success && response.data)
+            .map(response => {
+              const data = response.data;
+              
+              return {
+                date: data.date,
+                facility: this.getFacilityName(data.facility),
+                salesCount: data.summary?.transactionCount || 0,
+                refundCount: data.summary?.refundCount || 0,
+                totalSales: data.summary?.totalSales || 0,
+                totalRefunds: data.summary?.totalRefunds || 0,
+                paymentTotals: data.paymentTotals || {}
+              };
+            });
+          
           this.reportsLoading = false;
         },
         error: (error) => {
@@ -270,11 +285,22 @@ export class PosReportsComponent implements OnInit, OnDestroy {
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (sessions: any[]) => {
-          const zReportRequests = sessions.map(session => 
+        next: (sessions: any) => {
+          // Handle backend response format: {success: true, data: [...], message: '...'}
+          let sessionsArray = sessions;
+          if (!Array.isArray(sessions) && sessions?.success && Array.isArray(sessions.data)) {
+            sessionsArray = sessions.data;
+          }
+          
+          if (!Array.isArray(sessionsArray)) {
+            console.error('Sessions is not an array!', sessions);
+            return;
+          }
+          
+          const zReportRequests = sessionsArray.map(session => 
             this.posService.getZReport(session.id || session._id)
           );
-
+          
           forkJoin(zReportRequests)
             .subscribe({
               next: (zReports: any[]) => {
@@ -282,7 +308,7 @@ export class PosReportsComponent implements OnInit, OnDestroy {
                   sessionId: report.sessionId,
                   openedAt: report.openedAt,
                   closedAt: report.closedAt,
-                  cashier: `${report.cashier?.firstName || ''} ${report.cashier?.lastName || ''}`.trim(),
+                  cashier: report.cashier?.name || 'N/A',
                   salesCount: report.salesCount,
                   refundCount: report.refundCount,
                   totalSales: report.totalSales,

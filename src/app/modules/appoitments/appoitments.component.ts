@@ -991,7 +991,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       if (!session) {
         const openSessionPayload = {
           facility: facilityId,
-          openingFloat: 0
+          openingFloat: 0 // Nema početnog float-a za naplatu appointmenta
         };
         console.log('[POS] openSession payload:', openSessionPayload);
         const sessionResult = await firstValueFrom(this.posService.openSession(openSessionPayload));

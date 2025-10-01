@@ -34,7 +34,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Ukupno prodaja</div>
-          <div class="stat-value">{{ totalSales }}</div>
+          <div class="stat-value">{{ statistics.totalSales }}</div>
         </div>
       </div>
       <div class="stat-card">
@@ -43,7 +43,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Današnji promet</div>
-          <div class="stat-value">{{ formatCurrency(todayRevenue) }}</div>
+          <div class="stat-value">{{ formatCurrency(statistics.todayRevenue) }}</div>
         </div>
       </div>
       <div class="stat-card">
@@ -52,7 +52,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Prosečna vrednost</div>
-          <div class="stat-value">{{ formatCurrency(averageSale) }}</div>
+          <div class="stat-value">{{ formatCurrency(statistics.averageSale) }}</div>
         </div>
       </div>
       <div class="stat-card">
@@ -61,7 +61,7 @@
         </div>
         <div class="stat-content">
           <div class="stat-label">Ukupan promet</div>
-          <div class="stat-value">{{ formatCurrency(totalRevenue) }}</div>
+          <div class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</div>
         </div>
       </div>
     </div>

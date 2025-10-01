@@ -1,4 +1,4 @@
-import { Component, OnInit, Inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
@@ -11,8 +11,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { forkJoin, of } from 'rxjs';
-import { map, catchError } from 'rxjs/operators';
+import { forkJoin, of, Subject } from 'rxjs';
+import { map, catchError, takeUntil } from 'rxjs/operators';
 
 // Component imports
 import { PosCheckoutComponent } from '../pos-checkout/pos-checkout.component';
@@ -29,12 +29,31 @@ import { Client } from '../../../../models/Client';
 import { Facility } from '../../../../models/Facility';
 import { Service } from '../../../../models/Service';
 import { Article } from '../../../../models/Article';
+import { Sale, FiscalResponse } from '../../../../models/Sale';
+
+/**
+ * Sales Statistics Interface
+ */
+interface SalesStatistics {
+  totalSales: number;
+  totalRevenue: number;
+  averageSale: number;
+  todayRevenue: number;
+}
 
 /**
  * POS Sales Component
  * 
  * Glavna komponenta za upravljanje prodajama u POS sistemu.
  * Omogućava kreiranje novih prodaja, pregled postojećih, fiskalizaciju i povraćaje.
+ * 
+ * Funkcionalnosti:
+ * - Prikaz svih prodaja sa filterima
+ * - Kreiranje novih prodaja
+ * - Fiskalizacija prodaja
+ * - Povraćaj prodaja
+ * - Statistike prodaje
+ * - Export računa
  */
 @Component({
   selector: 'app-pos-sales',
@@ -55,7 +74,7 @@ import { Article } from '../../../../models/Article';
   styleUrl: './pos-sales.component.scss',
   providers: [AuthService, PosService]
 })
-export class PosSalesComponent implements OnInit {
+export class PosSalesComponent implements OnInit, OnDestroy {
   
   // ============================================================================
   // COMPONENT STATE
@@ -63,39 +82,47 @@ export class PosSalesComponent implements OnInit {
   
   loading = false;
   currentFacility: Facility | null = null;
+  private destroy$ = new Subject<void>();
   
   // Data arrays
   clients: Client[] = [];
   facilities: Facility[] = [];
   services: Service[] = [];
   articles: Article[] = [];
-  sales: any[] = [];
+  sales: Sale[] = [];
   
   // Table configuration
-  displayedColumns: string[] = [
+  readonly displayedColumns: string[] = [
     'number', 'date', 'client', 'facility', 'cashier', 
     'status', 'total', 'fiscal', 'actions'
   ];
   
   // Statistics
-  totalSales = 0;
-  totalRevenue = 0;
-  averageSale = 0;
-  todayRevenue = 0;
+  statistics: SalesStatistics = {
+    totalSales: 0,
+    totalRevenue: 0,
+    averageSale: 0,
+    todayRevenue: 0
+  };
 
   // ============================================================================
   // CONSTRUCTOR & LIFECYCLE
   // ============================================================================
 
   constructor(
-    private dialog: MatDialog,
-    private snackBar: MatSnackBar,
-    private posService: PosService,
-    @Inject(AuthService) private authService: AuthService
+    private readonly dialog: MatDialog,
+    private readonly snackBar: MatSnackBar,
+    private readonly posService: PosService,
+    @Inject(AuthService) private readonly authService: AuthService
   ) {}
 
   ngOnInit(): void {
     this.initializeComponent();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   // ============================================================================
@@ -103,14 +130,14 @@ export class PosSalesComponent implements OnInit {
   // ============================================================================
 
   /**
-   * Inicijalizuje komponentu - učitava sve potrebne podatke
+   * Initialize component - load all required data
    */
   private initializeComponent(): void {
     this.loading = true;
     const currentUser = this.authService.getCurrentUser();
     
     if (!currentUser) {
-      this.snackBar.open('Korisnik nije prijavljen', 'Zatvori', { duration: 3000 });
+      this.showError('Korisnik nije prijavljen');
       this.loading = false;
       return;
     }
@@ -119,55 +146,73 @@ export class PosSalesComponent implements OnInit {
   }
 
   /**
-   * Učitava sve potrebne podatke paralelno
+   * Load all required data in parallel
+   * @param tenant - Tenant ID
    */
   private loadAllData(tenant: string): void {
     forkJoin({
       facilities: this.posService.getFacilities(tenant).pipe(
-        catchError(error => {
-          console.error('Error loading facilities:', error);
-          return of([]);
-        })
+        catchError(error => this.handleDataLoadError('facilities', error))
       ),
       clients: this.posService.getClients(tenant).pipe(
-        catchError(error => {
-          console.error('Error loading clients:', error);
-          return of([]);
-        })
+        catchError(error => this.handleDataLoadError('clients', error))
       ),
       services: this.posService.getServices(tenant).pipe(
-        catchError(error => {
-          console.error('Error loading services:', error);
-          return of([]);
-        })
+        catchError(error => this.handleDataLoadError('services', error))
       ),
       articles: this.posService.getArticles(tenant).pipe(
-        catchError(error => {
-          console.error('Error loading articles:', error);
-          return of([]);
-        })
+        catchError(error => this.handleDataLoadError('articles', error))
       )
-    }).subscribe({
-      next: (data) => {
-        this.facilities = data.facilities;
-        this.clients = data.clients;
-        this.services = data.services;
-        this.articles = data.articles;
-        
-        if (this.facilities.length > 0) {
-          this.currentFacility = this.facilities[0];
-          this.loadSales();
-        } else {
-          this.snackBar.open('Nema dostupnih objekata', 'Zatvori', { duration: 3000 });
-          this.loading = false;
-        }
-      },
-      error: (error) => {
-        console.error('Error loading data:', error);
-        this.snackBar.open('Greška pri učitavanju podataka', 'Zatvori', { duration: 3000 });
-        this.loading = false;
-      }
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: (data) => this.handleDataLoadSuccess(data),
+      error: (error) => this.handleDataLoadError('general', error)
     });
+  }
+
+  /**
+   * Handle successful data loading
+   * @param data - Loaded data
+   */
+  private handleDataLoadSuccess(data: any): void {
+    this.facilities = data.facilities || [];
+    this.clients = data.clients || [];
+    this.services = data.services || [];
+    this.articles = data.articles || [];
+    
+    console.log('=== POS SALES COMPONENT INITIALIZATION ===');
+    console.log('Facilities loaded:', this.facilities.length, this.facilities);
+    console.log('Clients loaded:', this.clients.length, this.clients);
+    console.log('Services loaded:', this.services.length, this.services);
+    console.log('Articles loaded:', this.articles.length, this.articles);
+    
+    if (this.facilities.length > 0) {
+      this.currentFacility = this.facilities[0];
+      console.log('Current facility set:', this.currentFacility);
+      this.loadSales();
+    } else {
+      console.error('No facilities available');
+      this.showError('Nema dostupnih objekata');
+      this.loading = false;
+    }
+  }
+
+  /**
+   * Handle data loading error
+   * @param dataType - Type of data that failed to load
+   * @param error - Error object
+   * @returns Empty array for forkJoin
+   */
+  private handleDataLoadError(dataType: string, error: any): any {
+    console.error(`Error loading ${dataType}:`, error);
+    
+    if (dataType === 'general') {
+      this.showError('Greška pri učitavanju podataka');
+      this.loading = false;
+    }
+    
+    return of([]);
   }
 
   // ============================================================================
@@ -175,12 +220,11 @@ export class PosSalesComponent implements OnInit {
   // ============================================================================
 
   /**
-   * Učitava prodaje za trenutni facility
+   * Load sales for current facility
    */
   loadSales(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser || !this.currentFacility) {
-      console.warn('Cannot load sales: missing user or facility');
+    if (!this.validateSalesLoad(currentUser)) {
       return;
     }
 
@@ -188,58 +232,186 @@ export class PosSalesComponent implements OnInit {
       this.loading = true;
     }
 
-    const params = {
-      tenant: currentUser.tenant,
-      facility: this.currentFacility._id,
-      limit: 50,
-      sort: '-createdAt'
-    };
-
-    this.posService.getSales(params).pipe(
-      map((response: any) => {
-        let sales = [];
-        if (Array.isArray(response)) {
-          sales = response;
-        } else if (response && Array.isArray(response.data)) {
-          sales = response.data;
-        } else if (response && response.sales && Array.isArray(response.sales)) {
-          sales = response.sales;
+    const params = this.buildSalesParams(currentUser!.tenant);
+    console.log('Loading sales with params:', params);
+    
+    this.posService.getSales(params)
+      .pipe(
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (sales: Sale[]) => {
+          console.log('Sales loaded from API:', sales.length, sales);
+          this.handleSalesLoadSuccess(sales);
+        },
+        error: (error) => {
+          console.error('Error loading sales:', error);
+          this.handleSalesLoadError(error);
         }
-        return sales;
-      }),
-      catchError(error => {
-        console.error('Error loading sales:', error);
-        this.snackBar.open('Greška pri učitavanju prodaja', 'Zatvori', { duration: 3000 });
-        return of(this.sales);
-      })
-    ).subscribe({
-      next: (sales) => {
-        console.log('Sales loaded:', sales.length);
-        console.log('First sale fiscal status:', sales[0]?.fiscal);
-        this.sales = sales || [];
-        this.calculateStatistics();
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error in loadSales subscribe:', error);
-        this.loading = false;
-      }
-    });
+      });
   }
 
   /**
-   * Kalkuliše statistike prodaje
+   * Validate prerequisites for loading sales
+   * @param currentUser - Current authenticated user
+   * @returns True if validation passes
+   */
+  private validateSalesLoad(currentUser: any): boolean {
+    if (!currentUser) {
+      console.warn('Cannot load sales: user not authenticated');
+      return false;
+    }
+
+    if (!this.currentFacility) {
+      console.warn('Cannot load sales: no facility selected');
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Build query parameters for sales request
+   * @param tenant - Tenant ID
+   * @returns Query parameters
+   */
+  private buildSalesParams(tenant: string): any {
+    return {
+      tenant,
+      facility: this.currentFacility!._id,
+      limit: 50,
+      sort: '-createdAt'
+    };
+  }
+
+  /**
+   * Process sales response from backend
+   * @param response - Backend response
+   * @returns Processed sales array
+   */
+  private processSalesResponse(response: any): Sale[] {
+    if (Array.isArray(response)) {
+      return response;
+    }
+    if (response && Array.isArray(response.data)) {
+      return response.data;
+    }
+    if (response && response.sales && Array.isArray(response.sales)) {
+      return response.sales;
+    }
+    return [];
+  }
+
+  /**
+   * Handle successful sales loading
+   * @param sales - Loaded sales array
+   */
+  private handleSalesLoadSuccess(sales: Sale[]): void {
+    this.sales = sales || [];
+    console.log('=== SALES LOADED SUCCESSFULLY ===');
+    console.log('Sales count:', this.sales.length);
+    console.log('Sales data:', this.sales);
+    
+    this.calculateStatistics();
+    console.log('=== STATISTICS CALCULATED ===');
+    console.log('Statistics:', this.statistics);
+    
+    this.loading = false;
+  }
+
+  /**
+   * Handle sales loading error
+   * @param error - Error object
+   * @returns Empty sales array
+   */
+  private handleSalesLoadError(error: any): any {
+    console.error('Error loading sales:', error);
+    this.showError('Greška pri učitavanju prodaja');
+    this.loading = false;
+    return of(this.sales);
+  }
+
+  /**
+   * Calculate sales statistics
    */
   private calculateStatistics(): void {
-    this.totalSales = this.sales.length;
-    this.totalRevenue = this.sales.reduce((sum, sale) => sum + (sale.summary?.grandTotal || 0), 0);
-    this.averageSale = this.totalSales > 0 ? this.totalRevenue / this.totalSales : 0;
+    console.log('=== CALCULATING STATISTICS ===');
+    console.log('Input sales:', this.sales);
     
+    const totalSales = this.sales.length;
+    const totalRevenue = this.calculateTotalRevenue();
+    const averageSale = this.calculateAverageSale();
+    const todayRevenue = this.calculateTodayRevenue();
+    
+    console.log('Calculated values:');
+    console.log('- Total sales count:', totalSales);
+    console.log('- Total revenue:', totalRevenue);
+    console.log('- Average sale:', averageSale);
+    console.log('- Today revenue:', todayRevenue);
+    
+    this.statistics = {
+      totalSales,
+      totalRevenue,
+      averageSale,
+      todayRevenue
+    };
+  }
+
+  /**
+   * Calculate total revenue from all sales
+   * @returns Total revenue
+   */
+  private calculateTotalRevenue(): number {
+    const revenue = this.sales.reduce((sum, sale) => {
+      const saleTotal = sale.summary?.grandTotal || 0;
+      console.log(`Sale ${sale.number || sale.id}: grandTotal = ${saleTotal}`);
+      return sum + saleTotal;
+    }, 0);
+    
+    console.log('Total revenue calculated:', revenue);
+    return revenue;
+  }
+
+  /**
+   * Calculate average sale amount
+   * @returns Average sale amount
+   */
+  private calculateAverageSale(): number {
+    const totalRevenue = this.calculateTotalRevenue();
+    const salesCount = this.sales.length;
+    const average = salesCount > 0 ? totalRevenue / salesCount : 0;
+    
+    console.log(`Average calculation: ${totalRevenue} / ${salesCount} = ${average}`);
+    return average;
+  }
+
+  /**
+   * Calculate today's revenue
+   * @returns Today's revenue
+   */
+  private calculateTodayRevenue(): number {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    this.todayRevenue = this.sales
-      .filter(sale => new Date(sale.date) >= today)
-      .reduce((sum, sale) => sum + (sale.summary?.grandTotal || 0), 0);
+    
+    console.log('Today date filter:', today.toISOString());
+    
+    const todaySales = this.sales.filter(sale => {
+      const saleDate = new Date(sale.date);
+      const isToday = saleDate >= today;
+      console.log(`Sale ${sale.number || sale.id}: date = ${sale.date}, isToday = ${isToday}`);
+      return isToday;
+    });
+    
+    console.log('Today sales count:', todaySales.length);
+    
+    const todayRevenue = todaySales.reduce((sum, sale) => {
+      const saleTotal = sale.summary?.grandTotal || 0;
+      console.log(`Today sale ${sale.number || sale.id}: grandTotal = ${saleTotal}`);
+      return sum + saleTotal;
+    }, 0);
+    
+    console.log('Today revenue calculated:', todayRevenue);
+    return todayRevenue;
   }
 
   // ============================================================================
@@ -479,19 +651,47 @@ export class PosSalesComponent implements OnInit {
   }
 
   /**
-   * Formatira iznos u valuti
+   * Show error message to user
+   * @param message - Error message
+   */
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Zatvori', { duration: 3000 });
+  }
+
+  /**
+   * Show success message to user
+   * @param message - Success message
+   */
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Zatvori', { duration: 2000 });
+  }
+
+  /**
+   * Format currency amount
+   * @param amount - Amount to format
+   * @returns Formatted currency string
    */
   formatCurrency(amount: number): string {
     return new Intl.NumberFormat('sr-RS', {
       style: 'currency',
-      currency: 'RSD'
+      currency: 'RSD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
     }).format(amount);
   }
 
   /**
-   * Formatira datum za prikaz
+   * Format date for display
+   * @param date - Date to format
+   * @returns Formatted date string
    */
-  formatDate(date: Date): string {
-    return new Date(date).toLocaleString('sr-RS');
+  formatDate(date: Date | string): string {
+    return new Date(date).toLocaleString('sr-RS', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
   }
 }

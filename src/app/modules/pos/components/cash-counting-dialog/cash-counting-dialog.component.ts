@@ -11,7 +11,7 @@ import { MatCardModule } from '@angular/material/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { PosService } from '../../services/pos.service';
-import { CashSession, CashCountingResult } from '../../../../models/CashSession';
+import { CashSession, CashCountingResult, CashCountingRequest, CashVerificationRequest, CashVarianceRequest, VarianceAction } from '../../../../models/CashSession';
 
 export interface CashCountingDialogData {
   session: CashSession;
@@ -69,9 +69,15 @@ export class CashCountingDialogComponent implements OnInit {
     }
 
     this.processing = true;
-    const countedCash = Number(this.countingForm.value.countedCash);
+    const formData = this.countingForm.value;
+    const countingData: CashCountingRequest = {
+      countedCash: Number(formData.countedCash),
+      note: formData.note || undefined,
+      cashInDrawer: formData.cashInDrawer ? Number(formData.cashInDrawer) : undefined,
+      cashInRegister: formData.cashInRegister ? Number(formData.cashInRegister) : undefined
+    };
 
-    this.posService.countCash(this.data.session.id, countedCash).subscribe({
+    this.posService.countCash(this.data.session.id, countingData).subscribe({
       next: (result) => {
         this.countingResult = result;
         this.processing = false;
@@ -91,9 +97,13 @@ export class CashCountingDialogComponent implements OnInit {
     if (!this.countingResult) return;
 
     this.processing = true;
-    const actualCash = Number(this.countingForm.value.countedCash);
+    const formData = this.countingForm.value;
+    const verificationData: CashVerificationRequest = {
+      actualCash: Number(formData.countedCash),
+      note: formData.note || undefined
+    };
 
-    this.posService.verifyCashCount(this.data.session.id, actualCash).subscribe({
+    this.posService.verifyCashCount(this.data.session.id, verificationData).subscribe({
       next: (result) => {
         this.snackBar.open('Cash uspešno verifikovan', 'Zatvori', { duration: 2000 });
         this.processing = false;
@@ -102,6 +112,35 @@ export class CashCountingDialogComponent implements OnInit {
       error: (error) => {
         console.error('Error verifying cash count:', error);
         this.snackBar.open('Greška pri verifikaciji cash-a', 'Zatvori', { duration: 3000 });
+        this.processing = false;
+      }
+    });
+  }
+
+  /**
+   * Rukuje variance (nedostatak/višak novca)
+   */
+  handleVariance(action: VarianceAction, reason: string): void {
+    if (!this.countingResult) return;
+
+    this.processing = true;
+    const formData = this.countingForm.value;
+    const varianceData: CashVarianceRequest = {
+      actualCash: Number(formData.countedCash),
+      action: action,
+      reason: reason,
+      note: formData.note || undefined
+    };
+
+    this.posService.handleCashVariance(this.data.session.id, varianceData).subscribe({
+      next: (result) => {
+        this.snackBar.open('Variance uspešno obrađena', 'Zatvori', { duration: 2000 });
+        this.processing = false;
+        this.dialogRef.close(result);
+      },
+      error: (error) => {
+        console.error('Error handling variance:', error);
+        this.snackBar.open('Greška pri obradi variance', 'Zatvori', { duration: 3000 });
         this.processing = false;
       }
     });

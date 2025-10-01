@@ -11,6 +11,7 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { PosService } from '../../services/pos.service';
+import { RefundSaleRequest, RefundResponse } from '../../../../models/Sale';
 
 interface RefundData {
   sale: any;
@@ -109,7 +110,7 @@ export class PosRefundComponent implements OnInit {
     };
 
     // 4. Kreiraj refund data prema DTO
-    const refundData = {
+    const refundData: RefundSaleRequest = {
       items: refundItems,
       amount: Number(this.refundForm.value.refundAmount),
       reason: this.refundForm.value.reason,

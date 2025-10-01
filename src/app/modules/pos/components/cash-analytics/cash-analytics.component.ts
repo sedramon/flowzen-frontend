@@ -51,7 +51,7 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   // Form
   analyticsForm: FormGroup;
   
-  // Chart data (mock for now)
+  // Chart data (mock for now) - REMOVED PAYMENT METHODS TO AVOID CONFUSION
   chartData = {
     dailyVariance: [
       { date: '2024-01-01', variance: 150 },
@@ -60,11 +60,7 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
       { date: '2024-01-04', variance: -50 },
       { date: '2024-01-05', variance: 100 }
     ],
-    paymentMethods: [
-      { method: 'cash', amount: 15000, percentage: 60 },
-      { method: 'card', amount: 8000, percentage: 32 },
-      { method: 'voucher', amount: 2000, percentage: 8 }
-    ],
+    // REMOVED: paymentMethods - these were causing confusion with real data
     sessionTrends: [
       { date: '2024-01-01', sessions: 5, totalCash: 25000 },
       { date: '2024-01-02', sessions: 3, totalCash: 18000 },
@@ -149,12 +145,10 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
 
     // Load real data from multiple endpoints
     const requests = [
-      // Get sessions for the period
       this.posService.getSessions({ 
         status: 'closed', 
         facility: facility 
       }),
-      // Get daily cash reports for the period
       this.posService.getDailyCashReport(facility, startDate?.toISOString().split('T')[0] || new Date().toISOString().split('T')[0])
     ];
 
@@ -170,7 +164,20 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
         error: (error) => {
           console.error('Error loading analytics:', error);
           this.snackBar.open('Greška pri učitavanju analytics podataka', 'Zatvori', { duration: 3000 });
-          this.loadMockAnalytics();
+          
+          // Set empty state
+          this.analyticsData = {
+            totalSessions: 0,
+            totalCash: 0,
+            averageVariance: 0,
+            averageTransactionValue: 0,
+            varianceTrend: 'stable',
+            topPerformingFacility: 'N/A',
+            cashFlowEfficiency: 0,
+            recommendations: ['Greška pri učitavanju podataka'],
+            paymentMethods: []
+          };
+          
           this.analyticsLoading = false;
         }
       });
@@ -180,45 +187,46 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
    * Kalkuliše analytics podatke
    */
   private calculateAnalytics(sessions: any[], dailyReport: any): void {
-    console.log('Sessions data:', sessions);
-    console.log('Daily report data:', dailyReport);
-    console.log('First session structure:', sessions[0]);
+    const totalSessions = sessions?.length || 0;
     
-    const totalSessions = sessions.length;
+    // Calculate total cash from sessions data (more reliable than daily report)
+    const totalCashFromSessions = sessions?.reduce((sum: number, session: any) => {
+      const sessionCash = session.expectedCash || session.totalsByMethod?.cash || 0;
+      return sum + sessionCash;
+    }, 0) || 0;
     
-    // Payment methods from daily report
+    // Also try daily report as fallback
     const paymentTotals = dailyReport?.totalsByMethod || dailyReport?.paymentTotals || {};
-    const totalPaymentAmount = Object.values(paymentTotals).reduce((sum: number, amount: any) => sum + amount, 0);
-    console.log('Payment totals from daily report:', paymentTotals);
-    console.log('Total payment amount:', totalPaymentAmount);
+    const totalPaymentAmount = Object.values(paymentTotals).reduce((sum: number, amount: any) => sum + (amount || 0), 0);
+    const totalCashFromSummary = dailyReport?.summary?.totalExpectedCash || dailyReport?.summary?.totalActualCash || 0;
     
-    // Use total payment amount as total cash
-    const totalCash = totalPaymentAmount || dailyReport?.summary?.totalSales || dailyReport?.totals?.total || 0;
-    console.log('Total cash calculated:', totalCash);
+    // Use sessions data first, then daily report as fallback
+    const totalCash = totalCashFromSessions || totalCashFromSummary || totalPaymentAmount || 0;
     
-    const totalVariance = sessions.reduce((sum, session) => {
+    // Calculate variance
+    const totalVariance = sessions?.reduce((sum, session) => {
       const variance = session.variance || 0;
       return sum + Math.abs(variance);
-    }, 0);
+    }, 0) || 0;
     
     const averageVariance = totalSessions > 0 ? (totalVariance / totalSessions) : 0;
     
     // Calculate average transaction value
     const averageTransactionValue = totalSessions > 0 ? totalCash / totalSessions : 0;
     
-    console.log('Calculated analytics:', {
-      totalSessions,
-      totalCash,
-      averageVariance,
-      averageTransactionValue,
-      paymentTotals,
-      totalPaymentAmount
-    });
-    
-    // If no real data, use mock data
+    // If no real data, show empty state
     if (totalSessions === 0 || totalCash === 0) {
-      console.log('No real data found, using mock analytics');
-      this.loadMockAnalytics();
+      this.analyticsData = {
+        totalSessions: 0,
+        totalCash: 0,
+        averageVariance: 0,
+        averageTransactionValue: 0,
+        varianceTrend: 'stable',
+        topPerformingFacility: 'N/A',
+        cashFlowEfficiency: 0,
+        recommendations: ['Nema podataka za prikazani period'],
+        paymentMethods: []
+      };
       return;
     }
     
@@ -231,16 +239,52 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
       topPerformingFacility: this.getFacilityName(this.analyticsForm.get('facility')?.value),
       cashFlowEfficiency: totalSessions > 0 ? Math.round((totalCash / totalSessions) / 1000 * 100) : 0,
       recommendations: this.generateRecommendations(averageVariance, totalSessions),
-      paymentMethods: this.calculatePaymentMethods(paymentTotals, totalPaymentAmount)
+      paymentMethods: this.calculatePaymentMethodsFromSessions(sessions, totalCash)
     };
   }
 
   /**
-   * Kalkuliše payment methods
+   * Kalkuliše payment methods iz sessions podataka
    */
-  private calculatePaymentMethods(paymentTotals: any, totalAmount: number): any[] {
-    const methods = [];
+  private calculatePaymentMethodsFromSessions(sessions: any[], totalAmount: number): Array<{method: string, amount: number, percentage: number}> {
+    const methods: Array<{method: string, amount: number, percentage: number}> = [];
     
+    if (sessions && sessions.length > 0 && totalAmount > 0) {
+      // Sum up payment methods from all sessions
+      const totalsByMethod = sessions.reduce((totals: any, session: any) => {
+        const sessionTotals = session.totalsByMethod || {};
+        
+        return {
+          cash: (totals.cash || 0) + (sessionTotals.cash || 0),
+          card: (totals.card || 0) + (sessionTotals.card || 0),
+          voucher: (totals.voucher || 0) + (sessionTotals.voucher || 0),
+          gift: (totals.gift || 0) + (sessionTotals.gift || 0),
+          bank: (totals.bank || 0) + (sessionTotals.bank || 0),
+          other: (totals.other || 0) + (sessionTotals.other || 0)
+        };
+      }, {});
+      
+      // Create payment method objects
+      Object.entries(totalsByMethod).forEach(([method, amount]) => {
+        const amountValue = amount as number;
+        if (amountValue > 0) {
+          methods.push({
+            method,
+            amount: amountValue,
+            percentage: Math.round((amountValue / totalAmount) * 100)
+          });
+        }
+      });
+    }
+    
+    return methods;
+  }
+
+  /**
+   * Kalkuliše payment methods (legacy method for daily report)
+   */
+  private calculatePaymentMethods(paymentTotals: any, totalAmount: number): Array<{method: string, amount: number, percentage: number}> {
+    const methods: Array<{method: string, amount: number, percentage: number}> = [];
     
     // If we have real payment data, use it
     if (paymentTotals && Object.keys(paymentTotals).length > 0 && totalAmount > 0) {
@@ -272,17 +316,8 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
           percentage: Math.round((voucherAmount / totalAmount) * 100)
         });
       }
-    } else {
-      // Use mock data if no real data available
-      console.log('Using mock payment data');
-      methods.push(
-        { method: 'cash', amount: 15000, percentage: 60 },
-        { method: 'card', amount: 8000, percentage: 32 },
-        { method: 'voucher', amount: 2000, percentage: 8 }
-      );
     }
     
-    console.log('Final payment methods:', methods);
     return methods;
   }
 
@@ -308,29 +343,12 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Učitava mock podatke kao fallback
+   * Učitava mock podatke kao fallback (REMOVED - no longer used)
    */
-   private loadMockAnalytics(): void {
-     this.analyticsData = {
-       totalSessions: 25,
-       totalCash: 125000,
-       averageVariance: 2.5,
-       averageTransactionValue: 5000.00,
-       varianceTrend: 'improving',
-       topPerformingFacility: 'Glavna lokacija',
-       cashFlowEfficiency: 95,
-       recommendations: [
-         'Variance je u prihvatljivim granicama',
-         'Preporučuje se redovno brojanje cash-a',
-         'Kartična plaćanja su u porastu'
-       ],
-       paymentMethods: [
-         { method: 'cash', amount: 15000, percentage: 60 },
-         { method: 'card', amount: 8000, percentage: 32 },
-         { method: 'voucher', amount: 2000, percentage: 8 }
-       ]
-     };
-   }
+   // private loadMockAnalytics(): void {
+   //   // REMOVED: Mock data was causing incorrect 125,000 RSD values
+   //   // Now using empty state instead of mock data
+   // }
 
   /**
    * Generiše analytics izveštaj

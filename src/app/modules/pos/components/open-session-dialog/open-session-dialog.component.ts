@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,8 +9,10 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Subject, takeUntil } from 'rxjs';
 import { PosService } from '../../services/pos.service';
 import { Facility } from '../../../../models/Facility';
+import { OpenSessionRequest } from '../../../../models/CashSession';
 
 export interface OpenSessionDialogData {
   facilities: Facility[];
@@ -33,16 +35,17 @@ export interface OpenSessionDialogData {
   templateUrl: './open-session-dialog.component.html',
   styleUrls: ['./open-session-dialog.component.scss']
 })
-export class OpenSessionDialogComponent implements OnInit {
+export class OpenSessionDialogComponent implements OnInit, OnDestroy {
   openSessionForm: FormGroup;
   processing = false;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private dialogRef: MatDialogRef<OpenSessionDialogComponent>,
+    private readonly dialogRef: MatDialogRef<OpenSessionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: OpenSessionDialogData,
-    private fb: FormBuilder,
-    private posService: PosService,
-    private snackBar: MatSnackBar
+    private readonly fb: FormBuilder,
+    private readonly posService: PosService,
+    private readonly snackBar: MatSnackBar
   ) {
     this.openSessionForm = this.fb.group({
       facility: ['', Validators.required],
@@ -60,6 +63,11 @@ export class OpenSessionDialogComponent implements OnInit {
     }
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   /**
    * Otvara novu cash sesiju
    */
@@ -72,23 +80,25 @@ export class OpenSessionDialogComponent implements OnInit {
     this.processing = true;
 
     const formData = this.openSessionForm.value;
-    const sessionData = {
+    const sessionData: OpenSessionRequest = {
       facility: formData.facility,
       openingFloat: Number(formData.openingFloat),
       note: formData.note || undefined
     };
 
-    this.posService.openSession(sessionData).subscribe({
-      next: (result) => {
-        this.snackBar.open('Sesija uspešno otvorena', 'Zatvori', { duration: 2000 });
-        this.dialogRef.close(result);
-      },
-      error: (error) => {
-        console.error('Error opening session:', error);
-        this.snackBar.open('Greška pri otvaranju sesije', 'Zatvori', { duration: 3000 });
-        this.processing = false;
-      }
-    });
+    this.posService.openSession(sessionData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (result) => {
+          this.snackBar.open('Sesija uspešno otvorena', 'Zatvori', { duration: 2000 });
+          this.dialogRef.close(result);
+        },
+        error: (error) => {
+          console.error('Error opening session:', error);
+          this.snackBar.open('Greška pri otvaranju sesije', 'Zatvori', { duration: 3000 });
+          this.processing = false;
+        }
+      });
   }
 
   /**

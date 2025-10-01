@@ -244,7 +244,7 @@
           <mat-icon>restore</mat-icon>
           Vrati na podrazumevano
         </button>
-        <button mat-raised-button color="accent" class="save-btn" (click)="saveSettings()" [disabled]="saving || settingsForm.invalid">
+        <button mat-raised-button color="accent" class="save-btn" (click)="saveSettings()" [disabled]="saving || settingsForm.invalid || !settingsForm.dirty">
           <mat-icon *ngIf="!saving">save</mat-icon>
           <mat-icon *ngIf="saving" class="spinning">refresh</mat-icon>
           {{ saving ? 'Čuvanje...' : 'Sačuvaj podešavanja' }}

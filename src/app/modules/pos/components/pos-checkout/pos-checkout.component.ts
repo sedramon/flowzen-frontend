@@ -1,4 +1,4 @@
-import { Component, Inject, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Inject, Input, Output, EventEmitter, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormArray, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -9,8 +9,46 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule, DecimalPipe } from '@angular/common';
+import { Subject, takeUntil } from 'rxjs';
 import { PosService } from '../../services/pos.service';
+import { 
+  CreateSaleRequest, 
+  SaleResponse, 
+  SaleItem, 
+  SalePayment, 
+  SaleSummary 
+} from '../../../../models/Sale';
+import { Article } from '../../../../models/Article';
+import { Appointment } from '../../../../models/Appointment';
+import { Client } from '../../../../models/Client';
+import { Facility } from '../../../../models/Facility';
 
+/**
+ * Payment Method Interface
+ */
+interface PaymentMethodOption {
+  value: 'cash' | 'card' | 'voucher' | 'gift' | 'bank' | 'other';
+  label: string;
+}
+
+/**
+ * Checkout Dialog Data Interface
+ */
+interface CheckoutDialogData {
+  appointment?: Appointment;
+  articles?: Article[];
+  client?: Client;
+  total?: number;
+  facility?: Facility;
+  tenant?: string;
+}
+
+/**
+ * POS Checkout Component
+ * 
+ * Komponenta za kreiranje novih prodaja u POS sistemu.
+ * Omogućava dodavanje stavki, konfiguraciju plaćanja i kreiranje sale transakcije.
+ */
 @Component({
   selector: 'app-pos-checkout',
   templateUrl: './pos-checkout.component.html',
@@ -29,196 +67,423 @@ import { PosService } from '../../services/pos.service';
   ],
   providers: [DecimalPipe],
 })
-export class PosCheckoutComponent {
-  @Input() appointment: any;
-  @Input() articles: any[] = [];
-  @Input() client: any;
-  @Input() total: number = 0;
-  @Input() facility: any;
-  @Output() success = new EventEmitter<any>();
-  @Output() error = new EventEmitter<any>();
+export class PosCheckoutComponent implements OnInit, OnDestroy {
+  // ============================================================================
+  // INPUTS & OUTPUTS
+  // ============================================================================
 
-  form: FormGroup;
+  @Input() appointment?: Appointment;
+  @Input() articles: Article[] = [];
+  @Input() client?: Client;
+  @Input() total: number = 0;
+  @Input() facility?: Facility;
+  @Output() success = new EventEmitter<SaleResponse>();
+  @Output() error = new EventEmitter<Error>();
+
+  // ============================================================================
+  // COMPONENT STATE
+  // ============================================================================
+
+  form!: FormGroup;
   loading = false;
   errorMsg = '';
   successMsg = '';
-  availableArticles: any[] = [];
+  availableArticles: Article[] = [];
+  private destroy$ = new Subject<void>();
 
-  paymentMethods = [
+  // ============================================================================
+  // CONSTANTS
+  // ============================================================================
+
+  readonly paymentMethods: PaymentMethodOption[] = [
     { value: 'cash', label: 'Keš' },
     { value: 'card', label: 'Kartica' },
     { value: 'voucher', label: 'Vaučer' },
+    { value: 'gift', label: 'Poklon' },
     { value: 'bank', label: 'Bank Transfer' },
     { value: 'other', label: 'Ostalo' },
   ];
 
+  readonly defaultTaxRate = 20;
+  readonly minPaymentAmount = 1;
+
+  // ============================================================================
+  // CONSTRUCTOR & LIFECYCLE
+  // ============================================================================
+
   constructor(
-    private fb: FormBuilder,
-    private posService: PosService,
-    public dialogRef: MatDialogRef<PosCheckoutComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: any
+    private readonly fb: FormBuilder,
+    private readonly posService: PosService,
+    public readonly dialogRef: MatDialogRef<PosCheckoutComponent>,
+    @Inject(MAT_DIALOG_DATA) public data: CheckoutDialogData
   ) {
+    this.initializeForm();
+  }
+
+  ngOnInit(): void {
+    this.initializeAppointmentItems();
+    this.loadAvailableArticles();
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ============================================================================
+  // INITIALIZATION METHODS
+  // ============================================================================
+
+  /**
+   * Initialize reactive form
+   */
+  private initializeForm(): void {
     this.form = this.fb.group({
       items: this.fb.array([]),
       payments: this.fb.array([
         this.fb.group({
           method: ['cash', Validators.required],
-          amount: [this.data?.total || 0, [Validators.required, Validators.min(1)]],
+          amount: [this.data?.total || 0, [Validators.required, Validators.min(this.minPaymentAmount)]],
         }),
       ]),
-      discount: [0],
+      discount: [0, [Validators.min(0)]],
       note: [''],
     });
-    
-    // Dodaj uslugu iz appointment-a
-    if (data?.appointment) {
+  }
+
+  /**
+   * Initialize appointment items if provided
+   */
+  private initializeAppointmentItems(): void {
+    if (this.data?.appointment?.service) {
       this.items.push(
         this.fb.group({
-          refId: [data.appointment.service._id],
-          name: [data.appointment.service.name],
-          qty: [1],
-          unitPrice: [data.appointment.service.price],
+          refId: [this.data.appointment.service._id, Validators.required],
+          name: [this.data.appointment.service.name, Validators.required],
+          qty: [1, [Validators.required, Validators.min(1)]],
+          unitPrice: [this.data.appointment.service.price, [Validators.required, Validators.min(0)]],
+          discount: [0, [Validators.min(0)]],
+          taxRate: [this.defaultTaxRate, [Validators.required, Validators.min(0), Validators.max(100)]],
           type: ['service'],
         })
       );
     }
-    
-    // Ne dodaj artikle za novu prodaju - korisnik će ih dodati ručno
-    
-    // Učitaj dostupne artikle za dodavanje
-    this.loadAvailableArticles();
   }
 
-  get items() {
+  // ============================================================================
+  // FORM GETTERS
+  // ============================================================================
+
+  get items(): FormArray {
     return this.form.get('items') as FormArray;
   }
-  get payments() {
+
+  get payments(): FormArray {
     return this.form.get('payments') as FormArray;
   }
 
-  // Učitaj dostupne artikle
-  loadAvailableArticles() {
-    const currentUser = this.data?.tenant || '';
-    this.posService.getArticles(currentUser).subscribe({
-      next: (articles) => {
-        this.availableArticles = articles;
-      },
-      error: (err) => {
-        console.error('Error loading articles:', err);
-      }
+  /**
+   * Calculate total sum of all items
+   */
+  get totalSum(): number {
+    const itemsTotal = this.items.value.reduce((sum: number, item: SaleItem) => {
+      const qty = Number(item.qty) || 0;
+      const unitPrice = Number(item.unitPrice) || 0;
+      const discount = Number(item.discount) || 0;
+      return sum + (qty * unitPrice) - discount;
+    }, 0);
+    
+    const globalDiscount = Number(this.form.value.discount) || 0;
+    return itemsTotal - globalDiscount;
+  }
+
+  // ============================================================================
+  // DATA LOADING METHODS
+  // ============================================================================
+
+  /**
+   * Load available articles for selection
+   */
+  private loadAvailableArticles(): void {
+    const tenant = this.data?.tenant || '';
+    if (!tenant) {
+      console.warn('No tenant provided for loading articles');
+      return;
+    }
+
+    this.posService.getArticles(tenant)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (articles: Article[]) => {
+          this.availableArticles = articles || [];
+        },
+        error: (err: Error) => {
+          console.error('Error loading articles:', err);
+          this.availableArticles = [];
+        }
+      });
+  }
+
+  // ============================================================================
+  // ITEM MANAGEMENT METHODS
+  // ============================================================================
+
+  /**
+   * Add article to cart
+   * @param article - Article to add
+   */
+  addArticle(article: Article): void {
+    if (!article || !article._id) {
+      console.error('Invalid article provided');
+      return;
+    }
+
+    const existingItemIndex = this.items.controls.findIndex(
+      (control) => control.get('refId')?.value === article._id
+    );
+    
+    if (existingItemIndex >= 0) {
+      // Increase quantity of existing item
+      const existingItem = this.items.at(existingItemIndex);
+      const currentQty = Number(existingItem.get('qty')?.value) || 0;
+      existingItem.get('qty')?.setValue(currentQty + 1);
+    } else {
+      // Add new item
+      this.items.push(this.createItemFormGroup(article));
+    }
+  }
+
+  /**
+   * Create form group for item
+   * @param article - Article data
+   * @returns FormGroup for item
+   */
+  private createItemFormGroup(article: Article): FormGroup {
+    return this.fb.group({
+      refId: [article._id, Validators.required],
+      name: [article.name, Validators.required],
+      qty: [1, [Validators.required, Validators.min(1)]],
+      unitPrice: [article.price, [Validators.required, Validators.min(0)]],
+      discount: [0, [Validators.min(0)]],
+      taxRate: [this.defaultTaxRate, [Validators.required, Validators.min(0), Validators.max(100)]],
+      type: ['product'],
     });
   }
 
-  // Dodaj artikal u korpu
-  addArticle(article: any) {
-    const existingItem = this.items.controls.find(
-      (item: any) => item.get('refId')?.value === article._id
-    );
-    
-    if (existingItem) {
-      // Ako artikal već postoji, povećaj količinu
-      const currentQty = existingItem.get('qty')?.value || 0;
-      existingItem.get('qty')?.setValue(currentQty + 1);
-    } else {
-      // Dodaj novi artikal
-      this.items.push(
-        this.fb.group({
-          refId: [article._id],
-          name: [article.name],
-          qty: [1, [Validators.required, Validators.min(1)]],
-          unitPrice: [article.price, Validators.required],
-          type: ['product'],
-        })
-      );
+  /**
+   * Remove item from cart
+   * @param index - Index of item to remove
+   */
+  removeItem(index: number): void {
+    if (index >= 0 && index < this.items.length) {
+      this.items.removeAt(index);
     }
   }
 
-  // Ukloni artikal iz korpe
-  removeItem(index: number) {
-    this.items.removeAt(index);
-  }
+  // ============================================================================
+  // PAYMENT MANAGEMENT METHODS
+  // ============================================================================
 
-  addPayment() {
+  /**
+   * Add new payment method
+   */
+  addPayment(): void {
     this.payments.push(
       this.fb.group({
         method: ['cash', Validators.required],
-        amount: [0, [Validators.required, Validators.min(1)]],
+        amount: [0, [Validators.required, Validators.min(this.minPaymentAmount)]],
       })
     );
   }
-  removePayment(i: number) {
-    if (this.payments.length > 1) this.payments.removeAt(i);
+
+  /**
+   * Remove payment method
+   * @param index - Index of payment to remove
+   */
+  removePayment(index: number): void {
+    if (this.payments.length > 1 && index >= 0 && index < this.payments.length) {
+      this.payments.removeAt(index);
+    }
   }
 
-  get totalSum() {
-    return this.items.value.reduce((sum: number, i: any) => sum + i.qty * i.unitPrice, 0) - (this.form.value.discount || 0);
-  }
+  // ============================================================================
+  // SUBMISSION METHODS
+  // ============================================================================
 
-  submit() {
-    console.log('Submit clicked, form valid:', this.form.valid, 'items length:', this.items.length);
-    if (this.form.invalid) {
-      console.log('Form is invalid:', this.form.errors);
+  /**
+   * Submit form and create sale
+   */
+  submit(): void {
+    if (!this.validateForm()) {
       return;
     }
+
+    this.loading = true;
+    this.clearMessages();
+
+    const saleData = this.prepareSaleData();
+    
+    this.posService.createSale(saleData)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response: SaleResponse) => {
+          this.handleSuccess(response);
+        },
+        error: (error: Error) => {
+          this.handleError(error);
+        }
+      });
+  }
+
+  /**
+   * Validate form before submission
+   * @returns True if form is valid
+   */
+  private validateForm(): boolean {
+    if (this.form.invalid) {
+      console.warn('Form is invalid:', this.form.errors);
+      this.errorMsg = 'Molimo popunite sva obavezna polja';
+      return false;
+    }
+
     if (this.items.length === 0) {
       this.errorMsg = 'Dodajte bar jednu stavku za naplatu';
-      return;
+      return false;
     }
-    this.loading = true;
-    this.errorMsg = '';
 
-    // Pripremi items sa svim potrebnim poljima
-    const items = this.items.value.map((item: any) => {
+    const paymentTotal = this.payments.value.reduce((sum: number, payment: SalePayment) => 
+      sum + (Number(payment.amount) || 0), 0
+    );
+
+    if (paymentTotal < this.totalSum) {
+      this.errorMsg = 'Ukupno plaćanje mora biti veće ili jednako ukupnoj sumi';
+      return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Prepare sale data for backend
+   * @returns Sale request data
+   */
+  private prepareSaleData(): CreateSaleRequest {
+    const processedItems = this.processItems();
+    const summary = this.calculateSummary(processedItems);
+    
+    return {
+      facility: typeof this.data?.facility === 'string' 
+        ? this.data.facility 
+        : this.data?.facility?._id || '',
+      appointment: this.data?.appointment?.id,
+      client: this.data?.client?._id,
+      items: processedItems,
+      payments: this.payments.value,
+      summary,
+      note: this.form.value.note || ''
+    };
+  }
+
+  /**
+   * Process items with proper calculations
+   * @returns Processed items array
+   */
+  private processItems(): SaleItem[] {
+    return this.items.value.map((item: any) => {
       const qty = Number(item.qty) || 1;
       const unitPrice = Number(item.unitPrice) || 0;
-      const discount = typeof item.discount === 'number' ? item.discount : (this.form.value.discount || 0);
-      const taxRate = typeof item.taxRate === 'number' ? item.taxRate : 20;
+      const discount = Number(item.discount) || 0;
+      const taxRate = Number(item.taxRate) || this.defaultTaxRate;
       const total = (qty * unitPrice) - discount;
+      
       return {
-        ...item,
+        refId: item.refId,
+        type: item.type,
+        name: item.name,
         qty,
         unitPrice,
         discount,
         taxRate,
-        total,
+        total
       };
     });
+  }
 
-    // Izračunaj summary
-    const subtotal = items.reduce((sum: number, i: any) => sum + (i.qty * i.unitPrice), 0);
-    const discountTotal = items.reduce((sum: number, i: any) => sum + (i.discount || 0), 0);
-    const taxTotal = items.reduce((sum: number, i: any) => sum + ((i.total || 0) * (i.taxRate || 0) / 100), 0);
-    const grandTotal = items.reduce((sum: number, i: any) => sum + (i.total || 0), 0);
-    const summary = {
+  /**
+   * Calculate sale summary
+   * @param items - Processed items
+   * @returns Sale summary
+   */
+  private calculateSummary(items: SaleItem[]): SaleSummary {
+    const subtotal = items.reduce((sum: number, item: SaleItem) => 
+      sum + (item.qty * item.unitPrice), 0
+    );
+    
+    const discountTotal = items.reduce((sum: number, item: SaleItem) => 
+      sum + (item.discount || 0), 0
+    );
+    
+    const taxTotal = items.reduce((sum: number, item: SaleItem) => 
+      sum + ((item.total || 0) * (item.taxRate || 0) / 100), 0
+    );
+    
+    const grandTotal = items.reduce((sum: number, item: SaleItem) => 
+      sum + (item.total || 0), 0
+    );
+
+    return {
       subtotal,
       discountTotal,
       taxTotal,
       tip: 0,
-      grandTotal,
-      note: this.form.value.note || '',
+      grandTotal
     };
+  }
 
-    const payload: any = {
-      facility: this.data?.facility?._id || this.data?.facility,
-      appointment: this.data?.appointment?.id,
-      client: this.data?.client?._id,
-      items,
-      payments: this.payments.value,
-      summary,
-    };
+  /**
+   * Handle successful sale creation
+   * @param response - Sale response
+   */
+  private handleSuccess(response: SaleResponse): void {
+    this.loading = false;
+    this.successMsg = 'Račun uspešno izdat!';
+    this.success.emit(response);
+    
+    setTimeout(() => {
+      this.dialogRef.close(response);
+    }, 1000);
+  }
 
-    this.posService.createSale(payload).subscribe({
-      next: (res) => {
-        this.loading = false;
-        this.successMsg = 'Račun uspešno izdat!';
-        this.success.emit(res);
-        setTimeout(() => this.dialogRef.close(res), 1000);
-      },
-      error: (err) => {
-        this.loading = false;
-        this.errorMsg = err?.error?.message || 'Greška pri naplati.';
-        this.error.emit(err);
-      },
-    });
+  /**
+   * Handle sale creation error
+   * @param error - Error object
+   */
+  private handleError(error: Error): void {
+    this.loading = false;
+    this.errorMsg = this.getErrorMessage(error);
+    this.error.emit(error);
+  }
+
+  /**
+   * Get user-friendly error message
+   * @param error - Error object
+   * @returns Error message
+   */
+  private getErrorMessage(error: any): string {
+    if (error?.error?.message) {
+      return error.error.message;
+    }
+    if (error?.message) {
+      return error.message;
+    }
+    return 'Greška pri naplati. Molimo pokušajte ponovo.';
+  }
+
+  /**
+   * Clear error and success messages
+   */
+  private clearMessages(): void {
+    this.errorMsg = '';
+    this.successMsg = '';
   }
 }

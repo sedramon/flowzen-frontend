@@ -195,8 +195,14 @@
                 <div class="session-details">
                   <span class="detail">{{ formatDate(session.openedAt) }}</span>
                   <span class="detail">Float: {{ formatAmount(session.openingFloat) }}</span>
-                  <span class="detail" *ngIf="session.closingCount">
+                  <span class="detail" *ngIf="session.closingCount !== undefined && session.closingCount !== null">
                     Zatvoreno: {{ formatAmount(session.closingCount) }}
+                  </span>
+                  <span class="detail" *ngIf="session.openedBy">
+                    Otvorio: {{ session.openedBy.firstName }} {{ session.openedBy.lastName }}
+                  </span>
+                  <span class="detail" *ngIf="session.closedBy">
+                    Zatvorio: {{ session.closedBy.firstName }} {{ session.closedBy.lastName }}
                   </span>
                 </div>
               </div>

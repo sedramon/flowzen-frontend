@@ -102,6 +102,10 @@ export class PosSettingsComponent implements OnInit {
     this.loadFacilities();
   }
 
+  /**
+   * Inicijalizuje formu sa default vrednostima
+   */
+
   initializeForm(): void {
     // Initialize payment methods group
     const paymentMethodsGroup: any = {};
@@ -133,6 +137,9 @@ export class PosSettingsComponent implements OnInit {
     });
   }
 
+  /**
+   * Učitava dostupne objekte za trenutnog korisnika
+   */
   loadFacilities(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
@@ -160,6 +167,9 @@ export class PosSettingsComponent implements OnInit {
     });
   }
 
+  /**
+   * Učitava postavke za selektovani objekat
+   */
   loadSettings(): void {
     if (!this.currentFacility) {
       this.loading = false;
@@ -171,20 +181,48 @@ export class PosSettingsComponent implements OnInit {
     // Load settings from API
     this.posService.getSettings(this.currentFacility._id || '')
       .subscribe({
-        next: (settings: PosSettings) => {
-          this.settingsForm.patchValue({
-            facility: settings.facility,
-            paymentMethods: settings.paymentMethods,
-            defaultTaxRate: settings.defaultTaxRate,
-            maxDiscountPercent: settings.maxDiscountPercent,
-            allowNegativePrice: settings.allowNegativePrice,
-            receiptNumberFormat: settings.receiptNumberFormat,
+        next: (response: any) => {
+          // Extract settings from backend response format
+          const settings = response?.data || response;
+          
+          // Check if we have valid settings data
+          if (!settings || typeof settings !== 'object') {
+            this.loading = false;
+            return;
+          }
+          
+          // Prepare form data with proper structure
+          const formData = {
+            facility: settings.facility || this.currentFacility?._id || '',
+            paymentMethods: settings.paymentMethods || {
+              cash: { enabled: true, label: 'Gotovina' },
+              card: { enabled: true, label: 'Kartica' },
+              voucher: { enabled: false, label: 'Vaučer' },
+              gift: { enabled: false, label: 'Poklon bon' },
+              bank: { enabled: false, label: 'Bankovni transfer' },
+              other: { enabled: false, label: 'Ostalo' }
+            },
+            defaultTaxRate: settings.defaultTaxRate || 20,
+            maxDiscountPercent: settings.maxDiscountPercent || 50,
+            allowNegativePrice: settings.allowNegativePrice || false,
+            receiptNumberFormat: settings.receiptNumberFormat || 'FAC-YYYYMMDD-####',
             header: settings.receiptTemplate?.header || '',
             footer: settings.receiptTemplate?.footer || '',
-            showQR: settings.receiptTemplate?.showQR || false,
+            showQR: settings.receiptTemplate?.showQR || true,
             showFiscalNumber: settings.receiptTemplate?.showFiscalNumber || true,
-            fiscalization: settings.fiscalization
-          });
+            fiscalization: settings.fiscalization || {
+              enabled: false,
+              provider: 'none',
+              timeout: 5000,
+              retryCount: 3
+            }
+          };
+          
+          this.settingsForm.patchValue(formData);
+          
+          // Mark form as pristine after loading (not dirty)
+          this.settingsForm.markAsPristine();
+          
           this.loading = false;
         },
         error: (error) => {
@@ -219,11 +257,15 @@ export class PosSettingsComponent implements OnInit {
           };
           
           this.settingsForm.patchValue(defaultSettings);
+          this.settingsForm.markAsPristine();
           this.loading = false;
         }
       });
   }
 
+  /**
+   * Handler za promenu objekta
+   */
   onFacilityChange(facilityId: string): void {
     this.currentFacility = this.facilities.find(f => f._id === facilityId) || null;
     if (this.currentFacility) {
@@ -231,6 +273,9 @@ export class PosSettingsComponent implements OnInit {
     }
   }
 
+  /**
+   * Čuva postavke na backend
+   */
   saveSettings(): void {
     if (this.settingsForm.invalid) {
       this.snackBar.open('Molimo popunite sva obavezna polja', 'Zatvori', { duration: 3000 });
@@ -245,10 +290,6 @@ export class PosSettingsComponent implements OnInit {
     this.saving = true;
     const formValue = this.settingsForm.value;
     const currentUser = this.authService.getCurrentUser();
-    
-    console.log('Current facility ID:', this.currentFacility._id);
-    console.log('Current user tenant:', currentUser?.tenant);
-    console.log('Form value:', formValue);
     
     const settingsData = {
       facility: this.currentFacility._id,
@@ -266,8 +307,6 @@ export class PosSettingsComponent implements OnInit {
       },
       tenant: currentUser?.tenant
     };
-    
-    console.log('Settings data to send:', settingsData);
 
     // Save settings via API
     this.posService.updateSettings(settingsData)
@@ -284,6 +323,9 @@ export class PosSettingsComponent implements OnInit {
       });
   }
 
+  /**
+   * Vraća postavke na default vrednosti
+   */
   resetToDefaults(): void {
     const defaultPaymentMethods: any = {};
     this.paymentMethodsConfig.forEach(method => {
@@ -293,7 +335,7 @@ export class PosSettingsComponent implements OnInit {
       };
     });
 
-    this.settingsForm.patchValue({
+    const defaultSettings = {
       paymentMethods: defaultPaymentMethods,
       defaultTaxRate: 20,
       maxDiscountPercent: 50,
@@ -309,11 +351,16 @@ export class PosSettingsComponent implements OnInit {
         timeout: 5000,
         retryCount: 3
       }
-    });
+    };
+    
+    this.settingsForm.patchValue(defaultSettings);
 
     this.snackBar.open('Podešavanja vraćena na podrazumevano', 'Zatvori', { duration: 2000 });
   }
 
+  /**
+   * Helper metode za template
+   */
   getPaymentMethodKeys(): string[] {
     return this.paymentMethodsConfig.map(m => m.key);
   }

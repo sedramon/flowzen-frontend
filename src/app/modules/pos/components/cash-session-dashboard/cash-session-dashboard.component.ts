@@ -8,14 +8,14 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { map, switchMap, catchError } from 'rxjs/operators';
 
 // Service imports
 import { PosService } from '../../services/pos.service';
 import { AuthService } from '../../../../core/services/auth.service';
 
 // Model imports
-import { CashSession } from '../../../../models/CashSession';
+import { CashSession, OpenSessionRequest, CashSessionSummary } from '../../../../models/CashSession';
 import { Facility } from '../../../../models/Facility';
 
 // Dialog imports
@@ -25,10 +25,28 @@ import { CashCountingDialogComponent } from '../cash-counting-dialog/cash-counti
 import { CashReconciliationDialogComponent } from '../cash-reconciliation-dialog/cash-reconciliation-dialog.component';
 
 /**
+ * Today's Statistics Interface
+ */
+interface TodayStats {
+  totalSessions: number;
+  totalCash: number;
+  totalVariance: number;
+  averageVariance: number;
+}
+
+/**
  * Cash Session Dashboard Component
  * 
  * Glavna komponenta za upravljanje cash sesijama u POS sistemu.
  * Omogućava otvaranje/zatvaranje sesija, brojanje cash-a i usklađivanje.
+ * 
+ * Funkcionalnosti:
+ * - Prikaz trenutne sesije
+ * - Otvaranje/zatvaranje sesija
+ * - Brojanje cash-a
+ * - Usklađivanje variance
+ * - Statistike za danas
+ * - Pregled poslednjih sesija
  */
 @Component({
   selector: 'app-cash-session-dashboard',
@@ -50,7 +68,7 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   // COMPONENT STATE
   // ============================================================================
   
-  private destroy$ = new Subject<void>();
+  private readonly destroy$ = new Subject<void>();
   
   // Data
   currentSession: CashSession | null = null;
@@ -62,7 +80,7 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   sessionLoading = false;
   
   // Statistics
-  todayStats = {
+  todayStats: TodayStats = {
     totalSessions: 0,
     totalCash: 0,
     totalVariance: 0,
@@ -74,10 +92,10 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   // ============================================================================
 
   constructor(
-    private posService: PosService,
-    private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private readonly posService: PosService,
+    private readonly authService: AuthService,
+    private readonly snackBar: MatSnackBar,
+    private readonly dialog: MatDialog
   ) {}
 
   ngOnInit(): void {
@@ -94,43 +112,63 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   // ============================================================================
 
   /**
-   * Učitava sve potrebne podatke za dashboard
+   * Load all required data for dashboard
    */
   private loadDashboardData(): void {
     this.loading = true;
     
     const currentUser = this.authService.getCurrentUser();
-    forkJoin({
-      facilities: this.posService.getFacilities(currentUser?.tenant),
-      todayStats: this.posService.getTodayCashStats()
-    })
-    .pipe(
-      map(({ facilities, todayStats }) => {
-        const facilityId = facilities.length > 0 ? facilities[0]._id : '68d855f9f07f767dc2582ba2';
-        return forkJoin({
-          currentSession: this.posService.getCurrentSession(facilities),
-          recentSessions: this.posService.getRecentSessions(10, facilities),
-          facilities: of(facilities),
-          todayStats: this.posService.getTodayCashStats(facilityId)
-        });
-      }),
-      switchMap(result => result)
-    )
-    .pipe(takeUntil(this.destroy$))
-    .subscribe({
-      next: (data) => {
-        this.currentSession = data.currentSession;
-        this.recentSessions = data.recentSessions;
-        this.facilities = data.facilities;
-        this.todayStats = data.todayStats;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading dashboard data:', error);
-        this.snackBar.open('Greška pri učitavanju podataka', 'Zatvori', { duration: 3000 });
-        this.loading = false;
-      }
-    });
+    if (!currentUser) {
+      this.showError('Korisnik nije prijavljen');
+      this.loading = false;
+      return;
+    }
+
+    this.posService.getFacilities(currentUser.tenant)
+      .pipe(
+        switchMap(facilities => {
+          this.facilities = facilities || [];
+          const facilityId = facilities.length > 0 ? facilities[0]._id : '';
+          
+          return forkJoin({
+            currentSession: this.posService.getCurrentSession(facilityId, facilities),
+            recentSessions: this.posService.getRecentSessions(10, facilities),
+            todayStats: this.posService.getTodayCashStats(facilityId)
+          });
+        }),
+        takeUntil(this.destroy$)
+      )
+      .subscribe({
+        next: (data) => this.handleDashboardDataSuccess(data),
+        error: (error) => this.handleDashboardDataError(error)
+      });
+  }
+
+  /**
+   * Handle successful dashboard data loading
+   * @param data - Loaded data
+   */
+  private handleDashboardDataSuccess(data: any): void {
+    // Proveri da li je currentSession stvarno validna sesija
+    if (data.currentSession && data.currentSession.id && data.currentSession.status === 'open') {
+      this.currentSession = data.currentSession;
+    } else {
+      this.currentSession = null;
+    }
+    
+    this.recentSessions = data.recentSessions || [];
+    this.todayStats = data.todayStats || this.todayStats;
+    this.loading = false;
+  }
+
+  /**
+   * Handle dashboard data loading error
+   * @param error - Error object
+   */
+  private handleDashboardDataError(error: any): void {
+    console.error('Error loading dashboard data:', error);
+    this.showError('Greška pri učitavanju podataka');
+    this.loading = false;
   }
 
   // ============================================================================
@@ -221,22 +259,11 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   /**
    * Formatira iznos za prikaz
    */
-  formatAmount(amount: number): string {
+  formatAmount(amount: number | null | undefined): string {
+    if (amount === null || amount === undefined) return '0 RSD';
     return `${amount.toFixed(2)} RSD`;
   }
 
-  /**
-   * Formatira datum za prikaz
-   */
-  formatDate(date: Date | string): string {
-    return new Date(date).toLocaleDateString('sr-RS', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
-  }
 
   /**
    * Vraća boju za status sesije
@@ -271,11 +298,72 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća ikonu za variance
+   * Get variance icon
+   * @param variance - Variance amount
+   * @returns Icon name
    */
   getVarianceIcon(variance: number): string {
     if (variance > 0) return 'trending_up';
     if (variance < 0) return 'trending_down';
     return 'trending_flat';
+  }
+
+  /**
+   * Show error message to user
+   * @param message - Error message
+   */
+  private showError(message: string): void {
+    this.snackBar.open(message, 'Zatvori', { duration: 3000 });
+  }
+
+  /**
+   * Show success message to user
+   * @param message - Success message
+   */
+  private showSuccess(message: string): void {
+    this.snackBar.open(message, 'Zatvori', { duration: 2000 });
+  }
+
+  /**
+   * Format currency amount
+   * @param amount - Amount to format
+   * @returns Formatted currency string
+   */
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('sr-RS', {
+      style: 'currency',
+      currency: 'RSD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(amount);
+  }
+
+  /**
+   * Format date for display
+   * @param date - Date to format
+   * @returns Formatted date string
+   */
+  formatDate(date: Date | string | null | undefined): string {
+    if (!date) return 'N/A';
+    try {
+      return new Date(date).toLocaleString('sr-RS', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'N/A';
+    }
+  }
+
+  /**
+   * Check if session has significant variance
+   * @param variance - Variance amount
+   * @returns True if variance is significant
+   */
+  hasSignificantVariance(variance: number): boolean {
+    return Math.abs(variance) > 100; // More than 100 RSD
   }
 }

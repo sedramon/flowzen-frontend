@@ -1,4 +1,4 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -10,8 +10,9 @@ import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { Subject, takeUntil } from 'rxjs';
 import { PosService } from '../../services/pos.service';
-import { CashSession, CashSessionSummary } from '../../../../models/CashSession';
+import { CashSession, CashSessionSummary, CloseSessionRequest } from '../../../../models/CashSession';
 
 export interface CloseSessionDialogData {
   session: CashSession;
@@ -35,17 +36,18 @@ export interface CloseSessionDialogData {
   templateUrl: './close-session-dialog.component.html',
   styleUrls: ['./close-session-dialog.component.scss']
 })
-export class CloseSessionDialogComponent implements OnInit {
+export class CloseSessionDialogComponent implements OnInit, OnDestroy {
   closeSessionForm: FormGroup;
   processing = false;
   sessionSummary: CashSessionSummary | null = null;
+  private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private dialogRef: MatDialogRef<CloseSessionDialogComponent>,
+    private readonly dialogRef: MatDialogRef<CloseSessionDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: CloseSessionDialogData,
-    private fb: FormBuilder,
-    private posService: PosService,
-    private snackBar: MatSnackBar
+    private readonly fb: FormBuilder,
+    private readonly posService: PosService,
+    private readonly snackBar: MatSnackBar
   ) {
     this.closeSessionForm = this.fb.group({
       closingCount: [0, [Validators.required, Validators.min(0)]],
@@ -60,6 +62,11 @@ export class CloseSessionDialogComponent implements OnInit {
     });
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
   /**
    * Zatvara sesiju
    */
@@ -71,7 +78,7 @@ export class CloseSessionDialogComponent implements OnInit {
 
     this.processing = true;
     const formData = this.closeSessionForm.value;
-    const closeData = {
+    const closeData: CloseSessionRequest = {
       closingCount: Number(formData.closingCount),
       note: formData.note || undefined
     };

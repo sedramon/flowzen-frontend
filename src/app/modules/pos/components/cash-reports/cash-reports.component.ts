@@ -70,6 +70,10 @@ export class CashReportsComponent implements OnInit, OnDestroy {
     'actions'
   ];
 
+  // Cache for total stats to avoid repeated calculations
+  private _cachedTotalStats: any = null;
+  private _lastReportsHash: string = '';
+
   constructor(
     private posService: PosService,
     private snackBar: MatSnackBar,
@@ -105,6 +109,10 @@ export class CashReportsComponent implements OnInit, OnDestroy {
           this.loadReports().then(reports => {
             this.dailyReports = reports;
             this.loading = false;
+            
+            // Invalidate cache when data changes
+            this._cachedTotalStats = null;
+            this._lastReportsHash = '';
           }).catch(error => {
             console.error('Error loading reports:', error);
             this.snackBar.open('Greška pri učitavanju izveštaja', 'Zatvori', { duration: 3000 });
@@ -140,7 +148,8 @@ export class CashReportsComponent implements OnInit, OnDestroy {
         );
         
         Promise.all(facilityPromises).then(reports => {
-          resolve(reports.filter((report): report is DailyCashReport => report !== null && report !== undefined));
+          const filteredReports = reports.filter((report): report is DailyCashReport => report !== null && report !== undefined);
+          resolve(filteredReports);
         }).catch(reject);
       }
     });
@@ -155,6 +164,11 @@ export class CashReportsComponent implements OnInit, OnDestroy {
     this.loadReports().then(reports => {
       this.dailyReports = reports;
       this.reportLoading = false;
+      
+      // Invalidate cache when data changes
+      this._cachedTotalStats = null;
+      this._lastReportsHash = '';
+      
       this.snackBar.open('Izveštaj uspešno generisan', 'Zatvori', { duration: 2000 });
     }).catch(error => {
       console.error('Error generating report:', error);
@@ -219,7 +233,7 @@ export class CashReportsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća ukupne statistike
+   * Vraća ukupne statistike (sa cache-om)
    */
   getTotalStats(): {
     totalSessions: number;
@@ -229,14 +243,27 @@ export class CashReportsComponent implements OnInit, OnDestroy {
     totalVariance: number;
     averageVariance: number;
   } {
-    return this.dailyReports.reduce((totals, report) => ({
-      totalSessions: totals.totalSessions + report.sessionCount,
-      totalOpeningFloat: totals.totalOpeningFloat + report.summary.totalOpeningFloat,
-      totalExpectedCash: totals.totalExpectedCash + report.summary.totalExpectedCash,
-      totalActualCash: totals.totalActualCash + report.summary.totalActualCash,
-      totalVariance: totals.totalVariance + report.summary.totalVariance,
-      averageVariance: 0 // Will be calculated below
-    }), {
+    // Generate hash of current reports to check if cache is valid
+    const currentHash = JSON.stringify(this.dailyReports.map(r => ({ 
+      sessionCount: r.sessionCount, 
+      summary: r.summary 
+    })));
+    
+    // Return cached stats if reports haven't changed
+    if (this._cachedTotalStats && this._lastReportsHash === currentHash) {
+      return this._cachedTotalStats;
+    }
+    
+    const stats = this.dailyReports.reduce((totals, report) => {
+      return {
+        totalSessions: totals.totalSessions + (report.sessionCount || 0),
+        totalOpeningFloat: totals.totalOpeningFloat + (report.summary?.totalOpeningFloat || 0),
+        totalExpectedCash: totals.totalExpectedCash + (report.summary?.totalExpectedCash || 0),
+        totalActualCash: totals.totalActualCash + (report.summary?.totalActualCash || 0),
+        totalVariance: totals.totalVariance + (report.summary?.totalVariance || 0),
+        averageVariance: 0 // Will be calculated below
+      };
+    }, {
       totalSessions: 0,
       totalOpeningFloat: 0,
       totalExpectedCash: 0,
@@ -244,5 +271,16 @@ export class CashReportsComponent implements OnInit, OnDestroy {
       totalVariance: 0,
       averageVariance: 0
     });
+    
+    // Calculate average variance
+    if (stats.totalSessions > 0) {
+      stats.averageVariance = stats.totalVariance / stats.totalSessions;
+    }
+    
+    // Cache the results
+    this._cachedTotalStats = stats;
+    this._lastReportsHash = currentHash;
+    
+    return stats;
   }
 }

@@ -11,17 +11,45 @@ import {
   CashVerificationResult, 
   CashVarianceResult, 
   CashReconciliationResult, 
-  DailyCashReport 
+  DailyCashReport,
+  OpenSessionRequest,
+  CloseSessionRequest,
+  CashCountingRequest,
+  CashVerificationRequest,
+  CashVarianceRequest,
+  PaymentTotals,
+  VarianceAction
 } from '../../../models/CashSession';
 import { Facility } from '../../../models/Facility';
+import { 
+  Sale, 
+  CreateSaleRequest, 
+  RefundSaleRequest, 
+  SaleResponse, 
+  RefundResponse, 
+  FiscalResponse,
+  PosApiResponse 
+} from '../../../models/Sale';
 
+/**
+ * POS Service
+ * 
+ * Centralized service for all Point of Sale operations including:
+ * - Cash session management (open, close, counting, verification)
+ * - Sales transactions (create, refund, fiscalize)
+ * - Reports and analytics
+ * - Settings management
+ * 
+ * This service handles communication with the POS backend API
+ * and provides data transformation for frontend components.
+ */
 @Injectable({ providedIn: 'root' })
 export class PosService {
-  private api = environment.apiUrl + '/pos';
+  private readonly api = environment.apiUrl + '/pos';
 
   constructor(
-    private http: HttpClient,
-    private authService: AuthService
+    private readonly http: HttpClient,
+    private readonly authService: AuthService
   ) {}
 
   // ============================================================================
@@ -32,20 +60,24 @@ export class PosService {
    * Transformiše backend response u frontend model
    */
   private transformCashSession(session: any, facilities: Facility[] = []): CashSession {
+    
     const facilityId = session.facility?._id || session.facility?.id || session.facility;
     const facility = facilities.find(f => f._id === facilityId);
     
-    return {
+    const transformedOpenedBy = this.transformUser(session.openedBy);
+    const transformedClosedBy = session.closedBy ? this.transformUser(session.closedBy) : undefined;
+    
+    const result = {
       id: session._id || session.id,
       tenant: session.tenant,
       facility: {
         id: facilityId || '',
         name: facility?.name || session.facility?.name || 'N/A'
       },
-      openedBy: this.transformUser(session.openedBy),
+      openedBy: transformedOpenedBy,
       openedAt: session.openedAt,
       openingFloat: session.openingFloat || 0,
-      closedBy: session.closedBy ? this.transformUser(session.closedBy) : undefined,
+      closedBy: transformedClosedBy,
       closedAt: session.closedAt,
       closingCount: session.closingCount,
       totalsByMethod: session.totalsByMethod || this.getDefaultTotalsByMethod(),
@@ -53,8 +85,15 @@ export class PosService {
       variance: session.variance || 0,
       status: session.status || 'open',
       note: session.note,
-      calculatedTotals: session.calculatedTotals
+      calculatedTotals: session.calculatedTotals,
+      // Virtual fields from backend
+      duration: session.duration,
+      totalTransactions: session.totalTransactions,
+      variancePercentage: session.variancePercentage,
+      hasSignificantVariance: session.hasSignificantVariance
     };
+    
+    return result;
   }
 
   /**
@@ -71,17 +110,23 @@ export class PosService {
    * Transformiše user objekat
    */
   private transformUser(user: any): { id: string; firstName: string; lastName: string } {
+    // User schema has 'name' field, not 'firstName' and 'lastName'
+    const fullName = user?.name || 'N/A';
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || 'N/A';
+    const lastName = nameParts.slice(1).join(' ') || '';
+    
     return {
       id: user?._id || user?.id || '',
-      firstName: user?.firstName || 'N/A',
-      lastName: user?.lastName || ''
+      firstName: firstName,
+      lastName: lastName
     };
   }
 
   /**
    * Vraća default totals by method
    */
-  private getDefaultTotalsByMethod() {
+  private getDefaultTotalsByMethod(): PaymentTotals {
     return {
       cash: 0,
       card: 0,
@@ -113,24 +158,64 @@ export class PosService {
   // ============================================================================
 
   /**
-   * Otvara novu cash sesiju
+   * Open a new cash session
+   * @param data - Session opening data
+   * @returns Observable with created session ID
    */
-  openSession(data: { facility: string; openingFloat: number; note?: string }): Observable<{ id: string }> {
-    return this.http.post<{ id: string }>(`${this.api}/sessions/open`, data);
+  openSession(data: OpenSessionRequest): Observable<{ id: string }> {
+    return this.http.post<PosApiResponse<{ id: string }>>(`${this.api}/sessions/open`, data).pipe(
+      map((response: PosApiResponse<{ id: string }>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to open session');
+      }),
+      catchError((error) => {
+        console.error('Error opening session:', error);
+        throw error;
+      })
+    );
   }
 
   /**
-   * Zatvara cash sesiju
+   * Close a cash session
+   * @param id - Session ID
+   * @param data - Session closing data
+   * @returns Observable with session summary
    */
-  closeSession(id: string, data: { closingCount: number; note?: string }): Observable<CashSessionSummary> {
-    return this.http.post<CashSessionSummary>(`${this.api}/sessions/${id}/close`, data);
+  closeSession(id: string, data: CloseSessionRequest): Observable<CashSessionSummary> {
+    return this.http.post<PosApiResponse<CashSessionSummary>>(`${this.api}/sessions/${id}/close`, data).pipe(
+      map((response: PosApiResponse<CashSessionSummary>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to close session');
+      }),
+      catchError((error) => {
+        console.error('Error closing session:', error);
+        throw error;
+      })
+    );
   }
+
 
   /**
    * Dohvata sve sesije sa filterima
    */
   getSessions(params: { status?: string; facility?: string; employee?: string }): Observable<CashSession[]> {
-    return this.http.get<CashSession[]>(`${this.api}/sessions`, { params });
+    return this.http.get<any>(`${this.api}/sessions`, { params }).pipe(
+      map((response: any) => {
+        // Extract data from backend response format
+        if (response && response.success && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return Array.isArray(response) ? response : [];
+      }),
+      catchError((error) => {
+        console.error('Error getting sessions:', error);
+        throw error;
+      })
+    );
   }
 
   /**
@@ -143,8 +228,13 @@ export class PosService {
   /**
    * Dohvata trenutnu aktivnu sesiju
    */
-  getCurrentSession(facilities: Facility[] = []): Observable<CashSession | null> {
-    return this.http.get<CashSession | null>(`${this.api}/sessions/current`).pipe(
+  getCurrentSession(facilityId?: string, facilities: Facility[] = []): Observable<CashSession | null> {
+    const params: any = {};
+    if (facilityId) {
+      params.facility = facilityId;
+    }
+    
+    return this.http.get<CashSession | null>(`${this.api}/sessions/current`, { params }).pipe(
       map((response: any) => {
         if (response && response.data) {
           return this.transformCashSession(response.data, facilities);
@@ -190,30 +280,32 @@ export class PosService {
 
   /**
    * Broji cash u sesiji
+   * @param sessionId - Session ID
+   * @param data - Cash counting data
+   * @returns Observable with counting results
    */
-  countCash(sessionId: string, countedCash: number): Observable<CashCountingResult> {
-    return this.http.post<CashCountingResult>(`${this.api}/sessions/${sessionId}/count-cash`, { countedCash });
+  countCash(sessionId: string, data: CashCountingRequest): Observable<CashCountingResult> {
+    return this.http.post<CashCountingResult>(`${this.api}/sessions/${sessionId}/count-cash`, data);
   }
 
   /**
    * Verifikuje brojanje cash-a
+   * @param sessionId - Session ID
+   * @param data - Cash verification data
+   * @returns Observable with verification results
    */
-  verifyCashCount(sessionId: string, actualCash: number, note?: string): Observable<CashVerificationResult> {
-    return this.http.post<CashVerificationResult>(`${this.api}/sessions/${sessionId}/verify-cash`, { 
-      actualCash, 
-      note 
-    });
+  verifyCashCount(sessionId: string, data: CashVerificationRequest): Observable<CashVerificationResult> {
+    return this.http.post<CashVerificationResult>(`${this.api}/sessions/${sessionId}/verify-cash`, data);
   }
 
   /**
    * Rukuje variance (nedostatak/višak novca)
+   * @param sessionId - Session ID
+   * @param data - Variance handling data
+   * @returns Observable with variance handling results
    */
-  handleCashVariance(sessionId: string, actualCash: number, action: string, reason: string): Observable<CashVarianceResult> {
-    return this.http.post<CashVarianceResult>(`${this.api}/sessions/${sessionId}/handle-variance`, { 
-      actualCash, 
-      action, 
-      reason 
-    });
+  handleCashVariance(sessionId: string, data: CashVarianceRequest): Observable<CashVarianceResult> {
+    return this.http.post<CashVarianceResult>(`${this.api}/sessions/${sessionId}/handle-variance`, data);
   }
 
   // ============================================================================
@@ -222,6 +314,8 @@ export class PosService {
 
   /**
    * Usklađuje cash za sesiju
+   * @param sessionId - Session ID
+   * @returns Observable with reconciliation results
    */
   reconcileSession(sessionId: string): Observable<CashReconciliationResult> {
     return this.http.get<CashReconciliationResult>(`${this.api}/sessions/${sessionId}/reconcile`);
@@ -233,11 +327,19 @@ export class PosService {
 
   /**
    * Dohvata dnevni cash izveštaj
+   * @param facility - Facility ID
+   * @param date - Report date
+   * @returns Observable with daily cash report
    */
   getDailyCashReport(facility: string, date: string): Observable<DailyCashReport> {
     return this.http.get<DailyCashReport>(`${this.api}/sessions/reports/daily`, { 
       params: { facility, date } 
-    });
+    }).pipe(
+      catchError((error) => {
+        console.error('Error getting daily cash report:', error);
+        throw error;
+      })
+    );
   }
 
   /**
@@ -303,30 +405,145 @@ export class PosService {
     );
   }
 
-  // Sales
-  createSale(data: any): Observable<any> {
-    return this.http.post(`${this.api}/sales`, data);
+  // ============================================================================
+  // SALES MANAGEMENT
+  // ============================================================================
+
+  /**
+   * Create a new sale transaction
+   * @param data - Sale creation data
+   * @returns Observable with created sale data
+   */
+  createSale(data: CreateSaleRequest): Observable<SaleResponse> {
+    return this.http.post<PosApiResponse<SaleResponse>>(`${this.api}/sales`, data).pipe(
+      map((response: PosApiResponse<SaleResponse>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to create sale');
+      }),
+      catchError((error) => {
+        console.error('Error creating sale:', error);
+        throw error;
+      })
+    );
   }
-  refundSale(id: string, data: any): Observable<any> {
-    return this.http.post(`${this.api}/sales/${id}/refund`, data);
+
+  /**
+   * Refund a sale transaction
+   * @param id - Sale ID to refund
+   * @param data - Refund data
+   * @returns Observable with refund result
+   */
+  refundSale(id: string, data: RefundSaleRequest): Observable<RefundResponse> {
+    return this.http.post<PosApiResponse<RefundResponse>>(`${this.api}/sales/${id}/refund`, data).pipe(
+      map((response: PosApiResponse<RefundResponse>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to refund sale');
+      }),
+      catchError((error) => {
+        console.error('Error refunding sale:', error);
+        throw error;
+      })
+    );
   }
-  getSales(params: any): Observable<any> {
-    return this.http.get(`${this.api}/sales`, { params });
+
+  /**
+   * Get sales with optional filtering
+   * @param params - Query parameters
+   * @returns Observable with sales array
+   */
+  getSales(params: any): Observable<Sale[]> {
+    return this.http.get<PosApiResponse<Sale[]>>(`${this.api}/sales`, { params }).pipe(
+      map((response: PosApiResponse<Sale[]>) => {
+        if (response.success && Array.isArray(response.data)) {
+          return response.data;
+        }
+        return [];
+      }),
+      catchError((error) => {
+        console.error('Error getting sales:', error);
+        return of([]);
+      })
+    );
   }
-  getSale(id: string): Observable<any> {
-    return this.http.get(`${this.api}/sales/${id}`);
+
+  /**
+   * Get a specific sale by ID
+   * @param id - Sale ID
+   * @returns Observable with sale data
+   */
+  getSale(id: string): Observable<Sale> {
+    return this.http.get<PosApiResponse<Sale>>(`${this.api}/sales/${id}`).pipe(
+      map((response: PosApiResponse<Sale>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Sale not found');
+      }),
+      catchError((error) => {
+        console.error('Error getting sale:', error);
+        throw error;
+      })
+    );
   }
+
+  /**
+   * Get receipt for a sale
+   * @param id - Sale ID
+   * @returns Observable with receipt HTML
+   */
   getReceipt(id: string): Observable<any> {
-    return this.http.get(`${this.api}/sales/${id}/receipt`, { responseType: 'text' });
+    return this.http.get(`${this.api}/sales/${id}/receipt`, { responseType: 'text' }).pipe(
+      map((response: any) => {
+        // Handle new API response format
+        if (response && typeof response === 'object' && response.success && response.data) {
+          return response.data;
+        }
+        // Fallback for direct response (backward compatibility)
+        return response;
+      }),
+      catchError((error) => {
+        console.error('Error getting receipt:', error);
+        throw error;
+      })
+    );
   }
 
   // Reports
   getDailyReport(params: any): Observable<any> {
-    return this.http.get(`${this.api}/reports/daily`, { params });
+    return this.http.get(`${this.api}/reports/daily`, { params }).pipe(
+      map((response: any) => {
+        // Extract data from backend response format
+        if (response && response.success && response.data) {
+          return response.data;
+        }
+        return response;
+      }),
+      catchError((error) => {
+        console.error('Error getting daily report:', error);
+        throw error;
+      })
+    );
   }
   getZReport(sessionId: string): Observable<any> {
-    return this.http.get(`${this.api}/reports/session/${sessionId}/z`);
+    return this.http.get(`${this.api}/reports/session/${sessionId}/z`).pipe(
+      map((response: any) => {
+        // Extract data from backend response format
+        if (response && response.success && response.data) {
+          return response.data;
+        }
+        return response;
+      }),
+      catchError((error) => {
+        console.error('Error getting Z report:', error);
+        throw error;
+      })
+    );
   }
+
 
   // Settings
   getSettings(facility: string): Observable<any> {
@@ -339,6 +556,7 @@ export class PosService {
   // Additional methods for POS components
   getFacilities(tenant?: string): Observable<Facility[]> {
     const t = tenant || this.authService.getCurrentUser()?.tenant || '';
+    
     return this.http.get(`${environment.apiUrl}/facility`, { params: { tenant: t } }).pipe(
       map((response: any) => {
         const facilities = Array.isArray(response) ? response : (response?.data || []);
@@ -356,15 +574,63 @@ export class PosService {
   // ============================================================================
 
   getClients(tenant: string): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/clients`, { params: { tenant } });
+    return this.http.get(`${environment.apiUrl}/clients`, { params: { tenant } }).pipe(
+      map((response: any) => {
+        // Handle paginated response
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data;
+        }
+        // Handle direct array response
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return [];
+      }),
+      catchError((error) => {
+        console.error('Error getting clients:', error);
+        return of([]);
+      })
+    );
   }
 
   getServices(tenant: string): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/services`, { params: { tenant } });
+    return this.http.get(`${environment.apiUrl}/services`, { params: { tenant } }).pipe(
+      map((response: any) => {
+        // Handle paginated response
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data;
+        }
+        // Handle direct array response
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return [];
+      }),
+      catchError((error) => {
+        console.error('Error getting services:', error);
+        return of([]);
+      })
+    );
   }
 
   getArticles(tenant: string): Observable<any> {
-    return this.http.get(`${environment.apiUrl}/articles`, { params: { tenant } });
+    return this.http.get(`${environment.apiUrl}/articles`, { params: { tenant } }).pipe(
+      map((response: any) => {
+        // Handle paginated response
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data;
+        }
+        // Handle direct array response
+        if (Array.isArray(response)) {
+          return response;
+        }
+        return [];
+      }),
+      catchError((error) => {
+        console.error('Error getting articles:', error);
+        return of([]);
+      })
+    );
   }
 
   // ============================================================================
@@ -385,12 +651,47 @@ export class PosService {
   // FISCALIZATION METHODS
   // ============================================================================
 
-  fiscalizeSale(saleId: string, facility: string): Observable<any> {
-    return this.http.post(`${this.api}/sales/${saleId}/fiscalize`, { facility });
+  /**
+   * Fiscalize a sale transaction
+   * @param saleId - Sale ID to fiscalize
+   * @param facility - Facility ID
+   * @returns Observable with fiscalization result
+   */
+  fiscalizeSale(saleId: string, facility: string): Observable<FiscalResponse> {
+    return this.http.post<PosApiResponse<FiscalResponse>>(`${this.api}/sales/${saleId}/fiscalize`, { facility }).pipe(
+      map((response: PosApiResponse<FiscalResponse>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        throw new Error(response.message || 'Failed to fiscalize sale');
+      }),
+      catchError((error) => {
+        console.error('Error fiscalizing sale:', error);
+        throw error;
+      })
+    );
   }
 
+  /**
+   * Reset fiscalization for a sale
+   * @param saleId - Sale ID
+   * @returns Observable with reset result
+   */
   resetFiscalization(saleId: string): Observable<any> {
-    return this.http.post(`${this.api}/sales/${saleId}/reset-fiscalization`, {});
+    return this.http.post<any>(`${this.api}/sales/${saleId}/reset-fiscalization`, {}).pipe(
+      map((response: any) => {
+        // Handle new API response format
+        if (response && response.success && response.data) {
+          return response.data;
+        }
+        // Fallback for direct response (backward compatibility)
+        return response;
+      }),
+      catchError((error) => {
+        console.error('Error resetting fiscalization:', error);
+        throw error;
+      })
+    );
   }
 
   getFiscalLogs(params: any): Observable<any> {
@@ -401,19 +702,69 @@ export class PosService {
   // ANALYTICS METHODS
   // ============================================================================
 
+  /**
+   * Get general analytics data
+   * @param filters - Analytics filters
+   * @returns Observable with analytics data
+   */
   getAnalytics(filters: any): Observable<any> {
-    return this.http.get(`${this.api}/analytics`, { params: filters });
+    return this.http.get<PosApiResponse<any>>(`${this.api}/analytics`, { params: filters }).pipe(
+      map((response: PosApiResponse<any>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Error getting analytics:', error);
+        return of(null);
+      })
+    );
   }
 
+  /**
+   * Get cash flow analytics
+   * @param facility - Facility ID
+   * @param period - Analytics period
+   * @returns Observable with cash flow analytics
+   */
   getCashFlowAnalytics(facility: string, period: string): Observable<any> {
-    return this.http.get(`${this.api}/analytics/cash-flow`, { 
+    return this.http.get<PosApiResponse<any>>(`${this.api}/analytics/cash-flow`, { 
       params: { facility, period } 
-    });
+    }).pipe(
+      map((response: PosApiResponse<any>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Error getting cash flow analytics:', error);
+        return of(null);
+      })
+    );
   }
 
+  /**
+   * Get sales analytics
+   * @param facility - Facility ID
+   * @param period - Analytics period
+   * @returns Observable with sales analytics
+   */
   getSalesAnalytics(facility: string, period: string): Observable<any> {
-    return this.http.get(`${this.api}/analytics/sales`, { 
+    return this.http.get<PosApiResponse<any>>(`${this.api}/analytics/sales`, { 
       params: { facility, period } 
-    });
+    }).pipe(
+      map((response: PosApiResponse<any>) => {
+        if (response.success && response.data) {
+          return response.data;
+        }
+        return null;
+      }),
+      catchError((error) => {
+        console.error('Error getting sales analytics:', error);
+        return of(null);
+      })
+    );
   }
 }
