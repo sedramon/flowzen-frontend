@@ -1,0 +1,168 @@
+<div class="close-session-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">close</mat-icon>
+      <h2 class="dialog-title">Zatvaranje Cash Sesije</h2>
+    </div>
+  </div>
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    
+    <!-- Session Info -->
+    <mat-card class="session-info-card">
+      <mat-card-content>
+        <div class="session-details">
+          <div class="detail-row">
+            <span class="label">Lokacija:</span>
+            <span class="value">{{ data.session.facility?.name || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Otvorena:</span>
+            <span class="value">{{ formatDate(data.session.openedAt) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Blagajnik:</span>
+            <span class="value">{{ data.session.openedBy?.firstName }} {{ data.session.openedBy?.lastName }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Početni Float:</span>
+            <span class="value amount">{{ formatAmount(data.session.openingFloat) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Očekivani Cash:</span>
+            <span class="value amount">{{ formatAmount(data.session.expectedCash) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Closing Form -->
+    <form [formGroup]="closeSessionForm" (ngSubmit)="closeSession()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Brojani Cash pri zatvaranju (RSD)</mat-label>
+        <input 
+          matInput 
+          type="number" 
+          formControlName="closingCount" 
+          placeholder="0"
+          min="0"
+          step="1">
+        <mat-icon matSuffix>attach_money</mat-icon>
+        <mat-error *ngIf="closeSessionForm.get('closingCount')?.hasError('required')">
+          {{ getErrorMessage('closingCount') }}
+        </mat-error>
+        <mat-error *ngIf="closeSessionForm.get('closingCount')?.hasError('min')">
+          {{ getErrorMessage('closingCount') }}
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Napomena (opciono)</mat-label>
+        <textarea 
+          matInput 
+          formControlName="note" 
+          placeholder="Dodatne napomene pri zatvaranju..."
+          rows="3">
+        </textarea>
+        <mat-icon matSuffix>note</mat-icon>
+      </mat-form-field>
+    </form>
+
+    <!-- Variance Preview -->
+    <div class="variance-preview" *ngIf="closeSessionForm.get('closingCount')?.value">
+      <mat-card class="variance-card">
+        <mat-card-content>
+          <div class="variance-details">
+            <div class="variance-row">
+              <span class="label">Očekivani Cash:</span>
+              <span class="value">{{ formatAmount(data.session.expectedCash) }}</span>
+            </div>
+            <div class="variance-row">
+              <span class="label">Brojani Cash:</span>
+              <span class="value">{{ formatAmount(closeSessionForm.get('closingCount')?.value) }}</span>
+            </div>
+            <div class="variance-row variance-result">
+              <span class="label">Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(closeSessionForm.get('closingCount')?.value - data.session.expectedCash)">
+                <mat-icon class="variance-icon">{{ getVarianceIcon(closeSessionForm.get('closingCount')?.value - data.session.expectedCash) }}</mat-icon>
+                {{ formatAmount(closeSessionForm.get('closingCount')?.value - data.session.expectedCash) }}
+              </span>
+            </div>
+            <div class="variance-row">
+              <span class="label">Procenat Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(closeSessionForm.get('closingCount')?.value - data.session.expectedCash)">
+                {{ data.session.expectedCash > 0 ? (((closeSessionForm.get('closingCount')?.value - data.session.expectedCash) / data.session.expectedCash) * 100).toFixed(2) : 0 }}%
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Session Summary -->
+    <div *ngIf="sessionSummary" class="session-summary">
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Sesija Zatvorena</mat-card-title>
+          <mat-card-subtitle>{{ formatDate(sessionSummary.closedAt) }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="summary-details">
+            <div class="summary-row">
+              <span class="label">Početni Float:</span>
+              <span class="value">{{ formatAmount(sessionSummary.summary.openingFloat) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Ukupne Prodaje:</span>
+              <span class="value">{{ formatAmount(sessionSummary.summary.totalSales) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Brojani Cash:</span>
+              <span class="value">{{ formatAmount(sessionSummary.summary.closingCount) }}</span>
+            </div>
+            <div class="summary-row variance-row">
+              <span class="label">Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(sessionSummary.summary.variance)">
+                <mat-icon class="variance-icon">{{ getVarianceIcon(sessionSummary.summary.variance) }}</mat-icon>
+                {{ formatAmount(sessionSummary.summary.variance) }}
+              </span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Procenat Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(sessionSummary.summary.variance)">
+                {{ sessionSummary.summary.variancePercentage.toFixed(2) }}%
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Dialog Actions -->
+  <div class="dialog-actions">
+    <button 
+      mat-button 
+      type="button" 
+      (click)="cancel()"
+      [disabled]="processing"
+      class="cancel-button">
+      <mat-icon>close</mat-icon>
+      Otkaži
+    </button>
+    
+    <button 
+      mat-raised-button 
+      color="warn" 
+      (click)="closeSession()"
+      [disabled]="closeSessionForm.invalid || processing"
+      class="action-button">
+      <mat-spinner *ngIf="processing" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!processing">close</mat-icon>
+      {{ processing ? 'Zatvaranje...' : 'Zatvori Sesiju' }}
+    </button>
+  </div>
+</div>

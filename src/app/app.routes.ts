@@ -16,9 +16,11 @@ import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.
 import { Suppliers } from './modules/suppliers/suppliers';
 import { Articles } from './modules/articles/articles';
 import { PosSalesComponent } from './modules/pos/components/pos-sales/pos-sales.component';
-import { PosSessionsComponent } from './modules/pos/components/pos-sessions/pos-sessions.component';
 import { PosReportsComponent } from './modules/pos/components/pos-reports/pos-reports.component';
 import { PosSettingsComponent } from './modules/pos/components/pos-settings/pos-settings.component';
+import { CashSessionDashboardComponent } from './modules/pos/components/cash-session-dashboard/cash-session-dashboard.component';
+import { CashReportsComponent } from './modules/pos/components/cash-reports/cash-reports.component';
+import { CashAnalyticsComponent } from './modules/pos/components/cash-analytics/cash-analytics.component';
 
 export const routes: Routes = [
   {
@@ -154,13 +156,13 @@ export const routes: Routes = [
             }
           },
           {
-            path: 'sessions',
-            component: PosSessionsComponent,
+            path: 'cash-management',
+            component: CashSessionDashboardComponent,
             canActivate: [ScopeGuard],
             data: {
-              scope: 'scope_pos:session',
-              title: 'POS Sessions',
-              icon: 'account_balance_wallet'
+              scope: 'scope_pos:cash_management',
+              title: 'Cash Management',
+              icon: 'account_balance'
             }
           },
           {
@@ -171,6 +173,26 @@ export const routes: Routes = [
               scope: 'scope_pos:report',
               title: 'POS Reports',
               icon: 'assessment'
+            }
+          },
+          {
+            path: 'cash-reports',
+            component: CashReportsComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:cash_reports',
+              title: 'Cash Reports',
+              icon: 'assessment'
+            }
+          },
+          {
+            path: 'cash-analytics',
+            component: CashAnalyticsComponent,
+            canActivate: [ScopeGuard],
+            data: {
+              scope: 'scope_pos:cash_analytics',
+              title: 'Cash Analytics',
+              icon: 'analytics'
             }
           },
           {

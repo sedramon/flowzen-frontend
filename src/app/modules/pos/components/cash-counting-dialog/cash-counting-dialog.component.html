@@ -1,0 +1,141 @@
+<div class="cash-counting-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">calculate</mat-icon>
+      <h2 class="dialog-title">Brojanje Cash-a</h2>
+    </div>
+  </div>
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    
+    <!-- Session Info -->
+    <mat-card class="session-info-card">
+      <mat-card-content>
+        <div class="session-details">
+          <div class="detail-row">
+            <span class="label">Lokacija:</span>
+            <span class="value">{{ data.session.facility?.name || 'N/A' }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Očekivani Cash:</span>
+            <span class="value amount">{{ formatAmount(data.session.expectedCash) }}</span>
+          </div>
+          <div class="detail-row">
+            <span class="label">Početni Float:</span>
+            <span class="value amount">{{ formatAmount(data.session.openingFloat) }}</span>
+          </div>
+        </div>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Counting Form -->
+    <form [formGroup]="countingForm" (ngSubmit)="countCash()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Brojani Cash (RSD)</mat-label>
+        <input 
+          matInput 
+          type="number" 
+          formControlName="countedCash" 
+          placeholder="0"
+          min="0"
+          step="1">
+        <mat-icon matSuffix>attach_money</mat-icon>
+        <mat-error *ngIf="countingForm.get('countedCash')?.hasError('required')">
+          {{ getErrorMessage('countedCash') }}
+        </mat-error>
+        <mat-error *ngIf="countingForm.get('countedCash')?.hasError('min')">
+          {{ getErrorMessage('countedCash') }}
+        </mat-error>
+      </mat-form-field>
+    </form>
+
+    <!-- Counting Result -->
+    <div *ngIf="countingResult" class="counting-result">
+      <mat-card class="result-card">
+        <mat-card-header>
+          <mat-card-title>Rezultat Brojanja</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="result-details">
+            <div class="result-row">
+              <span class="label">Očekivani Cash:</span>
+              <span class="value">{{ formatAmount(countingResult.expectedCash) }}</span>
+            </div>
+            <div class="result-row">
+              <span class="label">Brojani Cash:</span>
+              <span class="value">{{ formatAmount(countingResult.countedCash) }}</span>
+            </div>
+            <div class="result-row variance-row">
+              <span class="label">Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(countingResult.status)">
+                <mat-icon class="variance-icon">{{ getVarianceIcon(countingResult.variance) }}</mat-icon>
+                {{ formatAmount(countingResult.variance) }}
+              </span>
+            </div>
+            <div class="result-row">
+              <span class="label">Procenat Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(countingResult.status)">
+                {{ countingResult.variancePercentage.toFixed(2) }}%
+              </span>
+            </div>
+            <div class="result-row status-row">
+              <span class="label">Status:</span>
+              <mat-chip 
+                [color]="getVarianceColor(countingResult.status)"
+                class="status-chip">
+                {{ getVarianceStatusText(countingResult.status) }}
+              </mat-chip>
+            </div>
+          </div>
+
+          <!-- Recommendations -->
+          <div *ngIf="countingResult.recommendations.length > 0" class="recommendations">
+            <h4>Preporuke:</h4>
+            <ul>
+              <li *ngFor="let rec of countingResult.recommendations">{{ rec }}</li>
+            </ul>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Dialog Actions -->
+  <div class="dialog-actions">
+    <button 
+      mat-button 
+      type="button" 
+      (click)="cancel()"
+      [disabled]="processing"
+      class="cancel-button">
+      <mat-icon>close</mat-icon>
+      Otkaži
+    </button>
+    
+    <button 
+      mat-button 
+      color="accent" 
+      (click)="countCash()"
+      [disabled]="countingForm.invalid || processing"
+      class="action-button">
+      <mat-spinner *ngIf="processing" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!processing">calculate</mat-icon>
+      {{ processing ? 'Brojanje...' : 'Broj Cash' }}
+    </button>
+
+    <button 
+      *ngIf="countingResult"
+      mat-raised-button 
+      color="primary" 
+      (click)="verifyCount()"
+      [disabled]="processing"
+      class="action-button">
+      <mat-spinner *ngIf="processing" diameter="20" class="button-spinner"></mat-spinner>
+      <mat-icon *ngIf="!processing">check_circle</mat-icon>
+      {{ processing ? 'Verifikacija...' : 'Verifikuj' }}
+    </button>
+  </div>
+</div>

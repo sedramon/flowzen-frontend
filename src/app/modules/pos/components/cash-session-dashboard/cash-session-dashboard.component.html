@@ -1,0 +1,218 @@
+<mat-card class="cash-dashboard">
+  <!-- Header -->
+  <div class="dashboard-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">account_balance</mat-icon>
+        <h1>Cash Management</h1>
+      </div>
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="openNewSession()"
+          class="action-button">
+          <mat-icon>add</mat-icon>
+          Nova Sesija
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Učitavanje podataka...</p>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!loading" class="dashboard-content">
+    
+    <!-- Current Session Card -->
+    <div class="current-session-card" *ngIf="currentSession">
+      <mat-card class="session-card">
+        <mat-card-header>
+          <div mat-card-avatar class="session-avatar">
+            <mat-icon>account_balance_wallet</mat-icon>
+          </div>
+          <mat-card-title>Aktivna Sesija</mat-card-title>
+          <mat-card-subtitle>
+            Otvorena: {{ formatDate(currentSession.openedAt) }}
+          </mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="session-details">
+            <div class="detail-row">
+              <span class="detail-label">Lokacija:</span>
+              <span class="detail-value">{{ currentSession.facility?.name || 'N/A' }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Blagajnik:</span>
+              <span class="detail-value">{{ currentSession.openedBy?.firstName }} {{ currentSession.openedBy?.lastName }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Početni Float:</span>
+              <span class="detail-value amount">{{ formatAmount(currentSession.openingFloat) }}</span>
+            </div>
+            <div class="detail-row">
+              <span class="detail-label">Očekivani Cash:</span>
+              <span class="detail-value amount">{{ formatAmount(currentSession.expectedCash) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+        
+        <mat-card-actions>
+          <button 
+            mat-button 
+            color="accent" 
+            (click)="countCash()"
+            class="action-button">
+            <mat-icon>calculate</mat-icon>
+            Broj Cash
+          </button>
+          <button 
+            mat-button 
+            color="primary" 
+            (click)="reconcileCash()"
+            class="action-button">
+            <mat-icon>balance</mat-icon>
+            Uskladi Cash
+          </button>
+          <button 
+            mat-button 
+            color="warn" 
+            (click)="closeCurrentSession()"
+            class="action-button">
+            <mat-icon>close</mat-icon>
+            Zatvori Sesiju
+          </button>
+        </mat-card-actions>
+      </mat-card>
+    </div>
+
+    <!-- No Current Session -->
+    <div *ngIf="!currentSession" class="no-session-card">
+      <mat-card class="empty-card">
+        <mat-card-content>
+          <div class="empty-content">
+            <mat-icon class="empty-icon">account_balance_wallet</mat-icon>
+            <h3>Nema aktivne sesije</h3>
+            <p>Otvorite novu sesiju da biste počeli sa radom</p>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="openNewSession()"
+              class="action-button">
+              <mat-icon>add</mat-icon>
+              Otvori Sesiju
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>receipt_long</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ todayStats.totalSessions }}</div>
+              <div class="stat-label">Današnje Sesije</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>attach_money</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ formatAmount(todayStats.totalCash) }}</div>
+              <div class="stat-label">Ukupan Cash</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" [ngClass]="getVarianceColor(todayStats.totalVariance)">
+              <mat-icon>{{ getVarianceIcon(todayStats.totalVariance) }}</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" [ngClass]="getVarianceColor(todayStats.totalVariance)">
+                {{ formatAmount(todayStats.totalVariance) }}
+              </div>
+              <div class="stat-label">Ukupna Variance</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>analytics</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ (todayStats.averageVariance || 0).toFixed(1) }}%</div>
+              <div class="stat-label">Prosečna Variance</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Recent Sessions -->
+    <div class="recent-sessions" *ngIf="recentSessions.length > 0">
+      <h2>Poslednje Sesije</h2>
+      <div class="sessions-list">
+        <mat-card 
+          *ngFor="let session of recentSessions" 
+          class="session-item"
+          [ngClass]="session.status">
+          <mat-card-content>
+            <div class="session-item-content">
+              <div class="session-info">
+                <div class="session-header">
+                  <h4>{{ session.facility?.name || 'N/A' }}</h4>
+                  <mat-chip 
+                    [color]="getStatusColor(session.status)"
+                    class="status-chip">
+                    {{ getStatusText(session.status) }}
+                  </mat-chip>
+                </div>
+                <div class="session-details">
+                  <span class="detail">{{ formatDate(session.openedAt) }}</span>
+                  <span class="detail">Float: {{ formatAmount(session.openingFloat) }}</span>
+                  <span class="detail" *ngIf="session.closingCount">
+                    Zatvoreno: {{ formatAmount(session.closingCount) }}
+                  </span>
+                </div>
+              </div>
+              <div class="session-actions">
+                <button 
+                  mat-icon-button 
+                  (click)="reconcileCash(session)"
+                  matTooltip="Uskladi Cash"
+                  class="action-icon">
+                  <mat-icon>balance</mat-icon>
+                </button>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  </div>
+</mat-card>

@@ -1,0 +1,322 @@
+.cash-reconciliation-dialog {
+  width: 100%;
+  max-width: 800px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 12px;
+  overflow: hidden;
+
+  .dialog-header {
+    background: linear-gradient(60deg, #8c0055, #b3006e, #8c0055, #b3006e, #8c0055);
+    background-size: 300% 300%;
+    animation: gradientPan 20s ease infinite;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .header-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #ffffff;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 24px;
+    background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+
+    .loading-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 60px;
+      color: #999999;
+
+      .spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid #666666;
+        border-top: 4px solid #8c0055;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 16px;
+      }
+
+      p {
+        font-size: 1.1em;
+        margin: 0;
+      }
+    }
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+    .reconciliation-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+
+      .summary-card,
+      .sales-summary-card,
+      .payment-methods-card,
+      .cash-flow-card {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid #555555;
+        border-radius: 8px;
+
+        mat-card-header {
+          mat-card-title {
+            color: #e0e0e0;
+            font-size: 18px;
+            font-weight: 600;
+          }
+
+          mat-card-subtitle {
+            color: #cccccc;
+            font-size: 14px;
+          }
+        }
+
+        .summary-details,
+        .sales-details,
+        .payment-methods,
+        .cash-flow-details {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+
+          .summary-row,
+          .sales-row,
+          .payment-method-row,
+          .flow-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #444444;
+
+            .label {
+              color: #cccccc;
+              font-weight: 500;
+            }
+
+            .value {
+              color: #e0e0e0;
+              font-weight: 600;
+              display: flex;
+              align-items: center;
+              gap: 8px;
+
+              &.primary {
+                color: #4caf50;
+              }
+
+              &.accent {
+                color: #ff9800;
+              }
+
+              &.warn {
+                color: #f44336;
+              }
+
+              .variance-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+              }
+            }
+
+            &.variance-row {
+              border-bottom: 2px solid #666666;
+              padding-bottom: 12px;
+              margin-bottom: 8px;
+            }
+
+            &.net-row {
+              border-bottom: 2px solid #666666;
+              padding-bottom: 12px;
+              margin-bottom: 8px;
+            }
+          }
+
+          .payment-method-row {
+            .method-info {
+              display: flex;
+              align-items: center;
+              gap: 12px;
+
+              .method-icon {
+                font-size: 20px;
+                width: 20px;
+                height: 20px;
+              }
+
+              .method-name {
+                color: #e0e0e0;
+                font-weight: 500;
+              }
+            }
+
+            .method-amount {
+              color: #8c0055;
+              font-family: 'Courier New', monospace;
+              font-weight: 600;
+            }
+          }
+        }
+      }
+
+      .payment-methods-card {
+        .payment-methods {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+          gap: 12px;
+        }
+      }
+    }
+
+    .error-state {
+      .error-card {
+        background: rgba(244, 67, 54, 0.1);
+        border: 1px solid #f44336;
+        border-radius: 8px;
+
+        .error-content {
+          text-align: center;
+          padding: 40px;
+
+          .error-icon {
+            font-size: 64px;
+            width: 64px;
+            height: 64px;
+            color: #f44336;
+            margin-bottom: 16px;
+          }
+
+          h3 {
+            color: #e0e0e0;
+            font-size: 20px;
+            font-weight: 600;
+            margin: 0 0 8px 0;
+          }
+
+          p {
+            color: #cccccc;
+            font-size: 16px;
+            margin: 0;
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+    border-top: 1px solid #555555;
+    display: flex;
+    justify-content: flex-end;
+
+    .close-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #d0d0d0;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+
+      &:hover {
+        background: linear-gradient(135deg, #4d4d4d, #3a3a3a);
+        border-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        color: #ffffff;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+        color: #aaaaaa;
+      }
+    }
+  }
+}
+
+@keyframes gradientPan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Responsive design
+@media (max-width: 800px) {
+  .cash-reconciliation-dialog {
+    max-width: 100%;
+    margin: 16px;
+
+    .dialog-header {
+      padding: 20px;
+
+      .header-content {
+        .dialog-title {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .dialog-content {
+      padding: 20px;
+
+      .reconciliation-content {
+        .payment-methods-card {
+          .payment-methods {
+            grid-template-columns: 1fr;
+          }
+        }
+      }
+    }
+  }
+}

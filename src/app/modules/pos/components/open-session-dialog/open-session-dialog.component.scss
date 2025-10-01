@@ -1,0 +1,282 @@
+.open-session-dialog {
+  width: 100%;
+  max-width: 500px;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+  border-radius: 12px;
+  overflow: hidden;
+
+  .dialog-header {
+    background: linear-gradient(60deg, #f72585, #7209b7, #3a0ca3, #4361ee, #f72585);
+    background-size: 300% 300%;
+    animation: gradientPan 15s ease infinite;
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+
+    &::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.2);
+      backdrop-filter: blur(10px);
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+
+      .header-icon {
+        font-size: 32px;
+        width: 32px;
+        height: 32px;
+        color: #ffffff;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+      }
+
+      .dialog-title {
+        margin: 0;
+        font-size: 24px;
+        font-weight: 600;
+        color: #ffffff;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+      }
+    }
+  }
+
+  .dialog-content {
+    padding: 24px;
+    background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+
+      .full-width {
+        width: 100%;
+
+        ::ng-deep {
+          .mat-mdc-form-field {
+            .mat-mdc-text-field-wrapper {
+              background-color: rgba(255, 255, 255, 0.05);
+              border-radius: 8px;
+            }
+
+            .mat-mdc-form-field-outline {
+              color: #666666;
+            }
+
+            .mat-mdc-form-field-outline-thick {
+              color: #8c0055;
+            }
+
+            .mat-mdc-form-field-label {
+              color: #cccccc;
+            }
+
+            .mat-mdc-input-element {
+              color: #e0e0e0;
+            }
+
+            .mat-mdc-form-field-hint {
+              color: #999999;
+            }
+
+            .mat-mdc-form-field-error {
+              color: #f44336;
+            }
+
+            .mat-mdc-select-value {
+              color: #e0e0e0;
+            }
+
+            .mat-mdc-select-arrow {
+              color: #cccccc;
+            }
+
+            .mat-mdc-form-field-icon-suffix {
+              color: #8c0055;
+            }
+          }
+        }
+      }
+
+      .preview-section {
+        margin-top: 16px;
+
+        .preview-card {
+          background: rgba(255, 255, 255, 0.05);
+          border: 1px solid #555555;
+          border-radius: 8px;
+          padding: 16px;
+
+          h4 {
+            margin: 0 0 12px 0;
+            color: #e0e0e0;
+            font-size: 16px;
+            font-weight: 600;
+          }
+
+          .preview-details {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+
+            .preview-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              padding: 4px 0;
+
+              .label {
+                color: #cccccc;
+                font-weight: 500;
+              }
+
+              .value {
+                color: #e0e0e0;
+                font-weight: 600;
+
+                &.amount {
+                  color: #8c0055;
+                  font-family: 'Courier New', monospace;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .dialog-actions {
+    padding: 16px 24px;
+    background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
+    border-top: 1px solid #555555;
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+
+    .cancel-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      color: #cccccc;
+      border: 1px solid #666666;
+
+      &:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #e0e0e0;
+        transform: translateY(-1px);
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+
+    .action-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+
+      &::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+      }
+
+      &:hover::before {
+        left: 100%;
+      }
+
+      &:hover:not(:disabled) {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(140, 0, 85, 0.3);
+      }
+
+      &:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+
+      .button-spinner {
+        margin-right: 8px;
+      }
+
+      mat-icon {
+        font-size: 18px;
+        width: 18px;
+        height: 18px;
+      }
+    }
+  }
+}
+
+@keyframes gradientPan {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .open-session-dialog {
+    max-width: 100%;
+    margin: 16px;
+
+    .dialog-header {
+      padding: 20px;
+
+      .header-content {
+        .dialog-title {
+          font-size: 20px;
+        }
+      }
+    }
+
+    .dialog-content {
+      padding: 20px;
+    }
+
+    .dialog-actions {
+      padding: 16px 20px;
+      flex-direction: column;
+
+      .cancel-button,
+      .action-button {
+        width: 100%;
+        justify-content: center;
+      }
+    }
+  }
+}

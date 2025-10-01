@@ -10,8 +10,8 @@
       color="accent" 
       class="export-btn"
       (click)="exportToExcel()"
-      [disabled]="reportData.length === 0">
-      <mat-icon>download</mat-icon>
+      [disabled]="(selectedTab === 0 && dailyReports.length === 0) || (selectedTab === 1 && zReports.length === 0)">
+      <mat-icon>upload_file</mat-icon>
       Izvezi Excel
     </button>
   </div>
@@ -45,101 +45,256 @@
     </div>
   </div>
 
-  <!-- Summary Cards -->
-  <div class="summary-cards">
-    <mat-card class="summary-card">
-      <mat-card-content>
-        <div class="summary-icon">
-          <mat-icon>shopping_cart</mat-icon>
+  <!-- Tabs -->
+  <mat-tab-group [(selectedIndex)]="selectedTab" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs>
+    <!-- Daily Reports Tab -->
+    <mat-tab label="Dnevni izveštaji">
+      <div class="tab-content">
+
+        <!-- Daily Reports Summary Cards -->
+        <div class="summary-cards">
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>shopping_cart</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Ukupno transakcija</h3>
+                <p class="summary-number">{{ getTotalTransactions() }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>attach_money</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Ukupan promet</h3>
+                <p class="summary-number">{{ formatCurrency(getTotalSales()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>trending_up</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Neto promet</h3>
+                <p class="summary-number">{{ formatCurrency(getNetAmount()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>account_balance_wallet</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Prosečna vrednost</h3>
+                <p class="summary-number">{{ formatCurrency(getAverageTransactionValue()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
         </div>
-        <div class="summary-content">
-          <h3>Ukupno prodaja</h3>
-          <p class="summary-number">{{ getTotalSales() }}</p>
+
+        <!-- Loading State -->
+        <div *ngIf="reportsLoading || todayReportLoading" class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p *ngIf="todayReportLoading">Učitavanje današnjeg izveštaja...</p>
+          <p *ngIf="reportsLoading && !todayReportLoading">Učitavanje dnevnih izveštaja...</p>
         </div>
-      </mat-card-content>
-    </mat-card>
 
-    <mat-card class="summary-card">
-      <mat-card-content>
-        <div class="summary-icon">
-          <mat-icon>attach_money</mat-icon>
+        <!-- Daily Reports Table -->
+        <div *ngIf="!reportsLoading && !todayReportLoading" class="reports-content">
+          <mat-table [dataSource]="dailyReports" class="reports-table">
+            <!-- Date Column -->
+            <ng-container matColumnDef="date">
+              <mat-header-cell *matHeaderCellDef>Datum</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatDate(report.date) }}</mat-cell>
+            </ng-container>
+
+            <!-- Facility Column -->
+            <ng-container matColumnDef="facility">
+              <mat-header-cell *matHeaderCellDef>Objekat</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ report.facility }}</mat-cell>
+            </ng-container>
+
+            <!-- Sales Count Column -->
+            <ng-container matColumnDef="salesCount">
+              <mat-header-cell *matHeaderCellDef>Broj prodaja</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ report.salesCount }}</mat-cell>
+            </ng-container>
+
+            <!-- Total Sales Column -->
+            <ng-container matColumnDef="totalSales">
+              <mat-header-cell *matHeaderCellDef>Ukupan promet</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales) }}</mat-cell>
+            </ng-container>
+
+            <!-- Total Refunds Column -->
+            <ng-container matColumnDef="totalRefunds">
+              <mat-header-cell *matHeaderCellDef>Povraćaji</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalRefunds) }}</mat-cell>
+            </ng-container>
+
+            <!-- Net Amount Column -->
+            <ng-container matColumnDef="netAmount">
+              <mat-header-cell *matHeaderCellDef>Neto promet</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales - report.totalRefunds) }}</mat-cell>
+            </ng-container>
+
+            <!-- Actions Column -->
+            <ng-container matColumnDef="actions">
+              <mat-header-cell *matHeaderCellDef>Akcije</mat-header-cell>
+              <mat-cell *matCellDef="let report">
+                <button 
+                  mat-icon-button 
+                  color="primary"
+                  matTooltip="Prikaži detalje"
+                  (click)="viewReportDetails(report)">
+                  <mat-icon>visibility</mat-icon>
+                </button>
+              </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
+          </mat-table>
+
+          <!-- No Data State -->
+          <div *ngIf="dailyReports.length === 0" class="no-data">
+            <mat-icon>assessment</mat-icon>
+            <p>Nema podataka za izabrani period</p>
+            <button mat-button color="primary" (click)="loadReports()">
+              Osveži podatke
+            </button>
+          </div>
         </div>
-        <div class="summary-content">
-          <h3>Ukupan promet</h3>
-          <p class="summary-number">{{ formatCurrency(getTotalAmount()) }}</p>
+      </div>
+    </mat-tab>
+
+    <!-- Z Reports Tab -->
+    <mat-tab label="Z izveštaji">
+      <div class="tab-content">
+        <!-- Z Reports Summary Cards -->
+        <div class="summary-cards">
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Ukupno sesija</h3>
+                <p class="summary-number">{{ zReports.length }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>attach_money</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Ukupan promet</h3>
+                <p class="summary-number">{{ formatCurrency(getZTotalSales()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>trending_up</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Ukupna varijacija</h3>
+                <p class="summary-number">{{ formatCurrency(getZTotalVariance()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
+
+          <mat-card class="summary-card">
+            <mat-card-content>
+              <div class="summary-icon">
+                <mat-icon>account_balance_wallet</mat-icon>
+              </div>
+              <div class="summary-content">
+                <h3>Prosečna varijacija</h3>
+                <p class="summary-number">{{ formatCurrency(getZAverageVariance()) }}</p>
+              </div>
+            </mat-card-content>
+          </mat-card>
         </div>
-      </mat-card-content>
-    </mat-card>
 
-    <mat-card class="summary-card">
-      <mat-card-content>
-        <div class="summary-icon">
-          <mat-icon>trending_up</mat-icon>
+        <!-- Loading State -->
+        <div *ngIf="zReportsLoading" class="loading-container">
+          <mat-spinner diameter="40"></mat-spinner>
+          <p>Učitavanje Z izveštaja...</p>
         </div>
-        <div class="summary-content">
-          <h3>Prosečna vrednost</h3>
-          <p class="summary-number">{{ formatCurrency(getAverageAmount()) }}</p>
+
+        <!-- Z Reports Table -->
+        <div *ngIf="!zReportsLoading" class="reports-content">
+          <mat-table [dataSource]="zReports" class="reports-table">
+            <!-- Session ID Column -->
+            <ng-container matColumnDef="sessionId">
+              <mat-header-cell *matHeaderCellDef>ID sesije</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ report.sessionId.substring(0, 8) }}...</mat-cell>
+            </ng-container>
+
+            <!-- Cashier Column -->
+            <ng-container matColumnDef="cashier">
+              <mat-header-cell *matHeaderCellDef>Blagajnik</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ report.cashier }}</mat-cell>
+            </ng-container>
+
+            <!-- Opened At Column -->
+            <ng-container matColumnDef="openedAt">
+              <mat-header-cell *matHeaderCellDef>Otvaranje</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatDateTime(report.openedAt) }}</mat-cell>
+            </ng-container>
+
+            <!-- Closed At Column -->
+            <ng-container matColumnDef="closedAt">
+              <mat-header-cell *matHeaderCellDef>Zatvaranje</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatDateTime(report.closedAt) }}</mat-cell>
+            </ng-container>
+
+            <!-- Total Sales Column -->
+            <ng-container matColumnDef="totalSales">
+              <mat-header-cell *matHeaderCellDef>Ukupan promet</mat-header-cell>
+              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales) }}</mat-cell>
+            </ng-container>
+
+            <!-- Variance Column -->
+            <ng-container matColumnDef="variance">
+              <mat-header-cell *matHeaderCellDef>Varijacija</mat-header-cell>
+              <mat-cell *matCellDef="let report">
+                <span [class]="report.variance >= 0 ? 'positive' : 'negative'">
+                  {{ formatCurrency(report.variance) }}
+                </span>
+              </mat-cell>
+            </ng-container>
+
+            <mat-header-row *matHeaderRowDef="zReportColumns"></mat-header-row>
+            <mat-row *matRowDef="let row; columns: zReportColumns;"></mat-row>
+          </mat-table>
+
+          <!-- No Data State -->
+          <div *ngIf="zReports.length === 0" class="no-data">
+            <mat-icon>receipt_long</mat-icon>
+            <p>Nema zatvorenih sesija za izabrani period</p>
+            <button mat-button color="primary" (click)="loadZReports()">
+              Osveži podatke
+            </button>
+          </div>
         </div>
-      </mat-card-content>
-    </mat-card>
-  </div>
-
-  <!-- Loading State -->
-  <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
-    <p>Učitavanje izveštaja...</p>
-  </div>
-
-  <!-- Reports Table -->
-  <div *ngIf="!loading" class="reports-content">
-    <mat-table [dataSource]="reportData" class="reports-table">
-      <!-- Date Column -->
-      <ng-container matColumnDef="date">
-        <mat-header-cell *matHeaderCellDef>Datum</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ formatDate(report.date) }}</mat-cell>
-      </ng-container>
-
-      <!-- Facility Column -->
-      <ng-container matColumnDef="facility">
-        <mat-header-cell *matHeaderCellDef>Objekat</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ report.facility }}</mat-cell>
-      </ng-container>
-
-      <!-- Employee Column -->
-      <ng-container matColumnDef="employee">
-        <mat-header-cell *matHeaderCellDef>Zaposleni</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ report.employee }}</mat-cell>
-      </ng-container>
-
-      <!-- Total Sales Column -->
-      <ng-container matColumnDef="totalSales">
-        <mat-header-cell *matHeaderCellDef>Broj prodaja</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ report.totalSales }}</mat-cell>
-      </ng-container>
-
-      <!-- Total Amount Column -->
-      <ng-container matColumnDef="totalAmount">
-        <mat-header-cell *matHeaderCellDef>Ukupan iznos</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalAmount) }}</mat-cell>
-      </ng-container>
-
-      <!-- Average Amount Column -->
-      <ng-container matColumnDef="averageAmount">
-        <mat-header-cell *matHeaderCellDef>Prosečna vrednost</mat-header-cell>
-        <mat-cell *matCellDef="let report">{{ formatCurrency(report.averageAmount) }}</mat-cell>
-      </ng-container>
-
-      <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-      <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-    </mat-table>
-
-    <!-- No Data State -->
-    <div *ngIf="reportData.length === 0" class="no-data">
-      <mat-icon>assessment</mat-icon>
-      <p>Nema podataka za izabrani period</p>
-      <button mat-button color="primary" (click)="loadReports()">
-        Osveži podatke
-      </button>
-    </div>
-  </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
 </mat-card>

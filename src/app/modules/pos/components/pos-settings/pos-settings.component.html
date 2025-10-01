@@ -1,13 +1,13 @@
 <mat-card class="pos-settings-container">
-  <div class="settings-header">
-    <h2 class="settings-title">
+  <div class="pos-header">
+    <h2 class="pos-title">
       <mat-icon color="accent">settings</mat-icon>
       POS Podešavanja
     </h2>
     <div class="header-actions">
       <mat-form-field appearance="outline" class="facility-selector">
         <mat-label>Objekat</mat-label>
-        <mat-select [formControl]="settingsForm.get('facility')!" (selectionChange)="onFacilityChange($event.value)">
+        <mat-select [value]="currentFacility?._id" (selectionChange)="onFacilityChange($event.value)">
           <mat-option *ngFor="let facility of facilities" [value]="facility._id">
             {{ facility.name }}
           </mat-option>
@@ -21,23 +21,39 @@
     <p>Učitavanje podešavanja...</p>
   </div>
 
-  <div *ngIf="!loading" class="settings-content">
+  <div *ngIf="!loading" class="pos-content">
     <form [formGroup]="settingsForm" class="settings-form">
-      <mat-tab-group class="settings-tabs">
+      <mat-tab-group class="settings-tabs" animationDuration="300ms">
         <!-- Payment Methods Tab -->
-        <mat-tab label="Načini plaćanja">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">payment</mat-icon>
+            Načini plaćanja
+          </ng-template>
           <div class="tab-content">
-            <h3>Konfiguracija načina plaćanja</h3>
+            <div class="section-header">
+              <h3>Konfiguracija načina plaćanja</h3>
+              <p class="section-description">Podešavanja dostupnih načina plaćanja u POS sistemu</p>
+            </div>
+            
             <div class="payment-methods-grid">
-              <div *ngFor="let method of getPaymentMethods()" class="payment-method-card">
+              <div *ngFor="let method of getPaymentMethodKeys()" class="payment-method-card">
                 <div class="method-header">
-                  <mat-slide-toggle [formControl]="settingsForm.get('paymentMethods.' + method + '.enabled')!">
-                    {{ settingsForm.get('paymentMethods.' + method + '.label')?.value }}
+                  <mat-slide-toggle [formControl]="getPaymentMethodControl(method, 'enabled')!">
+                    <span class="toggle-label">{{ getPaymentMethodControl(method, 'label')?.value }}</span>
                   </mat-slide-toggle>
+                  <mat-icon class="method-icon">{{
+                    method === 'cash' ? 'payments' :
+                    method === 'card' ? 'credit_card' :
+                    method === 'voucher' ? 'confirmation_number' :
+                    method === 'gift' ? 'card_giftcard' :
+                    method === 'bank' ? 'account_balance' :
+                    'more_horiz'
+                  }}</mat-icon>
                 </div>
                 <mat-form-field appearance="outline" class="method-label">
-                  <mat-label>Naziv</mat-label>
-                  <input matInput [formControl]="settingsForm.get('paymentMethods.' + method + '.label')!">
+                  <mat-label>Prilagođeni naziv</mat-label>
+                  <input matInput [formControl]="getPaymentMethodControl(method, 'label')!">
                 </mat-form-field>
               </div>
             </div>
@@ -45,35 +61,51 @@
         </mat-tab>
 
         <!-- Tax & Discount Tab -->
-        <mat-tab label="Porez i popusti">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">percent</mat-icon>
+            Porez i popusti
+          </ng-template>
           <div class="tab-content">
-            <h3>Podešavanja poreza i popusta</h3>
+            <div class="section-header">
+              <h3>Podešavanja poreza i popusta</h3>
+              <p class="section-description">Konfiguracija osnovnih finansijskih parametara</p>
+            </div>
+            
             <div class="form-grid">
-              <mat-form-field appearance="outline">
-                <mat-label>Podrazumevani porez (%)</mat-label>
-                <input matInput type="number" formControlName="defaultTaxRate" min="0" max="100">
-                <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('required')">
-                  Porez je obavezan
-                </mat-error>
-                <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('min')">
-                  Porez ne može biti negativan
-                </mat-error>
-                <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('max')">
-                  Porez ne može biti veći od 100%
-                </mat-error>
-              </mat-form-field>
+              <div class="form-card">
+                <mat-icon class="card-icon">account_balance</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Podrazumevani porez (%)</mat-label>
+                  <input matInput type="number" formControlName="defaultTaxRate" min="0" max="100">
+                  <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('required')">
+                    Porez je obavezan
+                  </mat-error>
+                  <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('min')">
+                    Porez ne može biti negativan
+                  </mat-error>
+                  <mat-error *ngIf="settingsForm.get('defaultTaxRate')?.hasError('max')">
+                    Porez ne može biti veći od 100%
+                  </mat-error>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Maksimalni popust (%)</mat-label>
-                <input matInput type="number" formControlName="maxDiscountPercent" min="0" max="100">
-                <mat-error *ngIf="settingsForm.get('maxDiscountPercent')?.hasError('required')">
-                  Maksimalni popust je obavezan
-                </mat-error>
-              </mat-form-field>
+              <div class="form-card">
+                <mat-icon class="card-icon">local_offer</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Maksimalni popust (%)</mat-label>
+                  <input matInput type="number" formControlName="maxDiscountPercent" min="0" max="100">
+                  <mat-error *ngIf="settingsForm.get('maxDiscountPercent')?.hasError('required')">
+                    Maksimalni popust je obavezan
+                  </mat-error>
+                </mat-form-field>
+              </div>
 
-              <div class="checkbox-field">
+              <div class="form-card checkbox-card">
+                <mat-icon class="card-icon">money_off</mat-icon>
                 <mat-checkbox formControlName="allowNegativePrice">
-                  Dozvoli negativne cene
+                  <span class="checkbox-label">Dozvoli negativne cene</span>
+                  <span class="checkbox-hint">Omogućava unos negativnih iznosa za korekcije</span>
                 </mat-checkbox>
               </div>
             </div>
@@ -81,38 +113,61 @@
         </mat-tab>
 
         <!-- Receipt Tab -->
-        <mat-tab label="Račun">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">receipt</mat-icon>
+            Račun
+          </ng-template>
           <div class="tab-content">
-            <h3>Podešavanja računa</h3>
+            <div class="section-header">
+              <h3>Podešavanja računa</h3>
+              <p class="section-description">Prilagođavanje izgleda i formata fiskalnih računa</p>
+            </div>
+            
             <div class="form-grid">
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Format broja računa</mat-label>
-                <input matInput formControlName="receiptNumberFormat" placeholder="FAC-YYYYMMDD-####">
-                <mat-hint>YYYYMMDD - datum, #### - redni broj</mat-hint>
-                <mat-error *ngIf="settingsForm.get('receiptNumberFormat')?.hasError('required')">
-                  Format broja računa je obavezan
-                </mat-error>
-              </mat-form-field>
+              <div class="form-card full-width">
+                <mat-icon class="card-icon">format_list_numbered</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Format broja računa</mat-label>
+                  <input matInput formControlName="receiptNumberFormat" placeholder="FAC-YYYYMMDD-####">
+                  <mat-hint>YYYYMMDD - datum, #### - redni broj</mat-hint>
+                  <mat-error *ngIf="settingsForm.get('receiptNumberFormat')?.hasError('required')">
+                    Format broja računa je obavezan
+                  </mat-error>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Zaglavlje računa</mat-label>
-                <textarea matInput formControlName="header" rows="3" placeholder="Naziv salona, adresa, telefon..."></textarea>
-              </mat-form-field>
+              <div class="form-card full-width">
+                <mat-icon class="card-icon">title</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Zaglavlje računa</mat-label>
+                  <textarea matInput formControlName="header" rows="3" placeholder="Naziv salona, adresa, telefon..."></textarea>
+                  <mat-hint>Prikazuje se na vrhu računa</mat-hint>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline" class="full-width">
-                <mat-label>Podnožje računa</mat-label>
-                <textarea matInput formControlName="footer" rows="3" placeholder="Hvala na poseti, dobrodošli ponovo..."></textarea>
-              </mat-form-field>
+              <div class="form-card full-width">
+                <mat-icon class="card-icon">notes</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Podnožje računa</mat-label>
+                  <textarea matInput formControlName="footer" rows="3" placeholder="Hvala na poseti, dobrodošli ponovo..."></textarea>
+                  <mat-hint>Prikazuje se na dnu računa</mat-hint>
+                </mat-form-field>
+              </div>
 
-              <div class="checkbox-field">
+              <div class="form-card checkbox-card">
+                <mat-icon class="card-icon">qr_code</mat-icon>
                 <mat-checkbox formControlName="showQR">
-                  Prikaži QR kod na računu
+                  <span class="checkbox-label">Prikaži QR kod na računu</span>
+                  <span class="checkbox-hint">Omogućava brzu verifikaciju računa</span>
                 </mat-checkbox>
               </div>
 
-              <div class="checkbox-field">
+              <div class="form-card checkbox-card">
+                <mat-icon class="card-icon">receipt_long</mat-icon>
                 <mat-checkbox formControlName="showFiscalNumber">
-                  Prikaži fiskalni broj
+                  <span class="checkbox-label">Prikaži fiskalni broj</span>
+                  <span class="checkbox-hint">Obavezno za fiskalizovane račune</span>
                 </mat-checkbox>
               </div>
             </div>
@@ -120,54 +175,76 @@
         </mat-tab>
 
         <!-- Fiscalization Tab -->
-        <mat-tab label="Fiskalizacija">
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon">verified</mat-icon>
+            Fiskalizacija
+          </ng-template>
           <div class="tab-content">
-            <h3>Podešavanja fiskalizacije</h3>
-            <div class="form-grid">
-              <div class="checkbox-field">
+            <div class="section-header">
+              <h3>Podešavanja fiskalizacije</h3>
+              <p class="section-description">Konfiguracija fiskalizacije računa i povezivanje sa fiskalnim uređajima</p>
+            </div>
+            
+            <div class="form-grid" formGroupName="fiscalization">
+              <div class="form-card checkbox-card full-width">
+                <mat-icon class="card-icon">toggle_on</mat-icon>
                 <mat-checkbox formControlName="enabled">
-                  Omogući fiskalizaciju
+                  <span class="checkbox-label">Omogući fiskalizaciju</span>
+                  <span class="checkbox-hint">Aktivira fiskalizaciju svih računa</span>
                 </mat-checkbox>
               </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Provider fiskalizacije</mat-label>
-                <mat-select formControlName="provider">
-                  <mat-option *ngFor="let provider of getFiscalProviders()" [value]="provider.value">
-                    {{ provider.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-card">
+                <mat-icon class="card-icon">devices</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Provider fiskalizacije</mat-label>
+                  <mat-select formControlName="provider">
+                    <mat-option *ngFor="let provider of getFiscalProviders()" [value]="provider.value">
+                      {{ provider.label }}
+                    </mat-option>
+                  </mat-select>
+                  <mat-hint>Izaberite tip fiskalnog sistema</mat-hint>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Timeout (ms)</mat-label>
-                <input matInput type="number" formControlName="timeout" min="1000">
-                <mat-error *ngIf="settingsForm.get('fiscalization.timeout')?.hasError('min')">
-                  Timeout mora biti najmanje 1000ms
-                </mat-error>
-              </mat-form-field>
+              <div class="form-card">
+                <mat-icon class="card-icon">timer</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Timeout (ms)</mat-label>
+                  <input matInput type="number" formControlName="timeout" min="1000">
+                  <mat-hint>Vreme čekanja odgovora od fiskalnog uređaja</mat-hint>
+                  <mat-error *ngIf="settingsForm.get('fiscalization.timeout')?.hasError('min')">
+                    Timeout mora biti najmanje 1000ms
+                  </mat-error>
+                </mat-form-field>
+              </div>
 
-              <mat-form-field appearance="outline">
-                <mat-label>Broj pokušaja</mat-label>
-                <input matInput type="number" formControlName="retryCount" min="1" max="10">
-                <mat-error *ngIf="settingsForm.get('fiscalization.retryCount')?.hasError('min')">
-                  Minimum 1 pokušaj
-                </mat-error>
-                <mat-error *ngIf="settingsForm.get('fiscalization.retryCount')?.hasError('max')">
-                  Maksimum 10 pokušaja
-                </mat-error>
-              </mat-form-field>
+              <div class="form-card">
+                <mat-icon class="card-icon">replay</mat-icon>
+                <mat-form-field appearance="outline">
+                  <mat-label>Broj pokušaja</mat-label>
+                  <input matInput type="number" formControlName="retryCount" min="1" max="10">
+                  <mat-hint>Broj ponovnih pokušaja pri neuspehu</mat-hint>
+                  <mat-error *ngIf="settingsForm.get('fiscalization.retryCount')?.hasError('min')">
+                    Minimum 1 pokušaj
+                  </mat-error>
+                  <mat-error *ngIf="settingsForm.get('fiscalization.retryCount')?.hasError('max')">
+                    Maksimum 10 pokušaja
+                  </mat-error>
+                </mat-form-field>
+              </div>
             </div>
           </div>
         </mat-tab>
       </mat-tab-group>
 
       <div class="form-actions">
-        <button mat-button type="button" (click)="resetToDefaults()" [disabled]="saving">
+        <button mat-stroked-button type="button" class="reset-btn" (click)="resetToDefaults()" [disabled]="saving">
           <mat-icon>restore</mat-icon>
           Vrati na podrazumevano
         </button>
-        <button mat-raised-button color="primary" (click)="saveSettings()" [disabled]="saving || settingsForm.invalid">
+        <button mat-raised-button color="accent" class="save-btn" (click)="saveSettings()" [disabled]="saving || settingsForm.invalid">
           <mat-icon *ngIf="!saving">save</mat-icon>
           <mat-icon *ngIf="saving" class="spinning">refresh</mat-icon>
           {{ saving ? 'Čuvanje...' : 'Sačuvaj podešavanja' }}

@@ -1,0 +1,257 @@
+<mat-card class="cash-analytics">
+  <!-- Header -->
+  <div class="analytics-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">analytics</mat-icon>
+        <h1>Cash Analytics</h1>
+      </div>
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="generateAnalytics()"
+          [disabled]="analyticsLoading"
+          class="action-button">
+          <div *ngIf="analyticsLoading" class="spinner"></div>
+          <mat-icon *ngIf="!analyticsLoading">refresh</mat-icon>
+          {{ analyticsLoading ? 'Generisanje...' : 'Generiši Analytics' }}
+        </button>
+        <button 
+          mat-button 
+          color="accent" 
+          (click)="exportAnalytics()"
+          [disabled]="!analyticsData"
+          class="action-button">
+          <mat-icon>download</mat-icon>
+          Eksportuj
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Učitavanje podataka...</p>
+  </div>
+
+  <!-- Analytics Content -->
+  <div *ngIf="!loading" class="analytics-content">
+    
+    <!-- Filters -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-card-title>Filteri</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="analyticsForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Lokacija</mat-label>
+              <mat-select formControlName="facility" (selectionChange)="onFilterChange()">
+                <mat-option value="">Sve lokacije</mat-option>
+                <mat-option *ngFor="let facility of facilities" [value]="facility._id">
+                  {{ facility.name }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_on</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Period</mat-label>
+              <mat-select formControlName="period" (selectionChange)="onFilterChange()">
+                <mat-option value="week">Nedelja</mat-option>
+                <mat-option value="month">Mesec</mat-option>
+                <mat-option value="quarter">Kvartal</mat-option>
+                <mat-option value="year">Godina</mat-option>
+              </mat-select>
+              <mat-icon matSuffix>schedule</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Datum od</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate" (dateChange)="onFilterChange()">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Datum do</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate" (dateChange)="onFilterChange()">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Analytics Data -->
+    <div *ngIf="analyticsData" class="analytics-data">
+      
+      <!-- Key Metrics -->
+      <div class="key-metrics">
+        <mat-card class="metric-card">
+          <mat-card-content>
+            <div class="metric-content">
+              <div class="metric-icon">
+                <mat-icon>receipt_long</mat-icon>
+              </div>
+              <div class="metric-details">
+                <div class="metric-value">{{ analyticsData.totalSessions }}</div>
+                <div class="metric-label">Ukupno Sesija</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="metric-card">
+          <mat-card-content>
+            <div class="metric-content">
+              <div class="metric-icon">
+                <mat-icon>attach_money</mat-icon>
+              </div>
+              <div class="metric-details">
+                <div class="metric-value">{{ formatAmount(analyticsData.totalCash) }}</div>
+                <div class="metric-label">Ukupan Cash</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+
+         <mat-card class="metric-card">
+           <mat-card-content>
+             <div class="metric-content">
+               <div class="metric-icon">
+                 <mat-icon>trending_up</mat-icon>
+               </div>
+               <div class="metric-details">
+                 <div class="metric-value">{{ analyticsData.averageTransactionValue | number:'1.2-2' }} RSD</div>
+                 <div class="metric-label">Prosečna Vrednost</div>
+               </div>
+             </div>
+           </mat-card-content>
+         </mat-card>
+
+        <mat-card class="metric-card">
+          <mat-card-content>
+            <div class="metric-content">
+              <div class="metric-icon" [ngClass]="getTrendColor(analyticsData.varianceTrend)">
+                <mat-icon>{{ getTrendIcon(analyticsData.varianceTrend) }}</mat-icon>
+              </div>
+              <div class="metric-details">
+                <div class="metric-value" [ngClass]="getTrendColor(analyticsData.varianceTrend)">
+                  {{ analyticsData.averageVariance | number:'1.2-2' }} RSD
+                </div>
+                <div class="metric-label">Prosečna Variance</div>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Performance Insights -->
+      <div class="performance-insights">
+        <mat-card class="insights-card">
+          <mat-card-header>
+            <mat-card-title>Performance Insights</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="insights-content">
+              <div class="insight-item">
+                <mat-icon class="insight-icon">star</mat-icon>
+                <div class="insight-details">
+                  <div class="insight-title">Najbolja Lokacija</div>
+                  <div class="insight-value">{{ analyticsData.topPerformingFacility }}</div>
+                </div>
+              </div>
+              
+               <div class="insight-item">
+                 <mat-icon class="insight-icon">speed</mat-icon>
+                 <div class="insight-details">
+                   <div class="insight-title">Efikasnost Cash Flow-a</div>
+                   <div class="insight-value">{{ analyticsData.cashFlowEfficiency | number:'1.0-0' }}%</div>
+                 </div>
+               </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Payment Methods Distribution -->
+      <div class="payment-methods">
+        <mat-card class="payment-card">
+          <mat-card-header>
+            <mat-card-title>Distribucija Plaćanja</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+             <div class="payment-methods-list">
+               <div 
+                 *ngFor="let payment of analyticsData.paymentMethods" 
+                 class="payment-method-item">
+                 <div class="method-info">
+                   <mat-icon [color]="getPaymentMethodColor(payment.method)" class="method-icon">
+                     {{ getPaymentMethodIcon(payment.method) }}
+                   </mat-icon>
+                   <span class="method-name">{{ getPaymentMethodText(payment.method) }}</span>
+                 </div>
+                 <div class="method-stats">
+                   <div class="method-amount">{{ formatAmount(payment.amount) }}</div>
+                   <div class="method-percentage">{{ payment.percentage }}%</div>
+                 </div>
+                 <div class="method-bar">
+                   <div 
+                     class="method-bar-fill" 
+                     [style.width.%]="payment.percentage"
+                     [ngClass]="getPaymentMethodColor(payment.method)">
+                   </div>
+                 </div>
+               </div>
+             </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+
+      <!-- Recommendations -->
+      <div class="recommendations">
+        <mat-card class="recommendations-card">
+          <mat-card-header>
+            <mat-card-title>Preporuke</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <div class="recommendations-list">
+              <div 
+                *ngFor="let recommendation of analyticsData.recommendations" 
+                class="recommendation-item">
+                <mat-icon class="recommendation-icon">lightbulb</mat-icon>
+                <span class="recommendation-text">{{ recommendation }}</span>
+              </div>
+            </div>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+
+    <!-- No Data State -->
+    <div *ngIf="!analyticsData && !loading" class="no-data-state">
+      <mat-card class="no-data-card">
+        <mat-card-content>
+          <div class="no-data-content">
+            <mat-icon class="no-data-icon">analytics</mat-icon>
+            <h3>Nema podataka</h3>
+            <p>Nema analytics podataka za odabrane kriterijume</p>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="generateAnalytics()"
+              class="action-button">
+              <mat-icon>refresh</mat-icon>
+              Generiši Analytics
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</mat-card>

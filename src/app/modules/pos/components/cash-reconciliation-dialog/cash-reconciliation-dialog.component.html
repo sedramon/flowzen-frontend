@@ -1,0 +1,165 @@
+<div class="cash-reconciliation-dialog">
+  <!-- Dialog Header -->
+  <div class="dialog-header">
+    <div class="header-content">
+      <mat-icon class="header-icon">balance</mat-icon>
+      <h2 class="dialog-title">Usklađivanje Cash-a</h2>
+    </div>
+  </div>
+
+  <!-- Dialog Content -->
+  <div class="dialog-content">
+    
+    <!-- Loading Spinner -->
+    <div *ngIf="loading" class="loading-container">
+      <div class="spinner"></div>
+      <p>Učitavanje podataka za usklađivanje...</p>
+    </div>
+
+    <!-- Reconciliation Data -->
+    <div *ngIf="!loading && reconciliationData" class="reconciliation-content">
+      
+      <!-- Summary Card -->
+      <mat-card class="summary-card">
+        <mat-card-header>
+          <mat-card-title>Pregled Sesije</mat-card-title>
+          <mat-card-subtitle>{{ data.session.facility?.name || 'N/A' }}</mat-card-subtitle>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="summary-details">
+            <div class="summary-row">
+              <span class="label">Početni Float:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.openingFloat) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Očekivani Cash:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.expectedCash) }}</span>
+            </div>
+            <div class="summary-row">
+              <span class="label">Stvarni Cash:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.actualCash) }}</span>
+            </div>
+            <div class="summary-row variance-row">
+              <span class="label">Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(reconciliationData.variance)">
+                <mat-icon class="variance-icon">{{ getVarianceIcon(reconciliationData.variance) }}</mat-icon>
+                {{ formatAmount(reconciliationData.variance) }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Sales Summary -->
+      <mat-card class="sales-summary-card">
+        <mat-card-header>
+          <mat-card-title>Pregled Prodaja</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="sales-details">
+            <div class="sales-row">
+              <span class="label">Ukupne Prodaje:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.totalSales) }}</span>
+            </div>
+            <div class="sales-row">
+              <span class="label">Ukupni Refundovi:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.totalRefunds) }}</span>
+            </div>
+            <div class="sales-row net-row">
+              <span class="label">Neto Prodaje:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.netSales) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Payment Methods -->
+      <mat-card class="payment-methods-card">
+        <mat-card-header>
+          <mat-card-title>Plaćanja po Metodama</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="payment-methods">
+            <div 
+              *ngFor="let method of getPaymentMethods()" 
+              class="payment-method-row">
+              <div class="method-info">
+                <mat-icon [color]="getPaymentMethodColor(method.key)" class="method-icon">
+                  {{ getPaymentMethodIcon(method.key) }}
+                </mat-icon>
+                <span class="method-name">{{ getPaymentMethodText(method.key) }}</span>
+              </div>
+              <span class="method-amount amount">{{ formatAmount(method.value) }}</span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <!-- Cash Flow -->
+      <mat-card class="cash-flow-card">
+        <mat-card-header>
+          <mat-card-title>Cash Flow</mat-card-title>
+        </mat-card-header>
+        
+        <mat-card-content>
+          <div class="cash-flow-details">
+            <div class="flow-row">
+              <span class="label">Početni Float:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.cashFlow.opening) }}</span>
+            </div>
+            <div class="flow-row">
+              <span class="label">Cash Prodaje:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.cashFlow.sales) }}</span>
+            </div>
+            <div class="flow-row">
+              <span class="label">Cash Refundovi:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.cashFlow.refunds) }}</span>
+            </div>
+            <div class="flow-row">
+              <span class="label">Očekivani Cash:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.cashFlow.expected) }}</span>
+            </div>
+            <div class="flow-row">
+              <span class="label">Stvarni Cash:</span>
+              <span class="value amount">{{ formatAmount(reconciliationData.summary.cashFlow.actual) }}</span>
+            </div>
+            <div class="flow-row variance-row">
+              <span class="label">Variance:</span>
+              <span class="value" [ngClass]="getVarianceColor(reconciliationData.summary.cashFlow.variance)">
+                <mat-icon class="variance-icon">{{ getVarianceIcon(reconciliationData.summary.cashFlow.variance) }}</mat-icon>
+                {{ formatAmount(reconciliationData.summary.cashFlow.variance) }}
+              </span>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Error State -->
+    <div *ngIf="!loading && !reconciliationData" class="error-state">
+      <mat-card class="error-card">
+        <mat-card-content>
+          <div class="error-content">
+            <mat-icon class="error-icon">error</mat-icon>
+            <h3>Greška pri učitavanju podataka</h3>
+            <p>Nije moguće učitati podatke za usklađivanje</p>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+
+  <!-- Dialog Actions -->
+  <div class="dialog-actions">
+    <button 
+      mat-button 
+      (click)="close()"
+      class="close-button">
+      <mat-icon>close</mat-icon>
+      Zatvori
+    </button>
+  </div>
+</div>

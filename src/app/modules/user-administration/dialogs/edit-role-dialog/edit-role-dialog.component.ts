@@ -175,4 +175,50 @@ export class EditRoleDialogComponent implements OnInit {
   cancel(): void {
     this.dialogRef.close();
   }
+
+  /**
+   * Vraća skraćeni tekst za prikaz action-a
+   */
+  getActionDisplayText(action: string): string {
+    const displayTexts: { [key: string]: string } = {
+      access: 'Access',
+      read: 'Read',
+      create: 'Create',
+      update: 'Update',
+      delete: 'Delete',
+      sale: 'Sales',
+      refund: 'Refund',
+      session: 'Sessions',
+      report: 'Reports',
+      settings: 'Settings',
+      cash_management: 'Cash Mgmt',
+      cash_reports: 'Cash Reports',
+      cash_analytics: 'Cash Analytics'
+    };
+    
+    return displayTexts[action] || action.charAt(0).toUpperCase() + action.slice(1);
+  }
+
+  /**
+   * Vraća puni tekst za tooltip
+   */
+  getActionTooltip(action: string): string {
+    const tooltipTexts: { [key: string]: string } = {
+      access: 'Access Control',
+      read: 'Read Access',
+      create: 'Create Access',
+      update: 'Update Access',
+      delete: 'Delete Access',
+      sale: 'Sales Management',
+      refund: 'Refund Management',
+      session: 'Session Management',
+      report: 'Report Access',
+      settings: 'Settings Access',
+      cash_management: 'Cash Management Dashboard',
+      cash_reports: 'Cash Reports & Analytics',
+      cash_analytics: 'Cash Analytics & Insights'
+    };
+    
+    return tooltipTexts[action] || action.charAt(0).toUpperCase() + action.slice(1);
+  }
 }

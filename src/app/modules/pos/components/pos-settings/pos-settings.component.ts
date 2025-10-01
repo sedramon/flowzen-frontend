@@ -14,24 +14,34 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { PosService } from '../../services/pos.service';
 import { AuthService } from '../../../../core/services/auth.service';
+import { Facility } from '../../../../models/Facility';
 
 interface PaymentMethod {
   enabled: boolean;
   label: string;
 }
 
-interface FiscalizationSettings {
-  enabled: boolean;
-  provider: 'none' | 'device' | 'cloud';
-  timeout: number;
-  retryCount: number;
-}
-
-interface ReceiptTemplate {
-  header: string;
-  footer: string;
-  showQR: boolean;
-  showFiscalNumber: boolean;
+interface PosSettings {
+  facility: string;
+  paymentMethods: {
+    [key: string]: PaymentMethod;
+  };
+  defaultTaxRate: number;
+  maxDiscountPercent: number;
+  allowNegativePrice: boolean;
+  receiptNumberFormat: string;
+  receiptTemplate?: {
+    header: string;
+    footer: string;
+    showQR: boolean;
+    showFiscalNumber: boolean;
+  };
+  fiscalization: {
+    enabled: boolean;
+    provider: string;
+    timeout: number;
+    retryCount: number;
+  };
 }
 
 @Component({
@@ -56,11 +66,28 @@ interface ReceiptTemplate {
   providers: [AuthService, PosService]
 })
 export class PosSettingsComponent implements OnInit {
-  settingsForm: FormGroup;
+  settingsForm!: FormGroup;
   loading = false;
   saving = false;
-  currentFacility: any = null;
-  facilities: any[] = [];
+  currentFacility: Facility | null = null;
+  facilities: Facility[] = [];
+
+  // Payment methods configuration
+  paymentMethodsConfig = [
+    { key: 'cash', defaultLabel: 'Gotovina', defaultEnabled: true },
+    { key: 'card', defaultLabel: 'Kartica', defaultEnabled: true },
+    { key: 'voucher', defaultLabel: 'Vaučer', defaultEnabled: false },
+    { key: 'gift', defaultLabel: 'Poklon bon', defaultEnabled: false },
+    { key: 'bank', defaultLabel: 'Bankovni transfer', defaultEnabled: false },
+    { key: 'other', defaultLabel: 'Ostalo', defaultEnabled: false }
+  ];
+
+  // Fiscal providers
+  fiscalProviders = [
+    { value: 'none', label: 'Bez fiskalizacije' },
+    { value: 'device', label: 'Fiskalni uređaj' },
+    { value: 'cloud', label: 'Cloud servis' }
+  ];
 
   constructor(
     private fb: FormBuilder,
@@ -68,61 +95,52 @@ export class PosSettingsComponent implements OnInit {
     @Inject(AuthService) private authService: AuthService,
     private snackBar: MatSnackBar
   ) {
-    this.settingsForm = this.fb.group({
-      facility: ['', Validators.required],
-      paymentMethods: this.fb.group({
-        cash: this.fb.group({
-          enabled: [true],
-          label: ['Gotovina']
-        }),
-        card: this.fb.group({
-          enabled: [true],
-          label: ['Kartica']
-        }),
-        voucher: this.fb.group({
-          enabled: [false],
-          label: ['Voucher']
-        }),
-        gift: this.fb.group({
-          enabled: [false],
-          label: ['Poklon bon']
-        }),
-        bank: this.fb.group({
-          enabled: [false],
-          label: ['Bankovni transfer']
-        }),
-        other: this.fb.group({
-          enabled: [false],
-          label: ['Ostalo']
-        })
-      }),
-      defaultTaxRate: [20, [Validators.required, Validators.min(0), Validators.max(100)]],
-      maxDiscountPercent: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
-      allowNegativePrice: [false],
-      receiptNumberFormat: ['FAC-YYYYMMDD-####', Validators.required],
-      fiscalization: this.fb.group({
-        enabled: [false],
-        provider: ['none'],
-        timeout: [5000, [Validators.required, Validators.min(1000)]],
-        retryCount: [3, [Validators.required, Validators.min(1), Validators.max(10)]]
-      }),
-      receiptTemplate: this.fb.group({
-        header: [''],
-        footer: [''],
-        showQR: [false],
-        showFiscalNumber: [true]
-      })
-    });
+    this.initializeForm();
   }
 
   ngOnInit(): void {
     this.loadFacilities();
   }
 
+  initializeForm(): void {
+    // Initialize payment methods group
+    const paymentMethodsGroup: any = {};
+    this.paymentMethodsConfig.forEach(method => {
+      paymentMethodsGroup[method.key] = this.fb.group({
+        enabled: [method.defaultEnabled],
+        label: [method.defaultLabel]
+      });
+    });
+
+    // Initialize main form
+    this.settingsForm = this.fb.group({
+      facility: [''],
+      paymentMethods: this.fb.group(paymentMethodsGroup),
+      defaultTaxRate: [20, [Validators.required, Validators.min(0), Validators.max(100)]],
+      maxDiscountPercent: [50, [Validators.required, Validators.min(0), Validators.max(100)]],
+      allowNegativePrice: [false],
+      receiptNumberFormat: ['FAC-YYYYMMDD-####', Validators.required],
+      header: [''],
+      footer: [''],
+      showQR: [true],
+      showFiscalNumber: [true],
+      fiscalization: this.fb.group({
+        enabled: [false],
+        provider: ['none'],
+        timeout: [5000, [Validators.required, Validators.min(1000)]],
+        retryCount: [3, [Validators.required, Validators.min(1), Validators.max(10)]]
+      })
+    });
+  }
+
   loadFacilities(): void {
     const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) return;
+    if (!currentUser) {
+      this.loading = false;
+      return;
+    }
 
+    this.loading = true;
     this.posService.getFacilities(currentUser.tenant).subscribe({
       next: (facilities) => {
         this.facilities = facilities;
@@ -130,37 +148,87 @@ export class PosSettingsComponent implements OnInit {
           this.currentFacility = facilities[0];
           this.settingsForm.patchValue({ facility: facilities[0]._id });
           this.loadSettings();
+        } else {
+          this.loading = false;
         }
       },
       error: (error) => {
         console.error('Error loading facilities:', error);
         this.snackBar.open('Greška pri učitavanju objekata', 'Zatvori', { duration: 3000 });
+        this.loading = false;
       }
     });
   }
 
   loadSettings(): void {
-    if (!this.currentFacility) return;
+    if (!this.currentFacility) {
+      this.loading = false;
+      return;
+    }
 
     this.loading = true;
-    this.posService.getSettings(this.currentFacility._id).subscribe({
-      next: (settings) => {
-        if (settings) {
-          this.settingsForm.patchValue(settings);
+
+    // Load settings from API
+    this.posService.getSettings(this.currentFacility._id || '')
+      .subscribe({
+        next: (settings: PosSettings) => {
+          this.settingsForm.patchValue({
+            facility: settings.facility,
+            paymentMethods: settings.paymentMethods,
+            defaultTaxRate: settings.defaultTaxRate,
+            maxDiscountPercent: settings.maxDiscountPercent,
+            allowNegativePrice: settings.allowNegativePrice,
+            receiptNumberFormat: settings.receiptNumberFormat,
+            header: settings.receiptTemplate?.header || '',
+            footer: settings.receiptTemplate?.footer || '',
+            showQR: settings.receiptTemplate?.showQR || false,
+            showFiscalNumber: settings.receiptTemplate?.showFiscalNumber || true,
+            fiscalization: settings.fiscalization
+          });
+          this.loading = false;
+        },
+        error: (error) => {
+          console.error('Error loading settings:', error);
+          this.snackBar.open('Greška pri učitavanju postavki', 'Zatvori', { duration: 3000 });
+          
+          // Fallback to default settings
+          const defaultSettings = {
+            facility: this.currentFacility?._id || '',
+            paymentMethods: {
+              cash: { enabled: true, label: 'Gotovina' },
+              card: { enabled: true, label: 'Kartica' },
+              voucher: { enabled: false, label: 'Vaučer' },
+              gift: { enabled: false, label: 'Poklon bon' },
+              bank: { enabled: false, label: 'Bankovni transfer' },
+              other: { enabled: false, label: 'Ostalo' }
+            },
+            defaultTaxRate: 20,
+            maxDiscountPercent: 50,
+            allowNegativePrice: false,
+            receiptNumberFormat: 'FAC-YYYYMMDD-####',
+            header: 'Dobrodošli u Flowzen Salon',
+            footer: 'Hvala vam na poseti!',
+            showQR: true,
+            showFiscalNumber: true,
+            fiscalization: {
+              enabled: false,
+              provider: 'none',
+              timeout: 5000,
+              retryCount: 3
+            }
+          };
+          
+          this.settingsForm.patchValue(defaultSettings);
+          this.loading = false;
         }
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading settings:', error);
-        this.snackBar.open('Greška pri učitavanju podešavanja', 'Zatvori', { duration: 3000 });
-        this.loading = false;
-      }
-    });
+      });
   }
 
   onFacilityChange(facilityId: string): void {
-    this.currentFacility = this.facilities.find(f => f._id === facilityId);
-    this.loadSettings();
+    this.currentFacility = this.facilities.find(f => f._id === facilityId) || null;
+    if (this.currentFacility) {
+      this.loadSettings();
+    }
   }
 
   saveSettings(): void {
@@ -169,64 +237,99 @@ export class PosSettingsComponent implements OnInit {
       return;
     }
 
-    this.saving = true;
-    const settingsData = {
-      ...this.settingsForm.value,
-      facility: this.currentFacility._id,
-      tenant: this.authService.getCurrentUser()?.tenant
-    };
+    if (!this.currentFacility) {
+      this.snackBar.open('Izaberite objekat', 'Zatvori', { duration: 3000 });
+      return;
+    }
 
-    this.posService.updateSettings(settingsData).subscribe({
-      next: () => {
-        this.snackBar.open('Podešavanja uspešno sačuvana', 'Zatvori', { duration: 2000 });
-        this.saving = false;
+    this.saving = true;
+    const formValue = this.settingsForm.value;
+    const currentUser = this.authService.getCurrentUser();
+    
+    console.log('Current facility ID:', this.currentFacility._id);
+    console.log('Current user tenant:', currentUser?.tenant);
+    console.log('Form value:', formValue);
+    
+    const settingsData = {
+      facility: this.currentFacility._id,
+      paymentMethods: formValue.paymentMethods,
+      defaultTaxRate: formValue.defaultTaxRate,
+      maxDiscountPercent: formValue.maxDiscountPercent,
+      allowNegativePrice: formValue.allowNegativePrice,
+      receiptNumberFormat: formValue.receiptNumberFormat,
+      fiscalization: formValue.fiscalization,
+      receiptTemplate: {
+        header: formValue.header || '',
+        footer: formValue.footer || '',
+        showQR: formValue.showQR || false,
+        showFiscalNumber: formValue.showFiscalNumber || true
       },
-      error: (error) => {
-        console.error('Error saving settings:', error);
-        this.snackBar.open('Greška pri čuvanju podešavanja', 'Zatvori', { duration: 3000 });
-        this.saving = false;
-      }
-    });
+      tenant: currentUser?.tenant
+    };
+    
+    console.log('Settings data to send:', settingsData);
+
+    // Save settings via API
+    this.posService.updateSettings(settingsData)
+      .subscribe({
+        next: (response) => {
+          this.snackBar.open('Podešavanja uspešno sačuvana', 'Zatvori', { duration: 2000 });
+          this.saving = false;
+        },
+        error: (error) => {
+          console.error('Error saving settings:', error);
+          this.snackBar.open('Greška pri čuvanju podešavanja', 'Zatvori', { duration: 3000 });
+          this.saving = false;
+        }
+      });
   }
 
   resetToDefaults(): void {
+    const defaultPaymentMethods: any = {};
+    this.paymentMethodsConfig.forEach(method => {
+      defaultPaymentMethods[method.key] = {
+        enabled: method.defaultEnabled,
+        label: method.defaultLabel
+      };
+    });
+
     this.settingsForm.patchValue({
-      paymentMethods: {
-        cash: { enabled: true, label: 'Gotovina' },
-        card: { enabled: true, label: 'Kartica' },
-        voucher: { enabled: false, label: 'Voucher' },
-        gift: { enabled: false, label: 'Poklon bon' },
-        bank: { enabled: false, label: 'Bankovni transfer' },
-        other: { enabled: false, label: 'Ostalo' }
-      },
+      paymentMethods: defaultPaymentMethods,
       defaultTaxRate: 20,
-      maxDiscountPercent: 0,
+      maxDiscountPercent: 50,
       allowNegativePrice: false,
       receiptNumberFormat: 'FAC-YYYYMMDD-####',
+      header: '',
+      footer: '',
+      showQR: true,
+      showFiscalNumber: true,
       fiscalization: {
         enabled: false,
         provider: 'none',
         timeout: 5000,
         retryCount: 3
-      },
-      receiptTemplate: {
-        header: '',
-        footer: '',
-        showQR: false,
-        showFiscalNumber: true
       }
     });
+
+    this.snackBar.open('Podešavanja vraćena na podrazumevano', 'Zatvori', { duration: 2000 });
   }
 
-  getPaymentMethods(): string[] {
-    return Object.keys(this.settingsForm.get('paymentMethods')?.value || {});
+  getPaymentMethodKeys(): string[] {
+    return this.paymentMethodsConfig.map(m => m.key);
+  }
+
+  getPaymentMethodControl(key: string, field: string) {
+    return this.settingsForm.get(`paymentMethods.${key}.${field}`);
   }
 
   getFiscalProviders() {
-    return [
-      { value: 'none', label: 'Bez fiskalizacije' },
-      { value: 'device', label: 'Fiskalni uređaj' },
-      { value: 'cloud', label: 'Cloud servis' }
-    ];
+    return this.fiscalProviders;
+  }
+
+  formatCurrency(amount: number): string {
+    return new Intl.NumberFormat('sr-RS', {
+      style: 'currency',
+      currency: 'RSD'
+    }).format(amount);
   }
 }

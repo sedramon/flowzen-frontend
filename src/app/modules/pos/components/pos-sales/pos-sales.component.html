@@ -181,11 +181,11 @@
                   <mat-icon>print</mat-icon>
                 </button>
                 <button mat-icon-button (click)="refundSale(sale)" matTooltip="Povraćaj" 
-                  [disabled]="sale.status === 'refunded' || sale.fiscal?.status !== 'done' || sale.refund">
+                  [disabled]="sale.status === 'refunded' || sale.fiscal?.status !== 'success' || sale.refund">
                   <mat-icon>undo</mat-icon>
                 </button>
                 <button mat-icon-button (click)="fiscalizeSale(sale)" matTooltip="Fiskalizuj" 
-                  [disabled]="sale.fiscal?.status === 'done' || sale.status === 'refunded'">
+                  [disabled]="sale.fiscal?.status === 'success' || sale.status === 'refunded'">
                   <mat-icon>receipt_long</mat-icon>
                 </button>
               </div>

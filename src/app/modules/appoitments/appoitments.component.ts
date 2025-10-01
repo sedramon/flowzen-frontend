@@ -18,6 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
+import { CashSession } from '../../models/CashSession';
 import { MatSelectModule } from '@angular/material/select';
 import interact from 'interactjs';
 import {
@@ -347,14 +348,18 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
 
     // Listen for facility changes and update work hours
     this.facilityControl.valueChanges.subscribe((facility) => {
-      if (facility && this.selectedDate) {
+      if (facility) {
         this.selectedFacility = facility;
         const selectedFacility = this.facilities.find(f => f._id === facility);
         if (selectedFacility) {
           this.updateWorkHours(selectedFacility);
         }
         this.cd.detectChanges();
-        this.loadSchedule(this.selectedDate);
+        
+        // Učitaj raspored samo ako je datum izabran
+        if (this.selectedDate) {
+          this.loadSchedule(this.selectedDate);
+        }
       }
     });
   }
@@ -830,6 +835,13 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // ===== SCHEDULE LOADING =====
   // Load schedule data, update work hours, and force change detection
   loadSchedule(date: Date): void {
+    // Proveri da li je selectedFacility postavljen
+    if (!this.selectedFacility) {
+      console.warn('No facility selected, skipping schedule load');
+      this.loading = false;
+      return;
+    }
+
     this.loading = true;
     this.appointmentsService.getScheduleSimple(date, this.selectedFacility).subscribe({
       next: (data) => {
@@ -973,7 +985,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
       console.log('[POS] getSessions payload:', getSessionsPayload);
       const sessions = await firstValueFrom(this.posService.getSessions(getSessionsPayload));
       console.log('[POS] getSessions result:', sessions);
-      let session = sessions && sessions.length ? sessions[0] : null;
+      let session: CashSession | null = sessions && sessions.length ? sessions[0] : null;
 
       // 3. Automatsko otvaranje sesije ako ne postoji
       if (!session) {
@@ -982,7 +994,9 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
           openingFloat: 0
         };
         console.log('[POS] openSession payload:', openSessionPayload);
-        session = await firstValueFrom(this.posService.openSession(openSessionPayload));
+        const sessionResult = await firstValueFrom(this.posService.openSession(openSessionPayload));
+        // Get the full session data after opening
+        session = await firstValueFrom(this.posService.getSession(sessionResult.id));
         console.log('[POS] openSession result:', session);
         this.snackBar.open('Blagajnička sesija je automatski otvorena.', 'Zatvori', { duration: 2000 });
       }

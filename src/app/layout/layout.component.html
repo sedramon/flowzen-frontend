@@ -55,10 +55,37 @@
       <mat-icon>settings</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_pos:sale')" mat-icon-button matTooltip="POS"
-      matTooltipPosition="below" routerLink="/pos/sales" routerLinkActive="active" class="nav-btn">
-      <mat-icon>point_of_sale</mat-icon>
+    <!-- POS Dropdown Menu -->
+    <button *ngIf="authService.isModuleEnabled('scope_pos:sale')" mat-button [matMenuTriggerFor]="posMenu" class="nav-btn text-btn">
+      POS
+      <mat-icon>arrow_drop_down</mat-icon>
     </button>
+    <mat-menu #posMenu="matMenu">
+      <button mat-menu-item routerLink="/pos/sales" routerLinkActive="active">
+        <mat-icon>point_of_sale</mat-icon>
+        <span>Prodaja</span>
+      </button>
+      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_management')" mat-menu-item routerLink="/pos/cash-management" routerLinkActive="active">
+        <mat-icon>account_balance</mat-icon>
+        <span>Cash Management</span>
+      </button>
+      <button *ngIf="authService.isModuleEnabled('scope_pos:report')" mat-menu-item routerLink="/pos/reports" routerLinkActive="active">
+        <mat-icon>assessment</mat-icon>
+        <span>Izveštaji</span>
+      </button>
+      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_reports')" mat-menu-item routerLink="/pos/cash-reports" routerLinkActive="active">
+        <mat-icon>assessment</mat-icon>
+        <span>Cash Izveštaji</span>
+      </button>
+      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_analytics')" mat-menu-item routerLink="/pos/cash-analytics" routerLinkActive="active">
+        <mat-icon>analytics</mat-icon>
+        <span>Cash Analitika</span>
+      </button>
+      <button *ngIf="authService.isModuleEnabled('scope_pos:settings')" mat-menu-item routerLink="/pos/settings" routerLinkActive="active">
+        <mat-icon>settings</mat-icon>
+        <span>POS Podešavanja</span>
+      </button>
+    </mat-menu>
 
 
 

@@ -25,29 +25,33 @@
     </mat-form-field>
 
     <!-- 3) Action Checkboxes -->
-    <div *ngIf="roleForm.controls.entity.value" formGroupName="actions"
-         fxLayout="row" fxLayoutAlign="center center" fxLayoutGap="32px"
-         style="padding: 24px 0; margin-bottom: 8px; overflow-x: auto;">
-      <mat-checkbox *ngFor="let action of availableActions"
-                    [formControlName]="action"
-                    matTooltip="{{ action | titlecase }}"
-                    style="margin: 0 8px; min-width: 120px;">
-        <mat-icon style="vertical-align: middle; margin-right: 8px;">
-          {{ {
-            access: 'lock_open',
-            read: 'visibility',
-            create: 'add_circle_outline',
-            update: 'autorenew',
-            delete: 'delete_outline',
-            sale: 'point_of_sale',
-            refund: 'undo',
-            session: 'event',
-            report: 'bar_chart',
-            settings: 'settings',
-          }[action] || 'check_box'}}
-        </mat-icon>
-        <span style="vertical-align: middle; font-size: 15px;">{{ action | titlecase }}</span>
-      </mat-checkbox>
+    <div *ngIf="roleForm.controls.entity.value" formGroupName="actions" class="actions-container">
+      <div class="actions-grid">
+        <mat-checkbox *ngFor="let action of availableActions"
+                      [formControlName]="action"
+                      [matTooltip]="getActionTooltip(action)"
+                      matTooltipPosition="above"
+                      class="action-checkbox">
+          <mat-icon class="action-icon">
+            {{ {
+              access: 'lock_open',
+              read: 'visibility',
+              create: 'add',
+              update: 'edit',
+              delete: 'delete',
+              sale: 'point_of_sale',
+              refund: 'undo',
+              session: 'event',
+              report: 'bar_chart',
+              settings: 'settings',
+              cash_management: 'account_balance',
+              cash_reports: 'assessment',
+              cash_analytics: 'analytics'
+            }[action] || 'check_box'}}
+          </mat-icon>
+          <span class="action-text">{{ getActionDisplayText(action) }}</span>
+        </mat-checkbox>
+      </div>
     </div>
   </form>
 

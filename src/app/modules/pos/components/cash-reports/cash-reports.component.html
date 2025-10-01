@@ -1,0 +1,273 @@
+<div class="cash-reports">
+  <!-- Header -->
+  <div class="reports-header">
+    <div class="header-content">
+      <div class="header-title">
+        <mat-icon class="header-icon">assessment</mat-icon>
+        <h1>Cash Reports</h1>
+      </div>
+      <div class="header-actions">
+        <button 
+          mat-raised-button 
+          color="primary" 
+          (click)="generateReport()"
+          [disabled]="reportLoading"
+          class="action-button">
+          <mat-spinner *ngIf="reportLoading" diameter="20" class="button-spinner"></mat-spinner>
+          <mat-icon *ngIf="!reportLoading">refresh</mat-icon>
+          {{ reportLoading ? 'Generisanje...' : 'Generiši Izveštaj' }}
+        </button>
+        <button 
+          mat-button 
+          color="accent" 
+          (click)="exportReport()"
+          [disabled]="dailyReports.length === 0"
+          class="action-button">
+          <mat-icon>download</mat-icon>
+          Eksportuj
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Spinner -->
+  <div *ngIf="loading" class="loading-container">
+    <div class="spinner"></div>
+    <p>Učitavanje podataka...</p>
+  </div>
+
+  <!-- Reports Content -->
+  <div *ngIf="!loading" class="reports-content">
+    
+    <!-- Filters -->
+    <mat-card class="filters-card">
+      <mat-card-header>
+        <mat-card-title>Filteri</mat-card-title>
+      </mat-card-header>
+      <mat-card-content>
+        <form [formGroup]="reportForm" class="filters-form">
+          <div class="filters-row">
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Lokacija</mat-label>
+              <mat-select formControlName="facility">
+                <mat-option value="">Sve lokacije</mat-option>
+                <mat-option *ngFor="let facility of facilities" [value]="facility.id">
+                  {{ facility.name }}
+                </mat-option>
+              </mat-select>
+              <mat-icon matSuffix>location_on</mat-icon>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Datum od</mat-label>
+              <input matInput [matDatepicker]="startPicker" formControlName="startDate">
+              <mat-datepicker-toggle matSuffix [for]="startPicker"></mat-datepicker-toggle>
+              <mat-datepicker #startPicker></mat-datepicker>
+            </mat-form-field>
+
+            <mat-form-field appearance="outline" class="filter-field">
+              <mat-label>Datum do</mat-label>
+              <input matInput [matDatepicker]="endPicker" formControlName="endDate">
+              <mat-datepicker-toggle matSuffix [for]="endPicker"></mat-datepicker-toggle>
+              <mat-datepicker #endPicker></mat-datepicker>
+            </mat-form-field>
+          </div>
+        </form>
+      </mat-card-content>
+    </mat-card>
+
+    <!-- Summary Statistics -->
+    <div class="summary-stats" *ngIf="dailyReports.length > 0">
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>receipt_long</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ getTotalStats().totalSessions }}</div>
+              <div class="stat-label">Ukupno Sesija</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>attach_money</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ formatAmount(getTotalStats().totalOpeningFloat) }}</div>
+              <div class="stat-label">Ukupni Float</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>account_balance</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ formatAmount(getTotalStats().totalExpectedCash) }}</div>
+              <div class="stat-label">Očekivani Cash</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon">
+              <mat-icon>account_balance_wallet</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value">{{ formatAmount(getTotalStats().totalActualCash) }}</div>
+              <div class="stat-label">Stvarni Cash</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+
+      <mat-card class="stat-card">
+        <mat-card-content>
+          <div class="stat-content">
+            <div class="stat-icon" [ngClass]="getVarianceColor(getTotalStats().totalVariance)">
+              <mat-icon>{{ getVarianceIcon(getTotalStats().totalVariance) }}</mat-icon>
+            </div>
+            <div class="stat-details">
+              <div class="stat-value" [ngClass]="getVarianceColor(getTotalStats().totalVariance)">
+                {{ formatAmount(getTotalStats().totalVariance) }}
+              </div>
+              <div class="stat-label">Ukupna Variance</div>
+            </div>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- Reports Table -->
+    <div class="reports-table" *ngIf="dailyReports.length > 0">
+      <mat-card class="table-card">
+        <mat-card-header>
+          <mat-card-title>Dnevni Izveštaji</mat-card-title>
+        </mat-card-header>
+        <mat-card-content>
+          <div class="table-container">
+            <table mat-table [dataSource]="dailyReports" class="reports-table-element">
+              
+              <!-- Date Column -->
+              <ng-container matColumnDef="date">
+                <th mat-header-cell *matHeaderCellDef>Datum</th>
+                <td mat-cell *matCellDef="let report">{{ formatDate(report.date) }}</td>
+              </ng-container>
+
+              <!-- Facility Column -->
+              <ng-container matColumnDef="facility">
+                <th mat-header-cell *matHeaderCellDef>Lokacija</th>
+                <td mat-cell *matCellDef="let report">{{ report.facility }}</td>
+              </ng-container>
+
+              <!-- Session Count Column -->
+              <ng-container matColumnDef="sessionCount">
+                <th mat-header-cell *matHeaderCellDef>Sesije</th>
+                <td mat-cell *matCellDef="let report">{{ report.sessionCount }}</td>
+              </ng-container>
+
+              <!-- Opening Float Column -->
+              <ng-container matColumnDef="totalOpeningFloat">
+                <th mat-header-cell *matHeaderCellDef>Float</th>
+                <td mat-cell *matCellDef="let report" class="amount-cell">
+                  {{ formatAmount(report.summary.totalOpeningFloat) }}
+                </td>
+              </ng-container>
+
+              <!-- Expected Cash Column -->
+              <ng-container matColumnDef="totalExpectedCash">
+                <th mat-header-cell *matHeaderCellDef>Očekivano</th>
+                <td mat-cell *matCellDef="let report" class="amount-cell">
+                  {{ formatAmount(report.summary.totalExpectedCash) }}
+                </td>
+              </ng-container>
+
+              <!-- Actual Cash Column -->
+              <ng-container matColumnDef="totalActualCash">
+                <th mat-header-cell *matHeaderCellDef>Stvarno</th>
+                <td mat-cell *matCellDef="let report" class="amount-cell">
+                  {{ formatAmount(report.summary.totalActualCash) }}
+                </td>
+              </ng-container>
+
+              <!-- Variance Column -->
+              <ng-container matColumnDef="totalVariance">
+                <th mat-header-cell *matHeaderCellDef>Variance</th>
+                <td mat-cell *matCellDef="let report" class="variance-cell">
+                  <div class="variance-content">
+                    <mat-icon class="variance-icon" [ngClass]="getVarianceColor(report.summary.totalVariance)">
+                      {{ getVarianceIcon(report.summary.totalVariance) }}
+                    </mat-icon>
+                    <span [ngClass]="getVarianceColor(report.summary.totalVariance)">
+                      {{ formatAmount(report.summary.totalVariance) }}
+                    </span>
+                  </div>
+                </td>
+              </ng-container>
+
+              <!-- Variance Percentage Column -->
+              <ng-container matColumnDef="variancePercentage">
+                <th mat-header-cell *matHeaderCellDef>%</th>
+                <td mat-cell *matCellDef="let report" class="percentage-cell">
+                  <mat-chip [color]="getVarianceColor(report.summary.totalVariance)" class="percentage-chip">
+                    {{ report.summary.variancePercentage.toFixed(2) }}%
+                  </mat-chip>
+                </td>
+              </ng-container>
+
+              <!-- Actions Column -->
+              <ng-container matColumnDef="actions">
+                <th mat-header-cell *matHeaderCellDef>Akcije</th>
+                <td mat-cell *matCellDef="let report">
+                  <button 
+                    mat-icon-button 
+                    matTooltip="Detalji"
+                    class="action-icon">
+                    <mat-icon>visibility</mat-icon>
+                  </button>
+                </td>
+              </ng-container>
+
+              <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+              <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
+            </table>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+
+    <!-- No Data State -->
+    <div *ngIf="dailyReports.length === 0 && !loading" class="no-data-state">
+      <mat-card class="no-data-card">
+        <mat-card-content>
+          <div class="no-data-content">
+            <mat-icon class="no-data-icon">assessment</mat-icon>
+            <h3>Nema podataka</h3>
+            <p>Nema izveštaja za odabrane kriterijume</p>
+            <button 
+              mat-raised-button 
+              color="primary" 
+              (click)="generateReport()"
+              class="action-button">
+              <mat-icon>refresh</mat-icon>
+              Generiši Izveštaj
+            </button>
+          </div>
+        </mat-card-content>
+      </mat-card>
+    </div>
+  </div>
+</div>
