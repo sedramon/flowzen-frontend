@@ -10,18 +10,18 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatCardModule } from '@angular/material/card';
 import { CommonModule, DecimalPipe } from '@angular/common';
 import { Subject, takeUntil } from 'rxjs';
-import { PosService } from '../../services/pos.service';
+import { PosService } from '../../../services/pos.service';
 import { 
   CreateSaleRequest, 
   SaleResponse, 
   SaleItem, 
   SalePayment, 
   SaleSummary 
-} from '../../../../models/Sale';
-import { Article } from '../../../../models/Article';
-import { Appointment } from '../../../../models/Appointment';
-import { Client } from '../../../../models/Client';
-import { Facility } from '../../../../models/Facility';
+} from '../../../../../models/Sale';
+import { Article } from '../../../../../models/Article';
+import { Appointment } from '../../../../../models/Appointment';
+import { Client } from '../../../../../models/Client';
+import { Facility } from '../../../../../models/Facility';
 
 /**
  * Payment Method Interface

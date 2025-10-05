@@ -5,7 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
-import { PosService } from '../../services/pos.service';
+import { PosService } from '../../../services/pos.service';
 
 interface ReceiptData {
   sale: any;

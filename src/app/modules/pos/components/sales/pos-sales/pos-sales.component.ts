@@ -21,15 +21,15 @@ import { PosRefundComponent } from '../pos-refund/pos-refund.component';
 import { PosTransactionViewComponent } from '../pos-transaction-view/pos-transaction-view.component';
 
 // Service imports
-import { PosService } from '../../services/pos.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { PosService } from '../../../services/pos.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 // Model imports
-import { Client } from '../../../../models/Client';
-import { Facility } from '../../../../models/Facility';
-import { Service } from '../../../../models/Service';
-import { Article } from '../../../../models/Article';
-import { Sale, FiscalResponse } from '../../../../models/Sale';
+import { Client } from '../../../../../models/Client';
+import { Facility } from '../../../../../models/Facility';
+import { Service } from '../../../../../models/Service';
+import { Article } from '../../../../../models/Article';
+import { Sale, FiscalResponse } from '../../../../../models/Sale';
 
 /**
  * Sales Statistics Interface

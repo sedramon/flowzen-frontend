@@ -10,9 +10,9 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
-import { PosService } from '../../services/pos.service';
-import { Facility } from '../../../../models/Facility';
-import { OpenSessionRequest } from '../../../../models/CashSession';
+import { PosService } from '../../../services/pos.service';
+import { Facility } from '../../../../../models/Facility';
+import { OpenSessionRequest } from '../../../../../models/CashSession';
 
 export interface OpenSessionDialogData {
   facilities: Facility[];

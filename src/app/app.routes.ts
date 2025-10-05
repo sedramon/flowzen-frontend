@@ -15,12 +15,12 @@ import { SettingsComponent } from './modules/settings/settings.component';
 import { WorkingShiftsComponent } from './modules/working-shifts/working-shifts.component';
 import { Suppliers } from './modules/suppliers/suppliers';
 import { Articles } from './modules/articles/articles';
-import { PosSalesComponent } from './modules/pos/components/pos-sales/pos-sales.component';
-import { PosReportsComponent } from './modules/pos/components/pos-reports/pos-reports.component';
-import { PosSettingsComponent } from './modules/pos/components/pos-settings/pos-settings.component';
-import { CashSessionDashboardComponent } from './modules/pos/components/cash-session-dashboard/cash-session-dashboard.component';
-import { CashReportsComponent } from './modules/pos/components/cash-reports/cash-reports.component';
-import { CashAnalyticsComponent } from './modules/pos/components/cash-analytics/cash-analytics.component';
+import { PosSalesComponent } from './modules/pos/components/sales/pos-sales/pos-sales.component';
+import { PosReportsComponent } from './modules/pos/components/reports/pos-reports/pos-reports.component';
+import { PosSettingsComponent } from './modules/pos/components/settings/pos-settings/pos-settings.component';
+import { CashSessionDashboardComponent } from './modules/pos/components/cash-management/cash-session-dashboard/cash-session-dashboard.component';
+import { CashReportsComponent } from './modules/pos/components/reports/cash-reports/cash-reports.component';
+import { CashAnalyticsComponent } from './modules/pos/components/cash-management/cash-analytics/cash-analytics.component';
 
 export const routes: Routes = [
   {

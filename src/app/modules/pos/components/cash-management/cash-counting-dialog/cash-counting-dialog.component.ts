@@ -10,8 +10,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatCardModule } from '@angular/material/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { PosService } from '../../services/pos.service';
-import { CashSession, CashCountingResult, CashCountingRequest, CashVerificationRequest, CashVarianceRequest, VarianceAction } from '../../../../models/CashSession';
+import { PosService } from '../../../services/pos.service';
+import { CashCountingRequest, CashCountingResult, CashSession, CashVarianceRequest, CashVerificationRequest, VarianceAction } from '../../../../../models/CashSession';
 
 export interface CashCountingDialogData {
   session: CashSession;

@@ -11,12 +11,12 @@ import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 
 // Service imports
-import { PosService } from '../../services/pos.service';
-import { AuthService } from '../../../../core/services/auth.service';
+import { PosService } from '../../../services/pos.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 // Model imports
-import { CashSession, OpenSessionRequest, CashSessionSummary } from '../../../../models/CashSession';
-import { Facility } from '../../../../models/Facility';
+import { CashSession, OpenSessionRequest, CashSessionSummary } from '../../../../../models/CashSession';
+import { Facility } from '../../../../../models/Facility';
 
 // Dialog imports
 import { OpenSessionDialogComponent } from '../open-session-dialog/open-session-dialog.component';

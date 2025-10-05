@@ -7,8 +7,8 @@ import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatCardModule } from '@angular/material/card';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { PosService } from '../../services/pos.service';
-import { CashSession, CashReconciliationResult } from '../../../../models/CashSession';
+import { CashSession, CashReconciliationResult } from '../../../../../models/CashSession';
+import { PosService } from '../../../services/pos.service';
 
 export interface CashReconciliationDialogData {
   session: CashSession;

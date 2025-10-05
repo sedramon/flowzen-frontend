@@ -10,8 +10,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { PosService } from '../../services/pos.service';
-import { RefundSaleRequest, RefundResponse } from '../../../../models/Sale';
+import { PosService } from '../../../services/pos.service';
+import { RefundSaleRequest, RefundResponse } from '../../../../../models/Sale';
 
 interface RefundData {
   sale: any;

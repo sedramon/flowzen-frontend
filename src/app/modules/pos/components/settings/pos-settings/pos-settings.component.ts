@@ -12,9 +12,9 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { PosService } from '../../services/pos.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { Facility } from '../../../../models/Facility';
+import { PosService } from '../../../services/pos.service';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { Facility } from '../../../../../models/Facility';
 
 interface PaymentMethod {
   enabled: boolean;

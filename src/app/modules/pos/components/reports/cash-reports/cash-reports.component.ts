@@ -16,9 +16,9 @@ import { MatSortModule } from '@angular/material/sort';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
-import { PosService } from '../../services/pos.service';
-import { DailyCashReport } from '../../../../models/CashSession';
-import { Facility } from '../../../../models/Facility';
+import { PosService } from '../../../services/pos.service';
+import { DailyCashReport } from '../../../../../models/CashSession';
+import { Facility } from '../../../../../models/Facility';
 
 @Component({
   selector: 'app-cash-reports',

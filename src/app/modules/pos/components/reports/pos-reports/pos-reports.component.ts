@@ -18,9 +18,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatDialog } from '@angular/material/dialog';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
-import { PosService } from '../../services/pos.service';
-import { AuthService } from '../../../../core/services/auth.service';
-import { Facility } from '../../../../models/Facility';
+import { PosService } from '../../../services/pos.service';
+import { AuthService } from '../../../../../core/services/auth.service';
+import { Facility } from '../../../../../models/Facility';
 
 interface ReportData {
   date: string;

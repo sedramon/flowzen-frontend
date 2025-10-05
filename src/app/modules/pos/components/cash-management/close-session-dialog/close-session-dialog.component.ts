@@ -11,8 +11,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { Subject, takeUntil } from 'rxjs';
-import { PosService } from '../../services/pos.service';
-import { CashSession, CashSessionSummary, CloseSessionRequest } from '../../../../models/CashSession';
+import { PosService } from '../../../services/pos.service';
+import { CashSession, CashSessionSummary, CloseSessionRequest } from '../../../../../models/CashSession';
 
 export interface CloseSessionDialogData {
   session: CashSession;

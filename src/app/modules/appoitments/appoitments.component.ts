@@ -65,7 +65,7 @@ import { Client } from '../../models/Client';
 import { MatButtonModule } from '@angular/material/button';
 import { AppointmentsService } from './services/appointment.service';
 import { BulkAppointmentsDialogComponent } from './dialog/bulk-appointments-dialog/bulk-appointments-dialog.component';
-import { PosCheckoutComponent } from '../pos/components/pos-checkout/pos-checkout.component';
+import { PosCheckoutComponent } from '../pos/components/sales/pos-checkout/pos-checkout.component';
 import { PosService } from '../pos/services/pos.service';
 import { firstValueFrom } from 'rxjs';
 
