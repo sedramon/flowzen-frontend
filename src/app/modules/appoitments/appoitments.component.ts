@@ -18,7 +18,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
-import { CashSession } from '../../models/CashSession';
+import { CashSession, CloseSessionRequest } from '../../models/CashSession';
 import { MatSelectModule } from '@angular/material/select';
 import interact from 'interactjs';
 import {
@@ -1017,20 +1017,36 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         tenant: currentUser.tenant,
         session
       };
-      console.log('[POS] Opening PosCheckoutComponent with data:', dialogData);
       const dialogRef = this.dialog.open(PosCheckoutComponent, {
         data: dialogData,
         panelClass: 'custom-appointment-dialog',
         backdropClass: 'custom-backdrop',
       });
 
-      // 5. Obrada rezultata naplate
+      // 5. Obrada rezultata naplate - sesija se uvek zatvaranja
       dialogRef.afterClosed().subscribe((res) => {
         if (res && res.id) {
+          // Uspešna naplata - sesija se automatski zatvaranja u backend-u
           ap.paid = true;
           ap.sale = res.id;
-          this.snackBar.open('Termin uspešno naplaćen!', 'Zatvori', { duration: 2000 });
+          this.snackBar.open('Termin uspešno naplaćen i sesija zatvorena!', 'Zatvori', { duration: 3000 });
           this.cd.detectChanges();
+        } else if (session && (session as any)._id) {
+          // Dijalog zatvoren bez naplate (ESC, klik pored, Cancel) - zatvori sesiju
+          const sessionId = (session as any)._id;
+          const closeData = {
+            closingCount: 0,
+            note: 'Session closed after dialog cancellation'
+          };
+          this.posService.closeSession(sessionId, closeData).subscribe({
+            next: () => {
+              this.snackBar.open('Sesija zatvorena', 'Zatvori', { duration: 2000 });
+            },
+            error: (err) => {
+              console.error('[POS] Error closing session:', err);
+              this.snackBar.open('Greška pri zatvaranju sesije', 'Zatvori', { duration: 2000 });
+            }
+          });
         }
       });
     } catch (err: any) {

@@ -242,6 +242,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (sales: Sale[]) => {
           console.log('Sales loaded from API:', sales.length, sales);
+          console.log('First sale cashier:', sales[0]?.cashier);
           this.handleSalesLoadSuccess(sales);
         },
         error: (error) => {
@@ -364,7 +365,6 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   private calculateTotalRevenue(): number {
     const revenue = this.sales.reduce((sum, sale) => {
       const saleTotal = sale.summary?.grandTotal || 0;
-      console.log(`Sale ${sale.number || sale.id}: grandTotal = ${saleTotal}`);
       return sum + saleTotal;
     }, 0);
     
@@ -398,7 +398,6 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     const todaySales = this.sales.filter(sale => {
       const saleDate = new Date(sale.date);
       const isToday = saleDate >= today;
-      console.log(`Sale ${sale.number || sale.id}: date = ${sale.date}, isToday = ${isToday}`);
       return isToday;
     });
     
@@ -693,5 +692,14 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       hour: '2-digit',
       minute: '2-digit'
     });
+  }
+
+  /**
+   * Get session openedBy user data
+   * @param sale - Sale object
+   * @returns openedBy user name or null
+   */
+  getSessionOpenedBy(sale: any): string | null {
+    return (sale.session as any)?.openedBy?.name || null;
   }
 }

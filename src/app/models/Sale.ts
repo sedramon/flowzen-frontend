@@ -43,7 +43,12 @@ export interface Sale {
   id?: string;
   tenant: string;
   facility: string | { _id: string; name: string };
-  session: string | { _id: string; number?: string };
+  session: string | { 
+    _id: string; 
+    number?: string;
+    openedBy?: { _id: string; name: string };
+    closedBy?: { _id: string; name: string };
+  };
   cashier: string | { _id: string; firstName: string; lastName: string };
   appointment?: string | { _id: string; service: any; client: any };
   client?: string | { _id: string; firstName: string; lastName: string };

@@ -126,7 +126,9 @@
           <ng-container matColumnDef="cashier">
             <th mat-header-cell *matHeaderCellDef>Blagajnik</th>
             <td mat-cell *matCellDef="let sale">
-              {{ sale.cashier?.firstName }} {{ sale.cashier?.lastName }}
+              <span *ngIf="sale.cashier">{{ sale.cashier.firstName }} {{ sale.cashier.lastName }}</span>
+              <span *ngIf="!sale.cashier && getSessionOpenedBy(sale)">{{ getSessionOpenedBy(sale) }}</span>
+              <span *ngIf="!sale.cashier && !getSessionOpenedBy(sale)" class="no-cashier">N/A</span>
             </td>
           </ng-container>
 
