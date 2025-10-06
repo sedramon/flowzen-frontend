@@ -68,7 +68,7 @@ export class PosTransactionViewComponent implements OnInit {
 
   getStatusText(transaction: any): string {
     // Proveri da li je fiskalizovano
-    if (transaction.sale?.fiscal?.status === 'done') {
+    if (transaction.sale?.fiscal?.status === 'success') {
       return 'Fiskalizovano';
     }
     
@@ -97,7 +97,7 @@ export class PosTransactionViewComponent implements OnInit {
 
   getStatusColor(transaction: any): string {
     // Proveri da li je fiskalizovano
-    if (transaction.sale?.fiscal?.status === 'done') {
+    if (transaction.sale?.fiscal?.status === 'success') {
       return '#66bb6a'; // Svetlija zelena - fiskalizovano
     }
     

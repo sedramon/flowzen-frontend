@@ -97,7 +97,7 @@
           <div class="transaction-divider" *ngIf="transaction.sale?.payments && transaction.sale.payments.length > 0"></div>
 
           <!-- Fiscal Info -->
-          <div class="fiscal-info" *ngIf="transaction.sale?.fiscal?.status === 'done'">
+          <div class="fiscal-info" *ngIf="transaction.sale?.fiscal?.status === 'success'">
             <h4>Fiskalni podaci:</h4>
             <div class="fiscal-row">
               <span>Fiskalni broj:</span>
@@ -113,7 +113,7 @@
             </div>
           </div>
 
-          <div class="transaction-divider" *ngIf="transaction.sale?.fiscal?.status === 'done'"></div>
+          <div class="transaction-divider" *ngIf="transaction.sale?.fiscal?.status === 'success'"></div>
 
           <!-- Footer -->
           <div class="transaction-footer">

@@ -143,7 +143,7 @@
               matTooltipPosition="above"
               [matTooltipDisabled]="isDragging"
               [class.paid]="ap.paid"
-              [class.fiscalized]="ap.sale?.fiscal?.status === 'done'"
+              [class.fiscalized]="ap.sale?.fiscal?.status === 'success'"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
               >
               <div class="appointment-info">   
@@ -158,16 +158,16 @@
             <button
               mat-button
               class="pay-btn"
-              [ngClass]="{ 'paid': ap.paid, 'fiscalized': ap.sale?.fiscal?.status === 'done' }"
-              [disabled]="ap.paid || ap.sale?.fiscal?.status === 'done'"
+              [ngClass]="{ 'paid': ap.paid, 'fiscalized': ap.sale?.fiscal?.status === 'success' }"
+              [disabled]="ap.paid || ap.sale?.fiscal?.status === 'success'"
               (click)="onPayAppointment(ap, $event)"
             >
               <mat-icon>point_of_sale</mat-icon>
-              {{ ap.paid ? (ap.sale?.fiscal?.status === 'done' ? 'Fisk.' : 'Napl.') : 'Naplati' }}
+              {{ ap.paid ? (ap.sale?.fiscal?.status === 'success' ? 'Fisk.' : 'Napl.') : 'Naplati' }}
             </button>
               </div>
               <div class="resize-handle" 
-                   *ngIf="!ap.paid && ap.sale?.fiscal?.status !== 'done'"
+                   *ngIf="!ap.paid && ap.sale?.fiscal?.status !== 'success'"
                    (click)="$event.stopPropagation()" 
                    (mousedown)="onResizeStart($event, ap)" 
                    (touchstart)="onResizeStart($event, ap)"></div>

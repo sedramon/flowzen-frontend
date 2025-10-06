@@ -447,7 +447,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             const target = event.target as HTMLElement;
             const apId = target.getAttribute('data-appointment-id') || '';
             const appointment = this.appointments.find(ap => ap.id === apId);
-            if (appointment && ((appointment as any).paid || (appointment as any).sale?.fiscal?.status === 'done')) {
+            if (appointment && ((appointment as any).paid || (appointment as any).sale?.fiscal?.status === 'success')) {
               event.interaction.stop();
               return;
             }
@@ -619,10 +619,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
             this.snackBar.open('Termin sačuvan!', 'Zatvori', {
               duration: 2000,
             }),
-          error: () =>
-            this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', {
-              duration: 2000,
-            }),
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Greška pri čuvanju termina!';
+            this.snackBar.open(errorMessage, 'Zatvori', {
+              duration: 4000,
+            });
+          },
         });
       },
     });
@@ -688,7 +690,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         const newAp: UpdateAndCreateAppointmentDto = {
           employee: emp._id!,
           startHour: result.startHour,
-          endHour: result.startHour + 1,
+          endHour: result.endHour,
           service: result.service,
           client: result.client,
           facility: result.facility || this.selectedFacility,
@@ -708,10 +710,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               duration: 2000,
             });
           },
-          error: () =>
-            this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', {
-              duration: 2000,
-            }),
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Greška pri čuvanju termina!';
+            this.snackBar.open(errorMessage, 'Zatvori', {
+              duration: 4000,
+            });
+          },
         });
       }
     });
@@ -725,7 +729,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     if (target.getAttribute('data-dragging') === 'true') return;
     
     // Ako je naplaćen, otvori preview dialog
-    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'done') {
+    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'success') {
       this.openAppointmentPreview(ap);
       return;
     }
@@ -784,10 +788,12 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
               duration: 2000,
             });
           },
-          error: () =>
-            this.snackBar.open('Greška pri izmeni termina!', 'Zatvori', {
-              duration: 2000,
-            }),
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Greška pri izmeni termina!';
+            this.snackBar.open(errorMessage, 'Zatvori', {
+              duration: 4000,
+            });
+          },
         });
       }
     });
@@ -962,7 +968,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     event.stopPropagation();
 
     // Ako je već naplaćen, otvori preview dialog umesto checkout-a
-    if (ap.paid || ap.sale?.fiscal?.status === 'done') {
+    if (ap.paid || ap.sale?.fiscal?.status === 'success') {
       this.openAppointmentPreview(ap);
       return;
     }
@@ -1037,7 +1043,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
   // ===== APPOINTMENT PREVIEW =====
   // Otvori preview dialog za naplaćene termine
   openAppointmentPreview(ap: any) {
-    const status = ap.sale?.fiscal?.status === 'done' ? 'Fiskalizovano' : 'Naplaćeno';
+    const status = ap.sale?.fiscal?.status === 'success' ? 'Fiskalizovano' : 'Naplaćeno';
     
     const dialogData = {
       appointment: ap,
@@ -1220,7 +1226,7 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
     ev.stopPropagation();
     ev.preventDefault();
     
-    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'done') return;
+    if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'success') return;
 
     const target = (ev.currentTarget as HTMLElement)?.parentElement as HTMLElement; // appointment-block
     if (!target) return;
@@ -1320,7 +1326,10 @@ export class AppoitmentsComponent implements OnInit, AfterViewInit {
         };
         this.appointmentsService.updateAppointment(a.id!, dto).subscribe({
           next: () => this.snackBar.open('Termin sačuvan!', 'Zatvori', { duration: 1200 }),
-          error: () => this.snackBar.open('Greška pri čuvanju termina!', 'Zatvori', { duration: 1500 }),
+          error: (error) => {
+            const errorMessage = error.error?.message || 'Greška pri čuvanju termina!';
+            this.snackBar.open(errorMessage, 'Zatvori', { duration: 4000 });
+          },
         });
       }, 120);
     };

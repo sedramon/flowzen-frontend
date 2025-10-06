@@ -99,7 +99,7 @@
       <div class="receipt-footer">
         <p>Hvala na poseti!</p>
         <p>Dobrodošli ponovo</p>
-        <div *ngIf="receiptData.sale.fiscal?.status === 'done'" class="fiscal-info">
+        <div *ngIf="receiptData.sale.fiscal?.status === 'success'" class="fiscal-info">
           <p>Fiskalni broj: {{ receiptData.sale.fiscal.fiscalNumber }}</p>
           <p>Korisnički broj: {{ receiptData.sale.fiscal.correlationId }}</p>
         </div>
