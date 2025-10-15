@@ -1,76 +1,150 @@
+.main-container {
+  height: 100vh;
+
+}
+
+.login-card {
+  width: 100%;
+  max-width: 450px;
+  border-radius: 25px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.8), 0 4px 16px rgba(0, 0, 0, 0.4) !important;
+  border: 2px solid rgba(126, 87, 194, 0.3) !important;
+  overflow: hidden;
+}
+
+.login-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center !important;
+  padding: 2rem;
+  gap: 1rem;
+  background: linear-gradient(60deg, #f72585, #7209b7, #3a0ca3, #4361ee, #f72585);
+  background-size: 300% 300%;
+  animation: gradientPan 15s ease infinite;
+  color: white;
+  
+  .logo {
+    width: 100px;
+    height: 85px;
+  }
+  
+  .brand-title {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    letter-spacing: 2px;
+  }
+}
+
 .login-form {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-    background-color: #2b2b2b;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    padding: 50px;
-    border-radius: 25px;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
 
+.form-label {
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.field-error {
+  color: #f44336;
+  font-size: 0.75rem;
+  margin-top: 0.25rem;
+  display: block;
+  padding-left: 0.25rem;
+}
+
+.form-input {
+  
+  ::ng-deep {
+    .p-inputtext {
+      background-color: #1a1a1a !important;
+      border: 2px solid #444 !important;
+      border-radius: 12px !important;
+      color: #e0e0e0 !important;
+      padding: 0.75rem 1rem !important;
+      font-size: 1rem !important;
+      transition: all 0.3s ease !important;
+      width: 100% !important;
+      
+      &:focus {
+        border-color: #7E57C2 !important;
+        box-shadow: 0 0 0 3px rgba(126, 87, 194, 0.2) !important;
+        background-color: #2a2a2a !important;
+        color: #e0e0e0 !important;
+      }
+      
+      &::placeholder {
+        color: #888 !important;
+      }
+    }
     
-    .error-message {
-      color: red;
-      margin-top: 25px;
-    }
-
-  
-    .form-group {
-      display: flex;
-      flex-direction: column;
-      margin-bottom: 16px;
-      width: 90%;
-      
-
-      mat-label {
-        color: white;
-      }
-
-      
-  
-      label {
-        margin-bottom: 8px;
-        font-weight: bold;
-        color: #311B92; 
-      }
-  
-      input {
-        padding: 10px 2px;
-        font-size: 16px;
-        border: 1px solid #D1C4E9;
-        outline: none;
-        transition: border-color 0.3s;
-  
-        &:focus {
-          border-color: #7E57C2;
-        }
-      }
-    }
-  
-    .login-button {
-      padding: 10px 20px;
-      background-color: #7E57C2; 
-      color: #FFFFFF;
-      border: none;
-      border-radius: 25px;
-      padding: 0px 48px;
-      font-size: 16px;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background-color 0.3s, transform 0.3s ease-in-out;
-  
-      &:hover {
-        background-color: #5E35B1;
-        transform: scale(1.05);
-      }
+    .p-password {
+      width: 100% !important;
+      position: relative !important;
     }
   }
+}
 
-  .main-container {
-    height: 100vh;
+.login-button {
+  width: 100%;
+  margin-top: 1rem;
+  
+  ::ng-deep .p-button {
+    background: linear-gradient(45deg, #7E57C2, #5E35B1) !important;
+    border: none !important;
+    border-radius: 12px !important;
+    padding: 0.875rem 2rem !important;
+    font-size: 1rem !important;
+    font-weight: 600 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1px !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 15px rgba(126, 87, 194, 0.3) !important;
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(45deg, #5E35B1, #4A2C8A) !important;
+      transform: translateY(-2px) !important;
+      box-shadow: 0 6px 20px rgba(126, 87, 194, 0.4) !important;
+    }
+    
+    &:active {
+      transform: translateY(0) !important;
+    }
+    
+    &:disabled {
+      background: #555 !important;
+      color: #888 !important;
+      cursor: not-allowed !important;
+      transform: none !important;
+      box-shadow: none !important;
+    }
   }
+}
 
+.error-message {
+  margin-top: 1rem;
   
-  
+  ::ng-deep .p-message {
+    background-color: rgba(244, 67, 54, 0.1) !important;
+    border: 1px solid #f44336 !important;
+    border-radius: 8px !important;
+    color: #f44336 !important;
+    padding: 0.75rem 1rem !important;
+    
+    .p-message-icon {
+      color: #f44336 !important;
+    }
+  }
+}

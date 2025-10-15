@@ -1,8 +1,56 @@
 @use '@angular/material' as mat;
 @import "app/themes/themestheme.css";
 
+@import "primeicons/primeicons.css";
 
+* {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
+body {
+  background-color: var(--mat-sys-background);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  font-weight: 400;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  padding: 0;
+  margin: 0;
+}
+
+/* Modern typography scale */
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Inter', sans-serif;
+  font-weight: 600;
+  line-height: 1.2;
+  letter-spacing: -0.025em;
+}
+
+/* Improve PrimeNG component typography */
+:host ::ng-deep .p-button {
+  font-weight: 500;
+  letter-spacing: 0.025em;
+}
+
+/* Button and form elements */
+button, input, textarea, select {
+  font-family: 'Inter', sans-serif;
+}
+
+:host ::ng-deep .p-inputtext,
+:host ::ng-deep .p-password input {
+  font-weight: 400;
+}
+
+:host ::ng-deep .p-card .p-card-title {
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+/* Modern focus states */
+:host ::ng-deep .p-focus {
+  box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+}
 
 
 .main-container {
@@ -148,12 +196,6 @@ mat-card.card {
 }
 
 
-body {
-  font-family: 'Roboto', Arial, sans-serif;
-  background-color: var(--mat-sys-background);
-  padding: 0px;
-  margin: 0;
-}
 
 .cdk-overlay-pane.mat-mdc-dialog-panel {
   max-width: none !important;

@@ -1,42 +1,56 @@
 <div class="main-container" fxLayout="column" fxLayoutAlign="center center">
-  <form class="login-form" (ngSubmit)="onSubmit()" #loginForm="ngForm">
-    <img src="flowzen-logo.png" alt="flowzen" style="width: 200px;">
-    <h2>Flowzen</h2>
-    <div class="form-group">
-      <mat-form-field appearance="outline" color="accent">
-        <mat-label>Username</mat-label>
-        <input
-          matInput
-          placeholder="Username"
-          name="username"
-          [(ngModel)]="credentials.username"
-          required
-        />
-      </mat-form-field>
-    </div>
-    <div class="form-group">
-      <mat-form-field appearance="outline" color="accent">
-        <mat-label>Password</mat-label>
-        <input
-          matInput
-          type="password"
-          placeholder="Password"
-          name="password"
-          [(ngModel)]="credentials.password"
-          required
-        />
-      </mat-form-field>
-    </div>
-    <button
-      mat-raised-button
-      type="submit"
-      class="login-button"
-      [disabled]="loginForm.invalid"
-    >
-      LOGIN
-    </button>
-    <div *ngIf="loginError" class="error-message">
-      <mat-error>Invalid username or password</mat-error>
-    </div>
-  </form>
+  <p-card class="login-card">
+    <ng-template pTemplate="header">
+      <div class="login-header" fxLayout="row" fxLayoutAlign="space-between center">
+        <img src="flowzen-logo.png" alt="flowzen" class="logo">
+        <h2 class="brand-title">Flowzen</h2>
+      </div>
+    </ng-template>
+    
+    <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+      <div class="form-group">
+        <label for="username" class="form-label">Username</label>
+        <div class="form-input">
+          <input
+            pInputText
+            id="username"
+            placeholder="Enter your username"
+            formControlName="username"
+            [class.ng-invalid]="isFieldInvalid('username')"
+          />
+          <small *ngIf="isFieldInvalid('username')" class="field-error">
+            {{ getFieldError('username') }}
+          </small>
+        </div>
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <div class="form-input">
+          <p-password
+            id="password"
+            placeholder="Enter your password"
+            formControlName="password"
+            [feedback]="false"
+            [class.ng-invalid]="isFieldInvalid('password')"
+          ></p-password>
+          <small *ngIf="isFieldInvalid('password')" class="field-error">
+            {{ getFieldError('password') }}
+          </small>
+        </div>
+      </div>
+      
+      <p-button
+        type="submit"
+        [label]="isLoading ? 'Logging in...' : 'LOGIN'"
+        [disabled]="loginForm.invalid || isLoading"
+        class="login-button"
+        severity="primary"
+        size="large"
+      ></p-button>
+    </form>
+    
+    <!-- Toast for notifications -->
+    <p-toast position="top-right"></p-toast>
+  </p-card>
 </div>
