@@ -36,7 +36,7 @@ export class AddUserDialogComponent implements OnInit {
   ngOnInit(): void {
     this.allRoles = this.userAdministrationService.getCurrentRoles();
 
-    this.userForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant);
+    this.userForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
 
     console.log(this.userForm.value);
   }

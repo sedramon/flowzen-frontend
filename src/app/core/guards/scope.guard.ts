@@ -17,7 +17,7 @@ export class ScopeGuard {
       take(1),
       map(user => {
 
-        if (user?.scopes.includes(requiredScope)) {
+        if (user?.scopes && user.scopes.includes(requiredScope)) {
           return true;
         }
 

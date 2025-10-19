@@ -28,7 +28,7 @@ export class CreateClientDialogComponent implements OnInit {
   constructor(private authService: AuthService, private dialogRef: MatDialogRef<CreateClientDialogComponent>) { }
 
   ngOnInit(): void {
-    this.clientForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant);
+    this.clientForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
   }
 
   createClient() {

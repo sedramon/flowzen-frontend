@@ -51,7 +51,7 @@ export class CreateServiceDialogComponent implements OnInit {
       });
     }
 
-    this.serviceForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant);
+    this.serviceForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
   }
 
   save(): void {

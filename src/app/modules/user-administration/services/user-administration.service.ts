@@ -80,7 +80,7 @@ export class UserAdministrationService {
 
                 // If the updated user is the currently authenticated user, update the AuthService user
                 const currentAuthUser = this.authService.getCurrentUser();
-                if (currentAuthUser && currentAuthUser.sub === updatedUser._id) {
+                if (currentAuthUser && currentAuthUser.userId === updatedUser._id) {
                     const updatedAuthUser = this.mapUserToAuthenticatedUser(updatedUser);
                     this.authService.updateCurrentUser(updatedAuthUser);
                 }
@@ -126,8 +126,9 @@ export class UserAdministrationService {
 
     mapUserToAuthenticatedUser(user: any): AuthenticatedUser {
         return {
-            sub: user.userId || user.sub,
-            username: user.username,
+            userId: user.userId || user.sub || '',
+            email: user.email,
+            name: user.name,
             role: typeof user.role === 'string' ? user.role : user.role?._id,
             tenant: user.tenant,
             scopes: user.scopes || [],

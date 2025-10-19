@@ -102,8 +102,8 @@ export class SettingsComponent implements OnInit, AfterViewInit {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) return;
 
-    this.tenantId = currentUser.tenant;
-    this.userId = currentUser.sub;
+    this.tenantId = currentUser.tenant!;
+    this.userId = currentUser.userId!;
 
     // facilities
     this.settingsService.getAllFacilities(this.tenantId).subscribe({

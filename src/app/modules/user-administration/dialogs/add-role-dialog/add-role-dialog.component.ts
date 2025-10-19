@@ -43,7 +43,7 @@ export class AddRoleDialogComponent implements OnInit {
   ngOnInit(): void {
     this.getAllScopes();
 
-    this.roleForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant);
+    this.roleForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
   }
 
   getAllScopes() {

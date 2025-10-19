@@ -142,7 +142,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadAllData(currentUser.tenant);
+    this.loadAllData(currentUser.tenant!);
   }
 
   /**
@@ -232,7 +232,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       this.loading = true;
     }
 
-    const params = this.buildSalesParams(currentUser!.tenant);
+    const params = this.buildSalesParams(currentUser!.tenant!);
     console.log('Loading sales with params:', params);
     
     this.posService.getSales(params)

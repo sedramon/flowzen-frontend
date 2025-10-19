@@ -1,9 +1,10 @@
 import { Role } from "./Role";
 
 export interface AuthenticatedUser {
-    sub: string;
-    username: string;
+    userId: string;
+    email: string;
+    name: string;
     role: Role | string;
-    scopes: string[];
-    tenant: string;
+    scopes?: string[];
+    tenant?: string;
 }

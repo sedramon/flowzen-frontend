@@ -1,41 +1,72 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { jwtDecode } from 'jwt-decode';
+import { HttpClient, HttpResponse } from '@angular/common/http';
+import { BehaviorSubject, Observable, tap } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthenticatedUser } from '../../models/AuthenticatedUser';
 import { environment } from '../../../environments/environment';
+import { CsrfService } from './csrf.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AuthService {
   private readonly apiUrl = environment.apiUrl;
-  private readonly TOKEN_KEY = 'access_token';
+  private readonly USER_KEY = 'user_data';
 
   private userSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
   public user$ = this.userSubject.asObservable();
 
-  constructor(private http: HttpClient, private router: Router) {
-    this.loadUserFromToken();
+  constructor(
+    private http: HttpClient, 
+    private router: Router,
+    private csrfService: CsrfService
+  ) {
+    this.loadUserFromStorage();
   }
 
   login(email: string, password: string): Observable<any> {
     return new Observable((observer) => {
       this.http
-        .post(`${this.apiUrl}/auth/login`, { email, password })
+        .post(`${this.apiUrl}/auth/login`, { email, password }, { 
+          observe: 'response',
+          withCredentials: true 
+        })
         .subscribe({
-          next: (response: any) => {
-            const token = response.access_token;
-            this.saveToken(token);
-            this.setUserFromToken(token);
+          next: (response: HttpResponse<any>) => {
+            const body = response.body;
+            
+            // Extract CSRF token from response headers
+            const csrfToken = response.headers.get('X-CSRF-Token');
+            console.log('📧 Login response headers:', response.headers.keys());
+            console.log('🎫 CSRF Token from login:', csrfToken);
+            if (csrfToken) {
+              this.csrfService.setToken(csrfToken);
+              console.log('✅ CSRF token stored in service');
+            } else {
+              console.error('❌ No CSRF token in login response!');
+            }
+
+            // Store user data from response body
+            if (body && body.user) {
+              const user: AuthenticatedUser = {
+                userId: body.user.userId,
+                tenant: body.user.tenant,
+                email: body.user.email,
+                name: body.user.name,
+                role: body.user.role,
+                scopes: body.user.scopes || []
+              };
+              console.log('user', user);
+              this.saveUser(user);
+              this.userSubject.next(user);
+            }
 
             // Redirekcija nakon prijave
-            const returnUrl = localStorage.getItem('returnUrl') || '/home'; // Preuzmi returnUrl ili default na /home
-            localStorage.removeItem('returnUrl'); // Očisti returnUrl
+            const returnUrl = localStorage.getItem('returnUrl') || '/home';
+            localStorage.removeItem('returnUrl');
             this.router.navigate([returnUrl]);
 
-            observer.next(response);
+            observer.next(body);
             observer.complete();
           },
           error: (err) => observer.error(err),
@@ -44,71 +75,73 @@ export class AuthService {
   }
 
   logout(): void {
-    this.http.post(`${this.apiUrl}/auth/logout`, {}).subscribe({
+    this.http.post(`${this.apiUrl}/auth/logout`, {}, { withCredentials: true }).subscribe({
       next: () => {
-        this.clearToken();
-        this.userSubject.next(null);
+        this.clearSession();
         this.router.navigate(['/login']);
       },
       error: () => {
-        this.clearToken();
-        this.userSubject.next(null);
+        // Even if logout fails on backend, clear local session
+        this.clearSession();
         this.router.navigate(['/login']);
       },
     });
   }
 
-  saveToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
+  /**
+   * Save user data to localStorage
+   * Note: JWT is in httpOnly cookie, we only store user info for UI purposes
+   */
+  private saveUser(user: AuthenticatedUser): void {
+    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
   }
 
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
+  /**
+   * Get user data from localStorage
+   */
+  private getStoredUser(): AuthenticatedUser | null {
+    const userData = localStorage.getItem(this.USER_KEY);
+    if (!userData) return null;
+    
+    try {
+      return JSON.parse(userData);
+    } catch {
+      return null;
+    }
   }
 
-  clearToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+  /**
+   * Clear all session data
+   */
+  private clearSession(): void {
+    localStorage.removeItem(this.USER_KEY);
+    localStorage.removeItem('returnUrl');
+    this.csrfService.clearToken();
+    this.userSubject.next(null);
   }
 
   updateCurrentUser(updatedUser: AuthenticatedUser): void {
+    this.saveUser(updatedUser);
     this.userSubject.next(updatedUser);
   }
 
+  /**
+   * Check if user is logged in
+   * Note: This checks if we have user data stored.
+   * The backend validates the actual JWT from the httpOnly cookie.
+   */
   isLoggedIn(): boolean {
-    const token = this.getToken();
-    if (!token) return false;
-
-    try {
-      const decodedToken: { exp: number } = jwtDecode(token);
-      const now = Math.floor(Date.now() / 1000);
-
-      if (decodedToken.exp < now) {
-        this.clearToken();
-        return false;
-      }
-
-      return true;
-    } catch (error) {
-      console.error('Invalid token:', error);
-      this.clearToken(); // Clear corrupted token
-      return false;
-    }
+    return this.userSubject.getValue() !== null;
   }
 
-  private setUserFromToken(token: string): void {
-    try {
-      const decodedToken: AuthenticatedUser =
-        jwtDecode<AuthenticatedUser>(token);
-      this.userSubject.next(decodedToken);
-    } catch {
-      this.userSubject.next(null);
-    }
-  }
-
-  private loadUserFromToken(): void {
-    const token = this.getToken();
-    if (token) {
-      this.setUserFromToken(token);
+  /**
+   * Load user data from localStorage on app initialization
+   * Note: The actual authentication is validated by the backend via the httpOnly cookie
+   */
+  private loadUserFromStorage(): void {
+    const user = this.getStoredUser();
+    if (user) {
+      this.userSubject.next(user);
     }
   }
 
@@ -122,14 +155,14 @@ export class AuthService {
   }
 
   isModuleEnabled(moduleName: string): boolean {
-  const scopes = this.getScopes();
+    const scopes = this.getScopes();
 
-  const normalizedScopes = scopes.map(s => s.toLowerCase().trim());
-  const normalizedModule = moduleName.toLowerCase().trim();
+    const normalizedScopes = scopes.map(s => s.toLowerCase().trim());
+    const normalizedModule = moduleName.toLowerCase().trim();
 
-  const has = normalizedScopes.includes(normalizedModule);
+    const has = normalizedScopes.includes(normalizedModule);
 
-  return has;
-}
+    return has;
+  }
 
 }

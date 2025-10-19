@@ -55,7 +55,7 @@ export class EditCreateArticleDialog implements OnInit {
       remark: [''],
     }) as typeof this.articleForm;
 
-    this.articleForm.get('tenant')!.setValue(this.authService.getCurrentUser()!.tenant);
+    this.articleForm.get('tenant')!.setValue(this.authService.getCurrentUser()!.tenant!);
 
     if (this.data.article) {
       this.isEditMode = true;
