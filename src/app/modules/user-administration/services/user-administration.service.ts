@@ -128,6 +128,7 @@ export class UserAdministrationService {
         return {
             userId: user.userId || user.sub || '',
             email: user.email,
+            username: user.username || user.email,
             name: user.name,
             role: typeof user.role === 'string' ? user.role : user.role?._id,
             tenant: user.tenant,

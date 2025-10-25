@@ -52,6 +52,7 @@ export class AuthService {
                 userId: body.user.userId,
                 tenant: body.user.tenant,
                 email: body.user.email,
+                username: body.user.username || body.user.email,
                 name: body.user.name,
                 role: body.user.role,
                 scopes: body.user.scopes || []
