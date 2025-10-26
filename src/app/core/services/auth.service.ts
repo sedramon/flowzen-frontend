@@ -35,15 +35,9 @@ export class AuthService {
           next: (response: HttpResponse<any>) => {
             const body = response.body;
             
-            // Extract CSRF token from response headers
             const csrfToken = response.headers.get('X-CSRF-Token');
-            console.log('📧 Login response headers:', response.headers.keys());
-            console.log('🎫 CSRF Token from login:', csrfToken);
             if (csrfToken) {
               this.csrfService.setToken(csrfToken);
-              console.log('✅ CSRF token stored in service');
-            } else {
-              console.error('❌ No CSRF token in login response!');
             }
 
             // Store user data from response body
@@ -57,12 +51,10 @@ export class AuthService {
                 role: body.user.role,
                 scopes: body.user.scopes || []
               };
-              console.log('user', user);
               this.saveUser(user);
               this.userSubject.next(user);
             }
 
-            // Redirekcija nakon prijave
             const returnUrl = localStorage.getItem('returnUrl') || '/home';
             localStorage.removeItem('returnUrl');
             this.router.navigate([returnUrl]);

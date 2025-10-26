@@ -1,0 +1,40 @@
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+::ng-deep .mat-mdc-dialog-container {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+mat-dialog-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 24px;
+  margin: 0;
+  flex: 1;
+  overflow: auto;
+}
+
+.full-width {
+  width: 100%;
+}
+
+mat-dialog-actions {
+  padding: 16px 24px 24px 24px;
+  gap: 8px;
+  margin: 0;
+  border-top: 1px solid rgba(0, 0, 0, 0.12);
+}
+
+mat-form-field {
+  width: 100%;
+}
+
+h2[mat-dialog-title] {
+  font-weight: 500;
+}

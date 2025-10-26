@@ -17,6 +17,11 @@ import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatSortModule } from '@angular/material/sort';
 import { MatTableModule } from '@angular/material/table';
+import { MatMenuModule } from '@angular/material/menu';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { UserAdministrationService } from '../../user-administration/services/user-administration.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { User } from '../../../models/User';
 
 @Component({
   selector: 'app-client-detail-view',
@@ -37,6 +42,8 @@ import { MatTableModule } from '@angular/material/table';
     MatDividerModule,
     MatCardModule,
     MatButtonModule,
+    MatMenuModule,
+    MatProgressSpinnerModule,
     FormsModule,
     ReactiveFormsModule,
     MatIconModule,
@@ -45,15 +52,31 @@ import { MatTableModule } from '@angular/material/table';
   templateUrl: './client-detail-view.component.html',
   styleUrl: './client-detail-view.component.scss',
 })
+/**
+ * Client Detail View Component
+ * 
+ * Komponenta za prikaz i editovanje detalja klijenta.
+ * Glavne funkcionalnosti:
+ * - Editovanje klijenta (ime, email, telefon, adresa)
+ * - Povezivanje klijenta sa User nalogom (mapping Client entity sa User entity)
+ * - Diskonektovanje User naloga
+ * - Promena povezanog User naloga
+ */
 export class ClientDetailViewComponent implements OnInit {
   private clientId!: string;
   client!: Client;
   selectedSection: 'details'|'bills'|'appointments'|'remarks' = 'details';
   sectionTitle: string = 'Client Details';
   hasChanged: boolean = false;
+  availableUsers: User[] = [];
+  allUsers: User[] = [];
+  connectedUser: User | null = null;
+  isLoadingUsers: boolean = true;
 
   constructor(
     private clientsService: ClientsService,
+    private usersService: UserAdministrationService,
+    private authService: AuthService,
     private route: ActivatedRoute,
     private snackBar: MatSnackBar
   ) {}
@@ -63,6 +86,108 @@ export class ClientDetailViewComponent implements OnInit {
 
     this.clientsService.getClientById(this.clientId).subscribe((client) => {
       this.client = client;
+      if (client.user) {
+        this.loadConnectedUser(client.user);
+      }
+    });
+
+    // Load available users
+    const currentUser = this.authService.getCurrentUser();
+    if (currentUser?.tenant) {
+      this.loadAllUsers(currentUser.tenant);
+    }
+  }
+
+  /**
+   * Učitava sve dostupne User naloge sa rolom 'client'.
+   * Filtrira naloge da prikaže samo one koji NISU povezani sa drugim klijentima.
+   */
+  loadAllUsers(tenant: string) {
+    this.usersService.fetchUsers(tenant).subscribe({
+      next: (users: User[]) => {
+        this.allUsers = users.filter(u => {
+          const role = typeof u.role === 'object' ? u.role.name : u.role;
+          return role === 'client' || role === 'Client';
+        });
+
+        // Load all clients to check which users are already connected
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser?.tenant) {
+          this.clientsService.getClientsAll(currentUser.tenant).subscribe({
+            next: (clients: Client[]) => {
+              // Filter out already connected users (except current user if connected)
+              const connectedUserIds = clients
+                .filter(c => c.user && c._id !== this.client._id)
+                .map(c => c.user);
+              
+              this.availableUsers = this.allUsers.filter(u => 
+                !connectedUserIds.includes(u._id)
+              );
+              this.isLoadingUsers = false;
+            }
+          });
+        } else {
+          this.isLoadingUsers = false;
+        }
+      }
+    });
+  }
+
+  loadConnectedUser(userId: string) {
+    this.usersService.fetchUsers(this.authService.getCurrentUser()?.tenant!).subscribe({
+      next: (users: User[]) => {
+        this.connectedUser = users.find(u => u._id === userId) || null;
+      }
+    });
+  }
+
+  /**
+   * Povezuje klijenta sa User nalogom.
+   * Omogućava User nalog da se prijavi i vidi podatke o klijentu.
+   */
+  connectUser(userId: string) {
+    this.clientsService.connectUserToClient(this.clientId, userId).subscribe({
+      next: () => {
+        this.showSnackbar('Klijent uspešno povezan sa User nalogom');
+        this.clientsService.getClientById(this.clientId).subscribe((client) => {
+          this.client = client;
+          if (client.user) {
+            this.loadConnectedUser(client.user);
+          }
+        });
+        // Refresh available users
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser?.tenant) {
+          this.loadAllUsers(currentUser.tenant);
+        }
+      },
+      error: (error) => {
+        console.error('Error connecting user:', error);
+        this.showSnackbar('Greška pri povezivanju', true);
+      }
+    });
+  }
+
+  /**
+   * Diskonektuje User nalog od klijenta.
+   * Nakon diskonektovanja, User nalog više neće moći da pristupi klijent podacima.
+   */
+  disconnectUser() {
+    this.clientsService.disconnectUserFromClient(this.clientId).subscribe({
+      next: () => {
+        this.showSnackbar('User nalog uspešno diskonektovan');
+        this.client.user = undefined;
+        this.connectedUser = null;
+        // Refresh available users
+        const currentUser = this.authService.getCurrentUser();
+        if (currentUser?.tenant) {
+          this.loadAllUsers(currentUser.tenant);
+        }
+      },
+      error: (error) => {
+        console.error('Error disconnecting user:', error);
+        this.showSnackbar('Greška pri diskonektovanju', true);
+      }
     });
   }
 

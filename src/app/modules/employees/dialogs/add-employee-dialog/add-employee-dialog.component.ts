@@ -19,7 +19,7 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeesService } from '../../services/employees.service';
 import { Facility } from '../../../../models/Facility';
-import { AppointmentsService } from '../../../appoitments/services/appointment.service';
+import { AppointmentsService } from '../../../appointments/services/appointment.service';
 
 @Component({
   selector: 'app-add-employee-dialog',

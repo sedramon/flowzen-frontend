@@ -10,8 +10,13 @@
       <mat-icon>home</mat-icon>
     </button>
 
-    <button *ngIf="authService.isModuleEnabled('scope_appoitments:access')" mat-icon-button matTooltip="Appointments"
-      matTooltipPosition="below" routerLink="/appoitments" routerLinkActive="active" class="nav-btn">
+    <button *ngIf="authService.isModuleEnabled('scope_client_dashboard:access')" mat-icon-button matTooltip="Client Dashboard" matTooltipPosition="below"
+      routerLink="/client-dashboard" routerLinkActive="active" class="nav-btn">
+      <mat-icon>dashboard</mat-icon>
+    </button>
+
+    <button *ngIf="authService.isModuleEnabled('scope_appointments:access')" mat-icon-button matTooltip="Appointments"
+      matTooltipPosition="below" routerLink="/appointments" routerLinkActive="active" class="nav-btn">
       <mat-icon>event</mat-icon>
     </button>
 
@@ -91,7 +96,7 @@
 
 
     <!-- Dropdown Menu A trigger -->
-    <button mat-button [matMenuTriggerFor]="menuA" class="nav-btn text-btn">
+    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuA" class="nav-btn text-btn">
       Menu A
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
@@ -102,7 +107,7 @@
     </mat-menu>
 
     <!-- Dropdown Menu B trigger -->
-    <button mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
+    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
       Menu B
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
@@ -111,11 +116,11 @@
       <button mat-menu-item>Placeholder B2</button>
     </mat-menu>
     <!-- Dropdown Menu C trigger -->
-    <button mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
+    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuC" class="nav-btn text-btn">
       Menu C
       <mat-icon>arrow_drop_down</mat-icon>
     </button>
-    <mat-menu #menuB="matMenu">
+    <mat-menu #menuC="matMenu">
       <button mat-menu-item>Placeholder C1</button>
       <button mat-menu-item>Placeholder C2</button>
     </mat-menu>

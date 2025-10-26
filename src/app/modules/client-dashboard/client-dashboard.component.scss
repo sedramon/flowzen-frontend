@@ -1,0 +1,178 @@
+.dashboard-container {
+  padding: 24px;
+  max-width: 1200px;
+  margin: 0 auto;
+  min-height: calc(100vh - 64px);
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: 40px;
+  padding: 30px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 16px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.welcome-header h1 {
+  color: white;
+  margin: 0 0 8px 0;
+  font-size: 32px;
+  font-weight: 700;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.welcome-header p {
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0;
+  font-size: 16px;
+  font-weight: 400;
+}
+
+.dashboard-content {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+}
+
+.section {
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  overflow: hidden;
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.section-header mat-icon {
+  font-size: 24px;
+  width: 24px;
+  height: 24px;
+  color: #667eea;
+}
+
+.section-header h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #cbcbcb;
+}
+
+.section-content {
+  padding: 20px;
+  min-height: 280px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #666;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.empty-state mat-icon {
+  font-size: 64px;
+  width: 64px;
+  height: 64px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+.empty-state p {
+  margin: 0 0 24px 0;
+  font-size: 16px;
+}
+
+.empty-state button {
+  min-width: 180px;
+  height: 48px;
+  font-weight: 500;
+}
+
+.appointments-list, .waitlist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.appointment-card, .waitlist-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+}
+
+.appointment-card:hover, .waitlist-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+
+.appointment-card button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.appointment-details h3, .waitlist-details h3 {
+  margin: 0 0 8px 0;
+  color: #2c3e50;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.waitlist-details {
+  flex: 1;
+}
+
+.waitlist-details h3 {
+  margin: 0 0 8px 0;
+}
+
+.appointment-details p, .waitlist-details p {
+  margin: 4px 0;
+  color: #666;
+  font-size: 14px;
+}
+
+.date {
+  font-weight: 500;
+  color: #667eea !important;
+}
+
+.waitlist-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.waitlist-actions button mat-icon {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+}
+
+.waitlist-actions button[mat-raised-button] {
+  min-width: 120px;
+  height: 40px;
+}
+
+@media (max-width: 768px) {
+  .dashboard-content {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  
+  .welcome-header h1 {
+    font-size: 28px;
+  }
+}

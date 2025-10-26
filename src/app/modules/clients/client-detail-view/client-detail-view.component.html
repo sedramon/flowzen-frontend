@@ -15,6 +15,7 @@
 
             </div>
 
+            <ng-container *ngIf="client">
             <ng-container [ngSwitch]="selectedSection">
                 <mat-card-content *ngSwitchCase="'details'">
                 <div fxLayout="column" fxLayoutGap="16px">
@@ -43,6 +44,57 @@
                         <mat-label>Client Phone</mat-label>
                         <input matInput [(ngModel)]="client.contactPhone" (ngModelChange)="hasChanged = true" name="phone">
                     </mat-form-field>
+
+                    <div class="user-connection-card">
+                        <h3 class="card-title">
+                            <mat-icon>{{ client.user ? 'person' : 'person_add' }}</mat-icon>
+                            Povezivanje sa User nalogom
+                        </h3>
+                        
+                        <div *ngIf="client.user && connectedUser" class="connected-user">
+                            <p class="connected-label"><strong>User nalog</strong></p>
+                            <div class="user-info">
+                                <span class="user-name">{{ connectedUser.name }}</span>
+                                <span class="user-email">{{ connectedUser.email }}</span>
+                            </div>
+                            <div class="user-actions">
+                                <button mat-stroked-button color="warn" (click)="disconnectUser()">
+                                    <mat-icon>link_off</mat-icon>
+                                    Diskonektuj nalog
+                                </button>
+                                <button mat-stroked-button color="primary" [matMenuTriggerFor]="userMenu" [disabled]="availableUsers.length === 0">
+                                    <mat-icon>swap_horiz</mat-icon>
+                                    Promeni nalog
+                                </button>
+                            </div>
+                        </div>
+
+                        <mat-menu #userMenu="matMenu" xPosition="before">
+                            <button mat-menu-item *ngFor="let user of availableUsers" (click)="connectUser(user._id!)">
+                                <div>
+                                    <p style="margin: 0; font-weight: 500;">{{ user.name }}</p>
+                                    <p style="margin: 0; color: #666; font-size: 0.9em;">{{ user.email }}</p>
+                                </div>
+                            </button>
+                        </mat-menu>
+
+                        <div *ngIf="!client.user && isLoadingUsers" class="loading-section">
+                            <mat-spinner diameter="24"></mat-spinner>
+                        </div>
+
+                        <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length > 0" class="select-user-section">
+                            <p class="select-label">Izaberi User nalog sa kojim želiš da povežeš ovog klijenta:</p>
+                            <button mat-raised-button color="primary" [matMenuTriggerFor]="userMenu">
+                                <mat-icon>person_add</mat-icon>
+                                Izaberi User nalog ({{ availableUsers.length }} dostupno)
+                            </button>
+                        </div>
+
+                        <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length === 0 && allUsers.length > 0" class="no-users-warning">
+                            <p>⚠️ Svi User nalozi su već povezani sa drugim klijentima</p>
+                        </div>
+                    </div>
+
                     <button mat-raised-button color="primary" (click)="saveClient()" [disabled]="!hasChanged">Save</button>
                 </div>
             </mat-card-content>
@@ -56,6 +108,7 @@
             <mat-card-content *ngSwitchCase="'remarks'">
                 <h1>Remarks</h1>
             </mat-card-content>
+            </ng-container>
             </ng-container>
             
         </mat-card>

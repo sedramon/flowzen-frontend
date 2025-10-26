@@ -49,3 +49,98 @@
         }
     }
 }
+
+.user-connection-card {
+    margin-top: 24px;
+    padding: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.03);
+    
+    .card-title {
+        margin: 0 0 16px 0;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #fff;
+        font-size: 18px;
+    }
+
+    .connected-user {
+        padding: 20px;
+        background: rgba(67, 97, 238, 0.15);
+        border-radius: 6px;
+        margin-bottom: 16px;
+        border: 1px solid rgba(67, 97, 238, 0.3);
+        
+        .connected-label {
+            margin: 0 0 14px 0;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 16px;
+            
+            .user-name {
+                color: #4361ee;
+                font-weight: 600;
+                font-size: 16px;
+            }
+
+            .user-email {
+                color: rgba(255, 255, 255, 0.7);
+                font-size: 14px;
+            }
+        }
+
+        .user-actions {
+            display: flex;
+            justify-content: space-between;
+            padding-top: 12px;
+            border-top: 1px solid rgba(67, 97, 238, 0.2);
+
+            button {
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                font-size: 13px;
+                font-weight: 500;
+            }
+        }
+    }
+
+    .loading-section {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+    }
+
+    .select-user-section {
+        margin-bottom: 16px;
+        
+        .select-label {
+            margin: 0 0 12px 0;
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+        }
+    }
+
+    .no-users-warning {
+        padding: 12px;
+        background: rgba(198, 40, 40, 0.15);
+        border: 1px solid rgba(198, 40, 40, 0.3);
+        border-radius: 4px;
+        
+        p {
+            margin: 0;
+            color: #ff5252;
+        }
+    }
+}

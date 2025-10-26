@@ -116,4 +116,59 @@ export class AppointmentsService {
     
     return this.http.get<any[]>(`${this.apiUrl}/employees/with-working-shift`, { params });
   }
+
+  // Client self-service methods
+  getClientAppointments(clientId: string, tenantId: string): Observable<Appointment[]> {
+    const params = { client: clientId, tenant: tenantId };
+    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments`, { params });
+  }
+
+  cancelAppointment(appointmentId: string): Observable<{ message: string }> {
+    return this.http.delete<{ message: string }>(`${this.apiUrl}/appointments/${appointmentId}`);
+  }
+
+  // ============================================
+  // WAITLIST METHODS
+  // ============================================
+  
+  /**
+   * Dodaje klijenta na listu čekanja.
+   * Koristi se kada termin nije dostupan ali klijent želi da čeka.
+   */
+  addToWaitlist(waitlistData: any) {
+    return this.http.post(`${this.apiUrl}/appointments/waitlist`, {
+      ...waitlistData,
+      tenant: this.tenantId
+    });
+  }
+
+  /**
+   * Vraća sve waitlist entries za određenog klijenta.
+   * Prikazuje se u client dashboard-u.
+   */
+  getClientWaitlist(clientId: string): Observable<any[]> {
+    const params = { tenant: this.tenantId };
+    return this.http.get<any[]>(`${this.apiUrl}/appointments/waitlist/client/${clientId}`, { params });
+  }
+
+  /**
+   * Uklanja klijenta sa liste čekanja.
+   * Koristi se kada klijent više ne želi da čeka.
+   */
+  removeFromWaitlist(waitlistId: string, clientId: string) {
+    const params = { clientId, tenant: this.tenantId };
+    return this.http.delete(`${this.apiUrl}/appointments/waitlist/${waitlistId}`, { params });
+  }
+
+  /**
+   * Prihvata termin sa liste čekanja.
+   * Poziva se sa claimToken koji je dobijen email notifikacijom.
+   * Kreira appointment i uklanja sve ostale sa liste za taj time slot.
+   */
+  claimAppointmentFromWaitlist(claimToken: string, clientId: string) {
+    return this.http.post(`${this.apiUrl}/appointments/waitlist/claim`, {
+      claimToken,
+      clientId
+    });
+  }
 }

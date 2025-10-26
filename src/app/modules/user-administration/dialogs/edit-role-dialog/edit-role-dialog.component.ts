@@ -165,10 +165,15 @@ export class EditRoleDialogComponent implements OnInit {
 
     const updatedFullIds = [...filtered, ...selectedForModule];
 
+    // Ensure tenant is a string
+    const tenantId = typeof this.data.role.tenant === 'string' 
+      ? this.data.role.tenant 
+      : this.data.role.tenant?._id || this.data.role.tenant?.id || this.data.role.tenant;
+
     this.dialogRef.close({
       name: this.roleForm.controls.name.value,
       availableScopes: updatedFullIds,
-      tenant: this.data.role.tenant,
+      tenant: tenantId,
     });
   }
 

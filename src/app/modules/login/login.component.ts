@@ -1,8 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../core/services/auth.service';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
@@ -24,13 +24,14 @@ import { MessageService } from 'primeng/api';
     PasswordModule, 
     CardModule, 
     MessageModule,
-    ToastModule
+    ToastModule,
+    RouterModule
   ],
   providers: [MessageService],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss'
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   loginForm: FormGroup;
   isLoading = false;
   returnUrl: string = '/dashboard';
@@ -45,12 +46,22 @@ export class LoginComponent {
     this.loginForm = this.fb.group({
       username: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
       password: ['', [Validators.required]]
-      // password: ['', [Validators.required, Validators.minLength(8), Validators.pattern(/^(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/)]]
     });
 
-    // Get return URL from query parameters
     const returnUrl = this.route.snapshot.queryParams['returnUrl'];
     this.returnUrl = returnUrl ? decodeURIComponent(returnUrl) : '/dashboard';
+  }
+
+  ngOnInit() {
+    const fromClient = this.route.snapshot.queryParams['fromClient'];
+    if (fromClient) {
+      setTimeout(() => {
+        const container = document.querySelector('.main-container');
+        if (container) {
+          container.classList.add('fade-in-from-client');
+        }
+      }, 100);
+    }
   }
 
   onSubmit(): void {
@@ -61,13 +72,11 @@ export class LoginComponent {
       this.authService.login(username, password).subscribe({
         next: (response) => {
           this.isLoading = false;
-          console.log('Login successful:', response);
           this.messageService.add({
             severity: 'success',
             summary: 'Success',
             detail: 'Login successful!'
           });
-          // Auth service handles navigation with returnUrl
         },
         error: (err) => {
           this.isLoading = false;

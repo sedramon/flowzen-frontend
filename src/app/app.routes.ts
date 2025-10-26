@@ -3,7 +3,7 @@ import { HomeComponent } from './modules/home/home.component';
 import { LoginComponent } from './modules/login/login.component';
 import { AuthGuard } from './core/guards/auth.guard';
 import { LayoutComponent } from './layout/layout.component';
-import { AppoitmentsComponent } from './modules/appoitments/appoitments.component';
+import { AppointmentsComponent } from './modules/appointments/appointments.component';
 import { ClientsComponent } from './modules/clients/clients.component';
 import { EmployeesComponent } from './modules/employees/employees.component';
 import { ScopeGuard } from './core/guards/scope.guard';
@@ -21,6 +21,8 @@ import { PosSettingsComponent } from './modules/pos/components/settings/pos-sett
 import { CashSessionDashboardComponent } from './modules/pos/components/cash-management/cash-session-dashboard/cash-session-dashboard.component';
 import { CashReportsComponent } from './modules/pos/components/reports/cash-reports/cash-reports.component';
 import { CashAnalyticsComponent } from './modules/pos/components/cash-management/cash-analytics/cash-analytics.component';
+import { ClientLoginComponent } from './modules/client-login/client-login.component';
+import { ClientDashboardComponent } from './modules/client-dashboard/client-dashboard.component';
 
 export const routes: Routes = [
   {
@@ -39,11 +41,21 @@ export const routes: Routes = [
         }
       },
       {
-        path: 'appoitments',
-        component: AppoitmentsComponent,
+        path: 'client-dashboard',
+        component: ClientDashboardComponent,
         canActivate: [ScopeGuard],
         data: {
-          scope: 'scope_appoitments:access',
+          scope: 'scope_client_dashboard:access',
+          title: 'Client Dashboard',
+          icon: 'dashboard'
+        }
+      },
+      {
+        path: 'appointments',
+        component: AppointmentsComponent,
+        canActivate: [ScopeGuard],
+        data: {
+          scope: 'scope_appointments:access',
           title: 'Appointments',
           icon: 'event'
         }
@@ -222,6 +234,7 @@ export const routes: Routes = [
       }
     ],
   },
-  { path: 'login', component: LoginComponent }, // Login route without the layout
-  { path: '**', redirectTo: 'login' }           // Redirect unknown routes to login
+  { path: 'login', component: LoginComponent },
+  { path: 'client-login', component: ClientLoginComponent },
+  { path: '**', redirectTo: 'login' }
 ];

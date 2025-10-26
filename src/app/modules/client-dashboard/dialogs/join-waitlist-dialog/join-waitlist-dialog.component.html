@@ -1,0 +1,81 @@
+<div class="dialog-container">
+  <h2 mat-dialog-title>Prijavi se na listu čekanja</h2>
+
+  <form [formGroup]="waitlistForm" (ngSubmit)="onSubmit()">
+    <mat-dialog-content>
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Lokacija</mat-label>
+        <mat-select formControlName="facility" (selectionChange)="onFacilityChange($event.value)">
+          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
+            {{ facility.name }}
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="waitlistForm.get('facility')?.hasError('required')">
+          Obavezno polje
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Zaposleni</mat-label>
+        <mat-select formControlName="employee">
+          <mat-option *ngFor="let employee of employees" [value]="employee._id">
+            {{ employee.firstName }} {{ employee.lastName }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="employees.length === 0">Izaberi lokaciju prvo</mat-hint>
+        <mat-error *ngIf="waitlistForm.get('employee')?.hasError('required')">
+          Obavezno polje
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Usluga</mat-label>
+        <mat-select formControlName="service" (selectionChange)="onServiceChange()">
+          <mat-option *ngFor="let service of services" [value]="service._id">
+            {{ service.name }} ({{ service.durationMinutes }}min, {{ service.price }} RSD)
+          </mat-option>
+        </mat-select>
+        <mat-error *ngIf="waitlistForm.get('service')?.hasError('required')">
+          Obavezno polje
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Preferirani datum</mat-label>
+        <input matInput [matDatepicker]="picker" formControlName="preferredDate" [min]="today">
+        <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+        <mat-datepicker #picker></mat-datepicker>
+        <mat-error *ngIf="waitlistForm.get('preferredDate')?.hasError('required')">
+          Obavezno polje
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Preferirano vreme</mat-label>
+        <mat-select formControlName="preferredStartHour" (selectionChange)="onServiceChange()">
+          <mat-option *ngFor="let slot of timeSlots" [value]="slot">
+            {{ slot }}
+          </mat-option>
+        </mat-select>
+        <mat-hint *ngIf="!waitlistForm.get('facility')?.value">Izaberi lokaciju prvo</mat-hint>
+        <mat-error *ngIf="waitlistForm.get('preferredStartHour')?.hasError('required')">
+          Obavezno polje
+        </mat-error>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width" *ngIf="waitlistForm.get('preferredEndHour')?.value">
+        <mat-label>Očekivano vreme završetka</mat-label>
+        <input matInput formControlName="preferredEndHour" readonly>
+        <mat-hint>Automatski izračunato na osnovu dužine usluge</mat-hint>
+      </mat-form-field>
+    </mat-dialog-content>
+
+    <mat-dialog-actions align="end">
+      <button mat-button type="button" (click)="onCancel()">Otkaži</button>
+      <button mat-raised-button color="primary" type="submit" [disabled]="waitlistForm.invalid || loading">
+        <span *ngIf="loading">Prijavljivanje...</span>
+        <span *ngIf="!loading">Prijavi se</span>
+      </button>
+    </mat-dialog-actions>
+  </form>
+</div>

@@ -1,0 +1,80 @@
+<div class="dashboard-container">
+  <div class="welcome-header">
+    <h1>Dobrodošli, {{ user?.name || 'Klijent' }}!</h1>
+    <p>Upravljajte svojim terminima i rezervacijama</p>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Moji termini -->
+    <div class="section">
+      <div class="section-header">
+        <mat-icon>event</mat-icon>
+        <h2>Moji termini</h2>
+      </div>
+      
+      <div class="section-content">
+        <div *ngIf="appointments.length === 0" class="empty-state">
+          <mat-icon>event_available</mat-icon>
+          <p>Nemate zakazanih termina</p>
+          <button mat-raised-button color="primary" (click)="bookAppointment()">
+            Zakaži termin
+          </button>
+        </div>
+        
+        <div *ngIf="appointments.length > 0" class="appointments-list">
+          <div *ngFor="let appointment of appointments" class="appointment-card">
+            <div class="appointment-details">
+              <h3>{{ appointment.service?.name || 'Usluga' }}</h3>
+              <p class="date">{{ formatDate(appointment.date) }} - {{ formatTime(appointment.startHour) }} - {{ formatTime(appointment.endHour) }}</p>
+              <p class="employee" *ngIf="appointment.employee">
+                Zaposleni: {{ appointment.employee.firstName }} {{ appointment.employee.lastName }}
+              </p>
+            </div>
+            <button mat-icon-button color="warn" (click)="cancelAppointment(appointment)">
+              <mat-icon>cancel</mat-icon>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Lista čekanja -->
+    <div class="section">
+      <div class="section-header">
+        <mat-icon>schedule</mat-icon>
+        <h2>Lista čekanja</h2>
+      </div>
+      
+      <div class="section-content">
+        <div *ngIf="waitlistEntries.length === 0" class="empty-state">
+          <mat-icon>schedule</mat-icon>
+          <p>Niste na listi čekanja</p>
+          <button mat-raised-button color="primary" (click)="joinWaitlist()">
+            Prijavi se na čekanje
+          </button>
+        </div>
+        
+        <div *ngIf="waitlistEntries.length > 0" class="waitlist-list">
+          <div *ngFor="let entry of waitlistEntries" class="waitlist-card">
+            <div class="waitlist-details">
+              <h3>{{ entry.service?.name || 'Usluga' }}</h3>
+              <p class="date">Datum: {{ formatDate(entry.date) }}</p>
+              <p class="time">Vreme: {{ formatTime(entry.startHour) }} - {{ formatTime(entry.endHour) }}</p>
+              <mat-chip [color]="entry.isNotified ? 'accent' : 'primary'" selected>
+                {{ entry.isNotified ? 'Obavešteni' : 'Čekanje' }}
+              </mat-chip>
+            </div>
+            <div class="waitlist-actions">
+              <button mat-raised-button color="accent" (click)="claimAppointment(entry)" [disabled]="!entry.isNotified">
+                Prihvati termin
+              </button>
+              <button mat-icon-button color="warn" (click)="removeFromWaitlist(entry)">
+                <mat-icon>remove</mat-icon>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

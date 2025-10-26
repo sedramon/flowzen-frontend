@@ -6,6 +6,7 @@ export interface Client {
     contactPhone: string
     address: string
     tenant: string
+    user?: string
     createdAt?: Date
     updatedAt?: Date
 }

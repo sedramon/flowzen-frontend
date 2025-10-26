@@ -82,7 +82,7 @@ export const CUSTOM_DATE_FORMATS = {
 };
 
 @Component({
-  selector: 'app-appoitments',
+  selector: 'app-appointments',
   standalone: true,
   imports: [
     CommonModule,
@@ -101,8 +101,8 @@ export const CUSTOM_DATE_FORMATS = {
     MatSelectModule,
     PosCheckoutComponent
   ],
-  templateUrl: './appoitments.component.html',
-  styleUrls: ['./appoitments.component.scss'],
+  templateUrl: './appointments.component.html',
+  styleUrls: ['./appointments.component.scss'],
   providers: [
     {
       provide: DateAdapter,
@@ -154,7 +154,7 @@ export const CUSTOM_DATE_FORMATS = {
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class AppoitmentsComponent implements OnInit, AfterViewInit {
+export class AppointmentsComponent implements OnInit, AfterViewInit {
   // ===== VIEW CHILD REFERENCES =====
   // Angular ViewChild references for DOM elements
   @ViewChild('timeColumn', { static: false }) timeColumnRef!: ElementRef;
