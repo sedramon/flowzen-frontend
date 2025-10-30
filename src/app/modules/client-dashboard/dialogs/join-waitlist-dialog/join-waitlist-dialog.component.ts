@@ -148,6 +148,10 @@ export class JoinWaitlistDialogComponent implements OnInit {
       const minEnd = (hour === closingHour.hour) ? closingHour.min : 60;
       
       for (let min = minStart; min <= minEnd; min += 30) {
+        // Ne dodavaj slotove sa minutima >= 60 (npr. 08:60 -> treba 09:00)
+        if (min >= 60) {
+          continue;
+        }
         const hourStr = String(hour).padStart(2, '0');
         const minStr = String(min).padStart(2, '0');
         slots.push(`${hourStr}:${minStr}`);
@@ -208,31 +212,42 @@ export class JoinWaitlistDialogComponent implements OnInit {
 
   /**
    * Kada se odabere usluga, automatski se izračunava endHour.
-   * Na osnovu durationMinutes usluge, dodaje se trajanje na startHour.
    */
   onServiceChange(): void {
+    this.calculateEndHour();
+  }
+
+  /**
+   * Kada se promeni start hour, automatski se izračunava endHour na osnovu usluge.
+   */
+  onStartHourChange(): void {
+    this.calculateEndHour();
+  }
+
+  /**
+   * Izračunava krajnje vreme na osnovu usluge i početnog vremena.
+   */
+  calculateEndHour(): void {
     const serviceId = this.waitlistForm.get('service')?.value;
     const service = this.services.find(s => s._id === serviceId);
+    const preferredStartHour = this.waitlistForm.get('preferredStartHour')?.value;
     
-    if (service) {
+    if (service && preferredStartHour) {
       const durationMinutes = service.durationMinutes;
       const hours = Math.floor(durationMinutes / 60);
       const minutes = durationMinutes % 60;
       
-      const preferredStartHour = this.waitlistForm.get('preferredStartHour')?.value;
-      if (preferredStartHour) {
-        const [startH, startM] = preferredStartHour.split(':').map(Number);
-        let endH = startH + hours;
-        let endM = startM + minutes;
-        
-        if (endM >= 60) {
-          endH += 1;
-          endM -= 60;
-        }
-        
-        const endHour = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-        this.waitlistForm.patchValue({ preferredEndHour: endHour });
+      const [startH, startM] = preferredStartHour.split(':').map(Number);
+      let endH = startH + hours;
+      let endM = startM + minutes;
+      
+      if (endM >= 60) {
+        endH += 1;
+        endM -= 60;
       }
+      
+      const endHour = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
+      this.waitlistForm.patchValue({ preferredEndHour: endHour });
     }
   }
 
@@ -262,12 +277,19 @@ export class JoinWaitlistDialogComponent implements OnInit {
             return;
           }
 
+          // Convert date to YYYY-MM-DD format
+          const date = new Date(formValue.preferredDate);
+          const preferredDate = date.getFullYear() + '-' + 
+            String(date.getMonth() + 1).padStart(2, '0') + '-' + 
+            String(date.getDate()).padStart(2, '0');
+
           const waitlistData = {
             client: client._id,
             employee: formValue.employee,
             service: formValue.service,
             facility: formValue.facility,
-            preferredDate: formValue.preferredDate,
+            tenant: user?.tenant,
+            preferredDate: preferredDate,
             preferredStartHour,
             preferredEndHour
           };

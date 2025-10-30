@@ -102,10 +102,24 @@
   gap: 16px;
 }
 
-.appointment-card, .waitlist-card {
+.appointment-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px;
+  border-radius: 12px;
+  border: 1px solid #e9ecef;
+  transition: all 0.3s ease;
+
+  &.cancelled {
+    opacity: 0.5;
+    border-color: #dc3545;
+  }
+}
+
+.waitlist-card {
+  display: flex;
+  flex-direction: column;
   padding: 16px;
   border-radius: 12px;
   border: 1px solid #e9ecef;
@@ -117,31 +131,147 @@
   transform: translateY(-2px);
 }
 
+.appointment-details {
+  flex: 1;
+  
+  .appointment-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 8px;
+    
+    h3 {
+      margin: 0;
+      color: #cbcbcb;
+      font-size: 18px;
+      font-weight: 600;
+    }
+  }
+}
+
+.appointment-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .appointment-card button mat-icon {
   font-size: 20px;
   width: 20px;
   height: 20px;
 }
 
-.appointment-details h3, .waitlist-details h3 {
-  margin: 0 0 8px 0;
-  color: #2c3e50;
+/* Removed - using individual styles for appointment and waitlist headers */
+
+.waitlist-details {
+  flex: 1;
+  
+  mat-chip {
+    margin-top: 8px;
+  }
+}
+
+.waitlist-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.waitlist-details h3 {
+  margin: 0;
+  color: #cbcbcb;
   font-size: 18px;
   font-weight: 600;
 }
 
-.waitlist-details {
-  flex: 1;
+.slot-status-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  
+  &.occupied {
+    background-color: #ffe5e5;
+    color: #d32f2f;
+    border: 1px solid #ffcdd2;
+    
+    mat-icon {
+      color: #d32f2f;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
+  
+  &.available {
+    background-color: #e8f5e9;
+    color: #388e3c;
+    border: 1px solid #c8e6c9;
+    
+    mat-icon {
+      color: #388e3c;
+      font-size: 18px;
+      width: 18px;
+      height: 18px;
+    }
+  }
 }
 
-.waitlist-details h3 {
-  margin: 0 0 8px 0;
+.slot-status-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  margin: 10px 0;
+  border-radius: 8px;
+  background-color: #f8f9ff;
+  border: 1px solid #e1e5ff;
+  font-size: 13px;
+  color: #4a5568;
+  
+  &.occupied {
+    background-color: #fff3cd;
+    border-color: #ffeaa7;
+    color: #856404;
+    
+    mat-icon {
+      color: #f59e0b;
+    }
+  }
+  
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    color: #667eea;
+  }
+  
+  span {
+    flex: 1;
+    line-height: 1.4;
+  }
 }
 
 .appointment-details p, .waitlist-details p {
-  margin: 4px 0;
+  margin: 6px 0;
   color: #666;
   font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    color: #999;
+  }
 }
 
 .date {
@@ -153,6 +283,10 @@
   display: flex;
   gap: 8px;
   align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #e9ecef;
 }
 
 .waitlist-actions button mat-icon {
@@ -162,8 +296,9 @@
 }
 
 .waitlist-actions button[mat-raised-button] {
-  min-width: 120px;
-  height: 40px;
+  flex: 1;
+  height: 42px;
+  font-weight: 600;
 }
 
 @media (max-width: 768px) {

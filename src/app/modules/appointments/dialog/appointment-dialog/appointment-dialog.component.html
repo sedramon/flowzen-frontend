@@ -38,7 +38,7 @@
       <!-- Dropdown za usluge -->
       <mat-form-field appearance="outline" class="dialog-field">
         <mat-label>Izaberi uslugu</mat-label>
-        <mat-select [(value)]="selectedService" [disabled]="isPreviewMode">
+        <mat-select [(value)]="selectedService" (selectionChange)="onServiceChange()" [disabled]="isPreviewMode">
           <mat-option *ngFor="let service of data.services" [value]="service._id">
             {{ service.name }}
           </mat-option>
@@ -50,7 +50,7 @@
       <div class="time-picker">
         <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Početak - Sati</mat-label>
-          <mat-select [(value)]="selectedHour" [disabled]="isPreviewMode">
+          <mat-select [(value)]="selectedHour" (selectionChange)="onStartTimeChange()" [disabled]="isPreviewMode">
             <mat-option *ngFor="let hour of hours" [value]="hour">
               {{ hour }}
             </mat-option>
@@ -58,7 +58,7 @@
         </mat-form-field>
         <mat-form-field appearance="outline" class="dialog-field time-field">
           <mat-label>Početak - Minuti</mat-label>
-          <mat-select [(value)]="selectedMinute" [disabled]="isPreviewMode">
+          <mat-select [(value)]="selectedMinute" (selectionChange)="onStartTimeChange()" [disabled]="isPreviewMode">
             <mat-option *ngFor="let min of minutes" [value]="min">
               {{ min < 10 ? '0' + min : min }}
             </mat-option>

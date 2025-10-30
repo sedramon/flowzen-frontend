@@ -47,9 +47,6 @@ export class AppointmentsService {
     return this.http.put(`${this.apiUrl}/appointments/${id}`, appointment);
   }
 
-  deleteAppointment(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/appointments/${id}`);
-  }
 
   getAllAppoitements(facility?: string, date?: string): Observable<any[]> {
     const params: any = { tenant: this.tenantId };
@@ -96,7 +93,8 @@ export class AppointmentsService {
               endHour: app.endHour,
               date: app.date,
               paid: app.paid,
-              sale: app.sale
+              sale: app.sale,
+              cancelled: app.cancelled
             }))
           }))
         )
@@ -120,10 +118,25 @@ export class AppointmentsService {
   // Client self-service methods
   getClientAppointments(clientId: string, tenantId: string): Observable<Appointment[]> {
     const params = { client: clientId, tenant: tenantId };
-    return this.http.get<Appointment[]>(`${this.apiUrl}/appointments`, { params });
+    return this.http.get<any[]>(`${this.apiUrl}/appointments`, { params }).pipe(
+      map(appointments => appointments.map(app => ({
+        ...app,
+        paid: app.paid || false,
+        sale: app.sale,
+        cancelled: app.cancelled || false
+      })))
+    );
   }
 
   cancelAppointment(appointmentId: string): Observable<{ message: string }> {
+    return this.http.put<{ message: string }>(`${this.apiUrl}/appointments/${appointmentId}/cancel`, {});
+  }
+
+  /**
+   * Hard delete appointmenta (samo admin).
+   * Ovaj metod se koristi u admin panelu za potpuno brisanje.
+   */
+  deleteAppointment(appointmentId: string): Observable<{ message: string }> {
     return this.http.delete<{ message: string }>(`${this.apiUrl}/appointments/${appointmentId}`);
   }
 
@@ -166,9 +179,23 @@ export class AppointmentsService {
    * Kreira appointment i uklanja sve ostale sa liste za taj time slot.
    */
   claimAppointmentFromWaitlist(claimToken: string, clientId: string) {
-    return this.http.post(`${this.apiUrl}/appointments/waitlist/claim`, {
-      claimToken,
-      clientId
+    // Use public endpoint - no authentication required
+    return this.http.post(`${this.apiUrl}/appointments/waitlist/claim-public`, {
+      claimToken
     });
+  }
+
+  /**
+   * Notifikuje waitlist za određeni slot (manual trigger za admin).
+   */
+  notifyWaitlist(data: { employeeId: string; facilityId: string; date: string; startHour: number; endHour: number }) {
+    return this.http.post<any[]>(`${this.apiUrl}/appointments/waitlist/notify`, data);
+  }
+
+  /**
+   * Prolazi kroz sve waitlist entries za određeni dan i automatski obaveštava za slobodne termine.
+   */
+  notifyWaitlistForDay(data: { date: string; tenantId: string }) {
+    return this.http.post<any>(`${this.apiUrl}/appointments/waitlist/notify-day`, data);
   }
 }

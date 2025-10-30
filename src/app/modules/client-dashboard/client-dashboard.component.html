@@ -16,23 +16,36 @@
         <div *ngIf="appointments.length === 0" class="empty-state">
           <mat-icon>event_available</mat-icon>
           <p>Nemate zakazanih termina</p>
-          <button mat-raised-button color="primary" (click)="bookAppointment()">
-            Zakaži termin
+          <button mat-raised-button color="primary" (click)="joinWaitlist()">
+            Prijavi se za termin
           </button>
         </div>
         
         <div *ngIf="appointments.length > 0" class="appointments-list">
-          <div *ngFor="let appointment of appointments" class="appointment-card">
+          <div *ngFor="let appointment of appointments" 
+               class="appointment-card" 
+               [class.cancelled]="appointment.cancelled">
             <div class="appointment-details">
-              <h3>{{ appointment.service?.name || 'Usluga' }}</h3>
-              <p class="date">{{ formatDate(appointment.date) }} - {{ formatTime(appointment.startHour) }} - {{ formatTime(appointment.endHour) }}</p>
+              <div class="appointment-header">
+                <h3>{{ appointment.service?.name || 'Usluga' }}</h3>
+              </div>
+              <p class="date">{{ formatDate(appointment.date) }} {{ formatTime(appointment.startHour) }} - {{ formatTime(appointment.endHour) }}</p>
               <p class="employee" *ngIf="appointment.employee">
                 Zaposleni: {{ appointment.employee.firstName }} {{ appointment.employee.lastName }}
               </p>
             </div>
-            <button mat-icon-button color="warn" (click)="cancelAppointment(appointment)">
-              <mat-icon>cancel</mat-icon>
-            </button>
+            <div class="appointment-actions">
+              <mat-chip *ngIf="appointment.cancelled" color="warn">Otkazan</mat-chip>
+              <mat-chip *ngIf="appointment.paid && !appointment.cancelled" color="primary">Naplaćen</mat-chip>
+              <mat-chip *ngIf="appointment.sale?.fiscal?.status === 'success' && !appointment.cancelled" color="accent">Fiskalizovan</mat-chip>
+              <button *ngIf="!appointment.cancelled && !appointment.paid && appointment.sale?.fiscal?.status !== 'success'" 
+                      mat-icon-button 
+                      color="warn" 
+                      (click)="cancelAppointment(appointment)"
+                      matTooltip="Otkaži termin">
+                <mat-icon>close</mat-icon>
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -57,11 +70,31 @@
         <div *ngIf="waitlistEntries.length > 0" class="waitlist-list">
           <div *ngFor="let entry of waitlistEntries" class="waitlist-card">
             <div class="waitlist-details">
-              <h3>{{ entry.service?.name || 'Usluga' }}</h3>
-              <p class="date">Datum: {{ formatDate(entry.date) }}</p>
-              <p class="time">Vreme: {{ formatTime(entry.startHour) }} - {{ formatTime(entry.endHour) }}</p>
+              <div class="waitlist-header">
+                <h3>{{ entry.service?.name || 'Usluga' }}</h3>
+                <div class="slot-status-badge" [class.occupied]="entry.isSlotOccupied" [class.available]="!entry.isSlotOccupied">
+                  <mat-icon>{{ entry.isSlotOccupied ? 'block' : 'check_circle' }}</mat-icon>
+                  <span>{{ entry.isSlotOccupied ? 'Zauzet' : 'Slobodan' }}</span>
+                </div>
+              </div>
+              <p class="date">
+                <mat-icon>event</mat-icon>
+                {{ formatDate(entry.date) }}
+              </p>
+              <p class="time">
+                <mat-icon>schedule</mat-icon>
+                {{ formatTime(entry.startHour) }} - {{ formatTime(entry.endHour) }}
+              </p>
+              <p class="employee" *ngIf="entry.employee">
+                <mat-icon>person</mat-icon>
+                {{ entry.employee.firstName }} {{ entry.employee.lastName }}
+              </p>
+              <div class="slot-status-info" [class.occupied]="entry.isSlotOccupied">
+                <mat-icon>{{ entry.isSlotOccupied ? 'info' : 'done_all' }}</mat-icon>
+                <span>{{ entry.slotStatus }}</span>
+              </div>
               <mat-chip [color]="entry.isNotified ? 'accent' : 'primary'" selected>
-                {{ entry.isNotified ? 'Obavešteni' : 'Čekanje' }}
+                {{ entry.isNotified ? 'Obavešteni' : 'Na čekanju' }}
               </mat-chip>
             </div>
             <div class="waitlist-actions">

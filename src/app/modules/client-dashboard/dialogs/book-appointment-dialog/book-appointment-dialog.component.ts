@@ -68,6 +68,23 @@ export class BookAppointmentDialogComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
     this.generateTimeSlots();
+    
+    // Pre-populate form if data is provided (rebooking cancelled appointment)
+    if (this.data) {
+      if (this.data.facility) {
+        this.appointmentForm.patchValue({ facility: this.data.facility._id || this.data.facility.id });
+        setTimeout(() => this.onFacilityChange(this.data.facility._id || this.data.facility.id), 100);
+      }
+      if (this.data.service) {
+        setTimeout(() => this.appointmentForm.patchValue({ service: this.data.service._id || this.data.service.id }), 200);
+      }
+      if (this.data.employee) {
+        setTimeout(() => this.appointmentForm.patchValue({ employee: this.data.employee._id || this.data.employee.id }), 300);
+      }
+      if (this.data.date) {
+        this.appointmentForm.patchValue({ date: this.data.date });
+      }
+    }
   }
 
   loadData(): void {
@@ -118,7 +135,8 @@ export class BookAppointmentDialogComponent implements OnInit {
     if (!facilityObj) return;
 
     // Load employees for this facility
-    this.employeesService.getAllEmployees(facilityObj.tenant, facilityId).subscribe({
+    const tenantId = typeof facilityObj.tenant === 'string' ? facilityObj.tenant : String(facilityObj.tenant);
+    this.employeesService.getAllEmployees(tenantId, facilityId).subscribe({
       next: (employees) => {
         this.employees = employees.filter(e => 
           e.includeInAppoitments && 

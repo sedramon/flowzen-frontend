@@ -23,6 +23,7 @@ import { CashReportsComponent } from './modules/pos/components/reports/cash-repo
 import { CashAnalyticsComponent } from './modules/pos/components/cash-management/cash-analytics/cash-analytics.component';
 import { ClientLoginComponent } from './modules/client-login/client-login.component';
 import { ClientDashboardComponent } from './modules/client-dashboard/client-dashboard.component';
+import { ClaimAppointmentComponent } from './modules/appointments/claim-appointment/claim-appointment.component';
 
 export const routes: Routes = [
   {
@@ -236,5 +237,6 @@ export const routes: Routes = [
   },
   { path: 'login', component: LoginComponent },
   { path: 'client-login', component: ClientLoginComponent },
+  { path: 'appointments/claim/:token', component: ClaimAppointmentComponent },
   { path: '**', redirectTo: 'login' }
 ];

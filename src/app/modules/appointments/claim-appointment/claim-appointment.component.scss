@@ -1,0 +1,194 @@
+.claim-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 20px;
+  position: relative;
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: 
+      radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+      radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 40% 40%, rgba(120, 119, 198, 0.2) 0%, transparent 50%);
+    pointer-events: none;
+  }
+}
+
+.claim-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  backdrop-filter: blur(20px);
+  border-radius: 20px;
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 0 0 1px rgba(255, 255, 255, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  padding: 50px 40px;
+  max-width: 500px;
+  width: 100%;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border-radius: 20px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%);
+    pointer-events: none;
+  }
+}
+
+.claim-header {
+  margin-bottom: 35px;
+  position: relative;
+  z-index: 2;
+}
+
+.success-icon {
+  color: #a8e6a3;
+  font-size: 70px;
+  width: 70px;
+  height: 70px;
+  filter: drop-shadow(0 4px 8px rgba(168, 230, 163, 0.5));
+  animation: successPulse 2s ease-in-out infinite;
+}
+
+.error-icon {
+  color: #ffb3b3;
+  font-size: 70px;
+  width: 70px;
+  height: 70px;
+  filter: drop-shadow(0 4px 8px rgba(255, 179, 179, 0.5));
+  animation: errorShake 0.5s ease-in-out;
+}
+
+@keyframes successPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes errorShake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  75% { transform: translateX(5px); }
+}
+
+h1 {
+  color: #ffffff;
+  margin: 25px 0 0 0;
+  font-size: 32px;
+  font-weight: 600;
+  letter-spacing: -0.5px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.claim-content {
+  margin-bottom: 40px;
+  position: relative;
+  z-index: 2;
+}
+
+.success-message {
+  color: #a8e6a3;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.error-message {
+  color: #ffb3b3;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.loading-message {
+  color: #e0e0e0;
+  font-size: 18px;
+  line-height: 1.7;
+  font-weight: 500;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.claim-actions {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  position: relative;
+  z-index: 2;
+}
+
+button {
+  min-width: 180px;
+  height: 50px;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 12px;
+  text-transform: none;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.success-snackbar {
+  background-color: #4caf50 !important;
+  color: white !important;
+  font-weight: 500;
+}
+
+.error-snackbar {
+  background-color: #f44336 !important;
+  color: white !important;
+  font-weight: 500;
+}
+
+// Responsive design
+@media (max-width: 600px) {
+  .claim-container {
+    padding: 15px;
+  }
+  
+  .claim-card {
+    padding: 40px 30px;
+    border-radius: 16px;
+  }
+  
+  h1 {
+    font-size: 28px;
+  }
+  
+  .success-message,
+  .error-message,
+  .loading-message {
+    font-size: 16px;
+  }
+  
+  button {
+    min-width: 150px;
+    height: 45px;
+  }
+}

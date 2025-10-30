@@ -1,64 +1,107 @@
 <div class="dialog-container">
   <h2 mat-dialog-title>Edit Role</h2>
-
-  <form [formGroup]="roleForm" mat-dialog-content fxLayout="column" fxLayoutGap="16px">
-    <!-- 1) Role Name -->
-    <mat-form-field appearance="outline" style="width: 100%">
+  
+  <div mat-dialog-content class="dialog-content" [formGroup]="roleForm">
+    <!-- Role Name Input -->
+    <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
       <mat-label>Role Name</mat-label>
-      <input matInput formControlName="name" placeholder="Enter role name" />
-      <mat-error *ngIf="roleForm.controls.name.hasError('required')">
-        Role Name is required
-      </mat-error>
+      <input matInput formControlName="name">
+      <mat-error *ngIf="roleForm.controls['name'].hasError('required')">Name is required</mat-error>
     </mat-form-field>
 
-    <!-- 2) Select Module / Entity -->
-    <mat-form-field appearance="outline" style="width: 100%">
-      <mat-label>Select Module</mat-label>
-      <mat-select formControlName="entity">
-        <mat-option *ngFor="let ent of uniqueEntities" [value]="ent">
-          {{ ent }}
-        </mat-option>
-      </mat-select>
-      <mat-error *ngIf="roleForm.controls.entity.hasError('required')">
-        Module is required
-      </mat-error>
-    </mat-form-field>
+    <!-- Available Scopes Organized by Modules -->
+    <div class="scopes-section">
+      <div class="scopes-section-header">
+        <div class="scopes-title-section">
+          <mat-icon class="scopes-icon">security</mat-icon>
+          <span class="scopes-title">Available Scopes</span>
+          <span class="scopes-counter" *ngIf="totalSelectedCount > 0">
+            ({{ totalSelectedCount }} / {{ allScopes.length }} selected)
+          </span>
+        </div>
+        <div class="scopes-global-actions">
+          <button 
+            mat-stroked-button 
+            type="button" 
+            (click)="selectAllScopes()" 
+            [disabled]="allSelected || allScopes.length === 0"
+            class="global-select-btn">
+            <mat-icon>select_all</mat-icon>
+            <span>Select All</span>
+          </button>
+          <button 
+            mat-stroked-button 
+            type="button" 
+            (click)="deselectAllScopes()" 
+            [disabled]="totalSelectedCount === 0"
+            class="global-deselect-btn">
+            <mat-icon>deselect</mat-icon>
+            <span>Deselect All</span>
+          </button>
+        </div>
+      </div>
 
-    <!-- 3) Action Checkboxes -->
-    <div *ngIf="roleForm.controls.entity.value" formGroupName="actions" class="actions-container">
-      <div class="actions-grid">
-        <mat-checkbox *ngFor="let action of availableActions"
-                      [formControlName]="action"
-                      [matTooltip]="getActionTooltip(action)"
-                      matTooltipPosition="above"
-                      class="action-checkbox">
-          <mat-icon class="action-icon">
-            {{ {
-              access: 'lock_open',
-              read: 'visibility',
-              create: 'add',
-              update: 'edit',
-              delete: 'delete',
-              sale: 'point_of_sale',
-              refund: 'undo',
-              session: 'event',
-              report: 'bar_chart',
-              settings: 'settings',
-              cash_management: 'account_balance',
-              cash_reports: 'assessment',
-              cash_analytics: 'analytics'
-            }[action] || 'check_box'}}
-          </mat-icon>
-          <span class="action-text">{{ getActionDisplayText(action) }}</span>
-        </mat-checkbox>
+      <!-- Modules Grid -->
+      <div class="modules-grid" formGroupName="modules">
+        <mat-card *ngFor="let module of uniqueModules" class="module-card">
+          <mat-card-header class="module-card-header">
+            <div class="module-header-content">
+              <mat-icon class="module-icon">{{ getModuleIcon(module) }}</mat-icon>
+              <mat-card-title class="module-title">{{ getModuleDisplayName(module) }}</mat-card-title>
+              <span class="module-count">({{ getModuleActions(module).length }})</span>
+            </div>
+            <div class="module-actions">
+              <button 
+                mat-icon-button 
+                type="button"
+                (click)="selectAllForModule(module)" 
+                [disabled]="allSelectedForModule(module)"
+                [matTooltip]="'Select all ' + getModuleDisplayName(module) + ' actions'"
+                matTooltipPosition="above"
+                class="module-select-btn">
+                <mat-icon>select_all</mat-icon>
+              </button>
+              <button 
+                mat-icon-button 
+                type="button"
+                (click)="deselectAllForModule(module)" 
+                [disabled]="!allSelectedForModule(module) && !someSelectedForModule(module)"
+                [matTooltip]="'Deselect all ' + getModuleDisplayName(module) + ' actions'"
+                matTooltipPosition="above"
+                class="module-deselect-btn">
+                <mat-icon>deselect</mat-icon>
+              </button>
+            </div>
+          </mat-card-header>
+          
+          <mat-card-content class="module-card-content">
+            <div class="actions-grid" [formGroupName]="module">
+              <mat-checkbox 
+                *ngFor="let action of getModuleActions(module)"
+                [formControlName]="action"
+                [matTooltip]="getActionTooltip(action)"
+                matTooltipPosition="above"
+                class="action-checkbox">
+                <mat-icon class="action-icon">
+                  {{ getActionIcon(action) }}
+                </mat-icon>
+                <span class="action-text">{{ getActionDisplayText(action) }}</span>
+              </mat-checkbox>
+            </div>
+          </mat-card-content>
+        </mat-card>
       </div>
     </div>
-  </form>
+  </div>
 
   <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
-    <button mat-raised-button color="primary" [disabled]="roleForm.invalid" (click)="save()">
-      <mat-icon>save</mat-icon>Save
+    <button mat-raised-button color="primary" (click)="save()" [disabled]="roleForm.controls['name'].invalid || totalSelectedCount === 0">
+      <mat-icon>save</mat-icon>
+      <span>Save Role</span>
     </button>
-    <button mat-raised-button (click)="cancel()"><mat-icon>cancel</mat-icon>Cancel</button>
+    <button mat-raised-button (click)="cancel()">
+      <mat-icon>cancel</mat-icon>
+      <span>Cancel</span>
+    </button>
   </div>
 </div>

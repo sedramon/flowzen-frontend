@@ -37,4 +37,6 @@ export interface WaitlistEntry {
   isClaimed: boolean;
   createdAt?: Date;
   updatedAt?: Date;
+  slotStatus?: string;
+  isSlotOccupied?: boolean;
 }

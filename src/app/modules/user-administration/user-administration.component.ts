@@ -134,8 +134,12 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openEditRoleDialog(role: Role) {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
-      width: '1000px',
-      height: '600px',
+      width: '900px',
+      maxWidth: '95vw',
+      height: '80vh',
+      maxHeight: '80vh',
+      disableClose: false,
+      autoFocus: true,
       data: { role },
     });
 
@@ -187,8 +191,12 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openAddRoleDialog() {
     const dialogRef = this.dialog.open(AddRoleDialogComponent, {
-      width: '600px',
-      height: '500px',
+      width: '900px',
+      maxWidth: '95vw',
+      height: '80vh',
+      maxHeight: '80vh',
+      disableClose: false,
+      autoFocus: true,
     });
 
     dialogRef.afterClosed().subscribe((role: Role | undefined) => {

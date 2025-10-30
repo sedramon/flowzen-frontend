@@ -1,0 +1,37 @@
+<div class="claim-container">
+  <div class="claim-card">
+    <div class="claim-header">
+      <mat-icon class="success-icon" *ngIf="isSuccess">check_circle</mat-icon>
+      <mat-icon class="error-icon" *ngIf="errorMessage">error</mat-icon>
+      <mat-spinner *ngIf="isLoading" diameter="40"></mat-spinner>
+      
+      <h1 *ngIf="isSuccess">Termin je prihvaćen!</h1>
+      <h1 *ngIf="errorMessage">Greška</h1>
+      <h1 *ngIf="isLoading">Prihvatanje termina...</h1>
+    </div>
+
+    <div class="claim-content">
+      <p *ngIf="isSuccess" class="success-message">
+        Vaš termin je uspešno prihvaćen. Možete se prijaviti na sistem da vidite detalje.
+      </p>
+      
+      <p *ngIf="errorMessage" class="error-message">
+        {{ errorMessage }}
+      </p>
+      
+      <p *ngIf="isLoading" class="loading-message">
+        Molimo sačekajte dok se termin prihvata...
+      </p>
+    </div>
+
+    <div class="claim-actions">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        (click)="goToLogin()"
+        *ngIf="isSuccess || errorMessage">
+        Idi na prijavu
+      </button>
+    </div>
+  </div>
+</div>

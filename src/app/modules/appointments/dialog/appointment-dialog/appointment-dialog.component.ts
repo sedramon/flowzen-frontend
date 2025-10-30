@@ -181,5 +181,54 @@ export class AppointmentDialogComponent implements OnInit {
     
     this.dialogRef.close({ delete: true });
   }
+
+  /**
+   * Kada se selektuje usluga, automatski se izračunava krajnje vreme.
+   */
+  onServiceChange(): void {
+    this.calculateEndTime();
+  }
+
+  /**
+   * Kada se promeni početno vreme, automatski se izračunava krajnje vreme ako je usluga selektovana.
+   */
+  onStartTimeChange(): void {
+    this.calculateEndTime();
+  }
+
+  /**
+   * Izračunava krajnje vreme na osnovu usluge i početnog vremena.
+   */
+  calculateEndTime(): void {
+    if (!this.selectedService || this.isPreviewMode) {
+      return;
+    }
+
+    const service = this.data.services.find(s => s._id === this.selectedService);
+    if (!service || !service.durationMinutes) {
+      return;
+    }
+
+    const durationMinutes = service.durationMinutes;
+    const hours = Math.floor(durationMinutes / 60);
+    const minutes = durationMinutes % 60;
+
+    let newEndHour = this.selectedHour + hours;
+    let newEndMinute = this.selectedMinute + minutes;
+
+    if (newEndMinute >= 60) {
+      newEndHour += 1;
+      newEndMinute -= 60;
+    }
+
+    // Osiguraj da je novo krajnje vreme unutar opsega (8-22h)
+    if (newEndHour > 22) {
+      newEndHour = 22;
+      newEndMinute = 0;
+    }
+
+    this.endHour = newEndHour;
+    this.endMinute = newEndMinute;
+  }
 }
 

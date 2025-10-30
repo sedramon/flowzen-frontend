@@ -278,6 +278,49 @@
     opacity: 0.9;
     border-color: rgba(21, 101, 192, 0.3);
   }
+  
+  &.cancelled {
+    background: linear-gradient(60deg, #616161, #424242, #212121, #0d0d0d, #616161);
+    background-size: 300% 300%;
+    animation: gradientPan 20s ease infinite;
+    cursor: pointer;
+    opacity: 0.7;
+    border-color: rgba(97, 97, 97, 0.3);
+    border-style: dashed;
+    
+    // Dodati overlay efekat za cancelled
+    &::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255, 0, 0, 0.05) 10px,
+        rgba(255, 0, 0, 0.05) 20px
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+  }
+  
+  &.no-drag {
+    cursor: pointer !important;
+  }
+}
+
+// Onemogući drag za cancelled appointments
+.appointment-block.no-drag {
+  cursor: pointer !important;
+  
+  // Ne dozvoli drag
+  &[data-dragging] {
+    pointer-events: none;
+  }
 }
 
 .appointment-block[data-dragging="true"] {

@@ -14,6 +14,13 @@ export interface Appointment {
   startHour: number;
   endHour: number;
   date: string;
+  cancelled?: boolean;
+  paid?: boolean;
+  sale?: {
+    fiscal?: {
+      status?: string;
+    };
+  };
   createdAt?: Date;
   updatedAt?: Date;
 }

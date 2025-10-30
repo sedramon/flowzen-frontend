@@ -447,7 +447,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
             const target = event.target as HTMLElement;
             const apId = target.getAttribute('data-appointment-id') || '';
             const appointment = this.appointments.find(ap => ap.id === apId);
-            if (appointment && ((appointment as any).paid || (appointment as any).sale?.fiscal?.status === 'success')) {
+            if (appointment && ((appointment as any).paid || (appointment as any).sale?.fiscal?.status === 'success' || (appointment as any).cancelled)) {
               event.interaction.stop();
               return;
             }
@@ -728,9 +728,15 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
     const target = event.currentTarget as HTMLElement;
     if (target.getAttribute('data-dragging') === 'true') return;
     
-    // Ako je naplaćen, otvori preview dialog
+    // Ako je naplaćen ili fiskalizovan, otvori preview dialog (prioritet nad cancelled)
     if ((ap as any).paid || (ap as any).sale?.fiscal?.status === 'success') {
       this.openAppointmentPreview(ap);
+      return;
+    }
+    
+    // Ako je cancelled (i NIJE naplaćen), otvori preview i briši nakon zatvaranja dijaloga
+    if ((ap as any).cancelled) {
+      this.openCancelledAppointmentPreview(ap);
       return;
     }
 
@@ -927,6 +933,35 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
     this.onDateChange(next);
   }
 
+  openWaitlistNotifyDialog(): void {
+    if (!this.selectedDate || !this.selectedDateStr) {
+      this.snackBar.open('Izaberi datum', 'Zatvori', { duration: 2000 });
+      return;
+    }
+
+    // Get tenant from auth
+    const user = this.authService.getCurrentUser();
+    if (!user?.tenant) {
+      this.snackBar.open('Tenant nije pronađen', 'Zatvori', { duration: 2000 });
+      return;
+    }
+
+    // Auto-notify all available slots for this day
+    this.appointmentsService.notifyWaitlistForDay({
+      date: this.selectedDateStr,
+      tenantId: user.tenant
+    }).subscribe({
+      next: (response: any) => {
+        this.snackBar.open(`✓ Obavešteno ${response?.notified || 0} klijent(a)`, 'Zatvori', { duration: 3000 });
+        console.log('Waitlist notify response:', response);
+      },
+      error: (error: any) => {
+        this.snackBar.open('Greška pri slanju notifikacije', 'Zatvori', { duration: 3000 });
+        console.error('Error notifying waitlist:', error);
+      }
+    });
+  }
+
   openBulkAppointments(): void {
     if (!this.selectedDate || !this.selectedFacility) {
       this.snackBar.open('Izaberi datum i objekat', 'Zatvori', { duration: 2000 });
@@ -1089,6 +1124,49 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
     });
   }
 
+  // ===== CANCELLED APPOINTMENT PREVIEW =====
+  // Otvori preview dialog za otkazane termine i briši ih nakon zatvaranja
+  openCancelledAppointmentPreview(ap: any) {
+    const dialogData = {
+      appointment: ap,
+      status: 'Otkazan',
+      isCancelled: true,
+      readonly: true,
+      services: this.services,
+      clients: this.clients,
+      facilities: this.facilities,
+      employee: ap.employee?._id || ap.employee,
+      facility: ap.facility?._id || ap.facility,
+      service: ap.service?._id || ap.service,
+      client: ap.client?._id || ap.client,
+      appointmentStart: ap.startHour,
+      appointmentEnd: ap.endHour
+    };
+
+    const dialogRef = this.dialog.open(AppointmentDialogComponent, {
+      data: dialogData,
+      panelClass: 'custom-appointment-dialog',
+      backdropClass: 'custom-backdrop',
+    });
+
+    dialogRef.afterClosed().subscribe(() => {
+      // Nakon zatvaranja dijaloga, obriši otkazani termin
+      this.appointmentsService.deleteAppointment(ap.id!).subscribe({
+        next: () => {
+          this.appointments = this.appointments.filter((a) => a.id !== ap.id);
+          this.snackBar.open('✓ Otkazani termin je uklonjen iz kalendara', 'Zatvori', { 
+            duration: 3000,
+            panelClass: ['success-snackbar']
+          });
+          this.cd.detectChanges();
+        },
+        error: () => {
+          this.snackBar.open('Greška pri brisanju otkazanog termina', 'Zatvori', { duration: 2000 });
+        }
+      });
+    });
+  }
+
   // ===== UTILITY FUNCTIONS =====
   // Format time for display (e.g., 17.5 -> "17:30") with proper padding
   formatTime(time: number): string {
@@ -1202,9 +1280,13 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
   }
 
   // Check if slot is covered by existing appointments (supports overnight shifts)
+  // Excludes cancelled appointments - they don't block new appointments
   isSlotCovered(emp: Employee, t: number): boolean {
     const appointments = this.getAppointmentsForEmployee(emp._id || '');
     return appointments.some((ap) => {
+      // Skip cancelled appointments
+      if ((ap as any).cancelled) return false;
+      
       const startHour = ap.startHour;
       const endHour = ap.endHour;
       

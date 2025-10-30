@@ -43,6 +43,10 @@
         <mat-icon>file_upload</mat-icon>
         Masovni unos termina
       </button>
+      <button mat-raised-button color="primary" (click)="openWaitlistNotifyDialog()" style="margin-left: 10px;">
+        <mat-icon>notifications</mat-icon>
+        Obavesti waitlist
+      </button>
     </div>
   </mat-toolbar>
 
@@ -144,30 +148,32 @@
               [matTooltipDisabled]="isDragging"
               [class.paid]="ap.paid"
               [class.fiscalized]="ap.sale?.fiscal?.status === 'success'"
+              [class.cancelled]="ap.cancelled && !ap.paid && ap.sale?.fiscal?.status !== 'success'"
               (click)="onAppointmentClick(ap, $event); $event.stopPropagation()"
               >
               <div class="appointment-info">   
                 <div class="service">{{ ap.service.name }}</div>
-                <div>Klijent : {{ap.client.firstName}} {{ap.client.lastName}}</div>
-                <div class="time">
+                <div *ngIf="!ap.cancelled">Klijent : {{ap.client.firstName}} {{ap.client.lastName}}</div>
+                <div *ngIf="ap.cancelled" style="color: #ff6b6b; font-weight: bold; text-align: center; padding: 4px 0;">OTKAZAN</div>
+                <div class="time" *ngIf="!ap.cancelled">
                   {{ formatTime(ap.startHour) }} - {{ formatTime(ap.endHour) }}
                 </div>
-                <div class="date">
+                <div class="date" *ngIf="!ap.cancelled">
                   {{ ap.date | date : "dd MMM yyyy" }}
                 </div>
             <button
               mat-button
               class="pay-btn"
-              [ngClass]="{ 'paid': ap.paid, 'fiscalized': ap.sale?.fiscal?.status === 'success' }"
-              [disabled]="ap.paid || ap.sale?.fiscal?.status === 'success'"
+              [ngClass]="{ 'paid': ap.paid, 'fiscalized': ap.sale?.fiscal?.status === 'success', 'cancelled': ap.cancelled }"
+              [disabled]="ap.paid || ap.sale?.fiscal?.status === 'success' || ap.cancelled"
               (click)="onPayAppointment(ap, $event)"
             >
               <mat-icon>point_of_sale</mat-icon>
-              {{ ap.paid ? (ap.sale?.fiscal?.status === 'success' ? 'Fisk.' : 'Napl.') : 'Naplati' }}
+              {{ ap.cancelled ? 'Otk' : (ap.paid ? (ap.sale?.fiscal?.status === 'success' ? 'Fisk.' : 'Napl.') : 'Naplati') }}
             </button>
               </div>
               <div class="resize-handle" 
-                   *ngIf="!ap.paid && ap.sale?.fiscal?.status !== 'success'"
+                   *ngIf="!ap.paid && ap.sale?.fiscal?.status !== 'success' && !ap.cancelled"
                    (click)="$event.stopPropagation()" 
                    (mousedown)="onResizeStart($event, ap)" 
                    (touchstart)="onResizeStart($event, ap)"></div>

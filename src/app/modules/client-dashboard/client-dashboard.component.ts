@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -11,8 +11,8 @@ import { MatChipsModule } from '@angular/material/chips';
 import { AuthService } from '../../core/services/auth.service';
 import { AppointmentsService } from '../appointments/services/appointment.service';
 import { ClientsService } from '../clients/services/clients.service';
-import { BookAppointmentDialogComponent } from './dialogs/book-appointment-dialog/book-appointment-dialog.component';
 import { JoinWaitlistDialogComponent } from './dialogs/join-waitlist-dialog/join-waitlist-dialog.component';
+import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { Appointment } from '../../models/Appointment';
 import { WaitlistEntry } from '../../models/WaitlistEntry';
 
@@ -41,11 +41,14 @@ import { WaitlistEntry } from '../../models/WaitlistEntry';
  * - Otkazuju termine
  * - Prijave se na listu čekanja (waitlist)
  * - Prihvataju ponuđene termine sa liste čekanja
+ * 
+ * Auto-refresh: Dashboard se automatski osvežava svakih 15 sekundi
  */
-export class ClientDashboardComponent implements OnInit {
+export class ClientDashboardComponent implements OnInit, OnDestroy {
   user: any;
   appointments: Appointment[] = [];
   waitlistEntries: WaitlistEntry[] = [];
+  private refreshInterval: any;
 
   constructor(
     private authService: AuthService,
@@ -60,6 +63,19 @@ export class ClientDashboardComponent implements OnInit {
     this.user = this.authService.getCurrentUser();
     this.loadAppointments();
     this.loadWaitlistEntries();
+    
+    // Auto-refresh svakih 15 sekundi
+    this.refreshInterval = setInterval(() => {
+      this.loadAppointments();
+      this.loadWaitlistEntries();
+    }, 15000);
+  }
+
+  ngOnDestroy(): void {
+    // Očisti interval kada se komponenta uništi
+    if (this.refreshInterval) {
+      clearInterval(this.refreshInterval);
+    }
   }
 
   /**
@@ -110,31 +126,52 @@ export class ClientDashboardComponent implements OnInit {
    */
   loadWaitlistEntries(): void {
     const user = this.authService.getCurrentUser();
-    if (user?.userId) {
-      this.appointmentService.getClientWaitlist(user.userId).subscribe({
-        next: (entries: any[]) => {
-          this.waitlistEntries = entries.map((entry: any) => ({
-            id: entry.id,
-            client: entry.client,
-            employee: entry.employee,
-            facility: entry.facility,
-            service: entry.service,
-            tenant: entry.tenant,
-            date: entry.preferredDate,
-            startHour: entry.preferredStartHour,
-            endHour: entry.preferredEndHour,
-            isNotified: entry.isNotified,
-            isClaimed: entry.isClaimed,
-            claimToken: entry.claimToken,
-            createdAt: entry.createdAt,
-            updatedAt: entry.updatedAt
-          }));
-        },
-        error: (error: any) => {
-          console.error('Error loading waitlist entries:', error);
-        }
-      });
+    
+    if (!user || !user.userId || !user.tenant) {
+      this.waitlistEntries = [];
+      return;
     }
+    
+    // Get client ID connected to this user
+    this.clientsService.getClientByUserId(user.userId).subscribe({
+      next: (client: any) => {
+        if (!client) {
+          this.waitlistEntries = [];
+          return;
+        }
+
+        const clientId = client._id || client.id;
+        
+        this.appointmentService.getClientWaitlist(clientId).subscribe({
+          next: (entries: any[]) => {
+            this.waitlistEntries = entries.map((entry: any) => ({
+              id: entry._id || entry.id,
+              client: entry.client,
+              employee: entry.employee,
+              facility: entry.facility,
+              service: entry.service,
+              tenant: entry.tenant,
+              date: entry.preferredDate,
+              startHour: entry.preferredStartHour,
+              endHour: entry.preferredEndHour,
+              isNotified: entry.isNotified,
+              isClaimed: entry.isClaimed,
+              claimToken: entry.claimToken,
+              createdAt: entry.createdAt,
+              updatedAt: entry.updatedAt,
+              slotStatus: entry.slotStatus,
+              isSlotOccupied: entry.isSlotOccupied
+            }));
+          },
+          error: (error: any) => {
+            console.error('Error loading waitlist entries:', error);
+          }
+        });
+      },
+      error: (error: any) => {
+        console.error('Error loading client profile:', error);
+      }
+    });
   }
 
   /**
@@ -154,32 +191,36 @@ export class ClientDashboardComponent implements OnInit {
     return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
   }
 
-  bookAppointment(): void {
-    const dialogRef = this.dialog.open(BookAppointmentDialogComponent, {
-      width: '600px',
-      maxWidth: '90vw'
+  cancelAppointment(appointment: Appointment): void {
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: { message: 'Da li ste sigurni da želite da otkažete ovaj termin?' }
     });
 
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
-        this.loadAppointments();
+        this.appointmentService.cancelAppointment(appointment.id!).subscribe({
+          next: () => {
+            this.snackBar.open('Termin je otkazan', 'Zatvori', { duration: 3000 });
+            
+            // Instant refresh za appointments i waitlist (vidi se slot status odmah)
+            this.loadAppointments();
+            this.loadWaitlistEntries();
+            
+            // Delayed refresh za waitlist da backend stigne da završi notifikaciju
+            // Backend automatski notifikuje waitlist nakon otkazivanja,
+            // ali treba vreme da se proces završi i update-uje isNotified: true
+            // Ovaj drugi refresh omogućava da dugme "Prihvati termin" postane enabled
+            setTimeout(() => {
+              this.loadWaitlistEntries();
+            }, 1500);
+          },
+          error: (error: any) => {
+            this.snackBar.open('Greška pri otkazivanju termina', 'Zatvori', { duration: 3000 });
+            console.error('Error canceling appointment:', error);
+          }
+        });
       }
     });
-  }
-
-  cancelAppointment(appointment: Appointment): void {
-    if (confirm('Da li ste sigurni da želite da otkažete ovaj termin?')) {
-      this.appointmentService.deleteAppointment(appointment.id!).subscribe({
-        next: () => {
-          this.snackBar.open('Termin je otkazan', 'Zatvori', { duration: 3000 });
-          this.loadAppointments();
-        },
-        error: (error: any) => {
-          this.snackBar.open('Greška pri otkazivanju termina', 'Zatvori', { duration: 3000 });
-          console.error('Error canceling appointment:', error);
-        }
-      });
-    }
   }
 
   joinWaitlist(): void {
@@ -205,41 +246,85 @@ export class ClientDashboardComponent implements OnInit {
       return;
     }
 
-    if (confirm('Da li želite da prihvatite ovaj termin?')) {
-      const user = this.authService.getCurrentUser();
-      
-      this.appointmentService.claimAppointmentFromWaitlist(entry.claimToken!, user?.userId!).subscribe({
-        next: (response: any) => {
-          if (response.success) {
-            this.snackBar.open('Termin je uspešno zakazan!', 'Zatvori', { duration: 3000 });
-            this.loadAppointments();
-            this.loadWaitlistEntries();
-          } else {
-            this.snackBar.open(response.message || 'Greška pri prihvatanju termina', 'Zatvori', { duration: 3000 });
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: { message: 'Da li želite da prihvatite ovaj termin?' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const user = this.authService.getCurrentUser();
+        
+        // Get client ID connected to this user
+        this.clientsService.getClientByUserId(user?.userId!).subscribe({
+          next: (client: any) => {
+            if (!client) {
+              this.snackBar.open('Klijent profil nije pronađen', 'Zatvori', { duration: 3000 });
+              return;
+            }
+
+            const clientId = client._id || client.id;
+            
+            this.appointmentService.claimAppointmentFromWaitlist(entry.claimToken!, clientId).subscribe({
+              next: (response: any) => {
+                if (response.success) {
+                  this.snackBar.open('Termin je uspešno zakazan!', 'Zatvori', { duration: 3000 });
+                  this.loadAppointments();
+                  this.loadWaitlistEntries();
+                } else {
+                  this.snackBar.open(response.message || 'Greška pri prihvatanju termina', 'Zatvori', { duration: 3000 });
+                }
+              },
+              error: (error: any) => {
+                this.snackBar.open('Greška pri prihvatanju termina', 'Zatvori', { duration: 3000 });
+                console.error('Error claiming appointment:', error);
+              }
+            });
+          },
+          error: (error: any) => {
+            console.error('Error loading client profile:', error);
+            this.snackBar.open('Greška pri učitavanju klijent profila', 'Zatvori', { duration: 3000 });
           }
-        },
-        error: (error: any) => {
-          this.snackBar.open('Greška pri prihvatanju termina', 'Zatvori', { duration: 3000 });
-          console.error('Error claiming appointment:', error);
-        }
-      });
-    }
+        });
+      }
+    });
   }
 
   removeFromWaitlist(entry: WaitlistEntry): void {
-    if (confirm('Da li ste sigurni da želite da se uklonite sa liste čekanja?')) {
-      const user = this.authService.getCurrentUser();
-      
-      this.appointmentService.removeFromWaitlist(entry.id, user?.userId!).subscribe({
-        next: () => {
-          this.snackBar.open('Uklonjeni ste sa liste čekanja', 'Zatvori', { duration: 3000 });
-          this.loadWaitlistEntries();
-        },
-        error: (error: any) => {
-          this.snackBar.open('Greška pri uklanjanju sa liste čekanja', 'Zatvori', { duration: 3000 });
-          console.error('Error removing from waitlist:', error);
-        }
-      });
-    }
+    const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
+      data: { message: 'Da li ste sigurni da želite da se uklonite sa liste čekanja?' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        const user = this.authService.getCurrentUser();
+        
+        // Get client ID connected to this user
+        this.clientsService.getClientByUserId(user?.userId!).subscribe({
+          next: (client: any) => {
+            if (!client) {
+              this.snackBar.open('Klijent profil nije pronađen', 'Zatvori', { duration: 3000 });
+              return;
+            }
+
+            const clientId = client._id || client.id;
+            
+            this.appointmentService.removeFromWaitlist(entry.id, clientId).subscribe({
+              next: () => {
+                this.snackBar.open('Uklonjeni ste sa liste čekanja', 'Zatvori', { duration: 3000 });
+                this.loadWaitlistEntries();
+              },
+              error: (error: any) => {
+                this.snackBar.open('Greška pri uklanjanju sa liste čekanja', 'Zatvori', { duration: 3000 });
+                console.error('Error removing from waitlist:', error);
+              }
+            });
+          },
+          error: (error: any) => {
+            console.error('Error loading client profile:', error);
+            this.snackBar.open('Greška pri učitavanju klijent profila', 'Zatvori', { duration: 3000 });
+          }
+        });
+      }
+    });
   }
 }
