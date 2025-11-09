@@ -92,9 +92,9 @@ export class ClientDetailViewComponent implements OnInit {
     });
 
     // Load available users
-    const currentUser = this.authService.getCurrentUser();
-    if (currentUser?.tenant) {
-      this.loadAllUsers(currentUser.tenant);
+    const tenantId = this.authService.getCurrentTenantId();
+    if (tenantId) {
+      this.loadAllUsers(tenantId);
     }
   }
 
@@ -111,9 +111,9 @@ export class ClientDetailViewComponent implements OnInit {
         });
 
         // Load all clients to check which users are already connected
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser?.tenant) {
-          this.clientsService.getClientsAll(currentUser.tenant).subscribe({
+        const tenantId = this.authService.getCurrentTenantId();
+        if (tenantId) {
+          this.clientsService.getClientsAll(tenantId).subscribe({
             next: (clients: Client[]) => {
               // Filter out already connected users (except current user if connected)
               const connectedUserIds = clients
@@ -134,7 +134,11 @@ export class ClientDetailViewComponent implements OnInit {
   }
 
   loadConnectedUser(userId: string) {
-    this.usersService.fetchUsers(this.authService.getCurrentUser()?.tenant!).subscribe({
+    const tenantId = this.authService.getCurrentTenantId();
+    if (!tenantId) {
+      throw new Error('Tenant ID nije dostupan za trenutno prijavljenog korisnika.');
+    }
+    this.usersService.fetchUsers(tenantId).subscribe({
       next: (users: User[]) => {
         this.connectedUser = users.find(u => u._id === userId) || null;
       }
@@ -156,9 +160,9 @@ export class ClientDetailViewComponent implements OnInit {
           }
         });
         // Refresh available users
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser?.tenant) {
-          this.loadAllUsers(currentUser.tenant);
+        const tenantId = this.authService.getCurrentTenantId();
+        if (tenantId) {
+          this.loadAllUsers(tenantId);
         }
       },
       error: (error) => {
@@ -179,9 +183,9 @@ export class ClientDetailViewComponent implements OnInit {
         this.client.user = undefined;
         this.connectedUser = null;
         // Refresh available users
-        const currentUser = this.authService.getCurrentUser();
-        if (currentUser?.tenant) {
-          this.loadAllUsers(currentUser.tenant);
+        const tenantId = this.authService.getCurrentTenantId();
+        if (tenantId) {
+          this.loadAllUsers(tenantId);
         }
       },
       error: (error) => {

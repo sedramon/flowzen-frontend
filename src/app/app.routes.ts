@@ -7,6 +7,7 @@ import { AppointmentsComponent } from './modules/appointments/appointments.compo
 import { ClientsComponent } from './modules/clients/clients.component';
 import { EmployeesComponent } from './modules/employees/employees.component';
 import { ScopeGuard } from './core/guards/scope.guard';
+import { GlobalAdminGuard } from './core/guards/global-admin.guard';
 import { UnauthorizedComponent } from './modules/unauthorized/unauthorized.component';
 import { UserAdministrationComponent } from './modules/user-administration/user-administration.component';
 import { ServicesComponent } from './modules/services/services.component';
@@ -129,6 +130,16 @@ export const routes: Routes = [
           title: 'Settings',
           icon: 'settings'
         }
+      },
+      {
+        path: 'admin',
+        canActivate: [GlobalAdminGuard],
+        loadChildren: () =>
+          import('./modules/admin/admin.routes').then((m) => m.ADMIN_ROUTES),
+        data: {
+          title: 'Global Admin',
+          icon: 'public',
+        },
       },
       {
         path: '',

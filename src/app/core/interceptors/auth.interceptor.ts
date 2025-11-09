@@ -1,11 +1,20 @@
-import { HttpEvent, HttpHandler, HttpInterceptor, HttpRequest, HttpResponse } from "@angular/common/http";
+import {
+    HttpEvent,
+    HttpHandler,
+    HttpInterceptor,
+    HttpRequest,
+    HttpResponse,
+} from "@angular/common/http";
 import { AuthService } from "../services/auth.service";
 import { Injectable } from "@angular/core";
 import { Observable, tap } from "rxjs";
 import { CsrfService } from "../services/csrf.service";
+import { environment } from "../../../environments/environment";
 
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+    private readonly debugAuth = environment.debugAuth === true;
+
     constructor(
         private auth: AuthService,
         private csrfService: CsrfService
@@ -26,14 +35,24 @@ export class AuthInterceptor implements HttpInterceptor {
         const isAuthEndpoint = req.url.includes('/auth/login') || req.url.includes('/auth/register');
         
         if (csrfToken && stateChangingMethods.includes(req.method) && !isAuthEndpoint) {
-            console.log('🔒 Adding CSRF token to request:', req.method, req.url);
+            if (this.debugAuth) {
+                console.info('[AuthInterceptor] attach-csrf', {
+                    method: req.method,
+                    url: req.url,
+                });
+            }
             modifiedReq = modifiedReq.clone({
                 setHeaders: {
                     'X-CSRF-Token': csrfToken
                 }
             });
         } else if (stateChangingMethods.includes(req.method) && !isAuthEndpoint && !csrfToken) {
-            console.warn('⚠️ No CSRF token available for request:', req.method, req.url);
+            if (this.debugAuth) {
+                console.warn('[AuthInterceptor] missing-csrf', {
+                    method: req.method,
+                    url: req.url,
+                });
+            }
         }
 
         // Handle the response to extract updated CSRF token
@@ -43,7 +62,12 @@ export class AuthInterceptor implements HttpInterceptor {
                     // Extract and store updated CSRF token from response headers
                     const newCsrfToken = event.headers.get('X-CSRF-Token');
                     if (newCsrfToken) {
-                        console.log('🔄 Received new CSRF token from:', req.url);
+                        if (this.debugAuth) {
+                            console.info('[AuthInterceptor] refresh-csrf', {
+                                url: req.url,
+                                status: event.status,
+                            });
+                        }
                         this.csrfService.setToken(newCsrfToken);
                     }
                 }

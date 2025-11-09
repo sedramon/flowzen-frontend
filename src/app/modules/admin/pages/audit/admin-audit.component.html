@@ -1,0 +1,156 @@
+<section class="admin-audit">
+  <header class="admin-audit__header">
+    <div>
+      <h2>Audit signals</h2>
+      <p>Svaka globalna akcija je zabeležena sa punim metapodacima.</p>
+    </div>
+
+    <div class="admin-audit__actions">
+      <button mat-stroked-button color="primary" (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        Osveži
+      </button>
+      <button mat-flat-button color="accent" (click)="exportJson()">
+        <mat-icon>download</mat-icon>
+        Export JSON
+      </button>
+    </div>
+  </header>
+
+  <section class="admin-audit__filters" [formGroup]="filterForm">
+    <mat-form-field appearance="outline">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        placeholder="Search actor, tenant, scope or metadata"
+        formControlName="search"
+      />
+      @if (filterForm.value.search) {
+        <button matSuffix mat-icon-button (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Target type</mat-label>
+      <mat-select formControlName="targetType">
+        <mat-option value="">All</mat-option>
+        <mat-option value="Tenant">Tenant</mat-option>
+        <mat-option value="User">User</mat-option>
+        <mat-option value="Scope">Scope</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Severity</mat-label>
+      <mat-select formControlName="severity">
+        <mat-option value="">All severities</mat-option>
+        <mat-option value="info">Info</mat-option>
+        <mat-option value="warning">Warning</mat-option>
+        <mat-option value="critical">Critical</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline">
+      <mat-label>Time range</mat-label>
+      <mat-select formControlName="timeRange" (selectionChange)="onTimeRangeChange()">
+        <mat-option value="24h">Poslednjih 24h</mat-option>
+        <mat-option value="7d">Poslednjih 7 dana</mat-option>
+        <mat-option value="30d">Poslednjih 30 dana</mat-option>
+        <mat-option value="custom">Custom</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    @if (filterForm.value.timeRange === 'custom') {
+      <mat-form-field appearance="outline">
+        <mat-label>Od</mat-label>
+        <input matInput [matDatepicker]="startPicker" formControlName="startDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+        <mat-datepicker #startPicker></mat-datepicker>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Do</mat-label>
+        <input matInput [matDatepicker]="endPicker" formControlName="endDate" />
+        <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+        <mat-datepicker #endPicker></mat-datepicker>
+      </mat-form-field>
+    }
+
+    <mat-form-field appearance="outline">
+      <mat-label>Limit</mat-label>
+      <mat-select formControlName="limit" (selectionChange)="onLimitChange()">
+        <mat-option [value]="25">25</mat-option>
+        <mat-option [value]="50">50</mat-option>
+        <mat-option [value]="100">100</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </section>
+
+  @if (!loading) {
+    <section class="admin-audit__feed">
+      @if (events.length) {
+        @for (event of events; track event.timestamp) {
+          <mat-card
+            class="audit-card"
+            [ngClass]="'audit-card--' + event.severity"
+          >
+            <header>
+              <div class="audit-card__headline">
+                <div class="pill">
+                  @if (event.severity === 'critical') {
+                    <mat-icon>error</mat-icon>
+                  }
+                  @if (event.severity === 'warning') {
+                    <mat-icon>warning_amber</mat-icon>
+                  }
+                  @if (event.severity === 'info') {
+                    <mat-icon>info</mat-icon>
+                  }
+                </div>
+                <div>
+                  <h3>{{ event.actor }}</h3>
+                  <span class="audit-card__action">{{ event.action }}</span>
+                </div>
+              </div>
+              <span class="audit-card__timestamp">{{ event.timestamp }}</span>
+            </header>
+
+            <section class="audit-card__meta">
+              <div>
+                <span class="label">Tenant</span>
+                <span class="value">{{ event.tenant }}</span>
+              </div>
+              <div>
+                <span class="label">Scope</span>
+                <span class="value">{{ event.scope }}</span>
+              </div>
+              <div>
+                <span class="label">Metadata</span>
+                <span class="value metadata">{{ event.metadata }}</span>
+              </div>
+            </section>
+
+            <footer class="audit-card__actions">
+              <button mat-button color="primary" (click)="openDetailDialog(event, event.rawMetadata)">
+                <mat-icon>article</mat-icon>
+                Detalji
+              </button>
+            </footer>
+          </mat-card>
+        }
+      } @else {
+        <div class="admin-audit__empty">
+          <mat-icon>library_books</mat-icon>
+          <p>Nema audit zapisa za prikaz.</p>
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="admin-audit__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+      <p>Učitavanje audit logova...</p>
+    </div>
+  }
+</section>

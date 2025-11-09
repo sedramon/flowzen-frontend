@@ -65,7 +65,7 @@ export class EditCreateSupplierDialog implements OnInit {
       this.supplierForm.patchValue(rest);
     }
 
-    this.supplierForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
+    this.supplierForm.get('tenant')?.setValue(this.authService.requireCurrentTenantId());
   }
 
 

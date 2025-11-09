@@ -148,7 +148,9 @@ export class PosSettingsComponent implements OnInit {
     }
 
     this.loading = true;
-    this.posService.getFacilities(currentUser.tenant).subscribe({
+    this.posService
+      .getFacilities(currentUser.tenant ?? this.authService.getCurrentTenantId() ?? undefined)
+      .subscribe({
       next: (facilities) => {
         this.facilities = facilities;
         if (facilities.length > 0) {

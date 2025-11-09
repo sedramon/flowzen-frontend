@@ -1,4 +1,5 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../../environments/environment';
 
 /**
  * CSRF Service for managing CSRF tokens
@@ -12,12 +13,17 @@ import { Injectable } from '@angular/core';
 })
 export class CsrfService {
   private csrfToken: string | null = null;
+  private readonly debugAuth = environment.debugAuth === true;
 
   /**
    * Store the CSRF token received from the backend
    */
   setToken(token: string): void {
-    console.log('💾 CsrfService: Storing token:', token?.substring(0, 20) + '...');
+    if (this.debugAuth) {
+      console.info('[CsrfService] setToken', {
+        tokenPrefix: token?.substring(0, 12),
+      });
+    }
     this.csrfToken = token;
   }
 
@@ -25,7 +31,11 @@ export class CsrfService {
    * Get the current CSRF token
    */
   getToken(): string | null {
-    console.log('🔑 CsrfService: Getting token:', this.csrfToken ? this.csrfToken.substring(0, 20) + '...' : 'null');
+    if (this.debugAuth) {
+      console.info('[CsrfService] getToken', {
+        tokenAvailable: !!this.csrfToken,
+      });
+    }
     return this.csrfToken;
   }
 
@@ -34,6 +44,9 @@ export class CsrfService {
    */
   clearToken(): void {
     this.csrfToken = null;
+    if (this.debugAuth) {
+      console.info('[CsrfService] clearToken');
+    }
   }
 
   /**

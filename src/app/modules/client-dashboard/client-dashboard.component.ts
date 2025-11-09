@@ -86,14 +86,14 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
   loadAppointments(): void {
     const user = this.authService.getCurrentUser();
     
-    if (!user || !user.userId || !user.tenant) {
+    const tenantId = this.authService.getCurrentTenantId();
+    if (!user || !user.userId || !tenantId) {
       console.log('No user logged in');
       this.appointments = [];
       return;
     }
     
     const userId = user.userId;
-    const tenantId = user.tenant;
     
     // Get client ID connected to this user
     this.clientsService.getClientByUserId(userId).subscribe({
@@ -105,7 +105,7 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
         }
 
         // Load appointments for this client
-        this.appointmentService.getClientAppointments(client._id || client.id, tenantId!).subscribe({
+        this.appointmentService.getClientAppointments(client._id || client.id, tenantId).subscribe({
           next: (appointments: any[]) => {
             this.appointments = appointments;
           },
@@ -126,8 +126,9 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
    */
   loadWaitlistEntries(): void {
     const user = this.authService.getCurrentUser();
+    const tenantId = this.authService.getCurrentTenantId();
     
-    if (!user || !user.userId || !user.tenant) {
+    if (!user || !user.userId || !tenantId) {
       this.waitlistEntries = [];
       return;
     }

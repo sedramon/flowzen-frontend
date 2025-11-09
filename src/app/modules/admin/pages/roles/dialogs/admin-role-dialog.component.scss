@@ -1,0 +1,201 @@
+.role-dialog-form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+
+  mat-dialog-content {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding-top: 8px;
+  }
+}
+
+.dialog-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  align-items: start;
+}
+
+.type-toggle {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  .label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.65);
+  }
+
+  mat-button-toggle-group {
+    align-self: flex-start;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    mat-button-toggle {
+      font-weight: 500;
+
+      mat-icon {
+        margin-right: 6px;
+      }
+    }
+
+    .mat-button-toggle-checked {
+      background: rgba(99, 123, 255, 0.28);
+      color: #eef0ff;
+    }
+  }
+}
+
+.scope-selector {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 18px 20px;
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(34, 38, 56, 0.94), rgba(18, 21, 33, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+
+  header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    justify-content: space-between;
+    align-items: center;
+
+    h3 {
+      margin: 0;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+
+    p {
+      margin: 4px 0 0;
+      color: rgba(255, 255, 255, 0.66);
+      max-width: 420px;
+      font-size: 0.88rem;
+    }
+
+    .scope-search {
+      width: clamp(220px, 32vw, 280px);
+
+      input {
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.scope-loading,
+.scope-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 24px 16px;
+  color: rgba(255, 255, 255, 0.68);
+
+  mat-icon {
+    font-size: 40px;
+    width: 40px;
+    height: 40px;
+    opacity: 0.6;
+  }
+}
+
+.scope-buckets {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.scope-bucket {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  mat-selection-list {
+    max-height: 220px;
+    overflow: auto;
+  }
+}
+
+.scope-bucket__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+
+  h4 {
+    margin: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+  }
+
+  span {
+    display: block;
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.85rem;
+  }
+}
+
+.scope-bucket__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  button {
+    border-radius: 12px;
+    font-weight: 600;
+    gap: 4px;
+  }
+}
+
+.scope-option {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  .scope-name {
+    font-weight: 600;
+    font-size: 0.95rem;
+  }
+
+  .scope-description {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.82rem;
+  }
+}
+
+mat-dialog-actions {
+  padding: 16px 24px 24px;
+  gap: 12px;
+
+  button[mat-flat-button] {
+    border-radius: 12px;
+    font-weight: 600;
+  }
+}
+
+@media (max-width: 720px) {
+  .scope-selector header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .scope-selector .scope-search {
+    width: 100%;
+  }
+}
+

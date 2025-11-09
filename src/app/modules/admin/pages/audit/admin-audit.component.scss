@@ -1,0 +1,219 @@
+.admin-audit {
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  color: #f4f6ff;
+}
+
+.admin-audit__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px 24px;
+  flex-wrap: wrap;
+}
+
+.admin-audit__header h2 {
+  margin: 0 0 6px;
+  font-size: 1.55rem;
+  font-weight: 600;
+}
+
+.admin-audit__header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.64);
+  max-width: 520px;
+}
+
+.admin-audit__actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-audit__actions button {
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  gap: 8px;
+}
+
+.admin-audit__filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  align-items: center;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(160deg, rgba(31, 36, 55, 0.92), rgba(21, 24, 37, 0.95));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 40px rgba(7, 8, 14, 0.45);
+}
+
+.admin-audit__filters mat-form-field {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+}
+
+.admin-audit__filters mat-form-field .mat-mdc-text-field-wrapper {
+  background: transparent;
+}
+
+.admin-audit__filters input {
+  color: #ffffff;
+}
+
+.admin-audit__feed {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 22px;
+}
+
+.admin-audit__loading,
+.admin-audit__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 24px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.admin-audit__empty mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.65;
+}
+
+.audit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 24px 22px;
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgba(34, 38, 56, 0.94), rgba(18, 21, 33, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 42px rgba(7, 8, 14, 0.45);
+  color: #f0f3ff;
+}
+
+.audit-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.audit-card__headline {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.pill {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.audit-card__headline h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.audit-card__action {
+  display: inline-block;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.66);
+}
+
+.audit-card__timestamp {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.5);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.audit-card__meta {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.audit-card__meta .label {
+  display: block;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: rgba(255, 255, 255, 0.55);
+  margin-bottom: 6px;
+}
+
+.audit-card__meta .value {
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.audit-card__meta .metadata {
+  font-size: 0.85rem;
+  font-weight: 500;
+  word-break: break-all;
+}
+
+.audit-card__actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.audit-card__actions button {
+  border-radius: 12px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.audit-card--critical {
+  border-color: rgba(255, 82, 82, 0.3);
+}
+
+.audit-card--warning {
+  border-color: rgba(255, 193, 7, 0.28);
+}
+
+.audit-card--info {
+  border-color: rgba(144, 202, 249, 0.28);
+}
+
+@media (max-width: 1024px) {
+  .admin-audit__filters {
+    grid-template-columns: minmax(240px, 1fr) minmax(160px, 200px);
+  }
+
+  .admin-audit__filters mat-form-field:last-child {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-audit__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-audit__filters {
+    grid-template-columns: 1fr;
+  }
+}
+

@@ -554,8 +554,8 @@ export class PosService {
   }
 
   // Additional methods for POS components
-  getFacilities(tenant?: string): Observable<Facility[]> {
-    const t = tenant || this.authService.getCurrentUser()?.tenant || '';
+  getFacilities(tenant?: string | null): Observable<Facility[]> {
+    const t = tenant ?? this.authService.getCurrentTenantId() ?? '';
     
     return this.http.get(`${environment.apiUrl}/facility`, { params: { tenant: t } }).pipe(
       map((response: any) => {

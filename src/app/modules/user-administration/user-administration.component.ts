@@ -94,7 +94,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     }
 
     // Učitavanje podataka sa API-ja
-    this.userAdministrationService.fetchUsers(currentUser.tenant!).subscribe({
+    this.userAdministrationService.fetchUsers(this.authService.requireCurrentTenantId()).subscribe({
       next: (data) => {
         console.log('Users fetched:', data);
         this.dataSourceUsers.data = data;
@@ -104,7 +104,7 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       },
     });
 
-    this.userAdministrationService.fetchRoles(this.authService.getCurrentUser()!.tenant!).subscribe({
+    this.userAdministrationService.fetchRoles(this.authService.requireCurrentTenantId()).subscribe({
       next: (data) => {
         console.log('Roles fetched:', data);
         this.dataSourceRoles.data = data;

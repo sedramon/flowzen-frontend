@@ -1,0 +1,298 @@
+.admin-tenants {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  color: #f4f6ff;
+}
+
+.admin-tenants__header {
+  display: flex;
+  justify-content: space-between;
+  gap: 18px 24px;
+  flex-wrap: wrap;
+}
+
+.admin-tenants__header h2 {
+  margin: 0 0 6px;
+  font-size: 1.55rem;
+  font-weight: 600;
+}
+
+.admin-tenants__header p {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.admin-tenants__header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-tenants__header-actions button[mat-stroked-button],
+.admin-tenants__header-actions button[mat-flat-button] {
+  border-radius: 12px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  gap: 8px;
+}
+
+.admin-tenants__filters {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding: 20px;
+  border-radius: 20px;
+  background: linear-gradient(150deg, rgba(31, 36, 55, 0.9), rgba(21, 24, 37, 0.94));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 15px 40px rgba(7, 8, 14, 0.5);
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.filter-chips button {
+  border-radius: 999px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.06);
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid transparent;
+  transition: all 0.15s ease;
+}
+
+.filter-chips button mat-icon {
+  margin-right: 6px;
+}
+
+.filter-chips button:hover {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.filter-chips button.active {
+  background: linear-gradient(135deg, rgba(94, 53, 177, 0.85), rgba(63, 81, 181, 0.85));
+  border-color: rgba(255, 255, 255, 0.35);
+  color: #ffffff;
+  box-shadow: 0 12px 22px rgba(63, 81, 181, 0.35);
+}
+
+.filter-inputs {
+  display: grid;
+  grid-template-columns: minmax(260px, 1fr) minmax(160px, 220px);
+  gap: 16px;
+}
+
+.filter-inputs mat-form-field {
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 14px;
+}
+
+.filter-inputs mat-form-field .mat-mdc-text-field-wrapper {
+  background: transparent;
+}
+
+.filter-inputs input {
+  color: #ffffff;
+}
+
+.admin-tenants__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 22px;
+}
+
+.admin-tenants__loading,
+.admin-tenants__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 36px 24px;
+  color: rgba(255, 255, 255, 0.68);
+}
+
+.admin-tenants__empty mat-icon {
+  font-size: 48px;
+  width: 48px;
+  height: 48px;
+  opacity: 0.65;
+}
+
+.tenant-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 26px 22px;
+  border-radius: 22px;
+  background: linear-gradient(150deg, rgba(32, 36, 52, 0.92), rgba(20, 24, 36, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 18px 40px rgba(7, 8, 14, 0.45);
+  color: #eceffc;
+  position: relative;
+  overflow: hidden;
+}
+
+.tenant-card header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.tenant-card__title {
+  display: flex;
+  gap: 14px;
+  align-items: center;
+}
+
+.tenant-card__title mat-icon {
+  font-size: 26px;
+  width: 26px;
+  height: 26px;
+  padding: 12px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(63, 81, 181, 0.4), rgba(63, 81, 181, 0.85));
+  box-shadow: 0 14px 24px rgba(63, 81, 181, 0.35);
+}
+
+.tenant-card__title h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  font-weight: 600;
+}
+
+.tenant-card__plan {
+  display: inline-block;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.7);
+  margin-top: 2px;
+}
+
+.tenant-card__stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  padding: 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.tenant-card__stats .label {
+  display: block;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.tenant-card__stats .value {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.tenant-card__stats .value--health {
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.tenant-card__details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+  padding: 16px 18px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.tenant-card__details .label {
+  display: block;
+  font-size: 0.74rem;
+  color: rgba(255, 255, 255, 0.52);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 6px;
+}
+
+.tenant-card__details .value {
+  font-size: 0.98rem;
+  font-weight: 600;
+  color: #ffffff;
+}
+
+.value--stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tenant-card__actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.tenant-card__actions button {
+  border-radius: 12px;
+  font-weight: 600;
+  gap: 6px;
+}
+
+.tenant-card__overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(10, 12, 20, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+  pointer-events: none;
+}
+
+.tenant-card__chip--suspended {
+  background: rgba(255, 82, 82, 0.18);
+  color: #ff8a80;
+}
+
+.tenant-card__chip--pending {
+  background: rgba(255, 193, 7, 0.18);
+  color: #ffecb3;
+}
+
+.tenant-card--active {
+  border-color: rgba(129, 199, 132, 0.2);
+}
+
+.tenant-card--pending {
+  border-color: rgba(255, 193, 7, 0.2);
+}
+
+.tenant-card--suspended {
+  border-color: rgba(244, 67, 54, 0.28);
+}
+
+@media (max-width: 1024px) {
+  .filter-inputs {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .admin-tenants__header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .admin-tenants__header-actions {
+    width: 100%;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+}
+

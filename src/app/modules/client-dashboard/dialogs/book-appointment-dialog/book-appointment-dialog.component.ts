@@ -184,7 +184,8 @@ export class BookAppointmentDialogComponent implements OnInit {
   onSubmit(): void {
     if (this.appointmentForm.valid) {
       const user = this.authService.getCurrentUser();
-      if (!user?.userId || !user?.tenant) {
+      const tenantId = this.authService.getCurrentTenantId();
+      if (!user?.userId || !tenantId) {
         this.snackBar.open('Greška: Neispravni korisnički podaci', 'Zatvori', { duration: 3000 });
         return;
       }
@@ -212,7 +213,7 @@ export class BookAppointmentDialogComponent implements OnInit {
             client: client._id,
             service: formValue.service,
             facility: formValue.facility,
-            tenant: user.tenant!,
+            tenant: tenantId,
             date: formValue.date,
             startHour,
             endHour,

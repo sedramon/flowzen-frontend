@@ -1,0 +1,74 @@
+<mat-sidenav-container class="admin-shell">
+  <mat-sidenav
+    class="admin-shell__sidenav"
+    mode="side"
+    [(opened)]="sidenavOpened"
+  >
+    <div class="admin-shell__identity">
+      <div class="brand">
+        <mat-icon>public</mat-icon>
+        <div class="brand__text">
+          <span class="brand__title">Flowzen</span>
+          <span class="brand__subtitle">Global Admin</span>
+        </div>
+      </div>
+      <div class="brand__badge">
+        <mat-icon>verified_user</mat-icon>
+        <span>Superadmin</span>
+      </div>
+    </div>
+
+    <mat-nav-list class="admin-shell__nav">
+      @for (item of visibleNavItems; track item.route) {
+        <a
+          mat-list-item
+          [routerLink]="[item.route]"
+          [class.active]="isActive(item)"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          [matTooltip]="item.description"
+          matTooltipPosition="right"
+        >
+          <span class="nav-item">
+            <span class="nav-icon">
+              <mat-icon>{{ item.icon }}</mat-icon>
+            </span>
+            <span class="nav-text">
+              <span class="nav-label">{{ item.label }}</span>
+              <span class="nav-description">{{ item.description }}</span>
+            </span>
+          </span>
+        </a>
+      }
+    </mat-nav-list>
+
+    <footer class="admin-shell__footer">
+      <p>Audited workspace &middot; high-privilege operations are tracked</p>
+    </footer>
+  </mat-sidenav>
+
+  <mat-sidenav-content class="admin-shell__content">
+    <mat-toolbar class="admin-shell__toolbar" color="primary">
+      <button mat-icon-button class="toolbar__toggle" (click)="toggleSidenav()">
+        <mat-icon>menu</mat-icon>
+      </button>
+
+      <div class="toolbar__headline">
+        <h1>{{ pageTitle }}</h1>
+        <p>{{ pageDescription }}</p>
+      </div>
+
+      <span class="toolbar__spacer"></span>
+
+      <button mat-stroked-button color="accent" routerLink="/home">
+        <mat-icon>arrow_back</mat-icon>
+        Back to app
+      </button>
+    </mat-toolbar>
+
+    <section class="admin-shell__main">
+      <router-outlet></router-outlet>
+    </section>
+  </mat-sidenav-content>
+</mat-sidenav-container>
+

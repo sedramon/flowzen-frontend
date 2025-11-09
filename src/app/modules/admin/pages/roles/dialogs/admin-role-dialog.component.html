@@ -1,0 +1,121 @@
+<h2 mat-dialog-title>
+  {{ mode === 'create' ? 'Nova rola' : 'Izmeni rolu' }}
+</h2>
+
+<form [formGroup]="form" (ngSubmit)="submit()" class="role-dialog-form">
+  <mat-dialog-content>
+    <div class="dialog-grid">
+      <mat-form-field appearance="outline">
+        <mat-label>Naziv role</mat-label>
+        <input matInput formControlName="name" placeholder="npr. Global auditor" />
+        <mat-error *ngIf="form.get('name')?.hasError('required')">
+          Naziv je obavezan.
+        </mat-error>
+        <mat-error *ngIf="form.get('name')?.hasError('minlength')">
+          Naziv mora imati minimum 3 karaktera.
+        </mat-error>
+      </mat-form-field>
+
+      <div class="type-toggle">
+        <span class="label">Tip role</span>
+        <mat-button-toggle-group formControlName="type" appearance="legacy">
+          <mat-button-toggle value="global">
+            <mat-icon>public</mat-icon>
+            Global
+          </mat-button-toggle>
+          <mat-button-toggle value="tenant">
+            <mat-icon>apartment</mat-icon>
+            Tenant
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+      </div>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Tenant (za tenant role)</mat-label>
+        <mat-select formControlName="tenantId" placeholder="Odaberi tenant">
+          <mat-option [value]="null">Bez tenanta</mat-option>
+          @for (tenant of tenants; track tenant._id) {
+            <mat-option [value]="tenant._id">{{ tenant.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
+    <section class="scope-selector">
+      <header>
+        <div>
+          <h3>Dodela scope-ova</h3>
+          <p>
+            Odaberi scope-ove koji čine ovu rolu. Za globalne role prikazuju se samo global scope-ovi.
+          </p>
+        </div>
+        <mat-form-field appearance="outline" class="scope-search">
+          <mat-icon matPrefix>search</mat-icon>
+          <input matInput placeholder="Pretraga scope-ova" formControlName="scopeSearch" />
+        </mat-form-field>
+      </header>
+
+      @if (scopesLoading) {
+        <div class="scope-loading">
+          <mat-progress-spinner diameter="40" mode="indeterminate"></mat-progress-spinner>
+          <span>Učitavanje scope-ova...</span>
+        </div>
+      } @else {
+        <div class="scope-buckets">
+          @if (scopeBuckets.length) {
+            @for (bucket of scopeBuckets; track bucket.key) {
+              <section class="scope-bucket">
+                <div class="scope-bucket__header">
+                  <div>
+                    <h4>{{ bucket.label }}</h4>
+                    <span>{{ bucket.scopes.length }} dostupnih scope-ova</span>
+                  </div>
+                  <div class="scope-bucket__actions">
+                    <button mat-stroked-button type="button" (click)="selectAll(bucket)">
+                      <mat-icon>select_all</mat-icon>
+                      Označi sve
+                    </button>
+                    <button mat-button type="button" (click)="clearAll(bucket)">
+                      <mat-icon>clear</mat-icon>
+                      Poništi
+                    </button>
+                  </div>
+                </div>
+
+                <mat-selection-list>
+                  @for (scope of bucket.scopes; track scope._id) {
+                    <mat-list-option
+                      [selected]="isScopeSelected(scope._id)"
+                      (selectionChange)="onScopeOptionToggle(scope._id, $event.source.selected)"
+                      matTooltip="{{ scope.description || 'Opis nije dodat' }}"
+                      matTooltipShowDelay="250"
+                      matTooltipPosition="above"
+                    >
+                      <div class="scope-option">
+                        <span class="scope-name">{{ scope.name }}</span>
+                        <small class="scope-description">{{ scope.description || '—' }}</small>
+                      </div>
+                    </mat-list-option>
+                  }
+                </mat-selection-list>
+              </section>
+            }
+          } @else {
+            <div class="scope-empty">
+              <mat-icon>search_off</mat-icon>
+              <p>Nema scope-ova koji odgovaraju pretrazi.</p>
+            </div>
+          }
+        </div>
+      }
+    </section>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" (click)="cancel()">Otkaži</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+      Sačuvaj
+    </button>
+  </mat-dialog-actions>
+</form>
+

@@ -67,7 +67,7 @@ export class Suppliers implements OnInit, AfterViewInit {
   constructor(private suppliersService: SuppliersService, private authService: AuthService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
 
   ngOnInit(): void {
-    this.suppliersService.getAllSuppliers(this.authService.getCurrentUser()!.tenant!).subscribe(
+    this.suppliersService.getAllSuppliers(this.authService.requireCurrentTenantId()).subscribe(
       s => this.dataSourceSuppliers.data = s
     );
   }

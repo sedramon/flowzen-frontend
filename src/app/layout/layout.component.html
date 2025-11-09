@@ -1,129 +1,135 @@
 <mat-toolbar color="primary" class="topbar">
-
   <div class="menu-content">
     <img src="/flowzen-logo.png" alt="flowzen" width="50">
     <span class="app-title">Flowzen</span>
 
-    
-    <button *ngIf="authService.isModuleEnabled('scope_home:access')" mat-icon-button matTooltip="Home" matTooltipPosition="below"
-      routerLink="/home" routerLinkActive="active" class="nav-btn">
-      <mat-icon>home</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_home:access')) {
+      <button mat-icon-button matTooltip="Home" matTooltipPosition="below"
+        routerLink="/home" routerLinkActive="active" class="nav-btn">
+        <mat-icon>home</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_client_dashboard:access')" mat-icon-button matTooltip="Client Dashboard" matTooltipPosition="below"
-      routerLink="/client-dashboard" routerLinkActive="active" class="nav-btn">
-      <mat-icon>dashboard</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_client_dashboard:access')) {
+      <button mat-icon-button matTooltip="Client Dashboard" matTooltipPosition="below"
+        routerLink="/client-dashboard" routerLinkActive="active" class="nav-btn">
+        <mat-icon>dashboard</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_appointments:access')" mat-icon-button matTooltip="Appointments"
-      matTooltipPosition="below" routerLink="/appointments" routerLinkActive="active" class="nav-btn">
-      <mat-icon>event</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_appointments:access')) {
+      <button mat-icon-button matTooltip="Appointments" matTooltipPosition="below"
+        routerLink="/appointments" routerLinkActive="active" class="nav-btn">
+        <mat-icon>event</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_working_shifts:access')" mat-icon-button matTooltip="Working Shifts" matTooltipPosition="below" routerLink="/working-shifts"
-      routerLinkActive="active" class="nav-btn">
-      <mat-icon>calendar_month</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_working_shifts:access')) {
+      <button mat-icon-button matTooltip="Working Shifts" matTooltipPosition="below"
+        routerLink="/working-shifts" routerLinkActive="active" class="nav-btn">
+        <mat-icon>calendar_month</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_clients:access')" mat-icon-button matTooltip="Clients"
-      matTooltipPosition="below" routerLink="/clients" routerLinkActive="active" class="nav-btn">
-      <mat-icon>sentiment_very_satisfied</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_clients:access')) {
+      <button mat-icon-button matTooltip="Clients" matTooltipPosition="below"
+        routerLink="/clients" routerLinkActive="active" class="nav-btn">
+        <mat-icon>sentiment_very_satisfied</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_employees:access')" mat-icon-button matTooltip="Employees"
-      matTooltipPosition="below" routerLink="/employees" routerLinkActive="active" class="nav-btn">
-      <mat-icon>supervisor_account</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_employees:access')) {
+      <button mat-icon-button matTooltip="Employees" matTooltipPosition="below"
+        routerLink="/employees" routerLinkActive="active" class="nav-btn">
+        <mat-icon>supervisor_account</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_user_administration:access')" mat-icon-button matTooltip="User Administration"
-      matTooltipPosition="below" routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
-      <mat-icon>admin_panel_settings</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_user_administration:access')) {
+      <button mat-icon-button matTooltip="User Administration" matTooltipPosition="below"
+        routerLink="/user-administration" routerLinkActive="active" class="nav-btn">
+        <mat-icon>admin_panel_settings</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_services:access')" mat-icon-button matTooltip="Services"
-      matTooltipPosition="below" routerLink="/services" routerLinkActive="active" class="nav-btn">
-      <mat-icon>content_cut</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_services:access')) {
+      <button mat-icon-button matTooltip="Services" matTooltipPosition="below"
+        routerLink="/services" routerLinkActive="active" class="nav-btn">
+        <mat-icon>content_cut</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_articles:access')" mat-icon-button matTooltip="Articles"
-      matTooltipPosition="below" routerLink="/articles" routerLinkActive="active" class="nav-btn">
-      <mat-icon>article</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_articles:access')) {
+      <button mat-icon-button matTooltip="Articles" matTooltipPosition="below"
+        routerLink="/articles" routerLinkActive="active" class="nav-btn">
+        <mat-icon>article</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_suppliers:access')" mat-icon-button matTooltip="Suppliers" matTooltipPosition="below"
-    routerLink="/suppliers" routerLinkActive="active" class="nav-btn">
-      <mat-icon>local_shipping</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_suppliers:access')) {
+      <button mat-icon-button matTooltip="Suppliers" matTooltipPosition="below"
+        routerLink="/suppliers" routerLinkActive="active" class="nav-btn">
+        <mat-icon>local_shipping</mat-icon>
+      </button>
+    }
 
-    <button *ngIf="authService.isModuleEnabled('scope_settings:access')" mat-icon-button matTooltip="Settings"
-      matTooltipPosition="below" routerLink="/settings" routerLinkActive="active" class="nav-btn">
-      <mat-icon>settings</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_settings:access')) {
+      <button mat-icon-button matTooltip="Settings" matTooltipPosition="below"
+        routerLink="/settings" routerLinkActive="active" class="nav-btn">
+        <mat-icon>settings</mat-icon>
+      </button>
+    }
 
-    <!-- POS Dropdown Menu -->
-    <button *ngIf="authService.isModuleEnabled('scope_pos:sale')" mat-button [matMenuTriggerFor]="posMenu" class="nav-btn text-btn">
-      POS
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
+    @if (authService.isModuleEnabled('scope_pos:sale')) {
+      <button mat-button [matMenuTriggerFor]="posMenu" class="nav-btn text-btn">
+        POS
+        <mat-icon>arrow_drop_down</mat-icon>
+      </button>
+    }
     <mat-menu #posMenu="matMenu">
       <button mat-menu-item routerLink="/pos/sales" routerLinkActive="active">
         <mat-icon>point_of_sale</mat-icon>
         <span>Prodaja</span>
       </button>
-      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_management')" mat-menu-item routerLink="/pos/cash-management" routerLinkActive="active">
-        <mat-icon>account_balance</mat-icon>
-        <span>Cash Management</span>
-      </button>
-      <button *ngIf="authService.isModuleEnabled('scope_pos:report')" mat-menu-item routerLink="/pos/reports" routerLinkActive="active">
-        <mat-icon>assessment</mat-icon>
-        <span>Izveštaji</span>
-      </button>
-      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_reports')" mat-menu-item routerLink="/pos/cash-reports" routerLinkActive="active">
-        <mat-icon>assessment</mat-icon>
-        <span>Cash Izveštaji</span>
-      </button>
-      <button *ngIf="authService.isModuleEnabled('scope_pos:cash_analytics')" mat-menu-item routerLink="/pos/cash-analytics" routerLinkActive="active">
-        <mat-icon>analytics</mat-icon>
-        <span>Cash Analitika</span>
-      </button>
-      <button *ngIf="authService.isModuleEnabled('scope_pos:settings')" mat-menu-item routerLink="/pos/settings" routerLinkActive="active">
-        <mat-icon>settings</mat-icon>
-        <span>POS Podešavanja</span>
-      </button>
+      @if (authService.isModuleEnabled('scope_pos:cash_management')) {
+        <button mat-menu-item routerLink="/pos/cash-management" routerLinkActive="active">
+          <mat-icon>account_balance</mat-icon>
+          <span>Cash Management</span>
+        </button>
+      }
+      @if (authService.isModuleEnabled('scope_pos:report')) {
+        <button mat-menu-item routerLink="/pos/reports" routerLinkActive="active">
+          <mat-icon>assessment</mat-icon>
+          <span>Izveštaji</span>
+        </button>
+      }
+      @if (authService.isModuleEnabled('scope_pos:cash_reports')) {
+        <button mat-menu-item routerLink="/pos/cash-reports" routerLinkActive="active">
+          <mat-icon>assessment</mat-icon>
+          <span>Cash Izveštaji</span>
+        </button>
+      }
+      @if (authService.isModuleEnabled('scope_pos:cash_analytics')) {
+        <button mat-menu-item routerLink="/pos/cash-analytics" routerLinkActive="active">
+          <mat-icon>analytics</mat-icon>
+          <span>Cash Analitika</span>
+        </button>
+      }
+      @if (authService.isModuleEnabled('scope_pos:settings')) {
+        <button mat-menu-item routerLink="/pos/settings" routerLinkActive="active">
+          <mat-icon>settings</mat-icon>
+          <span>POS Podešavanja</span>
+        </button>
+      }
     </mat-menu>
 
-
-
-
-    <!-- Dropdown Menu A trigger -->
-    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuA" class="nav-btn text-btn">
-      Menu A
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
-    <mat-menu #menuA="matMenu">
-      <button mat-menu-item>Placeholder A1</button>
-      <button mat-menu-item>Placeholder A2</button>
-      <button mat-menu-item>Placeholder A3</button>
-    </mat-menu>
-
-    <!-- Dropdown Menu B trigger -->
-    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuB" class="nav-btn text-btn">
-      Menu B
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
-    <mat-menu #menuB="matMenu">
-      <button mat-menu-item>Placeholder B1</button>
-      <button mat-menu-item>Placeholder B2</button>
-    </mat-menu>
-    <!-- Dropdown Menu C trigger -->
-    <button *ngIf="false" mat-button [matMenuTriggerFor]="menuC" class="nav-btn text-btn">
-      Menu C
-      <mat-icon>arrow_drop_down</mat-icon>
-    </button>
-    <mat-menu #menuC="matMenu">
-      <button mat-menu-item>Placeholder C1</button>
-      <button mat-menu-item>Placeholder C2</button>
-    </mat-menu>
+    @if (authService.isGlobalAdmin()) {
+      <button mat-button matTooltip="Global Administration"
+        matTooltipPosition="below" routerLink="/admin" routerLinkActive="active" class="nav-btn text-btn global-admin-btn">
+        <mat-icon>public</mat-icon>
+        <span>Global Admin</span>
+      </button>
+    }
   </div>
 
   <div fxLayout="row" fxLayoutAlign="end center" class="toolbar-right">
@@ -135,7 +141,6 @@
       (click)="logout()">
       <mat-icon>exit_to_app</mat-icon>Logout</button>
   </div>
-
 </mat-toolbar>
 
 <div class="main-content">

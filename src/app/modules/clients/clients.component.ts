@@ -107,9 +107,11 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    const user = this.authService.getCurrentUser();
-    if (!user) return;
-    this.tenantId = user.tenant!;
+    const tenantId = this.authService.getCurrentTenantId();
+    if (!tenantId) {
+      throw new Error('Tenant ID nije dostupan za trenutno prijavljenog korisnika.');
+    }
+    this.tenantId = tenantId;
   }
 
   ngAfterViewInit() {

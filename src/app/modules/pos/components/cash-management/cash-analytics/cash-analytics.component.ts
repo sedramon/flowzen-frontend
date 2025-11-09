@@ -15,6 +15,7 @@ import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Facility } from '../../../../../models/Facility';
 import { PosService } from '../../../services/pos.service';
+import { AuthService } from '../../../../../core/services/auth.service';
 
 @Component({
   selector: 'app-cash-analytics',
@@ -72,7 +73,8 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   constructor(
     private posService: PosService,
     private snackBar: MatSnackBar,
-    private fb: FormBuilder
+    private fb: FormBuilder,
+    private authService: AuthService
   ) {
     this.analyticsForm = this.fb.group({
       facility: [''],
@@ -97,18 +99,16 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   private loadInitialData(): void {
     this.loading = true;
     
-    // Set default facility
-    const currentUser = JSON.parse(localStorage.getItem('currentUser') || '{}');
-    const defaultFacility = '68d855f9f07f767dc2582ba2'; // Test Facility
-    
+    const tenantId = this.authService.getCurrentTenantId() ?? undefined;
+
     this.analyticsForm.patchValue({
-      facility: defaultFacility,
       period: 'week',
       startDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // 7 days ago
       endDate: new Date()
     });
     
-    this.posService.getFacilities(currentUser?.tenant)
+    this.posService
+      .getFacilities(tenantId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (facilities) => {

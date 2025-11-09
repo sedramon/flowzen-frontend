@@ -1,0 +1,199 @@
+<section class="admin-tenants">
+  <header class="admin-tenants__header">
+    <div>
+      <h2>Tenant landscape</h2>
+      <p>Global pregled tenanata, statusa licenci i health signala.</p>
+    </div>
+
+    <div class="admin-tenants__header-actions">
+      <button mat-stroked-button color="primary" (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        Osveži
+      </button>
+      <button mat-flat-button color="accent" (click)="openCreateTenantDialog()">
+        <mat-icon>add_business</mat-icon>
+        Novi tenant
+      </button>
+    </div>
+  </header>
+
+  <section class="admin-tenants__filters" [formGroup]="filterForm">
+    <div class="filter-chips">
+      @for (filter of tenantFilters; track filter.label) {
+        <button
+          mat-button
+          [class.active]="filter.status === activeStatus || (!filter.status && !activeStatus)"
+          (click)="applyChip(filter)"
+        >
+          <mat-icon>{{ filter.icon }}</mat-icon>
+          {{ filter.label }}
+        </button>
+      }
+    </div>
+
+    <div class="filter-inputs">
+      <mat-form-field appearance="outline">
+        <mat-icon matPrefix>search</mat-icon>
+        <input
+          matInput
+          placeholder="Search tenants, contact email or PIB"
+          formControlName="search"
+        />
+        @if (filterForm.value.search) {
+          <button matSuffix mat-icon-button (click)="clearSearch()">
+            <mat-icon>close</mat-icon>
+          </button>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>Status</mat-label>
+        <mat-select formControlName="status">
+          <mat-option value="">All statuses</mat-option>
+          <mat-option value="active">Active</mat-option>
+          <mat-option value="suspended">Suspended</mat-option>
+          <mat-option value="pending">Pending</mat-option>
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </section>
+
+  @if (!loading) {
+    <section class="admin-tenants__grid">
+      @if (tenants.length) {
+        @for (tenant of tenants; track trackByTenantId($index, tenant)) {
+          <mat-card
+            class="tenant-card"
+            [ngClass]="'tenant-card--' + tenant.status"
+          >
+            <header>
+              <div class="tenant-card__title">
+                <mat-icon>business</mat-icon>
+                <div>
+                  <h3>{{ tenant.name }}</h3>
+                  <span class="tenant-card__plan">
+                    {{ tenant.hasActiveLicense ? 'Licenca aktivna' : 'Bez licence' }}
+                  </span>
+                </div>
+              </div>
+
+              <mat-chip-set>
+                <mat-chip
+                  [class.tenant-card__chip--suspended]="tenant.status === 'suspended'"
+                  [class.tenant-card__chip--pending]="tenant.status === 'pending'"
+                >
+                  @if (tenant.status === 'active') {
+                    <mat-icon>verified</mat-icon>
+                  }
+                  @if (tenant.status === 'suspended') {
+                    <mat-icon>block</mat-icon>
+                  }
+                  @if (tenant.status === 'pending') {
+                    <mat-icon>pending_actions</mat-icon>
+                  }
+                  {{ tenant.status | titlecase }}
+                </mat-chip>
+              </mat-chip-set>
+            </header>
+
+            <section class="tenant-card__stats">
+              <div>
+                <span class="label">Created</span>
+                <span class="value">
+                  {{ tenant.createdAt | date: 'dd.MM.yyyy' }}
+                </span>
+              </div>
+              <div>
+                <span class="label">License expires</span>
+                <span class="value">
+                  {{ tenant.licenseExpiryDate ? (tenant.licenseExpiryDate | date: 'dd.MM.yyyy') : 'N/A' }}
+                </span>
+              </div>
+              <div>
+                <span class="label">Suspended reason</span>
+                <span class="value value--health">
+                  {{ tenant.suspensionReason || '—' }}
+                </span>
+              </div>
+            </section>
+
+            <section class="tenant-card__details">
+              <div>
+                <span class="label">Company type</span>
+                <span class="value">{{ formatValue(tenant.companyType) }}</span>
+              </div>
+              <div>
+                <span class="label">Address</span>
+                <span class="value">{{ formatAddress(tenant) }}</span>
+              </div>
+              <div>
+                <span class="label">Contact</span>
+                <div class="value value--stack">
+                  <span>{{ formatValue(tenant.contactEmail) }}</span>
+                  <span>{{ formatValue(tenant.contactPhone) }}</span>
+                </div>
+              </div>
+              <div>
+                <span class="label">PIB / MIB</span>
+                <span class="value">{{ formatTaxNumbers(tenant) }}</span>
+              </div>
+            </section>
+
+            <footer class="tenant-card__actions">
+              <button mat-button disabled>
+                <mat-icon>analytics</mat-icon>
+                Overview
+              </button>
+          <button
+            mat-button
+            color="primary"
+            (click)="openLicenseDialog(tenant)"
+            [disabled]="isProcessing(tenant._id)"
+          >
+            <mat-icon>tune</mat-icon>
+            Licenca
+          </button>
+          @if (tenant.status !== 'suspended') {
+            <button
+              mat-button
+              color="warn"
+              (click)="openSuspendDialog(tenant)"
+              [disabled]="isProcessing(tenant._id)"
+            >
+              <mat-icon>block</mat-icon>
+              Suspenduj
+            </button>
+          } @else {
+            <button
+              mat-button
+              color="accent"
+              (click)="openActivateDialog(tenant)"
+              [disabled]="isProcessing(tenant._id)"
+            >
+              <mat-icon>restart_alt</mat-icon>
+              Aktiviraj
+            </button>
+          }
+            </footer>
+
+        @if (isProcessing(tenant._id)) {
+          <div class="tenant-card__overlay">
+            <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+          </div>
+        }
+          </mat-card>
+        }
+      } @else {
+        <div class="admin-tenants__empty">
+          <mat-icon>inventory_2</mat-icon>
+          <p>Nema tenanata za prikaz sa izabranim filterima.</p>
+        </div>
+      }
+    </section>
+  } @else {
+    <div class="admin-tenants__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+      <p>Učitavanje tenanata...</p>
+    </div>
+  }
+</section>

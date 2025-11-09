@@ -11,7 +11,7 @@ import { AuthenticatedUser } from '../models/AuthenticatedUser';
 import { filter, map } from 'rxjs';
 import { MatTooltip } from '@angular/material/tooltip';
 import { MatMenuModule } from '@angular/material/menu';
-import { NgIf } from '@angular/common';
+import { CommonModule } from '@angular/common';
 
 
 
@@ -19,6 +19,7 @@ import { NgIf } from '@angular/common';
   selector: 'app-layout',
   standalone: true,
   imports: [
+    CommonModule,
     RouterModule, 
     MatSidenavModule, 
     MatListModule, 
@@ -27,8 +28,7 @@ import { NgIf } from '@angular/common';
     MatIconModule,
     FlexLayoutModule,
     MatTooltip,
-    MatMenuModule,
-    NgIf
+    MatMenuModule
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss'

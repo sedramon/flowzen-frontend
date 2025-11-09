@@ -124,7 +124,7 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.posService.getFacilities(currentUser.tenant)
+    this.posService.getFacilities(currentUser.tenant ?? this.authService.getCurrentTenantId() ?? undefined)
       .pipe(
         switchMap(facilities => {
           this.facilities = facilities || [];

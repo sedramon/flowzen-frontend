@@ -144,7 +144,7 @@ export class PosReportsComponent implements OnInit, OnDestroy {
     }
 
     this.loading = true;
-    this.posService.getFacilities(currentUser.tenant)
+    this.posService.getFacilities(currentUser.tenant ?? this.authService.getCurrentTenantId() ?? undefined)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (facilities) => {

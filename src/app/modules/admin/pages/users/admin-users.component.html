@@ -1,0 +1,242 @@
+<section class="admin-users">
+  <header class="admin-users__header">
+    <div>
+      <h2>Access directory</h2>
+      <p>Pregledaj superadministratore i korisnike po tenantima, uz brzu kontrolu privilegija.</p>
+    </div>
+
+    <div class="admin-users__actions">
+      <button mat-stroked-button color="primary" (click)="refresh()" [disabled]="loading">
+        <mat-icon>refresh</mat-icon>
+        Osveži
+      </button>
+      <button mat-flat-button color="accent" (click)="openCreateDialog()" [disabled]="loading">
+        <mat-icon>person_add</mat-icon>
+        Novi korisnik
+      </button>
+    </div>
+  </header>
+
+  <section class="admin-users__filters" [formGroup]="filterForm">
+    <mat-form-field appearance="outline">
+      <mat-icon matPrefix>search</mat-icon>
+      <input
+        matInput
+        placeholder="Pretraga po imenu, email-u ili tenantu"
+        formControlName="search"
+      />
+      @if (filterForm.value.search) {
+        <button matSuffix mat-icon-button (click)="clearSearch()">
+          <mat-icon>close</mat-icon>
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-button-toggle-group formControlName="view" appearance="legacy">
+      <mat-button-toggle value="all">
+        <mat-icon>public</mat-icon>
+        Svi
+      </mat-button-toggle>
+      <mat-button-toggle value="global">
+        <mat-icon>verified_user</mat-icon>
+        Superadmin
+      </mat-button-toggle>
+      <mat-button-toggle value="tenant">
+        <mat-icon>business</mat-icon>
+        Po tenantima
+      </mat-button-toggle>
+    </mat-button-toggle-group>
+  </section>
+
+  @if (!loading) {
+    <section class="admin-users__content">
+      @if (filterForm.value.view !== 'tenant') {
+        <mat-card class="admin-users__section">
+          <div class="section-header">
+            <div class="section-title">
+              <mat-icon>verified_user</mat-icon>
+              <div>
+                <h3>Globalni superadministratori</h3>
+                <p>Uvek dostupni korisnici sa punim globalnim privilegijama.</p>
+              </div>
+            </div>
+            <mat-chip appearance="outlined" color="primary">
+              {{ filteredGlobalUsers.length }} korisnika
+            </mat-chip>
+          </div>
+
+          @if (filteredGlobalUsers.length) {
+            <div class="user-card-grid">
+              @for (user of filteredGlobalUsers; track trackByUserId($index, user)) {
+                <mat-card class="user-card user-card--global">
+                  <header>
+                    <div class="user-card__identity">
+                      <div class="avatar avatar--global">
+                        <mat-icon>public</mat-icon>
+                      </div>
+                      <div>
+                        <h4>{{ user.name || user.email }}</h4>
+                        <span class="user-card__email">{{ user.email }}</span>
+                      </div>
+                    </div>
+
+                    <mat-chip-set>
+                      <mat-chip color="primary" selected>
+                        <mat-icon>shield</mat-icon>
+                        Superadmin
+                      </mat-chip>
+                    </mat-chip-set>
+                  </header>
+
+                  <section class="user-card__meta">
+                    <div>
+                      <span class="label">Role</span>
+                      <span class="value">{{ getRoleName(user) }}</span>
+                    </div>
+                    <div>
+                      <span class="label">Kreiran</span>
+                      <span class="value">{{ user.createdAt | date: 'dd.MM.yyyy' }}</span>
+                    </div>
+                  </section>
+
+                  <section class="user-card__scopes">
+                    <span class="label">Scopes</span>
+                    <mat-chip-set>
+                      @for (scope of user.scopes; track scope) {
+                        <mat-chip>{{ scope }}</mat-chip>
+                      }
+                      @if (!user.scopes?.length) {
+                        <mat-chip>Dodeli scope</mat-chip>
+                      }
+                    </mat-chip-set>
+                  </section>
+
+                  <footer class="user-card__actions">
+                    <button mat-icon-button color="primary" matTooltip="Izmeni korisnika" (click)="openEditDialog(user)" [disabled]="isProcessing(user._id)">
+                      <mat-icon>edit</mat-icon>
+                    </button>
+                    <button mat-icon-button matTooltip="Reset lozinke" (click)="openResetPasswordDialog(user)" [disabled]="isProcessing(user._id)">
+                      <mat-icon>vpn_key</mat-icon>
+                    </button>
+                    <button mat-icon-button color="warn" matTooltip="Obriši korisnika" (click)="confirmDelete(user)" [disabled]="isProcessing(user._id)">
+                      <mat-icon>delete</mat-icon>
+                    </button>
+                  </footer>
+
+                  @if (isProcessing(user._id)) {
+                    <div class="user-card__overlay">
+                      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+                    </div>
+                  }
+                </mat-card>
+              }
+            </div>
+          } @else {
+            <div class="admin-users__empty-block">
+              <mat-icon>shield_moon</mat-icon>
+              <p>Nema superadministratora koji ispunjavaju filter.</p>
+            </div>
+          }
+        </mat-card>
+      }
+
+      @if (filterForm.value.view !== 'global') {
+        <mat-card class="admin-users__section">
+          <div class="section-header">
+            <div class="section-title">
+              <mat-icon>apartment</mat-icon>
+              <div>
+                <h3>Korisnici po tenantima</h3>
+                <p>Detaljan pregled timova i njihovih uloga unutar svakog tenanta.</p>
+              </div>
+            </div>
+            <mat-chip appearance="outlined">
+              {{ filteredTenantGroups.length }} tenanta
+            </mat-chip>
+          </div>
+
+          @if (filteredTenantGroups.length) {
+            <mat-accordion class="tenant-accordion" multi>
+              @for (group of filteredTenantGroups; track group.tenant._id) {
+                <mat-expansion-panel>
+                  <mat-expansion-panel-header>
+                    <mat-panel-title>
+                      {{ group.tenant.name || 'Nepoznat tenant' }}
+                    </mat-panel-title>
+                    <mat-panel-description>
+                      {{ group.users.length }} korisnika
+                    </mat-panel-description>
+                  </mat-expansion-panel-header>
+
+                  <div class="tenant-users-grid">
+                    @for (user of group.users; track trackByUserId($index, user)) {
+                      <mat-card class="user-card">
+                        <header>
+                          <div class="user-card__identity">
+                            <div class="avatar">
+                              <mat-icon>person</mat-icon>
+                            </div>
+                            <div>
+                              <h4>{{ user.name || user.email }}</h4>
+                              <span class="user-card__email">{{ user.email }}</span>
+                            </div>
+                          </div>
+
+                          <mat-chip-set>
+                            <mat-chip>
+                              <mat-icon>workspace_premium</mat-icon>
+                              {{ getRoleName(user) }}
+                            </mat-chip>
+                          </mat-chip-set>
+                        </header>
+
+                        <section class="user-card__meta">
+                          <div>
+                            <span class="label">Tenant</span>
+                            <span class="value">{{ group.tenant.name || 'Global' }}</span>
+                          </div>
+                          <div>
+                            <span class="label">Kreiran</span>
+                            <span class="value">{{ user.createdAt | date: 'dd.MM.yyyy' }}</span>
+                          </div>
+                        </section>
+
+                        <footer class="user-card__actions">
+                          <button mat-icon-button color="primary" matTooltip="Izmeni korisnika" (click)="openEditDialog(user)" [disabled]="isProcessing(user._id)">
+                            <mat-icon>edit</mat-icon>
+                          </button>
+                          <button mat-icon-button matTooltip="Reset lozinke" (click)="openResetPasswordDialog(user)" [disabled]="isProcessing(user._id)">
+                            <mat-icon>vpn_key</mat-icon>
+                          </button>
+                          <button mat-icon-button color="warn" matTooltip="Obriši korisnika" (click)="confirmDelete(user)" [disabled]="isProcessing(user._id)">
+                            <mat-icon>delete</mat-icon>
+                          </button>
+                        </footer>
+
+                        @if (isProcessing(user._id)) {
+                          <div class="user-card__overlay">
+                            <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+                          </div>
+                        }
+                      </mat-card>
+                    }
+                  </div>
+                </mat-expansion-panel>
+              }
+            </mat-accordion>
+          } @else {
+            <div class="admin-users__empty-block">
+              <mat-icon>people_outline</mat-icon>
+              <p>Nema korisnika koji zadovoljavaju odabrane filtere.</p>
+            </div>
+          }
+        </mat-card>
+      }
+    </section>
+  } @else {
+    <div class="admin-users__loading">
+      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+      <p>Učitavanje korisnika...</p>
+    </div>
+  }
+</section>

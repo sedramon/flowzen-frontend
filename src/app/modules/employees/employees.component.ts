@@ -55,7 +55,7 @@ export class EmployeesComponent implements OnInit {
     this.employees$ = this.employeeService.employees$;
 
      // Trigger the initial fetch if not already loaded
-     this.employeeService.getAllEmployees(currentUser.tenant!).subscribe();
+     this.employeeService.getAllEmployees(this.authService.requireCurrentTenantId()).subscribe();
 
  
      // Initialize filtered employees

@@ -52,11 +52,11 @@ export class Articles implements OnInit, AfterViewInit {
   ) { }
 
   ngOnInit(): void {
-    this.articlesService.getAllArticles(this.authService.getCurrentUser()!.tenant!).subscribe(
+    this.articlesService.getAllArticles(this.authService.requireCurrentTenantId()).subscribe(
       a => this.dataSourceArticles.data = a
     )
 
-    this.supplierService.getAllSuppliers(this.authService.getCurrentUser()!.tenant!).subscribe(
+    this.supplierService.getAllSuppliers(this.authService.requireCurrentTenantId()).subscribe(
       s => this.suppliers = s
     )
   }

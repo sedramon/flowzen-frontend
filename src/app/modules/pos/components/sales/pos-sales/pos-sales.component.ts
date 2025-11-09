@@ -142,7 +142,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       return;
     }
 
-    this.loadAllData(currentUser.tenant!);
+    this.loadAllData(this.authService.requireCurrentTenantId());
   }
 
   /**
@@ -232,7 +232,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       this.loading = true;
     }
 
-    const params = this.buildSalesParams(currentUser!.tenant!);
+    const params = this.buildSalesParams(this.authService.requireCurrentTenantId());
     console.log('Loading sales with params:', params);
     
     this.posService.getSales(params)
@@ -448,7 +448,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
         articles: this.articles,
         total: 0,
         appointment: null,
-        tenant: this.authService.getCurrentUser()?.tenant
+        tenant: this.authService.getCurrentTenantId() ?? undefined
       },
       panelClass: 'custom-appointment-dialog',
       backdropClass: 'custom-backdrop',

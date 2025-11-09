@@ -45,7 +45,7 @@ export class CreateEditFacilityDialog implements OnInit {
       })
     }
 
-    this.facilityForm.get('tenant')?.setValue(this.authService.getCurrentUser()!.tenant!);
+    this.facilityForm.get('tenant')?.setValue(this.authService.requireCurrentTenantId());
   }
 
   save(){

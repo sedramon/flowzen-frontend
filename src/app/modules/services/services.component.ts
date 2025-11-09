@@ -82,7 +82,7 @@ export class ServicesComponent implements OnInit, AfterViewInit, OnDestroy {
       return;
     }
 
-    this.servicesService.getAllServices(currentUser.tenant!).subscribe(services => {
+    this.servicesService.getAllServices(this.authService.requireCurrentTenantId()).subscribe(services => {
       this.dataSourceServices.data = services;
 
       this.dataSourceServices.filterPredicate = (data: Service) => {

@@ -331,7 +331,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
     });
 
     this.servicesService
-      .getAllServices(currentUser.tenant!)
+      .getAllServices(this.authService.requireCurrentTenantId())
       .subscribe((fetchedServices) => {
         this.services = fetchedServices;
 
@@ -341,7 +341,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
       });
 
     this.clientService
-      .getClientsAll(currentUser.tenant!)
+      .getClientsAll(this.authService.requireCurrentTenantId())
       .subscribe((fetchedClients) => {
         this.clients = fetchedClients;
       });
@@ -694,7 +694,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
           service: result.service,
           client: result.client,
           facility: result.facility || this.selectedFacility,
-          tenant: this.authService.getCurrentUser()!.tenant!,
+          tenant: this.authService.requireCurrentTenantId(),
           date: this.selectedDateStr,
         };
 
@@ -1417,7 +1417,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
           client: a.client._id!,
           service: a.service._id!,
           facility: a.facility._id!,
-          tenant: this.authService.getCurrentUser()!.tenant!,
+          tenant: this.authService.requireCurrentTenantId(),
           startHour: a.startHour,
           endHour: a.endHour,
           date: this.selectedDateStr,

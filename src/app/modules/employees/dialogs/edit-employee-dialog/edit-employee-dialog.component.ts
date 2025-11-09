@@ -84,7 +84,7 @@ export class EditEmployeeDialogComponent implements OnInit, AfterViewInit {
   ngOnInit(): void {
     this.employeeForm
       .get('tenant')
-      ?.setValue(this.authService.getCurrentUser()!.tenant!);
+      ?.setValue(this.authService.requireCurrentTenantId());
     
     // Load facilities for the current tenant
     this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {

@@ -1,15 +1,15 @@
 export interface Tenant {
     _id: string;
     name: string;
-    companyType: string;
-    street: string;
-    city: string;
-    country: string;
-    contactEmail: string;
-    contanctPhone: string;
-    MIB: string;
-    PIB: string;
-    hasActiveLicense: boolean;
-    licenseStartDate: Date;
-    licenseExpiryDate: Date;
+    companyType?: string | null;
+    street?: string | null;
+    city?: string | null;
+    country?: string | null;
+    contactEmail?: string | null;
+    contactPhone?: string | null;
+    MIB?: string | null;
+    PIB?: string | null;
+    hasActiveLicense?: boolean;
+    licenseStartDate?: string | null;
+    licenseExpiryDate?: string | null;
 }
