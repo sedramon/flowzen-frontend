@@ -39,4 +39,8 @@ export interface WaitlistEntry {
   updatedAt?: Date;
   slotStatus?: string;
   isSlotOccupied?: boolean;
+  isWithinShift?: boolean;
+  shiftValidationMessage?: string | null;
+  shiftStartHour?: number | null;
+  shiftEndHour?: number | null;
 }

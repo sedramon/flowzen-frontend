@@ -223,6 +223,21 @@
   }
 }
 
+.shift-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0;
+  font-size: 13px;
+  color: #c53030;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
 .slot-status-info {
   display: flex;
   align-items: center;

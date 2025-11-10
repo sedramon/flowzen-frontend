@@ -93,12 +93,22 @@
                 <mat-icon>{{ entry.isSlotOccupied ? 'info' : 'done_all' }}</mat-icon>
                 <span>{{ entry.slotStatus }}</span>
               </div>
+              <div class="shift-status" *ngIf="entry.isWithinShift === false">
+                <mat-icon color="warn">warning</mat-icon>
+                <span>{{ entry.shiftValidationMessage || 'Termin je van radnog vremena zaposlenog.' }}</span>
+              </div>
               <mat-chip [color]="entry.isNotified ? 'accent' : 'primary'" selected>
                 {{ entry.isNotified ? 'Obavešteni' : 'Na čekanju' }}
               </mat-chip>
+              <mat-chip *ngIf="entry.isSlotOccupied" color="warn" selected matTooltip="{{ entry.slotStatus }}">
+                Slot trenutno zauzet
+              </mat-chip>
+              <mat-chip *ngIf="entry.isWithinShift === false" color="warn" selected>
+                Van smene
+              </mat-chip>
             </div>
             <div class="waitlist-actions">
-              <button mat-raised-button color="accent" (click)="claimAppointment(entry)" [disabled]="!entry.isNotified">
+              <button mat-raised-button color="accent" (click)="claimAppointment(entry)" [disabled]="!entry.isNotified || entry.isWithinShift === false">
                 Prihvati termin
               </button>
               <button mat-icon-button color="warn" (click)="removeFromWaitlist(entry)">

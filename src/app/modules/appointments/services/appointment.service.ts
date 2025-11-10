@@ -5,6 +5,7 @@ import { HttpClient } from '@angular/common/http';
 import { environment } from '../../../../environments/environment';
 import { AuthService } from '../../../core/services/auth.service';
 import { Appointment, UpdateAndCreateAppointmentDto } from '../../../models/Appointment';
+import { WaitlistEntry } from '../../../models/WaitlistEntry';
 import { SettingsService } from '../../settings/services/settings.service';
 import { Facility } from '../../../models/Facility';
 import { Employee } from '../../../models/Employee';
@@ -12,6 +13,17 @@ import { Employee } from '../../../models/Employee';
 export interface ScheduleData {
   employees: Employee[];
   appointments: Appointment[];
+}
+
+export interface AddToWaitlistRequest {
+  client: string;
+  employee: string;
+  service: string;
+  facility: string;
+  tenant?: string | null;
+  preferredDate: string;
+  preferredStartHour: number;
+  preferredEndHour: number;
 }
 
 @Injectable({
@@ -148,8 +160,8 @@ export class AppointmentsService {
    * Dodaje klijenta na listu čekanja.
    * Koristi se kada termin nije dostupan ali klijent želi da čeka.
    */
-  addToWaitlist(waitlistData: any) {
-    return this.http.post(`${this.apiUrl}/appointments/waitlist`, {
+  addToWaitlist(waitlistData: AddToWaitlistRequest): Observable<WaitlistEntry> {
+    return this.http.post<WaitlistEntry>(`${this.apiUrl}/appointments/waitlist`, {
       ...waitlistData,
       tenant: this.tenantId
     });
@@ -162,6 +174,21 @@ export class AppointmentsService {
   getClientWaitlist(clientId: string): Observable<any[]> {
     const params = { tenant: this.tenantId };
     return this.http.get<any[]>(`${this.apiUrl}/appointments/waitlist/client/${clientId}`, { params });
+  }
+
+  getWaitlistShiftWindow(employeeId: string, facilityId: string, date: string) {
+    const params = {
+      tenant: this.tenantId,
+      employee: employeeId,
+      facility: facilityId,
+      date,
+    };
+    return this.http.get<{
+      hasShift: boolean;
+      startHour?: number;
+      endHour?: number;
+      shiftType?: string;
+    }>(`${this.apiUrl}/appointments/waitlist/shift-window`, { params });
   }
 
   /**
@@ -179,7 +206,13 @@ export class AppointmentsService {
    * Kreira appointment i uklanja sve ostale sa liste za taj time slot.
    */
   claimAppointmentFromWaitlist(claimToken: string, clientId: string) {
-    // Use public endpoint - no authentication required
+    return this.http.post(`${this.apiUrl}/appointments/waitlist/claim`, {
+      claimToken,
+      clientId
+    });
+  }
+
+  claimAppointmentWithToken(claimToken: string) {
     return this.http.post(`${this.apiUrl}/appointments/waitlist/claim-public`, {
       claimToken
     });

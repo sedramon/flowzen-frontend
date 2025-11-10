@@ -7,6 +7,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatTooltipModule } from '@angular/material/tooltip';
 
 import { AuthService } from '../../core/services/auth.service';
 import { AppointmentsService } from '../appointments/services/appointment.service';
@@ -26,7 +27,8 @@ import { WaitlistEntry } from '../../models/WaitlistEntry';
     MatIconModule,
     MatChipsModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    MatTooltipModule
   ],
   templateUrl: './client-dashboard.component.html',
   styleUrl: './client-dashboard.component.scss'
@@ -161,7 +163,11 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
               createdAt: entry.createdAt,
               updatedAt: entry.updatedAt,
               slotStatus: entry.slotStatus,
-              isSlotOccupied: entry.isSlotOccupied
+              isSlotOccupied: entry.isSlotOccupied,
+              isWithinShift: entry.isWithinShift ?? true,
+              shiftValidationMessage: entry.shiftValidationMessage ?? null,
+              shiftStartHour: entry.shiftStartHour ?? null,
+              shiftEndHour: entry.shiftEndHour ?? null,
             }));
           },
           error: (error: any) => {
@@ -247,6 +253,13 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
       return;
     }
 
+    if (entry.isWithinShift === false) {
+      this.snackBar.open(entry.shiftValidationMessage || 'Termin nije u okviru radnog vremena zaposlenog.', 'Zatvori', {
+        duration: 4000,
+      });
+      return;
+    }
+
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
       data: { message: 'Da li želite da prihvatite ovaj termin?' }
     });
@@ -276,7 +289,11 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
                 }
               },
               error: (error: any) => {
-                this.snackBar.open('Greška pri prihvatanju termina', 'Zatvori', { duration: 3000 });
+              const message =
+                error?.error?.message ??
+                error?.message ??
+                'Greška pri prihvatanju termina';
+              this.snackBar.open(message, 'Zatvori', { duration: 3000 });
                 console.error('Error claiming appointment:', error);
               }
             });

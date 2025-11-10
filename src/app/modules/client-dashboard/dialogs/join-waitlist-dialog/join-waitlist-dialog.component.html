@@ -52,12 +52,16 @@
 
       <mat-form-field appearance="outline" class="full-width">
         <mat-label>Preferirano vreme</mat-label>
-        <mat-select formControlName="preferredStartHour" (selectionChange)="onServiceChange()">
+        <mat-select formControlName="preferredStartHour" (selectionChange)="onStartHourChange()">
           <mat-option *ngFor="let slot of timeSlots" [value]="slot">
             {{ slot }}
           </mat-option>
         </mat-select>
-        <mat-hint *ngIf="!waitlistForm.get('facility')?.value">Izaberi lokaciju prvo</mat-hint>
+        <mat-hint *ngIf="startHint">{{ startHint }}</mat-hint>
+        <mat-hint align="end" class="warn-hint" *ngIf="shiftWarning">{{ shiftWarning }}</mat-hint>
+        <mat-error *ngIf="waitlistForm.get('preferredStartHour')?.hasError('outsideShift')">
+          Termin izlazi iz radnog vremena zaposlenog.
+        </mat-error>
         <mat-error *ngIf="waitlistForm.get('preferredStartHour')?.hasError('required')">
           Obavezno polje
         </mat-error>
@@ -72,7 +76,14 @@
 
     <mat-dialog-actions align="end">
       <button mat-button type="button" (click)="onCancel()">Otkaži</button>
-      <button mat-raised-button color="primary" type="submit" [disabled]="waitlistForm.invalid || loading">
+      <button
+        mat-raised-button
+        color="primary"
+        type="submit"
+        [disabled]="waitlistForm.invalid || loading || (!!shiftWarning && !timeSlots.length)"
+        [matTooltip]="shiftWarning || ''"
+        [matTooltipDisabled]="!shiftWarning"
+      >
         <span *ngIf="loading">Prijavljivanje...</span>
         <span *ngIf="!loading">Prijavi se</span>
       </button>

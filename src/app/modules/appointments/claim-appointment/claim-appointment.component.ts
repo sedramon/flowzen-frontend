@@ -24,6 +24,7 @@ export class ClaimAppointmentComponent implements OnInit {
   isLoading: boolean = false;
   isSuccess: boolean = false;
   errorMessage: string = '';
+  successMessage: string = '';
 
   constructor(
     private route: ActivatedRoute,
@@ -47,12 +48,13 @@ export class ClaimAppointmentComponent implements OnInit {
     this.isLoading = true;
     this.errorMessage = '';
 
-    this.appointmentsService.claimAppointmentFromWaitlist(this.claimToken, '').subscribe({
+    this.appointmentsService.claimAppointmentWithToken(this.claimToken).subscribe({
       next: (response: any) => {
         this.isLoading = false;
         this.isSuccess = true;
-        
-        this.snackBar.open('✅ Termin je uspešno prihvaćen!', 'Zatvori', {
+        this.successMessage = response?.message || 'Termin je uspešno prihvaćen!';
+
+        this.snackBar.open(`✅ ${this.successMessage}`, 'Zatvori', {
           duration: 5000,
           panelClass: ['success-snackbar']
         });
@@ -64,7 +66,12 @@ export class ClaimAppointmentComponent implements OnInit {
       },
       error: (error: any) => {
         this.isLoading = false;
-        this.errorMessage = error.error?.message || 'Greška pri prihvatanju termina';
+        const backendMessage = error.error?.message;
+        if (backendMessage) {
+          this.errorMessage = backendMessage;
+        } else {
+          this.errorMessage = 'Greška pri prihvatanju termina.';
+        }
         
         this.snackBar.open('❌ ' + this.errorMessage, 'Zatvori', {
           duration: 5000,

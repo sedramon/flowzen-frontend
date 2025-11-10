@@ -7,8 +7,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBarModule, MatSnackBar } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { MatDatepickerModule, MatDatepickerInputEvent } from '@angular/material/datepicker';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { AppointmentsService } from '../../../appointments/services/appointment.service';
 import { SettingsService } from '../../../settings/services/settings.service';
 import { ServicesService } from '../../../services/services/services.service';
@@ -18,6 +19,18 @@ import { Employee } from '../../../../models/Employee';
 import { Service } from '../../../../models/Service';
 import { Facility } from '../../../../models/Facility';
 import { AuthService } from '../../../../core/services/auth.service';
+import { WaitlistEntry } from '../../../../models/WaitlistEntry';
+import { AddToWaitlistRequest } from '../../../appointments/services/appointment.service';
+import { Client } from '../../../../models/Client';
+
+type WaitlistFormValue = {
+  facility: string;
+  employee: string;
+  service: string;
+  preferredDate: string | Date;
+  preferredStartHour: string;
+  preferredEndHour: string;
+};
 
 /**
  * Join Waitlist Dialog Component
@@ -45,7 +58,8 @@ import { AuthService } from '../../../../core/services/auth.service';
     MatSelectModule,
     MatSnackBarModule,
     MatDatepickerModule,
-    MatNativeDateModule
+    MatNativeDateModule,
+    MatTooltipModule
   ],
   providers: [provideNativeDateAdapter()],
   templateUrl: './join-waitlist-dialog.component.html',
@@ -59,6 +73,9 @@ export class JoinWaitlistDialogComponent implements OnInit {
   timeSlots: string[] = [];
   loading = false;
   today = new Date().toISOString().split('T')[0];
+  shiftWindow: { startHour: number; endHour: number } | null = null;
+  shiftWarning: string | null = null;
+  isShiftLoading = false;
 
   constructor(
     private fb: FormBuilder,
@@ -85,6 +102,16 @@ export class JoinWaitlistDialogComponent implements OnInit {
   ngOnInit(): void {
     this.loadData();
     this.generateTimeSlots();
+
+    this.waitlistForm.get('employee')?.valueChanges.subscribe(() => {
+      this.waitlistForm.patchValue({ preferredStartHour: '', preferredEndHour: '' }, { emitEvent: false });
+      this.loadShiftWindow();
+    });
+
+    this.waitlistForm.get('preferredDate')?.valueChanges.subscribe(() => {
+      this.waitlistForm.patchValue({ preferredStartHour: '', preferredEndHour: '' }, { emitEvent: false });
+      this.loadShiftWindow();
+    });
   }
 
   loadData(): void {
@@ -158,13 +185,117 @@ export class JoinWaitlistDialogComponent implements OnInit {
       }
     }
     
-    this.timeSlots = slots;
+    if (this.shiftWindow) {
+      this.timeSlots = slots.filter(slot => this.isTimeWithinShift(slot));
+      if (!this.timeSlots.length) {
+        this.shiftWarning = 'Zaposleni nema dostupne termine unutar svoje smene za izabrani datum.';
+      } else {
+        this.shiftWarning = null;
+      }
+    } else {
+      this.timeSlots = slots;
+      this.shiftWarning = null;
+    }
   }
 
   parseTimeString(time: string): { hour: number; min: number } {
     // Parse "HH:MM" format
     const [hour, min] = time.split(':').map(Number);
     return { hour, min };
+  }
+
+  private timeStringToDecimal(value: string): number {
+    const [hour, minute] = value.split(':').map(Number);
+    return hour + minute / 60;
+  }
+
+  private getCurrentServiceDurationHours(): number {
+    const serviceId = this.waitlistForm.get('service')?.value;
+    const service = this.services.find(s => s._id === serviceId);
+    return service ? service.durationMinutes / 60 : 0;
+  }
+
+  private isTimeWithinShift(value: string): boolean {
+    if (!this.shiftWindow) {
+      return true;
+    }
+
+    const startDecimal = this.timeStringToDecimal(value);
+    const duration = this.getCurrentServiceDurationHours();
+    const endDecimal = startDecimal + duration;
+
+    return startDecimal >= this.shiftWindow.startHour && endDecimal <= this.shiftWindow.endHour;
+  }
+
+  private formatDateForApi(value: any): string {
+    if (!value) {
+      return '';
+    }
+
+    if (value instanceof Date) {
+      return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, '0')}-${String(value.getDate()).padStart(2, '0')}`;
+    }
+
+    const parsed = new Date(value);
+    if (!Number.isNaN(parsed.getTime())) {
+      return `${parsed.getFullYear()}-${String(parsed.getMonth() + 1).padStart(2, '0')}-${String(parsed.getDate()).padStart(2, '0')}`;
+    }
+
+    return value;
+  }
+
+  loadShiftWindow(): void {
+    const facilityId = this.waitlistForm.get('facility')?.value;
+    const employeeId = this.waitlistForm.get('employee')?.value;
+    const preferredDateControl = this.waitlistForm.get('preferredDate')?.value;
+
+    if (!facilityId || !employeeId || !preferredDateControl) {
+      this.shiftWindow = null;
+      this.shiftWarning = null;
+      this.waitlistForm.get('preferredStartHour')?.disable({ emitEvent: false });
+      this.timeSlots = [];
+      return;
+    }
+
+    const facilityObj = this.facilities.find(f => f._id === facilityId);
+    if (!facilityObj) {
+      return;
+    }
+
+    const preferredDate = this.formatDateForApi(preferredDateControl);
+    if (!preferredDate) {
+      return;
+    }
+
+    this.isShiftLoading = true;
+    this.waitlistForm.get('preferredStartHour')?.disable({ emitEvent: false });
+    this.appointmentsService.getWaitlistShiftWindow(employeeId, facilityId, preferredDate).subscribe({
+      next: (result) => {
+        this.isShiftLoading = false;
+
+        if (result.hasShift && result.startHour !== undefined && result.endHour !== undefined) {
+          this.shiftWindow = { startHour: result.startHour, endHour: result.endHour };
+          this.shiftWarning = null;
+          this.waitlistForm.get('preferredStartHour')?.enable({ emitEvent: false });
+          this.generateTimeSlotsForFacility(facilityObj);
+          this.calculateEndHour();
+        } else {
+          this.shiftWindow = null;
+          this.shiftWarning = 'Zaposleni nema definisanu smenu za izabrani datum.';
+          this.waitlistForm.get('preferredStartHour')?.disable({ emitEvent: false });
+          this.timeSlots = [];
+        }
+      },
+      error: (error) => {
+        this.isShiftLoading = false;
+        console.error('Error loading shift window:', error);
+        this.shiftWindow = null;
+        this.shiftWarning = 'Greška pri proveri smene zaposlenog.';
+        this.waitlistForm.get('preferredStartHour')?.disable({ emitEvent: false });
+        this.timeSlots = [];
+        this.snackBar.open('Greška pri proveri smene zaposlenog', 'Zatvori', { duration: 3000 });
+      },
+    });
   }
 
   /**
@@ -179,10 +310,10 @@ export class JoinWaitlistDialogComponent implements OnInit {
     if (!facilityObj) return;
 
     // Clear employee selection
-    this.waitlistForm.patchValue({ employee: '', preferredStartHour: '', preferredEndHour: '' });
-
-    // Enable preferred time when facility is selected
-    this.waitlistForm.get('preferredStartHour')?.enable();
+    this.waitlistForm.patchValue({ employee: '', preferredStartHour: '', preferredEndHour: '' }, { emitEvent: false });
+    this.waitlistForm.get('preferredStartHour')?.disable({ emitEvent: false });
+    this.shiftWindow = null;
+    this.shiftWarning = null;
 
     // Generate time slots based on facility working hours
     this.generateTimeSlotsForFacility(facilityObj);
@@ -208,12 +339,19 @@ export class JoinWaitlistDialogComponent implements OnInit {
         this.snackBar.open('Greška pri učitavanju zaposlenih', 'Zatvori', { duration: 3000 });
       }
     });
+
+    this.loadShiftWindow();
   }
 
   /**
    * Kada se odabere usluga, automatski se izračunava endHour.
    */
   onServiceChange(): void {
+    const facilityId = this.waitlistForm.get('facility')?.value;
+    const facilityObj = this.facilities.find(f => f._id === facilityId);
+    if (facilityObj) {
+      this.generateTimeSlotsForFacility(facilityObj);
+    }
     this.calculateEndHour();
   }
 
@@ -231,7 +369,13 @@ export class JoinWaitlistDialogComponent implements OnInit {
     const serviceId = this.waitlistForm.get('service')?.value;
     const service = this.services.find(s => s._id === serviceId);
     const preferredStartHour = this.waitlistForm.get('preferredStartHour')?.value;
-    
+    const startControl = this.waitlistForm.get('preferredStartHour');
+
+    if (!preferredStartHour) {
+      this.waitlistForm.patchValue({ preferredEndHour: '' }, { emitEvent: false });
+      return;
+    }
+
     if (service && preferredStartHour) {
       const durationMinutes = service.durationMinutes;
       const hours = Math.floor(durationMinutes / 60);
@@ -246,20 +390,50 @@ export class JoinWaitlistDialogComponent implements OnInit {
         endM -= 60;
       }
       
+      const endDecimal = endH + endM / 60;
+
+      if (this.shiftWindow && endDecimal > this.shiftWindow.endHour) {
+        startControl?.setErrors({ ...(startControl.errors || {}), outsideShift: true });
+        this.shiftWarning = 'Termin izlazi iz radnog vremena smene za odabranu uslugu.';
+        this.waitlistForm.patchValue({ preferredEndHour: '' }, { emitEvent: false });
+        return;
+      }
+
+      if (startControl?.hasError('outsideShift')) {
+        const { outsideShift, ...errors } = startControl.errors || {};
+        startControl.setErrors(Object.keys(errors).length ? errors : null);
+      }
+
+      this.shiftWarning = null;
       const endHour = `${String(endH).padStart(2, '0')}:${String(endM).padStart(2, '0')}`;
-      this.waitlistForm.patchValue({ preferredEndHour: endHour });
+      this.waitlistForm.patchValue({ preferredEndHour: endHour }, { emitEvent: false });
     }
   }
 
   onSubmit(): void {
     if (this.waitlistForm.valid) {
+      this.loading = true;
       const user = this.authService.getCurrentUser();
       if (!user?.userId) {
         this.snackBar.open('Greška: Neispravni korisnički podaci', 'Zatvori', { duration: 3000 });
+        this.loading = false;
         return;
       }
 
-      const formValue = this.waitlistForm.value;
+      const formValue = this.waitlistForm.getRawValue() as WaitlistFormValue;
+      if (!formValue.preferredStartHour || !formValue.preferredEndHour) {
+        this.snackBar.open('Molimo izaberite vreme termina.', 'Zatvori', { duration: 3000 });
+        this.loading = false;
+        return;
+      }
+      
+      if (this.shiftWindow && !this.isTimeWithinShift(formValue.preferredStartHour)) {
+        this.snackBar.open(this.shiftWarning || 'Termin nije u okviru radnog vremena zaposlenog.', 'Zatvori', {
+          duration: 4000,
+        });
+        this.loading = false;
+        return;
+      }
       
       // Convert time to hour number
       const [startH, startM] = formValue.preferredStartHour.split(':').map(Number);
@@ -270,7 +444,7 @@ export class JoinWaitlistDialogComponent implements OnInit {
 
       // First, get the Client ID from User ID
       this.clientsService.getClientByUserId(user.userId).subscribe({
-        next: (client) => {
+        next: (client: Client) => {
           if (!client || !client._id) {
             this.snackBar.open('Greška: Niste povezani sa klijent profila', 'Zatvori', { duration: 3000 });
             this.loading = false;
@@ -283,21 +457,23 @@ export class JoinWaitlistDialogComponent implements OnInit {
             String(date.getMonth() + 1).padStart(2, '0') + '-' + 
             String(date.getDate()).padStart(2, '0');
 
-          const waitlistData = {
+          const waitlistData: AddToWaitlistRequest = {
             client: client._id,
             employee: formValue.employee,
             service: formValue.service,
             facility: formValue.facility,
-            tenant: user?.tenant,
+            tenant: typeof user?.tenant === 'string' ? user.tenant : String(user?.tenant ?? ''),
             preferredDate: preferredDate,
             preferredStartHour,
             preferredEndHour
           };
 
           this.appointmentsService.addToWaitlist(waitlistData).subscribe({
-            next: () => {
+            next: (entry: WaitlistEntry) => {
               this.loading = false;
-              this.snackBar.open('Uspešno ste dodati na listu čekanja!', 'Zatvori', { duration: 3000 });
+              const successMessage =
+                entry?.shiftValidationMessage ?? entry?.slotStatus ?? 'Uspešno ste dodati na listu čekanja!';
+              this.snackBar.open(successMessage, 'Zatvori', { duration: 3000 });
               this.dialogRef.close(true);
             },
             error: (error) => {
@@ -319,5 +495,34 @@ export class JoinWaitlistDialogComponent implements OnInit {
 
   onCancel(): void {
     this.dialogRef.close(false);
+  }
+
+  private formatTimeFromDecimal(value: number): string {
+    const hours = Math.floor(value);
+    const minutes = Math.round((value - hours) * 60);
+    return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  }
+
+  formatShiftWindowLabel(): string {
+    if (!this.shiftWindow) {
+      return '';
+    }
+    return `${this.formatTimeFromDecimal(this.shiftWindow.startHour)} - ${this.formatTimeFromDecimal(this.shiftWindow.endHour)}`;
+  }
+
+  get startHint(): string | null {
+    if (this.isShiftLoading) {
+      return 'Provera smene...';
+    }
+
+    if (this.shiftWindow && !this.shiftWarning) {
+      return `Radno vreme smene: ${this.formatShiftWindowLabel()}`;
+    }
+
+    if (!this.waitlistForm.get('facility')?.value) {
+      return 'Izaberi lokaciju prvo';
+    }
+
+    return null;
   }
 }

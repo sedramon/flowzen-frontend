@@ -1,13 +1,19 @@
 import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
-import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
+import {
+  DateAdapter,
+  MAT_DATE_FORMATS,
+  MatNativeDateModule,
+  MAT_NATIVE_DATE_FORMATS,
+  NativeDateAdapter,
+} from '@angular/material/core';
 
 export interface TenantLicenseDialogData {
   hasActiveLicense?: boolean;
@@ -34,6 +40,10 @@ export interface TenantLicenseDialogResult {
     MatNativeDateModule,
     MatInputModule,
     MatIconModule,
+  ],
+  providers: [
+    { provide: DateAdapter, useClass: NativeDateAdapter },
+    { provide: MAT_DATE_FORMATS, useValue: MAT_NATIVE_DATE_FORMATS },
   ],
   template: `
     <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--tenants tenant-license-dialog">

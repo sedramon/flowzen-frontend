@@ -12,7 +12,7 @@
 
     <div class="claim-content">
       <p *ngIf="isSuccess" class="success-message">
-        Vaš termin je uspešno prihvaćen. Možete se prijaviti na sistem da vidite detalje.
+        {{ successMessage || 'Vaš termin je uspešno prihvaćen. Možete se prijaviti na sistem da vidite detalje.' }}
       </p>
       
       <p *ngIf="errorMessage" class="error-message">
