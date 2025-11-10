@@ -25,12 +25,13 @@ import { CashAnalyticsComponent } from './modules/pos/components/cash-management
 import { ClientLoginComponent } from './modules/client-login/client-login.component';
 import { ClientDashboardComponent } from './modules/client-dashboard/client-dashboard.component';
 import { ClaimAppointmentComponent } from './modules/appointments/claim-appointment/claim-appointment.component';
+import { TenantAccessGuard } from './core/guards/tenant-access.guard';
 
 export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent, // Parent route with the layout
-    canActivate: [AuthGuard],   // Ensure user is logged in
+    canActivate: [AuthGuard, TenantAccessGuard],   // Ensure user is logged in and tenant allowed
     children: [
       {
         path: 'home',
@@ -249,5 +250,12 @@ export const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'client-login', component: ClientLoginComponent },
   { path: 'appointments/claim/:token', component: ClaimAppointmentComponent },
+  {
+    path: 'access-restriction',
+    loadComponent: () =>
+      import('./modules/access-restriction/access-restriction.component').then(
+        (m) => m.AccessRestrictionComponent,
+      ),
+  },
   { path: '**', redirectTo: 'login' }
 ];

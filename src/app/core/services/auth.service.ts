@@ -3,6 +3,8 @@ import { HttpClient, HttpResponse } from '@angular/common/http';
 import { BehaviorSubject, Observable } from 'rxjs';
 import { Router } from '@angular/router';
 import { AuthenticatedUser } from '../../models/AuthenticatedUser';
+import { RoleTenantInfo } from '../../models/Role';
+import { TenantAccessState } from '../../models/TenantAccessState';
 import { environment } from '../../../environments/environment';
 import { CsrfService } from './csrf.service';
 
@@ -16,6 +18,8 @@ export class AuthService {
 
   private userSubject = new BehaviorSubject<AuthenticatedUser | null>(null);
   public user$ = this.userSubject.asObservable();
+  private accessRestrictionSubject = new BehaviorSubject<TenantAccessState | null>(null);
+  public accessRestriction$ = this.accessRestrictionSubject.asObservable();
 
   constructor(
     private http: HttpClient, 
@@ -54,13 +58,12 @@ export class AuthService {
                 ? body.user.scopes
                 : [];
 
-              const tenantRaw = body.user.tenant ?? null;
-              const tenantInfo =
-                tenantRaw && typeof tenantRaw === 'object' ? tenantRaw : null;
+              const tenantInfoRaw = body.user.tenant ?? null;
+              const tenantInfo = this.normalizeTenantInfo(tenantInfoRaw);
               const tenantId =
-                typeof tenantRaw === 'string'
-                  ? tenantRaw
-                  : tenantInfo?._id ?? null;
+                typeof tenantInfoRaw === 'string'
+                  ? tenantInfoRaw
+                  : tenantInfo?._id ?? tenantInfo?.tenantId ?? null;
 
               const user: AuthenticatedUser = {
                 userId: body.user.userId,
@@ -75,13 +78,15 @@ export class AuthService {
                 isGlobalAdmin: body.user.isGlobalAdmin === true,
               };
 
-              this.saveUser(user);
-              this.userSubject.next(user);
+              const normalizedUser = this.normalizeUser(user);
+              this.saveUser(normalizedUser);
+              this.userSubject.next(normalizedUser);
+              this.clearAccessRestrictionState();
               this.log('login:user-normalized', {
-                userId: user.userId,
-                tenantId: user.tenantId,
-                isGlobalAdmin: user.isGlobalAdmin,
-                scopesCount: Array.isArray(user.scopes) ? user.scopes.length : 0,
+                userId: normalizedUser.userId,
+                tenantId: normalizedUser.tenantId,
+                isGlobalAdmin: normalizedUser.isGlobalAdmin,
+                scopesCount: Array.isArray(normalizedUser.scopes) ? normalizedUser.scopes.length : 0,
               });
             }
 
@@ -124,23 +129,7 @@ export class AuthService {
    * Note: JWT is in httpOnly cookie, we only store user info for UI purposes
    */
   private saveUser(user: AuthenticatedUser): void {
-    const tenantInfo =
-      user.tenantInfo ??
-      (typeof user.tenant === 'object' && user.tenant !== null
-        ? (user.tenant as any)
-        : null);
-    const tenantId =
-      user.tenantId ??
-      (typeof user.tenant === 'string' ? user.tenant : tenantInfo?._id ?? null);
-
-    const normalizedUser: AuthenticatedUser = {
-      ...user,
-      tenant: tenantId ?? undefined,
-      tenantId: tenantId ?? null,
-      tenantInfo: tenantInfo ?? null,
-      scopes: Array.isArray(user.scopes) ? user.scopes : [],
-      isGlobalAdmin: user.isGlobalAdmin === true,
-    };
+    const normalizedUser = this.normalizeUser(user);
 
     localStorage.setItem(this.USER_KEY, JSON.stringify(normalizedUser));
     this.log('state:save-user', {
@@ -173,16 +162,18 @@ export class AuthService {
     localStorage.removeItem('returnUrl');
     this.csrfService.clearToken();
     this.userSubject.next(null);
+    this.clearAccessRestrictionState();
     this.log('state:clear-session');
   }
 
   updateCurrentUser(updatedUser: AuthenticatedUser): void {
-    this.saveUser(updatedUser);
-    this.userSubject.next(updatedUser);
+    const normalized = this.normalizeUser(updatedUser);
+    this.saveUser(normalized);
+    this.userSubject.next(normalized);
     this.log('state:update-user', {
-      userId: updatedUser.userId,
-      tenantId: updatedUser.tenantId,
-      scopesCount: updatedUser.scopes?.length ?? 0,
+      userId: normalized.userId,
+      tenantId: normalized.tenantId,
+      scopesCount: normalized.scopes?.length ?? 0,
     });
   }
 
@@ -202,25 +193,7 @@ export class AuthService {
   private loadUserFromStorage(): void {
     const user = this.getStoredUser();
     if (user) {
-      const tenantInfo =
-        user.tenantInfo ??
-        (typeof (user as any).tenantInfo === 'object'
-          ? (user as any).tenantInfo
-          : null);
-      const tenantId =
-        user.tenantId ??
-        (typeof user.tenant === 'string'
-          ? user.tenant
-          : tenantInfo?._id ?? null);
-
-      const normalized: AuthenticatedUser = {
-        ...user,
-        tenant: tenantId ?? undefined,
-        tenantId: tenantId ?? null,
-        tenantInfo: tenantInfo ?? null,
-        scopes: Array.isArray(user.scopes) ? user.scopes : [],
-        isGlobalAdmin: user.isGlobalAdmin === true,
-      };
+      const normalized = this.normalizeUser(user);
       this.userSubject.next(normalized);
       this.log('state:load-from-storage', {
         userId: normalized.userId,
@@ -236,8 +209,14 @@ export class AuthService {
   }
 
   getCurrentTenantId(): string | null {
-    const user = this.userSubject.getValue();
-    return user?.tenant ?? user?.tenantId ?? null;
+     const user = this.userSubject.getValue();
+    return (
+      user?.tenant ??
+      user?.tenantId ??
+      user?.tenantInfo?._id ??
+      user?.tenantInfo?.tenantId ??
+      null
+    );
   }
 
   requireCurrentTenantId(): string {
@@ -271,32 +250,187 @@ export class AuthService {
   }
 
   isModuleEnabled(moduleName: string): boolean {
-    const scopes = this.getScopes();
+     const scopes = this.getScopes();
+ 
+     const normalizedScopes = scopes.map((s) => s.toLowerCase().trim());
+     const normalizedModule = moduleName.toLowerCase().trim();
+ 
+     const has = normalizedScopes.includes(normalizedModule);
+ 
+     return has;
+   }
 
-    const normalizedScopes = scopes.map((s) => s.toLowerCase().trim());
-    const normalizedModule = moduleName.toLowerCase().trim();
+  getTenantAccessState(now: Date = new Date()): TenantAccessState {
+    const user = this.userSubject.getValue();
 
-    const has = normalizedScopes.includes(normalizedModule);
+    if (!user) {
+      return {
+        allowed: false,
+        reason: 'unauthenticated',
+        tenantId: null,
+        tenantName: null,
+      };
+    }
 
-    return has;
+    if (user.isGlobalAdmin) {
+      return {
+        allowed: true,
+        tenantId: null,
+        tenantName: null,
+        details: undefined,
+      };
+    }
+
+    const tenantInfo = this.normalizeTenantInfo(
+      user.tenantInfo ?? (typeof (user as any).tenant === 'object' ? (user as any).tenant : null),
+    );
+
+    const tenantId =
+      user.tenantId ??
+      (typeof user.tenant === 'string' ? user.tenant : null) ??
+      tenantInfo?._id ??
+      tenantInfo?.tenantId ??
+      null;
+
+    const baseDetails = tenantInfo
+      ? {
+          status: tenantInfo.status,
+          hasActiveLicense: tenantInfo.hasActiveLicense,
+          licenseStartDate: tenantInfo.licenseStartDate ?? null,
+          licenseExpiryDate: tenantInfo.licenseExpiryDate ?? null,
+          suspendedAt: tenantInfo.suspendedAt ?? null,
+          suspensionReason: tenantInfo.suspensionReason ?? null,
+        }
+      : undefined;
+
+    if (!tenantId) {
+      return {
+        allowed: false,
+        reason: 'missing-tenant',
+        tenantId: null,
+        tenantName: tenantInfo?.name ?? null,
+        details: baseDetails,
+        message: 'Tenant context is missing for the current user.',
+      };
+    }
+
+    const stateBase: TenantAccessState = {
+      allowed: true,
+      tenantId,
+      tenantName: tenantInfo?.name ?? null,
+      details: baseDetails,
+    };
+
+    if (tenantInfo?.status === 'suspended') {
+      return {
+        ...stateBase,
+        allowed: false,
+        reason: 'suspended',
+        message: tenantInfo.suspensionReason ?? 'Tenant is suspended.',
+      };
+    }
+
+    if (tenantInfo?.status === 'pending') {
+      return {
+        ...stateBase,
+        allowed: false,
+        reason: 'pending',
+        message: 'Tenant activation is pending.',
+      };
+    }
+
+    if (tenantInfo?.hasActiveLicense === false) {
+      return {
+        ...stateBase,
+        allowed: false,
+        reason: 'license-inactive',
+        message: 'Tenant license is inactive.',
+      };
+    }
+
+    const expiryTimestamp = tenantInfo?.licenseExpiryDate
+      ? new Date(tenantInfo.licenseExpiryDate).getTime()
+      : null;
+
+    if (
+      expiryTimestamp !== null &&
+      !Number.isNaN(expiryTimestamp) &&
+      expiryTimestamp < now.getTime()
+    ) {
+      return {
+        ...stateBase,
+        allowed: false,
+        reason: 'license-expired',
+        message: 'Tenant license has expired.',
+      };
+    }
+
+    return stateBase;
+  }
+
+  isTenantAccessAllowed(): boolean {
+    return this.getTenantAccessState().allowed;
+  }
+
+  setAccessRestrictionState(state: TenantAccessState | null): void {
+    this.accessRestrictionSubject.next(state);
+  }
+
+  clearAccessRestrictionState(): void {
+    this.setAccessRestrictionState(null);
+  }
+
+  getAccessRestrictionState(): TenantAccessState | null {
+    return this.accessRestrictionSubject.getValue();
   }
 
   private resolveDefaultRoute(
     user: AuthenticatedUser | null,
     storedReturnUrl: string | null,
   ): string {
-    if (storedReturnUrl && storedReturnUrl !== '/login') {
-      if (user?.isGlobalAdmin && storedReturnUrl === '/home') {
-        return '/admin/overview';
-      }
-      return storedReturnUrl;
-    }
+    const normalizedReturnUrl = this.normalizeReturnUrl(storedReturnUrl);
 
     if (user?.isGlobalAdmin) {
-      return '/admin/overview';
+      if (!normalizedReturnUrl || normalizedReturnUrl === '/login') {
+        return '/admin/overview';
+      }
+
+      const sanitized = normalizedReturnUrl.split('?')[0];
+      const disallowed = new Set(['', '/', '/home', '/unauthorized', '/access-restriction']);
+
+      if (disallowed.has(sanitized)) {
+        return '/admin/overview';
+      }
+
+      return normalizedReturnUrl.startsWith('/')
+        ? normalizedReturnUrl
+        : `/${normalizedReturnUrl}`;
+    }
+
+    if (normalizedReturnUrl && normalizedReturnUrl !== '/login') {
+      return normalizedReturnUrl.startsWith('/')
+        ? normalizedReturnUrl
+        : `/${normalizedReturnUrl}`;
     }
 
     return '/home';
+  }
+
+  private normalizeReturnUrl(url: string | null): string | null {
+    if (!url) {
+      return null;
+    }
+
+    if (url.startsWith('http://') || url.startsWith('https://')) {
+      try {
+        const parsed = new URL(url);
+        return parsed.pathname + parsed.search + parsed.hash;
+      } catch {
+        return null;
+      }
+    }
+
+    return url;
   }
 
   private log(message: string, payload?: unknown): void {
@@ -334,4 +468,74 @@ export class AuthService {
     return { message: 'Unhandled error', details: error };
   }
 
+  private normalizeUser(user: AuthenticatedUser): AuthenticatedUser {
+    const rawTenantInfo =
+      user.tenantInfo ?? (typeof (user as any).tenant === 'object' ? (user as any).tenant : null);
+
+    const tenantInfo = this.normalizeTenantInfo(rawTenantInfo);
+    const tenantId =
+      user.tenantId ??
+      (typeof user.tenant === 'string' ? user.tenant : null) ??
+      tenantInfo?._id ??
+      tenantInfo?.tenantId ??
+      null;
+
+    return {
+      ...user,
+      tenant: tenantId ?? undefined,
+      tenantId: tenantId ?? null,
+      tenantInfo,
+      scopes: Array.isArray(user.scopes) ? user.scopes : [],
+      isGlobalAdmin: user.isGlobalAdmin === true,
+    };
+  }
+
+  private normalizeTenantInfo(raw: unknown): RoleTenantInfo | null {
+    if (!raw || typeof raw !== 'object') {
+      return null;
+    }
+
+    const data = raw as Record<string, unknown>;
+    const idValue = data['tenantId'] ?? data['_id'] ?? data['id'] ?? null;
+    const normalizedId = idValue != null ? String(idValue) : null;
+
+    const statusValue = data['status'];
+    const normalizedStatus: 'active' | 'suspended' | 'pending' | undefined =
+      statusValue === 'active' || statusValue === 'suspended' || statusValue === 'pending'
+        ? (statusValue as 'active' | 'suspended' | 'pending')
+        : undefined;
+
+    const hasActiveLicenseValue = data['hasActiveLicense'];
+    const hasActiveLicense =
+      typeof hasActiveLicenseValue === 'boolean' ? (hasActiveLicenseValue as boolean) : undefined;
+
+    return {
+      _id: normalizedId,
+      tenantId: normalizedId,
+      name: typeof data['name'] === 'string' ? (data['name'] as string) : null,
+      isGlobal: data['isGlobal'] === true,
+      status: normalizedStatus,
+      hasActiveLicense,
+      licenseStartDate: this.normalizeDateValue(data['licenseStartDate']),
+      licenseExpiryDate: this.normalizeDateValue(data['licenseExpiryDate']),
+      suspendedAt: this.normalizeDateValue(data['suspendedAt']),
+      suspensionReason:
+        typeof data['suspensionReason'] === 'string'
+          ? (data['suspensionReason'] as string)
+          : null,
+    };
+  }
+
+  private normalizeDateValue(value: unknown): string | null {
+    if (!value) {
+      return null;
+    }
+
+    if (value instanceof Date) {
+      return Number.isNaN(value.getTime()) ? null : value.toISOString();
+    }
+
+    const parsed = new Date(value as any);
+    return Number.isNaN(parsed.getTime()) ? null : parsed.toISOString();
+  }
 }

@@ -1,0 +1,32 @@
+<section class="access-restriction" *ngIf="vm$ | async as vm">
+  <div class="access-restriction__background" aria-hidden="true">
+    <span class="access-restriction__gradient access-restriction__gradient--one"></span>
+    <span class="access-restriction__gradient access-restriction__gradient--two"></span>
+    <span class="access-restriction__grid"></span>
+  </div>
+
+  <button class="access-restriction__logout" mat-button type="button" (click)="logout()">
+    <mat-icon>logout</mat-icon>
+    Odjavi se
+  </button>
+
+  <div class="access-restriction__body">
+    <div class="access-restriction__pulse" aria-hidden="true"></div>
+
+    <article
+      class="access-restriction__panel"
+      [class.access-restriction__panel--visible]="vm.showContent"
+      aria-live="polite"
+      role="status"
+    >
+      <header class="access-restriction__heading">
+        <div class="access-restriction__title">{{ vm.display.title }}</div>
+        <div class="access-restriction__underline" aria-hidden="true"></div>
+      </header>
+
+      <p class="access-restriction__message">
+        {{ vm.display.reason }}
+      </p>
+    </article>
+  </div>
+</section>

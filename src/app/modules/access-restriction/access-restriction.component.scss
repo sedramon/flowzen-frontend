@@ -1,0 +1,251 @@
+.access-restriction {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(32px, 6vw, 64px);
+  background: linear-gradient(160deg, #04050f 0%, #050418 55%, #030312 100%);
+  color: #e8ebff;
+  overflow: hidden;
+}
+
+.access-restriction__background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.access-restriction__gradient {
+  position: absolute;
+  width: min(80vw, 540px);
+  aspect-ratio: 1;
+  border-radius: 50%;
+  filter: blur(110px);
+  opacity: 0.9;
+  mix-blend-mode: lighten;
+  animation: access-restriction-drift 16s ease-in-out infinite alternate;
+
+  &--one {
+    top: -22%;
+    left: -16%;
+    background: radial-gradient(circle at 40% 40%, rgba(64, 209, 255, 0.48), rgba(64, 0, 255, 0));
+  }
+
+  &--two {
+    bottom: -26%;
+    right: -18%;
+    background: radial-gradient(circle at 60% 60%, rgba(255, 79, 162, 0.5), rgba(104, 90, 255, 0));
+    animation-delay: -6s;
+  }
+}
+
+.access-restriction__grid {
+  position: absolute;
+  inset: -20%;
+  background-image:
+    linear-gradient(transparent 65%, rgba(160, 167, 255, 0.08) 68%, transparent 70%),
+    linear-gradient(90deg, transparent 65%, rgba(160, 167, 255, 0.08) 68%, transparent 70%);
+  background-size: clamp(48px, 8vw, 72px) clamp(48px, 8vw, 72px);
+  opacity: 0.3;
+  animation: access-restriction-shift 18s linear infinite;
+}
+
+.access-restriction__body {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(18px, 4vw, 28px);
+  width: min(540px, 92vw);
+  z-index: 1;
+}
+
+.access-restriction__pulse {
+  position: absolute;
+  inset: 16% 10%;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(101, 119, 255, 0.28), rgba(0, 0, 0, 0));
+  filter: blur(32px);
+  animation: access-restriction-pulse 12s ease-in-out infinite;
+}
+
+.access-restriction__panel {
+  position: relative;
+  width: 100%;
+  padding: clamp(40px, 7vw, 64px) clamp(36px, 7vw, 54px);
+  border-radius: clamp(22px, 4vw, 32px);
+  background: rgba(13, 16, 38, 0.84);
+  border: 1px solid rgba(132, 143, 255, 0.35);
+  box-shadow:
+    0 26px 90px rgba(8, 12, 32, 0.6),
+    inset 0 0 0 1px rgba(242, 244, 255, 0.06);
+  backdrop-filter: blur(24px) saturate(135%);
+  text-align: center;
+  transform: translateY(36px) scale(0.94);
+  opacity: 0;
+  transition:
+    transform 560ms cubic-bezier(0.18, 0.89, 0.32, 1.28),
+    opacity 560ms ease;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: -1.6px;
+    border-radius: inherit;
+    background: linear-gradient(130deg, rgba(120, 174, 255, 0.38), rgba(255, 101, 170, 0.24));
+    opacity: 0.65;
+    z-index: -1;
+    filter: blur(14px);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: clamp(18px, 4vw, 30px);
+    border-radius: clamp(16px, 3vw, 24px);
+    background: radial-gradient(circle at top, rgba(123, 138, 255, 0.22), transparent 70%);
+    opacity: 0.65;
+    pointer-events: none;
+  }
+
+  &--visible {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.access-restriction__heading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: clamp(14px, 3vw, 18px);
+}
+
+.access-restriction__title {
+  font-size: clamp(1.6rem, 5vw, 2.6rem);
+  letter-spacing: 0.38em;
+  text-transform: uppercase;
+  font-weight: 800;
+  color: transparent;
+  background: linear-gradient(120deg, #ffffff 10%, #89a0ff 45%, #f568c2 90%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  text-shadow: 0 0 28px rgba(125, 140, 255, 0.45);
+}
+
+.access-restriction__underline {
+  width: clamp(140px, 32vw, 240px);
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, rgba(109, 129, 255, 0), rgba(109, 129, 255, 0.65), rgba(247, 104, 191, 0));
+  animation: access-restriction-beam 2.8s ease-in-out infinite;
+}
+
+.access-restriction__message {
+  margin: clamp(16px, 4vw, 26px) 0 0;
+  font-size: clamp(1.05rem, 3vw, 1.32rem);
+  line-height: 1.7;
+  color: rgba(226, 231, 255, 0.86);
+}
+
+.access-restriction__logout {
+  position: absolute;
+  top: clamp(16px, 4vw, 32px);
+  right: clamp(16px, 4vw, 32px);
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 22px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  font-weight: 700;
+  color: rgba(229, 234, 255, 0.9);
+  background: rgba(24, 32, 68, 0.55);
+  border: 1px solid rgba(134, 148, 255, 0.42);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 18px 48px rgba(6, 10, 32, 0.45);
+  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+
+  &:hover,
+  &:focus-visible {
+    transform: translateY(-2px);
+    border-color: rgba(164, 176, 255, 0.72);
+    box-shadow: 0 24px 64px rgba(10, 20, 56, 0.5);
+  }
+}
+
+@keyframes access-restriction-drift {
+  0% {
+    transform: translate3d(-6%, -4%, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(8%, 10%, 0) scale(1.08);
+  }
+  100% {
+    transform: translate3d(-4%, 6%, 0) scale(0.96);
+  }
+}
+
+@keyframes access-restriction-shift {
+  0% {
+    transform: rotate(0deg) scale(1.04);
+    background-position:
+      0 0,
+      0 0;
+  }
+  50% {
+    transform: rotate(1.2deg) scale(1.08);
+    background-position:
+      40px 0,
+      0 40px;
+  }
+  100% {
+    transform: rotate(0deg) scale(1.04);
+    background-position:
+      80px 0,
+      0 80px;
+  }
+}
+
+@keyframes access-restriction-pulse {
+  0%,
+  100% {
+    transform: scale(0.9);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scale(1.08);
+    opacity: 0.75;
+  }
+}
+
+@keyframes access-restriction-beam {
+  0%,
+  100% {
+    transform: scaleX(0.6);
+    opacity: 0.55;
+  }
+  50% {
+    transform: scaleX(1);
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .access-restriction,
+  .access-restriction * {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .access-restriction__panel {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+}
