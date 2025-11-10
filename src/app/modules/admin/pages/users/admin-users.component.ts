@@ -112,8 +112,10 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<AdminCreateUserDialogComponent, undefined, AdminCreateUserDialogResult>(
       AdminCreateUserDialogComponent,
       {
-        width: '520px',
+        width: '800px',
+        maxWidth: '99vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
       },
     );
 
@@ -130,8 +132,10 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
       AdminEditUserDialogData,
       AdminEditUserDialogResult
     >(AdminEditUserDialogComponent, {
-      width: '520px',
+      width: '900px',
+      maxWidth: '92vw',
       disableClose: true,
+      panelClass: 'admin-dialog-panel',
       data: {
         user,
       },
@@ -150,8 +154,10 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
       { user: AdminUser },
       AdminResetPasswordDialogResult
     >(AdminResetPasswordDialogComponent, {
-      width: '440px',
+      width: '900px',
+      maxWidth: '92vw',
       disableClose: true,
+      panelClass: 'admin-dialog-panel',
       data: { user },
     });
 
@@ -166,8 +172,10 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
       ConfirmDialogComponent,
       {
-        width: '420px',
+        width: '900px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
         data: {
           title: 'Obriši korisnika',
           description: `Potvrdi brisanje korisnika <strong>${user.email}</strong>. Ova akcija je nepovratna.`,
@@ -288,9 +296,10 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
       .updateUser(userId, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
+        next: (updatedUser) => {
           this.notifications.success('Korisnik je ažuriran.');
-          this.refresh();
+          this.processingUsers.delete(userId);
+          this.upsertUser(updatedUser);
         },
         error: (error) => {
           console.error('[AdminUsersComponent] Failed to update user', error);
@@ -335,5 +344,37 @@ export class AdminUsersComponent implements OnInit, OnDestroy {
         },
       });
   }
+
+  private upsertUser(updatedUser: AdminUser): void {
+    const isGlobal = updatedUser.isGlobalAdmin || !updatedUser.tenant;
+
+    this.globalUsers = this.globalUsers.filter((user) => user._id !== updatedUser._id);
+    this.tenantGroups = this.tenantGroups
+      .map((group) => ({
+        tenant: group.tenant,
+        users: group.users.filter((user) => user._id !== updatedUser._id),
+      }))
+      .filter((group) => group.users.length > 0);
+
+    if (isGlobal) {
+      this.globalUsers = [...this.globalUsers, updatedUser];
+    } else if (updatedUser.tenant?._id) {
+      const existingGroup = this.tenantGroups.find((group) => group.tenant._id === updatedUser.tenant?._id);
+      if (existingGroup) {
+        existingGroup.users = [...existingGroup.users, updatedUser];
+      } else {
+        this.tenantGroups = [
+          ...this.tenantGroups,
+          {
+            tenant: updatedUser.tenant,
+            users: [updatedUser],
+          },
+        ];
+      }
+    }
+
+    this.applyFilters();
+  }
+
 }
 

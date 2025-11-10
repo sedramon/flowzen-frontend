@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatDatepickerModule } from '@angular/material/datepicker';
@@ -32,14 +33,23 @@ export interface TenantLicenseDialogResult {
     MatDatepickerModule,
     MatNativeDateModule,
     MatInputModule,
+    MatIconModule,
   ],
   template: `
-    <h2 mat-dialog-title>Ažuriraj licencu</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--tenants tenant-license-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>verified</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Ažuriraj licencu</h2>
+          <p>Upravljaj statusom licence, datumom početka i isteka za odabranog tenanta.</p>
+        </div>
+      </header>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="dialog-form">
-      <mat-dialog-content>
+      <mat-dialog-content class="admin-dialog__content tenant-license-dialog__content">
         <div class="dialog-grid">
-          <mat-slide-toggle formControlName="hasActiveLicense">
+          <mat-slide-toggle formControlName="hasActiveLicense" class="admin-toggle">
             Licenca je aktivna
           </mat-slide-toggle>
 
@@ -62,7 +72,7 @@ export interface TenantLicenseDialogResult {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
         <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           Sačuvaj
@@ -72,19 +82,19 @@ export interface TenantLicenseDialogResult {
   `,
   styles: [
     `
-      .dialog-form {
-        min-width: 420px;
-        max-width: 480px;
+      .tenant-license-dialog__content {
+        max-width: 820px;
       }
 
-      .dialog-grid {
+      .tenant-license-dialog .dialog-grid {
         display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
         align-items: center;
+        min-width: 0;
       }
 
-      mat-slide-toggle {
+      .tenant-license-dialog mat-slide-toggle {
         grid-column: 1 / -1;
       }
     `,
@@ -117,19 +127,36 @@ export class TenantLicenseDialogComponent {
     const licenseExpiryDate = this.form.get('licenseExpiryDate')?.value as Date | null | undefined;
 
     if (!hasActiveLicense) {
+      const fallbackStart =
+        licenseStartDate ??
+        (this.data.licenseStartDate ? new Date(this.data.licenseStartDate) : new Date());
+      const fallbackExpiry =
+        licenseExpiryDate ??
+        (this.data.licenseExpiryDate ? new Date(this.data.licenseExpiryDate) : fallbackStart);
+
       this.dialogRef.close({
         hasActiveLicense,
-        licenseStartDate: null,
-        licenseExpiryDate: null,
+        licenseStartDate: this.toIsoString(fallbackStart),
+        licenseExpiryDate: this.toIsoString(fallbackExpiry),
       });
       return;
     }
 
-    this.dialogRef.close({
+    const payload: TenantLicenseDialogResult = {
       hasActiveLicense,
       licenseStartDate: this.toIsoString(licenseStartDate),
       licenseExpiryDate: this.toIsoString(licenseExpiryDate),
-    });
+    };
+
+    if (payload.licenseStartDate === undefined || payload.licenseStartDate === null) {
+      delete payload.licenseStartDate;
+    }
+
+    if (payload.licenseExpiryDate === undefined || payload.licenseExpiryDate === null) {
+      delete payload.licenseExpiryDate;
+    }
+
+    this.dialogRef.close(payload);
   }
 
   private coerceDate(value?: string | null): Date | null {

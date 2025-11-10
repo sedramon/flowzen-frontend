@@ -1,11 +1,16 @@
 <section class="admin-tenants">
-  <header class="admin-tenants__header">
-    <div>
-      <h2>Tenant landscape</h2>
-      <p>Global pregled tenanata, statusa licenci i health signala.</p>
+  <header class="admin-tenants__header admin-page-hero admin-page-hero--tenants">
+    <div class="admin-page-hero__content">
+      <div class="admin-page-hero__icon">
+        <mat-icon>apartment</mat-icon>
+      </div>
+      <div class="admin-page-hero__text">
+        <h2>Tenant landscape</h2>
+        <p>Global pregled tenanata, statusa licenci i health signala.</p>
+      </div>
     </div>
 
-    <div class="admin-tenants__header-actions">
+    <div class="admin-tenants__header-actions admin-page-hero__actions">
       <button mat-stroked-button color="primary" (click)="refresh()">
         <mat-icon>refresh</mat-icon>
         Osveži

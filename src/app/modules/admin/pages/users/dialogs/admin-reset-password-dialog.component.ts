@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
 import { AdminUser } from '../../../models/admin-user.model';
 
 export interface AdminResetPasswordDialogResult {
@@ -13,14 +14,27 @@ export interface AdminResetPasswordDialogResult {
 @Component({
   selector: 'app-admin-reset-password-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatButtonModule, MatInputModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatButtonModule,
+    MatInputModule,
+    MatIconModule,
+  ],
   template: `
-    <h2 mat-dialog-title>Reset lozinke</h2>
-    <mat-dialog-content>
-      <p class="dialog-description">
-        Lozinka za korisnika <strong>{{ data.user.email }}</strong> biće ažurirana.
-      </p>
-      <form [formGroup]="form" class="dialog-form">
+    <form [formGroup]="form" (ngSubmit)="confirm()" class="admin-dialog admin-dialog--users reset-password-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>vpn_key</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Reset lozinke</h2>
+          <p>Postavi novu lozinku za korisnika <strong>{{ data.user.email }}</strong>.</p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Nova lozinka</mat-label>
           <input matInput type="password" formControlName="password" required />
@@ -31,22 +45,23 @@ export interface AdminResetPasswordDialogResult {
             Minimalno 8 karaktera.
           </mat-error>
         </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="dialogRef.close()">Otkaži</button>
-      <button mat-flat-button color="primary" (click)="confirm()" [disabled]="form.invalid">
-        Sačuvaj
-      </button>
-    </mat-dialog-actions>
+      </mat-dialog-content>
+
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
+        <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
+        <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+          Sačuvaj
+        </button>
+      </mat-dialog-actions>
+    </form>
   `,
   styles: [
     `
-      .dialog-form {
-        width: 100%;
+      .reset-password-dialog .admin-dialog__content {
+        max-width: 520px;
       }
 
-      .full-width {
+      .reset-password-dialog .full-width {
         width: 100%;
       }
     `,

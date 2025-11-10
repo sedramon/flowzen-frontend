@@ -148,8 +148,10 @@ export class AdminTenantsComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<TenantCreateDialogComponent, undefined, TenantCreateDialogResult>(
       TenantCreateDialogComponent,
       {
-        width: '520px',
+        width: '920px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
       },
     );
 
@@ -166,8 +168,10 @@ export class AdminTenantsComponent implements OnInit, OnDestroy {
       TenantLicenseDialogData,
       TenantLicenseDialogResult
     >(TenantLicenseDialogComponent, {
-      width: '480px',
+      width: '900px',
+      maxWidth: '92vw',
       disableClose: true,
+      panelClass: 'admin-dialog-panel',
       data: {
         hasActiveLicense: tenant.hasActiveLicense ?? false,
         licenseStartDate: tenant.licenseStartDate ?? null,
@@ -188,8 +192,10 @@ export class AdminTenantsComponent implements OnInit, OnDestroy {
       TenantSuspendDialogData,
       TenantSuspendDialogResult
     >(TenantSuspendDialogComponent, {
-      width: '460px',
+      width: '900px',
+      maxWidth: '92vw',
       disableClose: true,
+      panelClass: 'admin-dialog-panel',
       data: { name: tenant.name },
     });
 
@@ -206,8 +212,10 @@ export class AdminTenantsComponent implements OnInit, OnDestroy {
       TenantActivateDialogData,
       TenantActivateDialogResult
     >(TenantActivateDialogComponent, {
-      width: '460px',
+      width: '900px',
+      maxWidth: '92vw',
       disableClose: true,
+      panelClass: 'admin-dialog-panel',
       data: { name: tenant.name },
     });
 

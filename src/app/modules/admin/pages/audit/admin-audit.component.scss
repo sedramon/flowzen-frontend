@@ -5,39 +5,6 @@
   color: #f4f6ff;
 }
 
-.admin-audit__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px 24px;
-  flex-wrap: wrap;
-}
-
-.admin-audit__header h2 {
-  margin: 0 0 6px;
-  font-size: 1.55rem;
-  font-weight: 600;
-}
-
-.admin-audit__header p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.64);
-  max-width: 520px;
-}
-
-.admin-audit__actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.admin-audit__actions button {
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  gap: 8px;
-}
-
 .admin-audit__filters {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));

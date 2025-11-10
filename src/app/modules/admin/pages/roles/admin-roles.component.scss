@@ -5,25 +5,6 @@
   color: #f5f7ff;
 }
 
-.admin-roles__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px 24px;
-  flex-wrap: wrap;
-
-  h2 {
-    margin: 0 0 6px;
-    font-size: 1.65rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.66);
-    max-width: 560px;
-  }
-}
-
 .admin-roles__actions {
   display: flex;
   align-items: center;

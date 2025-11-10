@@ -48,23 +48,9 @@
   </mat-sidenav>
 
   <mat-sidenav-content class="admin-shell__content">
-    <mat-toolbar class="admin-shell__toolbar" color="primary">
-      <button mat-icon-button class="toolbar__toggle" (click)="toggleSidenav()">
-        <mat-icon>menu</mat-icon>
-      </button>
-
-      <div class="toolbar__headline">
-        <h1>{{ pageTitle }}</h1>
-        <p>{{ pageDescription }}</p>
-      </div>
-
-      <span class="toolbar__spacer"></span>
-
-      <button mat-stroked-button color="accent" routerLink="/home">
-        <mat-icon>arrow_back</mat-icon>
-        Back to app
-      </button>
-    </mat-toolbar>
+    <button mat-icon-button class="toolbar__toggle" (click)="toggleSidenav()">
+      <mat-icon>menu</mat-icon>
+    </button>
 
     <section class="admin-shell__main">
       <router-outlet></router-outlet>

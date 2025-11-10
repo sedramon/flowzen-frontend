@@ -132,7 +132,9 @@ export class AdminAuditComponent implements OnInit, OnDestroy {
     };
 
     this.dialog.open(AdminAuditDetailDialogComponent, {
-      width: '560px',
+      width: '680px',
+      maxWidth: '92vw',
+      panelClass: 'admin-dialog-panel',
       data,
     });
   }

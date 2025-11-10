@@ -5,6 +5,7 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { MatButtonModule } from '@angular/material/button';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
+import { MatIconModule } from '@angular/material/icon';
 import { AdminScope } from '../../../models/admin-scope.model';
 
 export interface ScopeDialogData {
@@ -27,11 +28,21 @@ export interface ScopeDialogResult {
     MatButtonModule,
     MatInputModule,
     MatSelectModule,
+    MatIconModule,
   ],
   template: `
-    <h2 mat-dialog-title>{{ data.scope ? 'Izmeni scope' : 'Novi scope' }}</h2>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="dialog-form">
-      <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--scopes scope-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>tune</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>{{ data.scope ? 'Izmeni scope' : 'Novi scope' }}</h2>
+          <p>Definiši naziv, kategoriju i opis scope definicije za granularnu kontrolu pristupa.</p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content scope-dialog__content">
         <div class="dialog-grid">
           <mat-form-field appearance="outline">
             <mat-label>Naziv</mat-label>
@@ -56,7 +67,7 @@ export interface ScopeDialogResult {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
         <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           {{ data.scope ? 'Sačuvaj' : 'Kreiraj' }}
@@ -66,18 +77,18 @@ export interface ScopeDialogResult {
   `,
   styles: [
     `
-      .dialog-form {
-        min-width: 460px;
-        max-width: 520px;
+      .scope-dialog__content {
+        max-width: 860px;
       }
 
-      .dialog-grid {
+      .scope-dialog .dialog-grid {
         display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        min-width: 0;
       }
 
-      .full-width {
+      .scope-dialog .full-width {
         grid-column: 1 / -1;
       }
     `,

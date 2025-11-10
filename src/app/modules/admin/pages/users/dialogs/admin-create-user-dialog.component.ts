@@ -13,6 +13,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { AdminRolesService, AdminRoleQuery } from '../../../services/admin-roles.service';
 import { AdminTenantsService } from '../../../services/admin-tenants.service';
 import { AdminNotificationsService } from '../../../shared/services/admin-notifications.service';
@@ -43,11 +44,21 @@ export interface AdminCreateUserDialogResult {
     MatSelectModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    MatIconModule,
   ],
   template: `
-    <h2 mat-dialog-title>Novi korisnik</h2>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="dialog-form">
-      <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--users create-user-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>person_add</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Novi korisnik</h2>
+          <p>Kreiraj administratorski nalog sa odgovarajućom ulogom i pripadajućim tenantom.</p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content">
         <div class="dialog-grid">
           <mat-form-field appearance="outline">
             <mat-label>Ime i prezime</mat-label>
@@ -57,23 +68,15 @@ export interface AdminCreateUserDialogResult {
           <mat-form-field appearance="outline">
             <mat-label>Email</mat-label>
             <input matInput type="email" formControlName="email" required />
-          <mat-error *ngIf="form.get('email')?.hasError('required')">
-              Email je obavezan.
-            </mat-error>
-          <mat-error *ngIf="form.get('email')?.hasError('email')">
-              Unesite validan email.
-            </mat-error>
+            <mat-error *ngIf="form.get('email')?.hasError('required')">Email je obavezan.</mat-error>
+            <mat-error *ngIf="form.get('email')?.hasError('email')">Unesite validan email.</mat-error>
           </mat-form-field>
 
           <mat-form-field appearance="outline">
             <mat-label>Lozinka</mat-label>
             <input matInput type="password" formControlName="password" required />
-          <mat-error *ngIf="form.get('password')?.hasError('required')">
-              Lozinka je obavezna.
-            </mat-error>
-          <mat-error *ngIf="form.get('password')?.hasError('minlength')">
-              Minimalno 8 karaktera.
-            </mat-error>
+            <mat-error *ngIf="form.get('password')?.hasError('required')">Lozinka je obavezna.</mat-error>
+            <mat-error *ngIf="form.get('password')?.hasError('minlength')">Minimalno 8 karaktera.</mat-error>
           </mat-form-field>
 
           <div class="role-select">
@@ -84,7 +87,7 @@ export interface AdminCreateUserDialogResult {
                   <mat-option [value]="role._id || role.name">{{ role.name }}</mat-option>
                 }
                 @if (!roles.length && !loadingRoles) {
-                  <mat-option disabled> Nema dostupnih rola </mat-option>
+                  <mat-option disabled>Nema dostupnih rola</mat-option>
                 }
               </mat-select>
             </mat-form-field>
@@ -106,7 +109,9 @@ export interface AdminCreateUserDialogResult {
             </mat-error>
           </mat-form-field>
 
-          <mat-checkbox formControlName="isGlobalAdmin" (change)="onGlobalAdminToggle()">Superadmin</mat-checkbox>
+          <mat-checkbox formControlName="isGlobalAdmin" class="admin-checkbox" (change)="onGlobalAdminToggle()">
+            Superadmin
+          </mat-checkbox>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Scope-ovi (opciono, razdvojeni zarezom)</mat-label>
@@ -115,7 +120,7 @@ export interface AdminCreateUserDialogResult {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
         <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           Kreiraj
@@ -125,26 +130,33 @@ export interface AdminCreateUserDialogResult {
   `,
   styles: [
     `
-      .dialog-form {
-        min-width: 520px;
-        max-width: 640px;
-      }
-
-      .dialog-grid {
+      .create-user-dialog {
         display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        align-items: start;
+        gap: 24px;
+        // width: 100%;
       }
 
-      .full-width {
+      .create-user-dialog .admin-dialog__content {
+        max-width: 900px;
+      }
+
+      .create-user-dialog .dialog-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        align-items: start;
+        min-width: 0;
+      }
+
+      .create-user-dialog .full-width {
         grid-column: 1 / -1;
       }
 
-      .role-select {
+      .create-user-dialog .role-select {
         display: flex;
         align-items: center;
         gap: 12px;
+        flex-wrap: wrap;
       }
     `,
   ],

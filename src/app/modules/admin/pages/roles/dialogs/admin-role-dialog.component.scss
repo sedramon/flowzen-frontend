@@ -1,20 +1,14 @@
-.role-dialog-form {
+.role-dialog__content {
   display: flex;
   flex-direction: column;
-  gap: 0;
-
-  mat-dialog-content {
-    display: flex;
-    flex-direction: column;
-    gap: 24px;
-    padding-top: 8px;
-  }
+  gap: 20px;
+  max-height: min(78vh, 840px);
 }
 
 .dialog-grid {
   display: grid;
-  gap: 16px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
   align-items: start;
 }
 
@@ -52,6 +46,7 @@
 }
 
 .scope-selector {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -60,6 +55,8 @@
   background: linear-gradient(150deg, rgba(34, 38, 56, 0.94), rgba(18, 21, 33, 0.96));
   border: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  min-height: 260px;
+  overflow: hidden;
 
   header {
     display: flex;
@@ -77,12 +74,12 @@
     p {
       margin: 4px 0 0;
       color: rgba(255, 255, 255, 0.66);
-      max-width: 420px;
+      max-width: 440px;
       font-size: 0.88rem;
     }
 
     .scope-search {
-      width: clamp(220px, 32vw, 280px);
+      width: clamp(220px, 32vw, 320px);
 
       input {
         color: #ffffff;
@@ -110,9 +107,12 @@
 }
 
 .scope-buckets {
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+  overflow: auto;
+  padding-right: 8px;
 }
 
 .scope-bucket {
@@ -125,8 +125,9 @@
   border: 1px solid rgba(255, 255, 255, 0.06);
 
   mat-selection-list {
-    max-height: 220px;
+    max-height: clamp(220px, 32vh, 360px);
     overflow: auto;
+    padding-right: 4px;
   }
 }
 
@@ -154,11 +155,10 @@
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-wrap: wrap;
 
   button {
     border-radius: 12px;
-    font-weight: 600;
-    gap: 4px;
   }
 }
 
@@ -178,16 +178,6 @@
   }
 }
 
-mat-dialog-actions {
-  padding: 16px 24px 24px;
-  gap: 12px;
-
-  button[mat-flat-button] {
-    border-radius: 12px;
-    font-weight: 600;
-  }
-}
-
 @media (max-width: 720px) {
   .scope-selector header {
     flex-direction: column;
@@ -197,5 +187,8 @@ mat-dialog-actions {
   .scope-selector .scope-search {
     width: 100%;
   }
+}
+.role-dialog-form {
+  display: flex;
 }
 

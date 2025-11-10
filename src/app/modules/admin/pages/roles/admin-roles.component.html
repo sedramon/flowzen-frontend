@@ -1,11 +1,16 @@
 <section class="admin-roles">
-  <header class="admin-roles__header">
-    <div>
-      <h2>Role Catalogue</h2>
-      <p>Modeluj globalne i tenant specifične uloge uz jasnu distribuciju scope-ova.</p>
+  <header class="admin-roles__header admin-page-hero admin-page-hero--roles">
+    <div class="admin-page-hero__content">
+      <div class="admin-page-hero__icon">
+        <mat-icon>workspace_premium</mat-icon>
+      </div>
+      <div class="admin-page-hero__text">
+        <h2>Role Catalogue</h2>
+        <p>Modeluj globalne i tenant specifične uloge uz jasnu distribuciju scope-ova.</p>
+      </div>
     </div>
 
-    <div class="admin-roles__actions">
+    <div class="admin-roles__actions admin-page-hero__actions">
       <button mat-stroked-button color="primary" (click)="refresh()" [disabled]="loading">
         <mat-icon>refresh</mat-icon>
         Osveži

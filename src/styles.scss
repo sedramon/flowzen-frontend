@@ -62,6 +62,621 @@ mat-icon,
   box-sizing: border-box;
 }
 
+.admin-page-hero {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 28px;
+  padding: 28px 32px;
+  border-radius: 26px;
+  background: linear-gradient(135deg, rgba(36, 43, 69, 0.94), rgba(21, 24, 36, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 28px 60px rgba(6, 8, 14, 0.55);
+  overflow: hidden;
+}
+
+.admin-page-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at top right, rgba(123, 97, 255, 0.18), transparent 55%);
+  pointer-events: none;
+}
+
+.admin-page-hero__content {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  z-index: 1;
+  flex: 1;
+}
+
+.admin-page-hero__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 18px 32px rgba(8, 10, 18, 0.45);
+  color: #ffffff;
+}
+
+.admin-page-hero__text h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f7f9ff;
+}
+
+.admin-page-hero__text p {
+  margin: 10px 0 0;
+  color: rgba(239, 242, 255, 0.7);
+  font-size: 0.95rem;
+  max-width: 520px;
+}
+
+.admin-page-hero__eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+.admin-page-hero__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
+  z-index: 1;
+}
+
+.admin-page-hero__actions button[mat-stroked-button],
+.admin-page-hero__actions button[mat-flat-button] {
+  border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  gap: 8px;
+  display: inline-flex;
+  align-items: center;
+}
+
+.admin-page-hero__actions button[mat-flat-button] {
+  padding: 0 20px;
+}
+
+.admin-page-hero--tenants .admin-page-hero__icon {
+  background: linear-gradient(135deg, rgba(100, 181, 246, 0.85), rgba(30, 136, 229, 0.78));
+}
+
+.admin-page-hero--users .admin-page-hero__icon {
+  background: linear-gradient(135deg, rgba(165, 214, 167, 0.85), rgba(102, 187, 106, 0.75));
+}
+
+.admin-page-hero--roles .admin-page-hero__icon {
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.85), rgba(171, 71, 188, 0.78));
+}
+
+.admin-page-hero--scopes .admin-page-hero__icon {
+  background: linear-gradient(135deg, rgba(129, 199, 212, 0.85), rgba(79, 195, 247, 0.75));
+}
+
+.admin-page-hero--audit .admin-page-hero__icon {
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.85), rgba(255, 143, 0, 0.78));
+}
+
+.admin-page-hero--audit::after {
+  background: radial-gradient(circle at top right, rgba(255, 183, 77, 0.22), transparent 58%);
+}
+
+.admin-page-hero--tenants::after {
+  background: radial-gradient(circle at top right, rgba(100, 181, 246, 0.22), transparent 58%);
+}
+
+.admin-page-hero--users::after {
+  background: radial-gradient(circle at top right, rgba(129, 199, 132, 0.22), transparent 58%);
+}
+
+.admin-page-hero--roles::after {
+  background: radial-gradient(circle at top right, rgba(206, 147, 216, 0.22), transparent 58%);
+}
+
+.admin-page-hero--scopes::after {
+  background: radial-gradient(circle at top right, rgba(129, 199, 212, 0.22), transparent 58%);
+}
+
+.admin-shell button[mat-flat-button],
+.admin-shell button[mat-stroked-button],
+.admin-shell button[mat-button] {
+  border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  gap: 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 140ms ease, box-shadow 140ms ease, filter 180ms ease;
+}
+
+.admin-shell button[mat-flat-button] {
+  padding: 0 20px;
+  color: #07121f;
+  box-shadow: 0 14px 24px rgba(9, 14, 24, 0.28);
+}
+
+.admin-shell button[mat-flat-button][color="primary"] {
+  background: linear-gradient(135deg, rgba(144, 202, 249, 0.95), rgba(30, 136, 229, 0.92));
+  color: #041428;
+  box-shadow: 0 18px 34px rgba(30, 136, 229, 0.45);
+}
+
+.admin-shell button[mat-flat-button][color="accent"] {
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.96), rgba(171, 71, 188, 0.88));
+  color: #290a33;
+  box-shadow: 0 18px 34px rgba(171, 71, 188, 0.45);
+}
+
+.admin-shell button[mat-flat-button][color="warn"] {
+  background: linear-gradient(135deg, rgba(244, 143, 177, 0.94), rgba(229, 57, 53, 0.9));
+  color: #330307;
+  box-shadow: 0 18px 34px rgba(229, 57, 53, 0.45);
+}
+
+.admin-shell button[mat-flat-button]:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 22px 42px rgba(8, 12, 24, 0.38);
+}
+
+.admin-shell button[mat-flat-button][color="primary"]:not(:disabled):hover {
+  box-shadow: 0 24px 44px rgba(30, 136, 229, 0.5);
+}
+
+.admin-shell button[mat-flat-button][color="accent"]:not(:disabled):hover {
+  box-shadow: 0 24px 44px rgba(171, 71, 188, 0.5);
+}
+
+.admin-shell button[mat-flat-button][color="warn"]:not(:disabled):hover {
+  box-shadow: 0 24px 44px rgba(229, 57, 53, 0.55);
+}
+
+.admin-shell button[mat-stroked-button] {
+  border-width: 1.5px;
+  color: #f1f4ff;
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.06), 0 12px 24px rgba(8, 10, 18, 0.28);
+}
+
+.admin-shell button[mat-stroked-button][color="primary"] {
+  border-color: rgba(129, 212, 250, 0.9);
+  color: rgba(204, 233, 255, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(129, 212, 250, 0.35), 0 12px 26px rgba(13, 71, 161, 0.35);
+}
+
+.admin-shell button[mat-stroked-button][color="accent"] {
+  border-color: rgba(206, 147, 216, 0.9);
+  color: rgba(244, 229, 250, 0.96);
+  box-shadow: inset 0 0 0 1px rgba(206, 147, 216, 0.32), 0 12px 26px rgba(74, 20, 140, 0.35);
+}
+
+.admin-shell button[mat-stroked-button][color="warn"] {
+  border-color: rgba(244, 143, 177, 0.9);
+  color: rgba(255, 225, 230, 0.98);
+  box-shadow: inset 0 0 0 1px rgba(244, 143, 177, 0.32), 0 12px 26px rgba(183, 28, 28, 0.35);
+}
+
+.admin-shell button[mat-stroked-button]:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 16px 30px rgba(8, 10, 18, 0.38);
+}
+
+.admin-shell button[mat-stroked-button][color="primary"]:not(:disabled):hover {
+  box-shadow: inset 0 0 0 1px rgba(129, 212, 250, 0.45), 0 18px 34px rgba(13, 71, 161, 0.4);
+}
+
+.admin-shell button[mat-stroked-button][color="accent"]:not(:disabled):hover {
+  box-shadow: inset 0 0 0 1px rgba(206, 147, 216, 0.42), 0 18px 34px rgba(74, 20, 140, 0.4);
+}
+
+.admin-shell button[mat-stroked-button][color="warn"]:not(:disabled):hover {
+  box-shadow: inset 0 0 0 1px rgba(244, 143, 177, 0.42), 0 18px 34px rgba(183, 28, 28, 0.4);
+}
+
+.admin-shell button[mat-button][color="primary"] {
+  color: rgba(129, 212, 250, 0.95);
+}
+
+.admin-shell button[mat-button][color="accent"] {
+  color: rgba(206, 147, 216, 0.9);
+}
+
+.admin-shell button[mat-button][color="warn"] {
+  color: rgba(239, 154, 154, 0.95);
+}
+
+.admin-shell button:disabled {
+  opacity: 0.55;
+  cursor: default;
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(0.25);
+}
+
+.admin-shell button[mat-icon-button] {
+  border-radius: 14px;
+  transition: transform 120ms ease, background 120ms ease, box-shadow 140ms ease;
+}
+
+.admin-shell button[mat-icon-button]:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 24px rgba(8, 10, 18, 0.28);
+  transform: translateY(-1px);
+}
+
+.admin-shell button[mat-icon-button][color="warn"]:not(:disabled):hover {
+  background: rgba(229, 57, 53, 0.18);
+}
+
+.admin-dialog-panel .mat-mdc-dialog-surface {
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+
+.admin-dialog-panel .mat-mdc-dialog-container {
+  padding: 0 0 12px;
+}
+
+.admin-dialog {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 28px 28px 24px;
+  border-radius: 26px;
+  background: linear-gradient(145deg, rgba(36, 42, 64, 0.96), rgba(20, 24, 36, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 24px 56px rgba(6, 8, 14, 0.6);
+  color: #f0f3ff;
+  width: min(720px, calc(100vw - 48px));
+  min-width: min(520px, calc(100vw - 48px));
+}
+
+.admin-dialog__header {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.admin-dialog__icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 26px;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16), 0 16px 32px rgba(8, 10, 18, 0.45);
+}
+
+.admin-dialog__title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.admin-dialog__title h2 {
+  margin: 0;
+  font-size: 1.45rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: #f7f9ff;
+}
+
+.admin-dialog__title p {
+  margin: 0;
+  font-size: 0.92rem;
+  color: rgba(230, 235, 255, 0.72);
+  max-width: 420px;
+}
+
+.admin-dialog__content {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  max-height: 60vh;
+  padding-right: 6px;
+}
+
+.admin-dialog__content::-webkit-scrollbar {
+  width: 6px;
+}
+
+.admin-dialog__content::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 999px;
+}
+
+.admin-dialog__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding-top: 12px;
+}
+
+.admin-dialog__section-title {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.admin-dialog__section-title h3 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.admin-dialog__section-title p {
+  margin: 0;
+  font-size: 0.88rem;
+  color: rgba(230, 235, 255, 0.7);
+}
+
+.admin-dialog mat-form-field {
+  background: rgba(0, 0, 0, 0.18);
+  border-radius: 16px;
+}
+
+.admin-dialog mat-form-field .mat-mdc-text-field-wrapper {
+  background: transparent;
+}
+
+.admin-dialog mat-dialog-content {
+  padding: 0;
+  margin: 0;
+  overflow: visible;
+}
+
+.admin-dialog mat-dialog-actions {
+  padding: 0;
+  margin: 0;
+}
+
+.admin-dialog__chip-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.admin-dialog button[mat-flat-button],
+.admin-dialog button[mat-stroked-button],
+.admin-dialog button[mat-button],
+.admin-dialog button[mat-icon-button] {
+  border-radius: 14px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: transform 140ms ease, box-shadow 140ms ease, background 140ms ease, filter 180ms ease;
+}
+
+.admin-dialog button[mat-flat-button] {
+  padding: 0 20px;
+  color: #07121f;
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.96), rgba(171, 71, 188, 0.88));
+  box-shadow: 0 18px 34px rgba(171, 71, 188, 0.42);
+}
+
+.admin-dialog button[mat-flat-button][color="primary"] {
+  background: linear-gradient(135deg, rgba(144, 202, 249, 0.95), rgba(30, 136, 229, 0.92));
+  color: #031123;
+  box-shadow: 0 18px 34px rgba(30, 136, 229, 0.45);
+}
+
+.admin-dialog button[mat-flat-button][color="warn"] {
+  background: linear-gradient(135deg, rgba(244, 143, 177, 0.94), rgba(229, 57, 53, 0.9));
+  color: #30060b;
+  box-shadow: 0 18px 34px rgba(229, 57, 53, 0.48);
+}
+
+.admin-dialog button[mat-flat-button][color="accent"] {
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.96), rgba(171, 71, 188, 0.88));
+  color: #280830;
+  box-shadow: 0 18px 34px rgba(171, 71, 188, 0.45);
+}
+
+.admin-dialog button[mat-flat-button]:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 44px rgba(8, 12, 24, 0.4);
+}
+
+.admin-dialog button[mat-stroked-button] {
+  border-width: 1.5px;
+  border-color: rgba(255, 255, 255, 0.18);
+  color: rgba(240, 243, 255, 0.92);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08), 0 12px 26px rgba(8, 10, 18, 0.26);
+}
+
+.admin-dialog button[mat-stroked-button][color="primary"] {
+  border-color: rgba(129, 212, 250, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(129, 212, 250, 0.32), 0 14px 28px rgba(13, 71, 161, 0.34);
+  color: rgba(205, 230, 255, 0.96);
+}
+
+.admin-dialog button[mat-stroked-button][color="warn"] {
+  border-color: rgba(244, 143, 177, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(244, 143, 177, 0.32), 0 14px 28px rgba(183, 28, 28, 0.36);
+  color: rgba(255, 220, 226, 0.96);
+}
+
+.admin-dialog button[mat-stroked-button][color="accent"] {
+  border-color: rgba(206, 147, 216, 0.9);
+  box-shadow: inset 0 0 0 1px rgba(206, 147, 216, 0.32), 0 14px 28px rgba(74, 20, 140, 0.36);
+  color: rgba(244, 229, 250, 0.92);
+}
+
+.admin-dialog button[mat-stroked-button]:not(:disabled):hover {
+  transform: translateY(-1px);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.18), 0 18px 36px rgba(8, 10, 18, 0.38);
+}
+
+.admin-dialog button[mat-icon-button] {
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.admin-dialog button[mat-icon-button]:not(:disabled):hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(8, 10, 18, 0.28);
+}
+
+.admin-dialog button[mat-button] {
+  color: rgba(220, 226, 255, 0.92);
+}
+
+.admin-dialog button:disabled {
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(0.35);
+  cursor: default;
+}
+
+.admin-dialog mat-slide-toggle {
+  padding: 12px 16px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  --mdc-switch-selected-track-color: rgba(129, 212, 250, 0.55);
+  --mdc-switch-selected-hover-track-color: rgba(129, 212, 250, 0.62);
+  --mdc-switch-selected-focus-track-color: rgba(129, 212, 250, 0.62);
+  --mdc-switch-selected-pressed-track-color: rgba(129, 212, 250, 0.68);
+  --mdc-switch-selected-handle-color: rgba(206, 237, 255, 0.95);
+  --mdc-switch-selected-hover-handle-color: rgba(222, 244, 255, 1);
+  --mdc-switch-selected-focus-handle-color: rgba(222, 244, 255, 1);
+  --mdc-switch-selected-pressed-handle-color: rgba(222, 244, 255, 1);
+  --mdc-switch-selected-icon-color: #07121f;
+  --mdc-switch-unselected-track-color: rgba(255, 255, 255, 0.16);
+  --mdc-switch-unselected-handle-color: rgba(245, 247, 255, 0.6);
+  --mdc-switch-unselected-hover-handle-color: rgba(245, 247, 255, 0.78);
+  --mdc-switch-unselected-focus-handle-color: rgba(245, 247, 255, 0.78);
+  --mdc-switch-unselected-pressed-handle-color: rgba(245, 247, 255, 0.86);
+}
+
+.admin-dialog .admin-toggle .mdc-switch__track::after {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.admin-dialog .admin-toggle .mdc-switch__handle::after {
+  background: rgba(236, 241, 255, 0.88) !important;
+  box-shadow: 0 4px 12px rgba(17, 23, 40, 0.32);
+}
+
+.admin-dialog .admin-toggle .mdc-switch--selected .mdc-switch__track::after {
+  background: linear-gradient(135deg, rgba(109, 152, 255, 0.82), rgba(63, 81, 181, 0.92), rgba(41, 121, 255, 0.92)) !important;
+}
+
+.admin-dialog .admin-toggle .mdc-switch--selected .mdc-switch__handle::after {
+  background: linear-gradient(135deg, rgba(205, 228, 255, 0.98), rgba(227, 242, 253, 0.98)) !important;
+  box-shadow: 0 6px 16px rgba(41, 121, 255, 0.32);
+}
+
+.admin-dialog mat-slide-toggle.mat-mdc-slide-toggle-checked {
+  background: rgba(129, 212, 250, 0.12);
+  border-color: rgba(129, 212, 250, 0.35);
+}
+
+.admin-dialog mat-checkbox {
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: inline-flex;
+  align-items: center;
+  --mdc-checkbox-selected-checkmark-color: #07121f;
+  --mdc-checkbox-selected-icon-color: rgba(213, 239, 255, 0.98);
+  --mdc-checkbox-selected-hover-icon-color: rgba(229, 247, 255, 1);
+  --mdc-checkbox-selected-focus-icon-color: rgba(229, 247, 255, 1);
+  --mdc-checkbox-selected-pressed-icon-color: rgba(229, 247, 255, 1);
+  --mdc-checkbox-unselected-icon-color: rgba(255, 255, 255, 0.6);
+  --mdc-checkbox-unselected-hover-icon-color: rgba(255, 255, 255, 0.76);
+  --mdc-checkbox-unselected-focus-icon-color: rgba(255, 255, 255, 0.76);
+  --mdc-checkbox-unselected-pressed-icon-color: rgba(255, 255, 255, 0.84);
+  --mdc-checkbox-selected-focus-state-layer-opacity: 0.18;
+  --mdc-checkbox-selected-hover-state-layer-opacity: 0.2;
+  --mdc-checkbox-selected-pressed-state-layer-opacity: 0.22;
+  --mdc-checkbox-unselected-focus-state-layer-opacity: 0.12;
+  --mdc-checkbox-unselected-hover-state-layer-opacity: 0.14;
+  --mdc-checkbox-unselected-pressed-state-layer-opacity: 0.16;
+}
+
+.admin-dialog .admin-checkbox .mdc-checkbox__background {
+  border-radius: 6px !important;
+  border-color: rgba(143, 164, 255, 0.4) !important;
+  background: rgba(24, 28, 46, 0.4) !important;
+  transition: background 160ms ease, border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.admin-dialog mat-checkbox.mat-mdc-checkbox-checked {
+  background: rgba(206, 147, 216, 0.12);
+  border-color: rgba(206, 147, 216, 0.35);
+}
+
+.admin-dialog .admin-checkbox.mat-mdc-checkbox-checked .mdc-checkbox__background {
+  background: linear-gradient(135deg, rgba(171, 121, 255, 0.92), rgba(104, 70, 198, 0.95)) !important;
+  border-color: rgba(171, 121, 255, 0.9) !important;
+  box-shadow: 0 10px 24px rgba(57, 38, 102, 0.34);
+}
+
+.admin-dialog mat-checkbox .mdc-form-field > label,
+.admin-dialog mat-slide-toggle .mdc-form-field > label {
+  color: rgba(235, 239, 255, 0.88);
+  font-weight: 500;
+}
+
+.admin-dialog--tenants .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(129, 212, 250, 0.88), rgba(33, 150, 243, 0.92));
+}
+
+.admin-dialog--roles .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(206, 147, 216, 0.92), rgba(171, 71, 188, 0.82));
+}
+
+.admin-dialog--users .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(165, 214, 167, 0.95), rgba(102, 187, 106, 0.88));
+}
+
+.admin-dialog--scopes .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(129, 199, 212, 0.9), rgba(79, 195, 247, 0.82));
+}
+
+.admin-dialog--audit .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(255, 183, 77, 0.94), rgba(255, 143, 0, 0.9));
+}
+
+.admin-dialog--confirm .admin-dialog__icon {
+  background: linear-gradient(135deg, rgba(244, 143, 177, 0.92), rgba(229, 57, 53, 0.9));
+}
+
 :host ::ng-deep .p-inputtext,
 :host ::ng-deep .p-password input {
   font-weight: 400;

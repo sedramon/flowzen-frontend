@@ -1,11 +1,16 @@
 <section class="admin-users">
-  <header class="admin-users__header">
-    <div>
-      <h2>Access directory</h2>
-      <p>Pregledaj superadministratore i korisnike po tenantima, uz brzu kontrolu privilegija.</p>
+  <header class="admin-users__header admin-page-hero admin-page-hero--users">
+    <div class="admin-page-hero__content">
+      <div class="admin-page-hero__icon">
+        <mat-icon>groups</mat-icon>
+      </div>
+      <div class="admin-page-hero__text">
+        <h2>Access directory</h2>
+        <p>Pregledaj superadministratore i korisnike po tenantima, uz brzu kontrolu privilegija.</p>
+      </div>
     </div>
 
-    <div class="admin-users__actions">
+    <div class="admin-users__actions admin-page-hero__actions">
       <button mat-stroked-button color="primary" (click)="refresh()" [disabled]="loading">
         <mat-icon>refresh</mat-icon>
         Osveži
@@ -182,12 +187,6 @@
                             </div>
                           </div>
 
-                          <mat-chip-set>
-                            <mat-chip>
-                              <mat-icon>workspace_premium</mat-icon>
-                              {{ getRoleName(user) }}
-                            </mat-chip>
-                          </mat-chip-set>
                         </header>
 
                         <section class="user-card__meta">
@@ -201,17 +200,25 @@
                           </div>
                         </section>
 
-                        <footer class="user-card__actions">
-                          <button mat-icon-button color="primary" matTooltip="Izmeni korisnika" (click)="openEditDialog(user)" [disabled]="isProcessing(user._id)">
-                            <mat-icon>edit</mat-icon>
-                          </button>
-                          <button mat-icon-button matTooltip="Reset lozinke" (click)="openResetPasswordDialog(user)" [disabled]="isProcessing(user._id)">
-                            <mat-icon>vpn_key</mat-icon>
-                          </button>
-                          <button mat-icon-button color="warn" matTooltip="Obriši korisnika" (click)="confirmDelete(user)" [disabled]="isProcessing(user._id)">
-                            <mat-icon>delete</mat-icon>
-                          </button>
-                        </footer>
+                  <footer class="user-card__footer">
+                    <div class="user-card__actions">
+                      <button mat-icon-button color="primary" matTooltip="Izmeni korisnika" (click)="openEditDialog(user)" [disabled]="isProcessing(user._id)">
+                        <mat-icon>edit</mat-icon>
+                      </button>
+                      <button mat-icon-button matTooltip="Reset lozinke" (click)="openResetPasswordDialog(user)" [disabled]="isProcessing(user._id)">
+                        <mat-icon>vpn_key</mat-icon>
+                      </button>
+                      <button mat-icon-button color="warn" matTooltip="Obriši korisnika" (click)="confirmDelete(user)" [disabled]="isProcessing(user._id)">
+                        <mat-icon>delete</mat-icon>
+                      </button>
+                    </div>
+                    <mat-chip-set class="user-card__role">
+                      <mat-chip>
+                        <mat-icon>workspace_premium</mat-icon>
+                        {{ getRoleName(user) }}
+                      </mat-chip>
+                    </mat-chip-set>
+                  </footer>
 
                         @if (isProcessing(user._id)) {
                           <div class="user-card__overlay">

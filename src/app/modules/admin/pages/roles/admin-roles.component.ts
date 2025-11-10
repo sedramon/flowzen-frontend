@@ -144,7 +144,9 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       AdminRoleDialogData,
       AdminRoleDialogResult
     >(AdminRoleDialogComponent, {
-      width: '680px',
+      width: '760px',
+      maxWidth: '90vw',
+      panelClass: 'admin-dialog-panel',
       data: {
         mode: 'create',
         tenants: this.tenants,
@@ -165,7 +167,9 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
       AdminRoleDialogData,
       AdminRoleDialogResult
     >(AdminRoleDialogComponent, {
-      width: '680px',
+      width: '760px',
+      maxWidth: '90vw',
+      panelClass: 'admin-dialog-panel',
       data: {
         mode: 'edit',
         role,
@@ -189,8 +193,10 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
       ConfirmDialogComponent,
       {
-        width: '420px',
+        width: '520px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
         data: {
           title: 'Obriši rolu',
           description: `Potvrdi brisanje role <strong>${role.name}</strong>. Ova akcija je nepovratna.`,

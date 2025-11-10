@@ -1,9 +1,16 @@
-<h2 mat-dialog-title>
-  {{ mode === 'create' ? 'Nova rola' : 'Izmeni rolu' }}
-</h2>
-
 <form [formGroup]="form" (ngSubmit)="submit()" class="role-dialog-form">
-  <mat-dialog-content>
+  <div class="admin-dialog admin-dialog--roles">
+    <header class="admin-dialog__header">
+      <div class="admin-dialog__icon">
+        <mat-icon>workspace_premium</mat-icon>
+      </div>
+      <div class="admin-dialog__title">
+        <h2>{{ mode === 'create' ? 'Nova rola' : 'Izmeni rolu' }}</h2>
+        <p>Modeluj globalne i tenant privilegije sa preciznom kontrolom scope-ova.</p>
+      </div>
+    </header>
+
+    <mat-dialog-content class="admin-dialog__content role-dialog__content">
     <div class="dialog-grid">
       <mat-form-field appearance="outline">
         <mat-label>Naziv role</mat-label>
@@ -41,7 +48,7 @@
       </mat-form-field>
     </div>
 
-    <section class="scope-selector">
+    <section class="scope-selector" [class.scope-selector--tenant]="form.get('type')?.value === 'tenant'">
       <header>
         <div>
           <h3>Dodela scope-ova</h3>
@@ -109,13 +116,14 @@
         </div>
       }
     </section>
-  </mat-dialog-content>
+    </mat-dialog-content>
 
-  <mat-dialog-actions align="end">
-    <button mat-button type="button" (click)="cancel()">Otkaži</button>
-    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
-      Sačuvaj
-    </button>
-  </mat-dialog-actions>
+    <mat-dialog-actions class="admin-dialog__actions" align="end">
+      <button mat-button type="button" (click)="cancel()">Otkaži</button>
+      <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
+        Sačuvaj
+      </button>
+    </mat-dialog-actions>
+  </div>
 </form>
 

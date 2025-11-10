@@ -5,38 +5,6 @@
   color: #f4f6ff;
 }
 
-.admin-tenants__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px 24px;
-  flex-wrap: wrap;
-}
-
-.admin-tenants__header h2 {
-  margin: 0 0 6px;
-  font-size: 1.55rem;
-  font-weight: 600;
-}
-
-.admin-tenants__header p {
-  margin: 0;
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.admin-tenants__header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.admin-tenants__header-actions button[mat-stroked-button],
-.admin-tenants__header-actions button[mat-flat-button] {
-  border-radius: 12px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  gap: 8px;
-}
-
 .admin-tenants__filters {
   display: flex;
   flex-direction: column;

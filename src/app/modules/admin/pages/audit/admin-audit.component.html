@@ -1,11 +1,16 @@
 <section class="admin-audit">
-  <header class="admin-audit__header">
-    <div>
-      <h2>Audit signals</h2>
-      <p>Svaka globalna akcija je zabeležena sa punim metapodacima.</p>
+  <header class="admin-audit__header admin-page-hero admin-page-hero--audit">
+    <div class="admin-page-hero__content">
+      <div class="admin-page-hero__icon">
+        <mat-icon>manage_history</mat-icon>
+      </div>
+      <div class="admin-page-hero__text">
+        <h2>Audit signals</h2>
+        <p>Svaka globalna akcija je zabeležena sa punim metapodacima.</p>
+      </div>
     </div>
 
-    <div class="admin-audit__actions">
+    <div class="admin-audit__actions admin-page-hero__actions">
       <button mat-stroked-button color="primary" (click)="refresh()">
         <mat-icon>refresh</mat-icon>
         Osveži

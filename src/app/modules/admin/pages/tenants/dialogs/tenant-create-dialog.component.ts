@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angula
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface TenantCreateDialogData {
   title?: string;
@@ -24,12 +25,27 @@ export interface TenantCreateDialogResult {
 @Component({
   selector: 'app-tenant-create-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   template: `
-    <h2 mat-dialog-title>{{ data?.title || 'Novi tenant' }}</h2>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--tenants tenant-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>apartment</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>{{ data?.title || 'Novi tenant' }}</h2>
+          <p>Postavi osnovne informacije o kompaniji, kontaktima i identifikacionim brojevima.</p>
+        </div>
+      </header>
 
-    <form [formGroup]="form" (ngSubmit)="submit()" class="dialog-form">
-      <mat-dialog-content>
+      <mat-dialog-content class="admin-dialog__content tenant-dialog__content">
         <div class="dialog-grid">
           <mat-form-field appearance="outline">
             <mat-label>Naziv</mat-label>
@@ -96,7 +112,7 @@ export interface TenantCreateDialogResult {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
         <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           Kreiraj tenant
@@ -106,19 +122,15 @@ export interface TenantCreateDialogResult {
   `,
   styles: [
     `
-      .dialog-form {
-        min-width: 420px;
-        max-width: 520px;
+      .tenant-dialog__content {
+        max-width: 860px;
       }
 
-      .dialog-grid {
+      .tenant-dialog .dialog-grid {
         display: grid;
         gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      }
-
-      .full-width {
-        grid-column: 1 / -1;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        min-width: 0;
       }
     `,
   ],

@@ -122,8 +122,10 @@ export class AdminScopesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<ScopeDialogComponent, undefined, ScopeDialogResult>(
       ScopeDialogComponent,
       {
-        width: '520px',
+        width: '900px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
       },
     );
 
@@ -138,8 +140,10 @@ export class AdminScopesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<ScopeDialogComponent, ScopeDialogData, ScopeDialogResult>(
       ScopeDialogComponent,
       {
-        width: '520px',
+        width: '900px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
         data: { scope },
       },
     );
@@ -155,8 +159,10 @@ export class AdminScopesComponent implements OnInit, OnDestroy {
     const dialogRef = this.dialog.open<ConfirmDialogComponent, ConfirmDialogData, boolean>(
       ConfirmDialogComponent,
       {
-        width: '420px',
+        width: '900px',
+        maxWidth: '92vw',
         disableClose: true,
+        panelClass: 'admin-dialog-panel',
         data: {
           title: 'Obriši scope',
           description: `Potvrdi brisanje scope-a <strong>${scope.name}</strong>. Ova akcija je nepovratna.`,

@@ -1,3 +1,9 @@
+.user-card__role mat-chip {
+  background: rgba(255, 255, 255, 0.08);
+  color: #ffffff;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
 .admin-users {
   display: flex;
   flex-direction: column;
@@ -5,44 +11,9 @@
   color: #f5f7ff;
 }
 
-.admin-users__header {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px 24px;
-  flex-wrap: wrap;
-
-  h2 {
-    margin: 0 0 6px;
-    font-size: 1.65rem;
-    font-weight: 600;
-  }
-
-  p {
-    margin: 0;
-    color: rgba(255, 255, 255, 0.64);
-    max-width: 540px;
-  }
-}
-
-.admin-users__actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-
-  button {
-    border-radius: 14px;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    gap: 8px;
-    display: inline-flex;
-    align-items: center;
-  }
-
-  mat-icon {
-    font-size: 20px;
-    line-height: 20px;
-  }
+.admin-users__actions mat-icon {
+  font-size: 20px;
+  line-height: 20px;
 }
 
 .admin-users__filters {
@@ -290,6 +261,14 @@
   }
 }
 
+.user-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
 .user-card__actions {
   display: flex;
   align-items: center;
@@ -297,6 +276,14 @@
 
   button {
     border-radius: 12px;
+  }
+}
+
+.user-card__role {
+  display: flex;
+  align-items: center;
+  mat-icon {
+    margin-right: 6px;
   }
 }
 

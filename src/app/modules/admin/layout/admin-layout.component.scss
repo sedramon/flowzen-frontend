@@ -187,77 +187,34 @@
 }
 
 .admin-shell__content {
+  position: relative;
   display: flex;
   flex-direction: column;
   background: linear-gradient(160deg, rgba(12, 14, 18, 0.92) 0%, rgba(15, 17, 23, 0.85) 60%, rgba(12, 14, 18, 0.95) 100%);
 }
 
-.admin-shell__toolbar {
-  background: linear-gradient(135deg, rgba(35, 40, 56, 0.95), rgba(29, 33, 47, 0.95));
-  color: #f7f8fc;
-  padding: 16px 28px;
-  gap: 20px;
-  box-shadow: 0 10px 30px rgba(14, 16, 23, 0.65);
-}
-
 .toolbar__toggle {
+  position: absolute;
+  top: 24px;
+  left: 24px;
+  z-index: 5;
   background: rgba(255, 255, 255, 0.08);
   border-radius: 12px;
   width: 44px;
   height: 44px;
-  transition: transform 120ms ease, background 120ms ease;
+  box-shadow: 0 10px 26px rgba(9, 11, 19, 0.4);
+  transition: transform 120ms ease, background 120ms ease, box-shadow 120ms ease;
 }
 
 .toolbar__toggle:hover {
   background: rgba(255, 255, 255, 0.18);
   transform: translateY(-1px);
-}
-
-.toolbar__headline {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.toolbar__headline h1 {
-  margin: 0;
-  font-weight: 600;
-  font-size: 1.4rem;
-  letter-spacing: 0.02em;
-}
-
-.toolbar__headline p {
-  margin: 0;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.62);
-}
-
-.toolbar__spacer {
-  flex: 1;
-}
-
-.admin-shell__toolbar button[mat-stroked-button] {
-  border-radius: 10px;
-  font-weight: 600;
-  letter-spacing: 0.02em;
-  gap: 8px;
-  padding: 0 18px;
-  border-color: rgba(255, 255, 255, 0.45);
-  color: #ffffff;
-}
-
-.admin-shell__toolbar button[mat-stroked-button] mat-icon {
-  font-size: 18px;
-  width: 18px;
-  height: 18px;
+  box-shadow: 0 14px 32px rgba(9, 11, 19, 0.5);
 }
 
 .admin-shell__main {
   flex: 1;
-  padding: 32px 36px 48px;
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
+  padding: 72px 36px 30px;
 }
 
 @media (max-width: 1200px) {
@@ -265,12 +222,8 @@
     width: 240px;
   }
 
-  .admin-shell__toolbar {
-    padding: 12px 20px;
-  }
-
   .admin-shell__main {
-    padding: 28px;
+    padding: 72px 28px 40px;
   }
 }
 
@@ -286,24 +239,16 @@
   .admin-shell__content {
     min-height: calc(100vh - 56px);
   }
+
+  .toolbar__toggle {
+    top: 16px;
+    left: 16px;
+  }
 }
 
 @media (max-width: 720px) {
-  .admin-shell__toolbar {
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-
-  .toolbar__headline {
-    flex: 1 0 100%;
-  }
-
-  .admin-shell__toolbar button[mat-stroked-button] {
-    margin-left: auto;
-  }
-
   .admin-shell__main {
-    padding: 20px;
+    padding: 64px 20px 32px;
   }
 }
 

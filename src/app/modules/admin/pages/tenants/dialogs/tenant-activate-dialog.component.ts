@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface TenantActivateDialogData {
   name: string;
@@ -16,36 +17,48 @@ export interface TenantActivateDialogResult {
 @Component({
   selector: 'app-tenant-activate-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   template: `
-    <h2 mat-dialog-title>Aktiviraj tenant</h2>
-    <mat-dialog-content>
-      <p class="dialog-description">
-        Tenant <strong>{{ data.name }}</strong> će biti ponovo aktivan i korisnici će moći da nastave sa radom.
-      </p>
-      <form [formGroup]="form" class="dialog-form">
+    <form [formGroup]="form" (ngSubmit)="confirm()" class="admin-dialog admin-dialog--tenants tenant-activate-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>restart_alt</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Aktiviraj tenant</h2>
+          <p>
+            Tenant <strong>{{ data.name }}</strong> će biti ponovo aktivan i korisnici će se moći prijaviti.
+          </p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Napomena (opciono)</mat-label>
           <textarea matInput rows="4" formControlName="note"></textarea>
         </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="dialogRef.close()">Otkaži</button>
-      <button mat-flat-button color="primary" (click)="confirm()">Aktiviraj</button>
-    </mat-dialog-actions>
+      </mat-dialog-content>
+
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
+        <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
+        <button mat-flat-button color="primary" type="submit">Aktiviraj</button>
+      </mat-dialog-actions>
+    </form>
   `,
   styles: [
     `
-      .dialog-description {
-        margin-bottom: 20px;
+      .tenant-activate-dialog {
+        // width: 100%;
       }
 
-      .dialog-form {
-        width: 100%;
-      }
-
-      .full-width {
+      .tenant-activate-dialog .full-width {
         width: 100%;
       }
     `,

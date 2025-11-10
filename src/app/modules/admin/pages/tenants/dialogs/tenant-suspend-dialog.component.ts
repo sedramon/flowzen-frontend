@@ -4,6 +4,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 
 export interface TenantSuspendDialogData {
   name: string;
@@ -16,36 +17,49 @@ export interface TenantSuspendDialogResult {
 @Component({
   selector: 'app-tenant-suspend-dialog',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, MatDialogModule, MatInputModule, MatButtonModule],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    MatDialogModule,
+    MatInputModule,
+    MatButtonModule,
+    MatIconModule,
+  ],
   template: `
-    <h2 mat-dialog-title>Suspenduj tenant</h2>
-    <mat-dialog-content>
-      <p class="dialog-description">
-        Potvrdi suspenziju za <strong>{{ data.name }}</strong>. Korisnici ovog tenanta neće moći da se prijave dok ga ponovo ne aktiviraš.
-      </p>
-      <form [formGroup]="form" class="dialog-form">
+    <form [formGroup]="form" (ngSubmit)="confirm()" class="admin-dialog admin-dialog--tenants tenant-suspend-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>block</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Suspenduj tenant</h2>
+          <p>
+            Suspenzija privremeno onemogućava pristup korisnicima tenanta
+            <strong>{{ data.name }}</strong>. Možeš je opozvati kasnije.
+          </p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content tenant-suspend-dialog__content">
         <mat-form-field appearance="outline" class="full-width">
           <mat-label>Razlog (opciono)</mat-label>
           <textarea matInput rows="4" formControlName="reason"></textarea>
         </mat-form-field>
-      </form>
-    </mat-dialog-content>
-    <mat-dialog-actions align="end">
-      <button mat-button (click)="dialogRef.close()">Otkaži</button>
-      <button mat-flat-button color="warn" (click)="confirm()">Potvrdi suspenziju</button>
-    </mat-dialog-actions>
+      </mat-dialog-content>
+
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
+        <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
+        <button mat-flat-button color="warn" type="submit">Potvrdi suspenziju</button>
+      </mat-dialog-actions>
+    </form>
   `,
   styles: [
     `
-      .dialog-description {
-        margin-bottom: 20px;
+      .tenant-suspend-dialog__content {
+        max-width: 720px;
       }
 
-      .dialog-form {
-        width: 100%;
-      }
-
-      .full-width {
+      .tenant-suspend-dialog .full-width {
         width: 100%;
       }
     `,

@@ -4,12 +4,24 @@
       <div>
         <h2>Operational pulse</h2>
         @if (overview) {
-          <p>
-            Aktivni: {{ overview?.active ?? 0 }} · Pending: {{ overview?.pending ?? 0 }} · Suspendovani:
-            {{ overview?.suspended ?? 0 }}
-          </p>
+          <div class="overview__headline-metrics">
+            <div class="headline-metric headline-metric--active">
+              <span class="headline-metric__label">Aktivni</span>
+              <span class="headline-metric__value">{{ overview?.active ?? 0 }}</span>
+            </div>
+            <div class="headline-metric headline-metric--pending">
+              <span class="headline-metric__label">Pending</span>
+              <span class="headline-metric__value">{{ overview?.pending ?? 0 }}</span>
+            </div>
+            <div class="headline-metric headline-metric--suspended">
+              <span class="headline-metric__label">Suspendovani</span>
+              <span class="headline-metric__value">{{ overview?.suspended ?? 0 }}</span>
+            </div>
+          </div>
         } @else {
-          <p>Stay ahead of tenant health, onboarding velocity and sensitive admin actions.</p>
+          <p class="overview__headline-placeholder">
+            Stay ahead of tenant health, onboarding velocity and sensitive admin actions.
+          </p>
         }
       </div>
       <div class="overview__actions">
@@ -17,8 +29,12 @@
           <mat-icon>refresh</mat-icon>
           Osveži
         </button>
-        <button mat-flat-button color="accent" routerLink="../tenants">
-          <mat-icon>analytics</mat-icon>
+        <button
+          mat-flat-button
+          class="overview__tenants"
+          (click)="navigate('/admin/tenants')"
+        >
+          <mat-icon>domain</mat-icon>
           Tenants
         </button>
       </div>
@@ -130,14 +146,17 @@
                 <div class="activity-feed__icon">
                   <mat-icon>{{ item.icon }}</mat-icon>
                 </div>
-                <div class="activity-feed__content">
-                  <p>
-                    <strong>{{ item.actor }}</strong>
-                    {{ item.action }}
-                  </p>
-                  <span>{{ item.meta }}</span>
+                <div class="activity-feed__body">
+                  <div class="activity-feed__headline">
+                    <span class="activity-feed__actor">{{ item.actor }}</span>
+                    <span class="activity-feed__action">{{ item.action }}</span>
+                  </div>
+                  <div class="activity-feed__meta">{{ item.meta }}</div>
                 </div>
-                <span class="activity-feed__time">{{ item.timeAgo }}</span>
+                <div class="activity-feed__time">
+                  <mat-icon>schedule</mat-icon>
+                  <span>{{ item.timeAgo }}</span>
+                </div>
               </li>
             }
           </ul>

@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatIconModule } from '@angular/material/icon';
 import { AdminRolesService, AdminRoleQuery } from '../../../services/admin-roles.service';
 import { AdminTenantsService } from '../../../services/admin-tenants.service';
 import { AdminNotificationsService } from '../../../shared/services/admin-notifications.service';
@@ -40,11 +41,21 @@ export interface AdminEditUserDialogResult {
     MatSelectModule,
     MatCheckboxModule,
     MatProgressSpinnerModule,
+    MatIconModule,
   ],
   template: `
-    <h2 mat-dialog-title>Izmeni korisnika</h2>
-    <form [formGroup]="form" (ngSubmit)="submit()" class="dialog-form">
-      <mat-dialog-content>
+    <form [formGroup]="form" (ngSubmit)="submit()" class="admin-dialog admin-dialog--users edit-user-dialog">
+      <header class="admin-dialog__header">
+        <div class="admin-dialog__icon">
+          <mat-icon>manage_accounts</mat-icon>
+        </div>
+        <div class="admin-dialog__title">
+          <h2>Izmeni korisnika</h2>
+          <p>Prilagodi ulogu, tenant i scope-ove postojećeg administratorskog naloga.</p>
+        </div>
+      </header>
+
+      <mat-dialog-content class="admin-dialog__content">
         <div class="dialog-grid">
           <mat-form-field appearance="outline">
             <mat-label>Ime i prezime</mat-label>
@@ -81,7 +92,7 @@ export interface AdminEditUserDialogResult {
             </mat-error>
           </mat-form-field>
 
-          <mat-checkbox formControlName="isGlobalAdmin" (change)="onGlobalAdminToggle()">
+          <mat-checkbox formControlName="isGlobalAdmin" class="admin-checkbox" (change)="onGlobalAdminToggle()">
             Superadmin
           </mat-checkbox>
 
@@ -92,7 +103,7 @@ export interface AdminEditUserDialogResult {
         </div>
       </mat-dialog-content>
 
-      <mat-dialog-actions align="end">
+      <mat-dialog-actions class="admin-dialog__actions" align="end">
         <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
         <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">
           Sačuvaj
@@ -102,26 +113,33 @@ export interface AdminEditUserDialogResult {
   `,
   styles: [
     `
-      .dialog-form {
-        min-width: 520px;
-        max-width: 620px;
-      }
-
-      .dialog-grid {
+      .edit-user-dialog {
         display: grid;
-        gap: 16px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        align-items: start;
+        gap: 24px;
+        // width: 100%;
       }
 
-      .full-width {
+      .edit-user-dialog .admin-dialog__content {
+        max-width: 900px;
+      }
+
+      .edit-user-dialog .dialog-grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+        align-items: start;
+        min-width: 0;
+      }
+
+      .edit-user-dialog .full-width {
         grid-column: 1 / -1;
       }
 
-      .role-select {
+      .edit-user-dialog .role-select {
         display: flex;
         align-items: center;
         gap: 12px;
+        flex-wrap: wrap;
       }
     `,
   ],
