@@ -27,6 +27,12 @@ export class AuthService {
     private csrfService: CsrfService
   ) {
     this.loadUserFromStorage();
+    
+    // Hybrid approach: If user data exists, validate session is still active
+    // Delay the call to avoid circular dependency with HttpClient/Interceptors
+    if (this.getCurrentUser()) {
+      setTimeout(() => this.validateSession(), 0);
+    }
   }
 
   login(email: string, password: string): Observable<any> {

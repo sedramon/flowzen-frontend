@@ -1,3 +1,4 @@
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -5,12 +6,12 @@ import { AuthService } from '../../core/services/auth.service';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { FlexLayoutModule } from '@angular/flex-layout';
 import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
-import { CardModule } from 'primeng/card';
-import { MessageModule } from 'primeng/message';
 import { ToastModule } from 'primeng/toast';
-import { MessageService } from 'primeng/api';
+import { FlexLayoutModule } from '@angular/flex-layout';
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-login',
@@ -39,12 +40,11 @@ export class LoginComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private authService: AuthService,
-    private router: Router,
     private route: ActivatedRoute,
     private messageService: MessageService
   ) {
     this.loginForm = this.fb.group({
-      username: ['', [Validators.required, Validators.email, Validators.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)]],
+      username: ['', [Validators.required, Validators.email]],
       password: ['', [Validators.required]]
     });
 
@@ -65,7 +65,15 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
+    console.log('Form submitted');
+    console.log('Form valid:', this.loginForm.valid);
+    console.log('Form value:', this.loginForm.value);
+    console.log('Form errors:', this.loginForm.errors);
+    console.log('Username errors:', this.loginForm.get('username')?.errors);
+    console.log('Password errors:', this.loginForm.get('password')?.errors);
+
     if (this.loginForm.valid) {
+      console.log('✅ Form is valid, calling backend...');
       this.isLoading = true;
       const { username, password } = this.loginForm.value;
 
@@ -78,18 +86,19 @@ export class LoginComponent implements OnInit {
             detail: 'Login successful!'
           });
         },
-        error: (err) => {
+        error: (error) => {
           this.isLoading = false;
-          console.error('Login failed:', err);
           this.messageService.add({
             severity: 'error',
             summary: 'Login Failed',
-            detail: err.error?.message || 'Invalid username or password'
+            detail: error.error?.message || 'Invalid credentials'
           });
         }
       });
     } else {
+      console.log('❌ Form is invalid, showing validation errors...');
       this.markFormGroupTouched();
+      this.showValidationErrors();
     }
   }
 
@@ -98,29 +107,39 @@ export class LoginComponent implements OnInit {
     return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
-  getFieldError(fieldName: string): string {
-    const field = this.loginForm.get(fieldName);
-    if (field?.errors) {
-      if (field.errors['required']) {
-        return `${fieldName.charAt(0).toUpperCase() + fieldName.slice(1)} is required`;
-      }
-      if (field.errors['email']) {
-        return 'Please enter a valid email address';
-      }
-      if (field.errors['minlength']) {
-        const requiredLength = field.errors['minlength'].requiredLength;
-        return `Password must be at least ${requiredLength} characters`;
-      }
-      if (field.errors['pattern']) {
-        if (fieldName === 'username') {
-          return 'Please enter a valid email address';
-        }
-        if (fieldName === 'password') {
-          return 'Password must contain at least 1 number and 1 special character (@$!%*?&)';
-        }
+  private showValidationErrors(): void {
+    const errors: string[] = [];
+    
+    // Check email errors
+    const emailField = this.loginForm.get('username');
+    if (emailField?.invalid) {
+      if (emailField.errors?.['required']) {
+        errors.push('Email is required');
+      } else if (emailField.errors?.['email']) {
+        errors.push('Please enter a valid email address');
       }
     }
-    return '';
+    
+    // Check password errors
+    const passwordField = this.loginForm.get('password');
+    if (passwordField?.invalid) {
+      if (passwordField.errors?.['required']) {
+        errors.push('Password is required');
+      } else if (passwordField.errors?.['minlength']) {
+        const minLength = passwordField.errors['minlength'].requiredLength;
+        errors.push(`Password must be at least ${minLength} characters`);
+      }
+    }
+    
+    // Show all validation errors in a single toast
+    if (errors.length > 0) {
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validation Error',
+        detail: errors.join('. '),
+        life: 5000
+      });
+    }
   }
 
   private markFormGroupTouched(): void {

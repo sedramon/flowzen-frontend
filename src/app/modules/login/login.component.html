@@ -9,18 +9,18 @@
     
     <form class="login-form" [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <div class="form-group">
-        <label for="username" class="form-label">Username</label>
+        <label for="username" class="form-label">Email</label>
         <div class="form-input">
           <input
             pInputText
             id="username"
-            placeholder="Enter your username"
+            type="email"
+            placeholder="Enter your email"
             formControlName="username"
             [class.ng-invalid]="isFieldInvalid('username')"
+            [class.ng-dirty]="loginForm.get('username')?.dirty"
+            [class.ng-touched]="loginForm.get('username')?.touched"
           />
-          <small *ngIf="isFieldInvalid('username')" class="field-error">
-            {{ getFieldError('username') }}
-          </small>
         </div>
       </div>
       
@@ -32,11 +32,11 @@
             placeholder="Enter your password"
             formControlName="password"
             [feedback]="false"
+            [toggleMask]="true"
             [class.ng-invalid]="isFieldInvalid('password')"
+            [class.ng-dirty]="loginForm.get('password')?.dirty"
+            [class.ng-touched]="loginForm.get('password')?.touched"
           ></p-password>
-          <small *ngIf="isFieldInvalid('password')" class="field-error">
-            {{ getFieldError('password') }}
-          </small>
         </div>
       </div>
       
@@ -47,6 +47,7 @@
         class="login-button"
         severity="primary"
         size="large"
+        styleClass="p-button-primary"
       ></p-button>
     </form>
     
@@ -58,3 +59,6 @@
     <p-toast position="top-right"></p-toast>
   </p-card>
 </div>
+<!-- Toast for notifications - moved outside to avoid positioning issues -->
+<p-toast position="top-right" [life]="5000"></p-toast>
+
