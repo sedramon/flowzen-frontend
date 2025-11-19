@@ -1,146 +1,473 @@
-.nav-column>mat-card {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-    margin-right: 20px;
-    height: 100%;
-
-    mat-card-title {
-        text-align: start;
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 10px;
-        margin-bottom: 10px;
-    }
-
-    .navigation-button {
-        margin: 10px;
-
-    }
+.client-detail-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
 }
 
-.clients-details-column {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-    margin-left: 20px;
+// Navigation Sidebar
+.nav-sidebar {
+  width: 280px;
+  flex-shrink: 0;
+}
 
-    border-radius: 25px;
-
-
-
-    .title-container {
-        padding: 25px;
-
-        .title {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            background: linear-gradient(60deg,
-                    #f72585,
-                    #7209b7,
-                    #3a0ca3,
-                    #4361ee,
-                    #f72585);
-            background-size: 300% 300%;
-            animation: gradientPan 70s ease infinite;
-            padding: 1rem;
-            margin: 1rem;
-            border-radius: 25px;
+.nav-card {
+  ::ng-deep {
+    .p-card {
+      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      
+      .p-card-header {
+        background: transparent;
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
+      }
+      
+      .p-card-body {
+        padding: 0;
+        
+        .p-card-content {
+          padding: 1.5rem;
         }
+      }
     }
+  }
 }
 
-.user-connection-card {
-    margin-top: 24px;
-    padding: 20px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.03);
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  
+  i {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-button {
+  ::ng-deep .p-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
     
-    .card-title {
-        margin: 0 0 16px 0;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        color: #fff;
-        font-size: 18px;
+    &.p-button-text {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
     }
+    
+    &.p-button-raised {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: rgba(255, 255, 255, 0.9);
+      
+      &:hover {
+        background: rgba(139, 92, 246, 0.15);
+        border-color: rgba(139, 92, 246, 0.5);
+        transform: translateX(4px);
+      }
+    }
+  }
+}
 
-    .connected-user {
-        padding: 20px;
-        background: rgba(67, 97, 238, 0.15);
-        border-radius: 6px;
-        margin-bottom: 16px;
-        border: 1px solid rgba(67, 97, 238, 0.3);
+// Main Content
+.main-content {
+  flex: 1;
+}
+
+.content-card {
+  ::ng-deep {
+    .p-card {
+      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      
+      .p-card-header {
+        background: transparent;
+        padding: 1.5rem 2rem;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
+      }
+      
+      .p-card-body {
+        padding: 0;
         
-        .connected-label {
-            margin: 0 0 14px 0;
-            color: rgba(255, 255, 255, 0.9);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        .p-card-content {
+          padding: 2rem;
         }
-
-        .user-info {
-            display: flex;
-            flex-direction: column;
-            gap: 6px;
-            margin-bottom: 16px;
-            
-            .user-name {
-                color: #4361ee;
-                font-weight: 600;
-                font-size: 16px;
-            }
-
-            .user-email {
-                color: rgba(255, 255, 255, 0.7);
-                font-size: 14px;
-            }
-        }
-
-        .user-actions {
-            display: flex;
-            justify-content: space-between;
-            padding-top: 12px;
-            border-top: 1px solid rgba(67, 97, 238, 0.2);
-
-            button {
-                display: flex;
-                align-items: center;
-                gap: 6px;
-                font-size: 13px;
-                font-weight: 500;
-            }
-        }
+      }
     }
+  }
+}
 
-    .loading-section {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 20px;
-    }
+.content-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1rem 1.5rem;
+}
 
-    .select-user-section {
-        margin-bottom: 16px;
-        
-        .select-label {
-            margin: 0 0 12px 0;
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 14px;
-        }
+.back-btn {
+  ::ng-deep .p-button {
+    min-width: 3rem;
+    height: 3rem;
+    background: rgba(139, 92, 246, 0.1);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    color: rgba(139, 92, 246, 0.9);
+    transition: all 0.3s ease;
+    
+    &:hover {
+      background: rgba(139, 92, 246, 0.2);
+      border-color: rgba(139, 92, 246, 0.5);
+      transform: translateX(-2px);
     }
+  }
+}
 
-    .no-users-warning {
-        padding: 12px;
-        background: rgba(198, 40, 40, 0.15);
-        border: 1px solid rgba(198, 40, 40, 0.3);
-        border-radius: 4px;
-        
-        p {
-            margin: 0;
-            color: #ff5252;
-        }
+.title-section {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+// Details Section
+.details-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.input-field {
+  width: 100%;
+  padding: 1rem;
+  background: #1a1a1a;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  
+  &:enabled:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    background: #1a1a1a;
+  }
+  
+  &:enabled:focus {
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    background: #2a2a2a;
+    outline: none;
+  }
+}
+
+::ng-deep {
+  .p-float-label {
+    margin-top: 1rem;
+    
+    label {
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+      left: 1rem;
     }
+    
+    input:focus ~ label,
+    input.p-filled ~ label {
+      color: rgba(139, 92, 246, 0.9);
+    }
+  }
+}
+
+// User Connection Card
+.user-connection-card {
+  margin-top: 1.5rem;
+  padding: 2rem;
+  background: rgba(139, 92, 246, 0.05);
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 16px;
+  box-shadow: 0 4px 16px rgba(139, 92, 246, 0.1);
+}
+
+.connection-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  
+  i {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.connected-user {
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  border-radius: 12px;
+  margin-top: 1rem;
+}
+
+.connected-label {
+  margin-bottom: 1rem;
+  
+  strong {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+}
+
+.user-info {
+  margin-bottom: 1.5rem;
+}
+
+.user-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.user-name {
+  color: rgba(139, 92, 246, 1);
+  font-weight: 600;
+  font-size: 1.25rem;
+}
+
+.user-email {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 1rem;
+}
+
+.user-actions {
+  display: flex;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.3);
+  
+  ::ng-deep .p-button {
+    flex: 1;
+    justify-content: center;
+    padding: 0.875rem 1.5rem;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+    }
+  }
+}
+
+.loading-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1rem;
+  padding: 2rem;
+  
+  span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1rem;
+  }
+  
+  ::ng-deep .p-progress-spinner-circle {
+    stroke: rgba(139, 92, 246, 0.8);
+  }
+}
+
+.select-user-section {
+  margin-top: 1rem;
+}
+
+.select-label {
+  margin: 0 0 1rem 0;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.no-users-warning {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  margin-top: 1rem;
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(198, 40, 40, 0.15));
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  
+  i {
+    font-size: 1.5rem;
+    color: rgba(239, 68, 68, 0.9);
+  }
+  
+  p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+  }
+}
+
+.save-section {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1.5rem;
+}
+
+.save-btn {
+  ::ng-deep .p-button {
+    padding: 1rem 2rem;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+    border: none;
+    color: white;
+    font-weight: 600;
+    font-size: 1.1rem;
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    transition: all 0.3s ease;
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// Section Placeholders
+.section-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 4rem 2rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-align: center;
+  
+  i {
+    font-size: 5rem;
+    opacity: 0.3;
+  }
+  
+  h2 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.7);
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.5);
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .client-detail-container {
+    flex-direction: column;
+  }
+  
+  .nav-sidebar {
+    width: 100%;
+  }
+  
+  .nav-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .nav-button {
+    flex: 1;
+    min-width: 200px;
+  }
+}
+
+@media (max-width: 768px) {
+  .client-detail-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .content-header {
+    gap: 1rem;
+  }
+  
+  .title-section h2 {
+    font-size: 1.5rem;
+  }
+  
+  .user-actions {
+    flex-direction: column;
+  }
+  
+  .nav-buttons {
+    flex-direction: column;
+  }
+  
+  .nav-button {
+    min-width: 100%;
+  }
 }

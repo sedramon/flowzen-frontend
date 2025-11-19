@@ -1,107 +1,80 @@
-import {
-  AfterViewInit,
-  Component,
-  OnDestroy,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { Observable, of, Subscription, tap } from 'rxjs';
+import { Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { Subscription, tap } from 'rxjs';
 import { Client } from '../../models/Client';
 import { ClientsService } from './services/clients.service';
 import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { CommonModule } from '@angular/common';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatIconButton, MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatOption, provideNativeDateAdapter } from '@angular/material/core';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
+import { FormsModule } from '@angular/forms';
 import { CreateClientDialogComponent } from './dialogs/create-client-dialog/create-client-dialog.component';
 import { Router } from '@angular/router';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { AuthService } from '../../core/services/auth.service';
-import { PagedResponse } from '../../models/PagedResponse';
-import {
-  MatDatepicker,
-  MatDatepickerModule,
-  MatDateRangePicker,
-} from '@angular/material/datepicker';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { TooltipModule } from 'primeng/tooltip';
+import { Paginator, PaginatorModule } from 'primeng/paginator';
+import { DatePickerModule } from 'primeng/datepicker';
+import { SelectModule } from 'primeng/select';
 
 @Component({
   selector: 'app-clients',
   standalone: true,
   imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    FlexLayoutModule,
     CommonModule,
-    MatPaginatorModule,
-    MatTableModule,
-    MatSortModule,
-    MatIconModule,
-    MatIconButton,
-    MatDividerModule,
-    MatSnackBarModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatCardModule,
-    MatButtonModule,
     FormsModule,
-    ReactiveFormsModule,
-    MatDatepickerModule,
+    TableModule,
+    ButtonModule,
+    CardModule,
+    ToastModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    TooltipModule,
+    PaginatorModule,
+    DatePickerModule,
+    SelectModule
   ],
-  providers: [provideNativeDateAdapter()],
+  providers: [MessageService],
   templateUrl: './clients.component.html',
   styleUrl: './clients.component.scss',
 })
-export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
-  dataSourceClients = new MatTableDataSource<Client>([]);
-  displayedColumnsClients: string[] = [
-    'firstName',
-    'lastName',
-    'contactEmail',
-    'contactPhone',
-    'createdAt',
-    'updatedAt',
-    'actions',
-  ];
-
+export class ClientsComponent implements OnInit, OnDestroy {
+  clients: Client[] = [];
+  
   sortBy: string = '';
   sortDir: 'asc' | 'desc' = 'desc';
 
   sortOptions = [
-    { value: 'firstName', view: 'First Name' },
-    { value: 'lastName', view: 'Last Name' },
-    { value: 'createdAt', view: 'Created At' },
-    { value: 'updatedAt', view: 'Updated At' },
+    { label: 'Ime', value: 'firstName' },
+    { label: 'Prezime', value: 'lastName' },
+    { label: 'Kreirano', value: 'createdAt' },
+    { label: 'Ažurirano', value: 'updatedAt' },
   ];
 
   totalItems = 0;
   searchQuery = '';
   createdFrom?: Date;
   createdTo?: Date;
+  
+  // Pagination
+  currentPage = 0;
+  pageSize = 10;
 
   private tenantId!: string;
   private subs = new Subscription();
 
-  @ViewChild(MatPaginator) paginator!: MatPaginator;
+  @ViewChild('paginator') paginator!: Paginator;
 
   constructor(
     private clientsService: ClientsService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private messageService: MessageService,
     private router: Router,
     private authService: AuthService
   ) {}
@@ -112,15 +85,8 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
       throw new Error('Tenant ID nije dostupan za trenutno prijavljenog korisnika.');
     }
     this.tenantId = tenantId;
-  }
-
-  ngAfterViewInit() {
-    // paginator
-    this.subs.add(
-      this.paginator.page.pipe(tap(() => this.loadPage())).subscribe()
-    );
-
-    // initial load
+    
+    // Initial load
     this.loadPage();
   }
 
@@ -129,39 +95,44 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   loadPage() {
-  const page  = this.paginator.pageIndex + 1;
-  const limit = this.paginator.pageSize || 25;
+    const page = this.currentPage + 1;
+    const limit = this.pageSize;
 
-  this.clientsService
-    .getClients(
-      this.tenantId,
-      this.searchQuery,
-      page,
-      limit,
-      this.sortBy,     // send from dropdown
-      this.sortDir,    // send from dropdown
-      this.createdFrom,
-      this.createdTo
-    )
-    .subscribe(({ data, total }) => {
-      this.dataSourceClients.data = data;
-      this.totalItems             = total;
-    });
-}
+    this.clientsService
+      .getClients(
+        this.tenantId,
+        this.searchQuery,
+        page,
+        limit,
+        this.sortBy,
+        this.sortDir,
+        this.createdFrom,
+        this.createdTo
+      )
+      .subscribe(({ data, total }) => {
+        this.clients = data;
+        this.totalItems = total;
+      });
+  }
 
-  onSearchClick() {
-    this.paginator.firstPage();
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+    this.pageSize = event.rows;
     this.loadPage();
   }
-  onDateRangeChange(from: Date | null, to: Date | null) {
-    this.createdFrom = from ?? undefined;
-    this.createdTo = to ?? undefined;
-    this.paginator.firstPage();
+
+  onSearchClick() {
+    this.currentPage = 0;
+    this.loadPage();
+  }
+  
+  onDateRangeChange() {
+    this.currentPage = 0;
     this.loadPage();
   }
 
   onSortChange() {
-    this.paginator.firstPage();
+    this.currentPage = 0;
     this.loadPage();
   }
 
@@ -169,31 +140,30 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.searchQuery = '';
     this.createdFrom = undefined;
     this.createdTo = undefined;
-    this.paginator.firstPage();
+    this.sortBy = '';
+    this.sortDir = 'desc';
+    this.currentPage = 0;
     this.loadPage();
   }
 
-  // stub methods for dialogs/actions
   openAddClientDialog() {
     const dialogRef = this.dialog.open(CreateClientDialogComponent, {
-      width: '600px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
     });
 
     dialogRef.afterClosed().subscribe((client) => {
       if (client) {
         this.clientsService.createClient(client).subscribe(
           (createdClient) => {
-            this.showSnackbar(
-              `Client "${client.firstName} ${client.lastName}" created successfully`
+            this.showToast(
+              `Klijent "${client.firstName} ${client.lastName}" uspešno kreiran`
             );
-            this.dataSourceClients.data = [
-              ...this.dataSourceClients.data,
-              createdClient,
-            ];
+            this.loadPage(); // Reload to refresh data
           },
           (error) => {
             console.error('Error creating client:', error);
-            this.showSnackbar('Failed to create client', true);
+            this.showToast('Neuspešno kreiranje klijenta', true);
           }
         );
       }
@@ -202,11 +172,11 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
 
   deleteClient(id: string) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '500px',
-      height: '250px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: {
-        title: 'Delete Facility',
-        message: `Are you sure you want to delete?`,
+        title: 'Brisanje klijenta',
+        message: `Da li ste sigurni da želite da obrišete ovog klijenta?`,
       },
     });
 
@@ -214,14 +184,12 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
       if (result) {
         this.clientsService.deleteClient(id).subscribe(
           () => {
-            this.showSnackbar(`Client deleted successfully`);
-            this.dataSourceClients.data = this.dataSourceClients.data.filter(
-              (client) => client._id !== id
-            );
+            this.showToast('Klijent uspešno obrisan');
+            this.loadPage(); // Reload to refresh data
           },
           (error) => {
             console.error('Error deleting client:', error);
-            this.showSnackbar('Failed to delete client', true);
+            this.showToast('Neuspešno brisanje klijenta', true);
           }
         );
       }
@@ -232,12 +200,12 @@ export class ClientsComponent implements OnInit, AfterViewInit, OnDestroy {
     this.router.navigate(['/clients', client._id]);
   }
 
-  showSnackbar(message: string, isError: boolean = false) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000, // 3 seconds
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'], // Ensure it's an array
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
     });
   }
 }

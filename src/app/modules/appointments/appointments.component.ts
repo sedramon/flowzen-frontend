@@ -20,6 +20,9 @@ import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { CashSession, CloseSessionRequest } from '../../models/CashSession';
 import { MatSelectModule } from '@angular/material/select';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
 import interact from 'interactjs';
 import {
   trigger,
@@ -99,6 +102,9 @@ export const CUSTOM_DATE_FORMATS = {
     MatTooltipModule,
     MatButtonModule,
     MatSelectModule,
+    ButtonModule,
+    SelectModule,
+    DatePickerModule,
     PosCheckoutComponent
   ],
   templateUrl: './appointments.component.html',
@@ -125,18 +131,18 @@ export const CUSTOM_DATE_FORMATS = {
         ),
       ]),
     ]),
-    // Animacije za naslov i datepicker (pomak ulevo/udesno)
+    // Animacije za naslov i datepicker (fade in/out instead of translateX)
     trigger('titleAnim', [
-      state('centered', style({ transform: 'translateX(0)' })),
-      state('spaced', style({ transform: 'translateX(-100px)' })),
-      transition('centered => spaced', animate('0.5s ease-out')),
-      transition('spaced => centered', animate('0.5s ease-in')),
+      state('centered', style({ opacity: 1 })),
+      state('spaced', style({ opacity: 1 })),
+      transition('centered => spaced', animate('0.3s ease-out')),
+      transition('spaced => centered', animate('0.3s ease-in')),
     ]),
     trigger('dateAnim', [
-      state('centered', style({ transform: 'translateX(0)' })),
-      state('spaced', style({ transform: 'translateX(100px)' })),
-      transition('centered => spaced', animate('0.5s ease-out')),
-      transition('spaced => centered', animate('0.5s ease-in')),
+      state('centered', style({ opacity: 1 })),
+      state('spaced', style({ opacity: 1 })),
+      transition('centered => spaced', animate('0.3s ease-out')),
+      transition('spaced => centered', animate('0.3s ease-in')),
     ]),
     // Animacija za promenu rasporeda – samo ulazna animacija (fade-in)
     trigger('scheduleChange', [
@@ -681,7 +687,6 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
       data: dialogData,
-      panelClass: 'custom-appointment-dialog',
       backdropClass: 'custom-backdrop',
     });
 
@@ -754,7 +759,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
       data: dialogData,
-      panelClass: 'custom-appointment-dialog',
+      panelClass: 'admin-dialog-panel',
       backdropClass: 'custom-backdrop',
     });
 
@@ -1115,7 +1120,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
       data: dialogData,
-      panelClass: 'custom-appointment-dialog',
+      panelClass: 'admin-dialog-panel',
       backdropClass: 'custom-backdrop',
     });
 
@@ -1145,7 +1150,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
 
     const dialogRef = this.dialog.open(AppointmentDialogComponent, {
       data: dialogData,
-      panelClass: 'custom-appointment-dialog',
+      panelClass: 'admin-dialog-panel',
       backdropClass: 'custom-backdrop',
     });
 

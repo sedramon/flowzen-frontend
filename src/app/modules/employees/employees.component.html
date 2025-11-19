@@ -1,93 +1,126 @@
-<div class="main-container">
-    <div fxLayout="row" fxLayoutAlign="space-between center" fxLayoutGap="25px">
-        <div fxLayout="row" fxLayoutAlign="start center" fxLayoutGap="25px">
-            <!-- Display the number of employees using the async pipe -->
-            <span style="font-weight: bold; font-size: 35px;">{{ (filteredEmployees$ | async)?.length || 0 }}</span>
-            <h1>Employees</h1>
-            <button mat-raised-button><mat-icon>filter_list</mat-icon> Filter</button>
-            
-            <!-- Search Button -->
-            <button mat-icon-button style="background-color: #181818;" (click)="toggleSearch()">
-                <mat-icon>search</mat-icon>
-            </button>
-
-            <!-- Animated Search Input -->
-            <input 
-                matInput 
-                [(ngModel)]="searchQuery" 
-                placeholder="Search..."
-                [@expandSearch]="searchExpanded ? 'expanded' : 'collapsed'" 
-                class="search-input"
-                (input)="filterEmployees()">
-        </div>
-
-        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="25px">
-            <button mat-icon-button style="background-color: #181818;">
-                <mat-icon>import_export</mat-icon>
-            </button>
-            <button mat-raised-button (click)="openAddEmployeeDialog()">
-                <mat-icon>add</mat-icon> Add Employee
-            </button>
-        </div>
+<div class="employees-container">
+  <!-- Header Section -->
+  <div class="employees-header">
+    <div class="header-left">
+      <div class="employee-count">
+        <span class="count-number">{{ (filteredEmployees$ | async)?.length || 0 }}</span>
+        <span class="count-label">Zaposleni</span>
+      </div>
+      
+      <p-divider layout="vertical"></p-divider>
+      
+      <div class="search-section">
+        <p-iconField iconPosition="left" class="search-field">
+          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            (input)="filterEmployees()"
+            placeholder="Pretražite zaposlene..."
+            class="search-input" />
+        </p-iconField>
+      </div>
     </div>
 
-    <mat-divider style="margin-bottom: 25px;"></mat-divider>
-
-    <!-- Employee Cards -->
-    <div fxLayout="row wrap" fxLayoutGap="20px" fxLayoutAlign="center center">
-        <!-- Use the async pipe to iterate over the filtered employees -->
-        <div *ngFor="let employee of (filteredEmployees$ | async)" 
-            fxLayout="column" 
-            fxLayoutAlign="space-between" 
-            class="employee-tiles" 
-            (click)="openEditEmployeeDialog(employee)">
-            
-            <!-- Active/Inactive Chip -->
-            <div fxLayout="row" fxLayoutAlign="end center">
-                <mat-chip *ngIf="employee.isActive">Active</mat-chip>
-                <mat-chip *ngIf="!employee.isActive" style="background-color: red; border: white solid 1px;">Inactive</mat-chip>
-            </div>
-
-            <!-- Employee Image -->
-            <div>
-              <img
-                [src]="employee.avatarUrl ? (apiUrl + employee.avatarUrl) : 'user-profile-image.png'"
-                alt="employee-image"
-                width="125"
-                height="125"
-                style="border-radius: 50%; object-fit: cover;"
-              >
-            </div>
-
-            <!-- Employee Name and Role -->
-            <div fxLayout="column" fxLayoutAlign="center center" class="employee-name">
-                <span style="font-weight: bold;">{{ employee.firstName }} {{ employee.lastName }}</span>
-                {{ employee.jobRole }}
-            </div>
-
-            <!-- Employee Contact Details -->
-            <div class="employee-contact-details" fxLayout="column" fxLayoutAlign="space-around">
-                <div fxLayout="row" fxLayoutAlign="space-around center">
-                    <div fxLayout="column" fxLayoutAlign="center center">
-                        <span>Department</span>
-                        Design Team
-                    </div>
-                    <div fxLayout="column" fxLayoutAlign="center center">
-                        <span>Date Hired</span>
-                        17/03/2021
-                    </div>
-                </div>
-                <div fxLayout="column" fxLayoutAlign="center center">
-                    <div fxLayout="row" fxLayoutAlign="center center">
-                        <mat-icon>email</mat-icon>
-                        {{ employee.contactEmail }}
-                    </div>
-                    <div fxLayout="row" fxLayoutAlign="center center">
-                        <mat-icon>phone</mat-icon>
-                        {{ employee.contactPhone }}
-                    </div>
-                </div>
-            </div>
-        </div>
+    <div class="header-right">
+      <p-button 
+        icon="pi pi-filter" 
+        label="Filteri"
+        [outlined]="true"
+        severity="secondary"
+        [rounded]="true"
+        class="action-btn">
+      </p-button>
+      
+      <p-button 
+        icon="pi pi-download" 
+        [text]="true"
+        [rounded]="true"
+        pTooltip="Izvoz"
+        tooltipPosition="bottom"
+        severity="secondary"
+        class="action-btn">
+      </p-button>
+      
+      <p-button 
+        icon="pi pi-plus" 
+        label="Dodaj zaposlenog"
+        [rounded]="true"
+        (onClick)="openAddEmployeeDialog()"
+        class="add-btn">
+      </p-button>
     </div>
+  </div>
+
+  <p-divider></p-divider>
+
+  <!-- Employee Cards Grid -->
+  <div class="employees-grid">
+    <p-card 
+      *ngFor="let employee of (filteredEmployees$ | async)" 
+      class="employee-card"
+      (click)="openEditEmployeeDialog(employee)">
+      
+      <!-- Card Header with Status -->
+      <ng-template pTemplate="header">
+        <div class="card-header">
+          <p-tag 
+            [value]="employee.isActive ? 'Aktivan' : 'Neaktivan'" 
+            [severity]="employee.isActive ? 'success' : 'danger'"
+            [rounded]="true">
+          </p-tag>
+        </div>
+      </ng-template>
+
+      <!-- Card Content -->
+      <div class="card-content">
+        <!-- Employee Avatar -->
+        <div class="avatar-section">
+          <p-avatar 
+            [image]="employee.avatarUrl ? (apiUrl + employee.avatarUrl) : 'user-profile-image.png'"
+            shape="circle" 
+            size="xlarge"
+            class="employee-avatar">
+          </p-avatar>
+        </div>
+
+        <!-- Employee Info -->
+        <div class="employee-info">
+          <h3 class="employee-name">{{ employee.firstName }} {{ employee.lastName }}</h3>
+          <p class="employee-role">{{ employee.jobRole }}</p>
+        </div>
+
+        <!-- Contact Details Card -->
+        <div class="contact-details">
+          <div class="detail-row">
+            <div class="detail-item">
+              <span class="detail-label">Odeljenje</span>
+              <span class="detail-value">Dizajn tim</span>
+            </div>
+            <div class="detail-item">
+              <span class="detail-label">Datum zaposlenja</span>
+              <span class="detail-value">17/03/2021</span>
+            </div>
+          </div>
+          
+          <p-divider></p-divider>
+          
+          <div class="contact-row">
+            <div class="contact-item">
+              <i class="pi pi-envelope"></i>
+              <span>{{ employee.contactEmail }}</span>
+            </div>
+            <div class="contact-item">
+              <i class="pi pi-phone"></i>
+              <span>{{ employee.contactPhone }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </p-card>
+  </div>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

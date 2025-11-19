@@ -1,10 +1,11 @@
 import { Component, OnInit, Inject } from '@angular/core';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
+import { FormsModule } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { TagModule } from 'primeng/tag';
 import { Service } from '../../../../models/Service';
 import { Client } from '../../../../models/Client';
 import { Employee } from '../../../../models/Employee';
@@ -32,10 +33,10 @@ export interface AppointmentDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatButtonModule
+    FormsModule,
+    ButtonModule,
+    SelectModule,
+    TagModule
   ],
   templateUrl: './appointment-dialog.component.html',
   styleUrls: ['./appointment-dialog.component.scss'],
@@ -73,6 +74,13 @@ export class AppointmentDialogComponent implements OnInit {
   isPreviewMode: boolean = false;
   appointmentData: any = null;
 
+  // PrimeNG dropdown options
+  facilityOptions: any[] = [];
+  clientOptions: any[] = [];
+  serviceOptions: any[] = [];
+  hourOptions: any[] = [];
+  minuteOptions: any[] = [];
+
   ngOnInit(): void {
     console.log(this.data);
     
@@ -88,6 +96,9 @@ export class AppointmentDialogComponent implements OnInit {
     for (let i = 8; i <= 22; i++) {
       this.hours.push(i);
     }
+
+    // Initialize PrimeNG dropdown options
+    this.initializeDropdownOptions();
     if (this.data.appointmentStart) {
       this.selectedHour = Math.floor(this.data.appointmentStart);
       this.selectedMinute = Math.round((this.data.appointmentStart - this.selectedHour) * 60);
@@ -135,6 +146,9 @@ export class AppointmentDialogComponent implements OnInit {
     for (let i = 8; i <= 22; i++) {
       this.hours.push(i);
     }
+
+    // Initialize PrimeNG dropdown options
+    this.initializeDropdownOptions();
     
     // Učitaj vremenske podatke
     this.selectedHour = Math.floor(this.appointmentData.startHour);
@@ -229,6 +243,54 @@ export class AppointmentDialogComponent implements OnInit {
 
     this.endHour = newEndHour;
     this.endMinute = newEndMinute;
+  }
+
+  /**
+   * Inicijalizuje opcije za PrimeNG dropdown komponente
+   */
+  initializeDropdownOptions(): void {
+    // Facility options
+    this.facilityOptions = this.data.facilities?.map(f => ({
+      label: f.name,
+      value: f._id
+    })) || [];
+
+    // Client options
+    this.clientOptions = this.data.clients.map(c => ({
+      label: `${c.firstName} ${c.lastName}`,
+      value: c._id
+    }));
+
+    // Service options
+    this.serviceOptions = this.data.services.map(s => ({
+      label: s.name,
+      value: s._id
+    }));
+
+    // Hour options
+    this.hourOptions = this.hours.map(h => ({
+      label: h.toString(),
+      value: h
+    }));
+
+    // Minute options
+    this.minuteOptions = this.minutes.map(m => ({
+      label: m < 10 ? '0' + m : m.toString(),
+      value: m
+    }));
+  }
+
+  /**
+   * Određuje severity za p-tag komponentu na osnovu statusa
+   */
+  getStatusSeverity(status: string): 'success' | 'info' | 'warn' | 'danger' | 'secondary' | 'contrast' | undefined {
+    if (!status) return 'secondary';
+    
+    const normalizedStatus = status.toLowerCase();
+    if (normalizedStatus.includes('napl') || normalizedStatus.includes('paid')) return 'success';
+    if (normalizedStatus.includes('fisk') || normalizedStatus.includes('fiscal')) return 'info';
+    if (normalizedStatus.includes('otka') || normalizedStatus.includes('cancel')) return 'danger';
+    return 'secondary';
   }
 }
 

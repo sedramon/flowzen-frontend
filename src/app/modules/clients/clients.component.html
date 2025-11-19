@@ -1,161 +1,225 @@
-<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-
-  <!-- ── CLIENTS TABLE (80%) ── -->
-  <div fxFlex="80" class="clients-table">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>person</mat-icon> Clients
-        </mat-card-title>
-        <mat-card-subtitle>
-          Manage and view all your clients here.
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content class="table-card">
-        <div class="table-wrapper">
-          <div *ngIf="dataSourceClients.data.length;">
-            <table mat-table [dataSource]="dataSourceClients">
-
-              <!-- First Name -->
-              <ng-container matColumnDef="firstName">
-                <th mat-header-cell *matHeaderCellDef >First Name</th>
-                <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.firstName }}</td>
-              </ng-container>
-
-              <!-- Last Name -->
-              <ng-container matColumnDef="lastName">
-                <th mat-header-cell *matHeaderCellDef >Last Name</th>
-                <td mat-cell *matCellDef="let client" style="font-weight: bold;">{{ client.lastName }}</td>
-              </ng-container>
-
-              <!-- Email -->
-              <ng-container matColumnDef="contactEmail">
-                <th mat-header-cell *matHeaderCellDef >Email</th>
-                <td mat-cell *matCellDef="let client">{{ client.contactEmail }}</td>
-              </ng-container>
-
-              <!-- Phone -->
-              <ng-container matColumnDef="contactPhone">
-                <th mat-header-cell *matHeaderCellDef >Phone</th>
-                <td mat-cell *matCellDef="let client">{{ client.contactPhone }}</td>
-              </ng-container>
-
-              <!-- Created At -->
-              <ng-container matColumnDef="createdAt">
-                <th mat-header-cell *matHeaderCellDef >Created At</th>
-                <td mat-cell *matCellDef="let client">{{ client.createdAt | date }}</td>
-              </ng-container>
-
-              <!-- Updated At -->
-              <ng-container matColumnDef="updatedAt">
-                <th mat-header-cell *matHeaderCellDef>Updated At</th>
-                <td mat-cell *matCellDef="let client">{{ client.updatedAt | date }}</td>
-              </ng-container>
-
-              <!-- Actions -->
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>
-                  <div fxLayout="row" fxLayoutAlign="end center">
-                    Actions
-                    <button mat-icon-button (click)="openAddClientDialog(); $event.stopPropagation()"
-                      style="margin-left: 8px;">
-                      <mat-icon style="color: greenyellow;">add</mat-icon>
-                    </button>
-                  </div>
-                </th>
-                <td mat-cell *matCellDef="let client" (click)="$event.stopPropagation()">
-                  <div fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button (click)="deleteClient(client._id); $event.stopPropagation()"
-                      style="margin: 0 4px; color: red;">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-
-
-              <!-- Header & Row Declarations -->
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsClients" class="custom-header-row"></tr>
-              <tr mat-row *matRowDef="let row; columns: displayedColumnsClients" (click)="openClientDetailView(row)"
-                class="custom-row"></tr>
-            </table>
-
-
-          </div>
-          <mat-paginator #paginator [length]="totalItems" [pageSize]="10" [pageSizeOptions]="[10,25,50]"
-            showFirstLastButtons>
-          </mat-paginator>
+<div class="clients-container">
+  <!-- Filter Card -->
+  <p-card class="filter-card">
+    <ng-template pTemplate="header">
+      <div class="filter-header">
+        <div class="filter-header-content">
+          <i class="pi pi-filter"></i>
+          <h3>Pretraga i filteri</h3>
         </div>
+      </div>
+    </ng-template>
 
+    <div class="filter-content">
+      <!-- Search -->
+      <div class="filter-row">
+        <p-iconField iconPosition="left" class="search-field">
+          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            placeholder="Pretražite po imenu ili email-u..."
+            class="search-input" />
+        </p-iconField>
+        <p-button 
+          icon="pi pi-search" 
+          label="Pretraži"
+          [rounded]="true"
+          (onClick)="onSearchClick()"
+          class="search-btn">
+        </p-button>
+      </div>
 
-        <p *ngIf="!dataSourceClients.data.length">No clients found.</p>
+      <!-- Date Range -->
+      <div class="filter-row">
+        <div class="date-field">
+          <label>Kreirano od</label>
+          <p-datepicker 
+            [(ngModel)]="createdFrom" 
+            (onSelect)="onDateRangeChange()"
+            (onClear)="onDateRangeChange()"
+            [showIcon]="true"
+            [showClear]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Izaberite datum"
+            styleClass="date-calendar">
+          </p-datepicker>
+        </div>
+        
+        <div class="date-field">
+          <label>Kreirano do</label>
+          <p-datepicker 
+            [(ngModel)]="createdTo" 
+            (onSelect)="onDateRangeChange()"
+            (onClear)="onDateRangeChange()"
+            [showIcon]="true"
+            [showClear]="true"
+            dateFormat="dd/mm/yy"
+            placeholder="Izaberite datum"
+            styleClass="date-calendar">
+          </p-datepicker>
+        </div>
+      </div>
 
-      </mat-card-content>
-    </mat-card>
-  </div>
+      <!-- Sort Options -->
+      <div class="filter-row">
+        <div class="sort-field">
+          <label>Sortiraj po</label>
+          <p-select 
+            [(ngModel)]="sortBy" 
+            [options]="sortOptions" 
+            (onChange)="onSortChange()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Izaberite polje"
+            styleClass="sort-dropdown">
+          </p-select>
+        </div>
+        
+        <div class="sort-field">
+          <label>Smer</label>
+          <p-select 
+            [(ngModel)]="sortDir" 
+            [options]="[{label: 'Rastuće', value: 'asc'}, {label: 'Opadajuće', value: 'desc'}]" 
+            (onChange)="onSortChange()"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Izaberite smer"
+            styleClass="sort-dropdown">
+          </p-select>
+        </div>
+      </div>
 
-  <!-- ── SEARCH & FILTER COLUMN (20%) ── -->
-  <div fxFlex="20" class="filter-column">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>filter_list</mat-icon> Filters
-        </mat-card-title>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content fxLayout="column" fxLayoutGap="16px" style="margin-top: 20px">
+      <p-button 
+        icon="pi pi-times" 
+        label="Očisti sve"
+        [outlined]="true"
+        severity="secondary"
+        [rounded]="true"
+        (onClick)="clearFilters()"
+        class="clear-btn">
+      </p-button>
+    </div>
+  </p-card>
 
-        <!-- Search box with icon button -->
-        <mat-form-field appearance="outline">
-          <mat-label>Search Clients</mat-label>
-          <input matInput [(ngModel)]="searchQuery" placeholder="Name or email…" />
-          <button mat-icon-button matSuffix (click)="onSearchClick()" aria-label="Search">
-            <mat-icon>search</mat-icon>
-          </button>
-        </mat-form-field>
+  <!-- Clients Table Card -->
+  <p-card class="clients-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-content">
+          <i class="pi pi-users"></i>
+          <div class="header-text">
+            <h2>Klijenti</h2>
+            <p>Upravljajte i pregledajte sve svoje klijente ovde.</p>
+          </div>
+        </div>
+        <p-button 
+          icon="pi pi-plus" 
+          label="Dodaj klijenta"
+          [rounded]="true"
+          (onClick)="openAddClientDialog()"
+          class="add-btn">
+        </p-button>
+      </div>
+    </ng-template>
 
-        <!-- Created From datepicker -->
-        <mat-form-field appearance="outline">
-          <mat-label>Created From</mat-label>
-          <input matInput [matDatepicker]="fromPicker" (dateChange)="onDateRangeChange($event.value, createdTo!)" />
-          <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-          <mat-datepicker #fromPicker></mat-datepicker>
-        </mat-form-field>
+    <p-table 
+      [value]="clients" 
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th>Ime</th>
+          <th>Prezime</th>
+          <th>Email</th>
+          <th>Telefon</th>
+          <th>Kreirano</th>
+          <th>Ažurirano</th>
+          <th class="actions-column">Akcije</th>
+        </tr>
+      </ng-template>
 
-        <!-- Created To datepicker -->
-        <mat-form-field appearance="outline">
-          <mat-label>Created To</mat-label>
-          <input matInput [matDatepicker]="toPicker" (dateChange)="onDateRangeChange(createdFrom!, $event.value)" />
-          <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-          <mat-datepicker #toPicker></mat-datepicker>
-        </mat-form-field>
+      <ng-template pTemplate="body" let-client>
+        <tr (click)="openClientDetailView(client)" class="table-row">
+          <td>
+            <span class="client-name">{{ client.firstName }}</span>
+          </td>
+          <td>
+            <span class="client-name">{{ client.lastName }}</span>
+          </td>
+          <td>
+            <span class="client-email">{{ client.contactEmail || '-' }}</span>
+          </td>
+          <td>
+            <span class="client-phone">{{ client.contactPhone || '-' }}</span>
+          </td>
+          <td>
+            <span class="client-date">{{ client.createdAt | date:'short' }}</span>
+          </td>
+          <td>
+            <span class="client-date">{{ client.updatedAt | date:'short' }}</span>
+          </td>
+          <td class="actions-column">
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-eye" 
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                pTooltip="Pregledaj detalje"
+                tooltipPosition="top"
+                (onClick)="openClientDetailView(client); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                pTooltip="Obriši"
+                tooltipPosition="top"
+                (onClick)="deleteClient(client._id); $event.stopPropagation()">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
 
-        <!-- Sort Field -->
-        <mat-form-field appearance="outline">
-          <mat-label>Sort By</mat-label>
-          <mat-select [(ngModel)]="sortBy" (selectionChange)="onSortChange()">
-            <mat-option *ngFor="let opt of sortOptions" [value]="opt.value">
-              {{ opt.view }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="7" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-users"></i>
+              <p>Nema pronađenih klijenata.</p>
+              <p-button 
+                icon="pi pi-plus" 
+                label="Dodaj klijenta"
+                [rounded]="true"
+                (onClick)="openAddClientDialog()"
+                class="empty-add-btn">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
 
-        <!-- Sort Direction -->
-        <mat-form-field appearance="outline">
-          <mat-label>Direction</mat-label>
-          <mat-select [(ngModel)]="sortDir" (selectionChange)="onSortChange()">
-            <mat-option value="asc">Ascending</mat-option>
-            <mat-option value="desc">Descending</mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <button mat-flat-button color="accent" (click)="clearFilters()">
-          Clear All
-        </button>
-
-      </mat-card-content>
-    </mat-card>
-  </div>
-
+    <!-- Custom Paginator -->
+    <div class="paginator-wrapper">
+      <p-paginator 
+        #paginator
+        [first]="currentPage * pageSize"
+        [rows]="pageSize"
+        [totalRecords]="totalItems"
+        [rowsPerPageOptions]="[10, 25, 50]"
+        (onPageChange)="onPageChange($event)"
+        [showCurrentPageReport]="true"
+        currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} klijenata">
+      </p-paginator>
+    </div>
+  </p-card>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

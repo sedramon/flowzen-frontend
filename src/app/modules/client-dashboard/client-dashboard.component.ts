@@ -200,7 +200,12 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
 
   cancelAppointment(appointment: Appointment): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { message: 'Da li ste sigurni da želite da otkažete ovaj termin?' }
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
+      data: { 
+        title: 'Otkazivanje termina',
+        message: 'Da li ste sigurni da želite da otkažete ovaj termin?' 
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -261,7 +266,12 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
     }
 
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { message: 'Da li želite da prihvatite ovaj termin?' }
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
+      data: { 
+        title: 'Prihvatanje termina',
+        message: 'Da li želite da prihvatite ovaj termin?' 
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -309,7 +319,12 @@ export class ClientDashboardComponent implements OnInit, OnDestroy {
 
   removeFromWaitlist(entry: WaitlistEntry): void {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      data: { message: 'Da li ste sigurni da želite da se uklonite sa liste čekanja?' }
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
+      data: { 
+        title: 'Uklanjanje sa liste čekanja',
+        message: 'Da li ste sigurni da želite da se uklonite sa liste čekanja?' 
+      }
     });
 
     dialogRef.afterClosed().subscribe(result => {

@@ -2,53 +2,38 @@ import { Component, OnInit } from '@angular/core';
 import { Client } from '../../../models/Client';
 import { ClientsService } from '../services/clients.service';
 import { ActivatedRoute } from '@angular/router';
-import { CommonModule, NgSwitchCase } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatIconButton, MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatIconModule } from '@angular/material/icon';
-import { MatInputModule } from '@angular/material/input';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
-import { MatMenuModule } from '@angular/material/menu';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { UserAdministrationService } from '../../user-administration/services/user-administration.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { User } from '../../../models/User';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { InputTextModule } from 'primeng/inputtext';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { DividerModule } from 'primeng/divider';
+import { MenuModule } from 'primeng/menu';
+import { MenuItem } from 'primeng/api';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FloatLabelModule } from 'primeng/floatlabel';
 
 @Component({
   selector: 'app-client-detail-view',
   standalone: true,
   imports: [
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    FlexLayoutModule,
     CommonModule,
-    MatPaginatorModule,
-    MatTableModule,
-    MatSortModule,
-    MatIconModule,
-    MatDividerModule,
-    MatSnackBarModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatCardModule,
-    MatButtonModule,
-    MatMenuModule,
-    MatProgressSpinnerModule,
     FormsModule,
-    ReactiveFormsModule,
-    MatIconModule,
-    NgSwitchCase
+    ButtonModule,
+    CardModule,
+    InputTextModule,
+    ToastModule,
+    DividerModule,
+    MenuModule,
+    ProgressSpinnerModule,
+    FloatLabelModule
   ],
+  providers: [MessageService],
   templateUrl: './client-detail-view.component.html',
   styleUrl: './client-detail-view.component.scss',
 })
@@ -66,19 +51,20 @@ export class ClientDetailViewComponent implements OnInit {
   private clientId!: string;
   client!: Client;
   selectedSection: 'details'|'bills'|'appointments'|'remarks' = 'details';
-  sectionTitle: string = 'Client Details';
+  sectionTitle: string = 'Detalji klijenta';
   hasChanged: boolean = false;
   availableUsers: User[] = [];
   allUsers: User[] = [];
   connectedUser: User | null = null;
   isLoadingUsers: boolean = true;
+  userMenuItems: MenuItem[] = [];
 
   constructor(
     private clientsService: ClientsService,
     private usersService: UserAdministrationService,
     private authService: AuthService,
     private route: ActivatedRoute,
-    private snackBar: MatSnackBar
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
@@ -123,6 +109,7 @@ export class ClientDetailViewComponent implements OnInit {
               this.availableUsers = this.allUsers.filter(u => 
                 !connectedUserIds.includes(u._id)
               );
+              this.buildUserMenuItems();
               this.isLoadingUsers = false;
             }
           });
@@ -131,6 +118,14 @@ export class ClientDetailViewComponent implements OnInit {
         }
       }
     });
+  }
+
+  buildUserMenuItems() {
+    this.userMenuItems = this.availableUsers.map(user => ({
+      label: user.name,
+      icon: 'pi pi-user',
+      command: () => this.connectUser(user._id!)
+    }));
   }
 
   loadConnectedUser(userId: string) {
@@ -152,7 +147,7 @@ export class ClientDetailViewComponent implements OnInit {
   connectUser(userId: string) {
     this.clientsService.connectUserToClient(this.clientId, userId).subscribe({
       next: () => {
-        this.showSnackbar('Klijent uspešno povezan sa User nalogom');
+        this.showToast('Klijent uspešno povezan sa User nalogom');
         this.clientsService.getClientById(this.clientId).subscribe((client) => {
           this.client = client;
           if (client.user) {
@@ -167,7 +162,7 @@ export class ClientDetailViewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error connecting user:', error);
-        this.showSnackbar('Greška pri povezivanju', true);
+        this.showToast('Greška pri povezivanju', true);
       }
     });
   }
@@ -179,7 +174,7 @@ export class ClientDetailViewComponent implements OnInit {
   disconnectUser() {
     this.clientsService.disconnectUserFromClient(this.clientId).subscribe({
       next: () => {
-        this.showSnackbar('User nalog uspešno diskonektovan');
+        this.showToast('User nalog uspešno diskonektovan');
         this.client.user = undefined;
         this.connectedUser = null;
         // Refresh available users
@@ -190,7 +185,7 @@ export class ClientDetailViewComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error disconnecting user:', error);
-        this.showSnackbar('Greška pri diskonektovanju', true);
+        this.showToast('Greška pri diskonektovanju', true);
       }
     });
   }
@@ -203,16 +198,16 @@ export class ClientDetailViewComponent implements OnInit {
     this.selectedSection = section;
     switch (section) {
       case 'details':
-        this.sectionTitle = 'Client Details';
+        this.sectionTitle = 'Detalji klijenta';
         break;
       case 'bills':
-        this.sectionTitle = 'Client Bills';
+        this.sectionTitle = 'Računi klijenta';
         break;
       case 'appointments':
-        this.sectionTitle = 'Client Appointments';
+        this.sectionTitle = 'Termini klijenta';
         break;
       case 'remarks':
-        this.sectionTitle = 'Client Remarks';
+        this.sectionTitle = 'Napomene o klijentu';
         break;
     }
   }
@@ -223,16 +218,16 @@ export class ClientDetailViewComponent implements OnInit {
       .subscribe((updatedClient) => {
         this.client = updatedClient;
         this.hasChanged = false;
-        this.showSnackbar(`Client "${this.client.firstName} ${this.client.lastName}" updated successfully`);
+        this.showToast(`Klijent "${this.client.firstName} ${this.client.lastName}" uspešno ažuriran`);
       })
   }
 
-  showSnackbar(message: string, isError: boolean = false) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000, // 3 seconds
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
     });
   }
 }

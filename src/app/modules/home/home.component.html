@@ -1,75 +1,157 @@
-<div class="main-container">
-
-  <!-- Hero -->
+<div class="home-container">
+  <!-- Hero Section -->
   <section class="hero">
-    <h1>Welcome to Flowzen!</h1>
-    <p>Your one-stop solution for salon & clinic scheduling.</p>
-    <button mat-raised-button color="accent" style="margin-bottom: 24px;">Get Started</button>
+    <div class="hero-content">
+      <div class="hero-badge">
+        <i class="pi pi-star-fill"></i>
+        <span>Premium Salon & Klinika Menadžment</span>
+      </div>
+      
+      <h1 class="hero-title">
+        Dobrodošli u
+        <span class="gradient-text">Flowzen</span>
+      </h1>
+      
+      <p class="hero-subtitle">
+        Vaše kompletno rešenje za zakazivanje u salonu i klinici.
+        <br>
+        Upravljajte terminima, klijentima i zaposlenima sa lakoćom.
+      </p>
+      
+      <div class="hero-actions">
+        <p-button 
+          icon="pi pi-play" 
+          label="Započnite"
+          [rounded]="true"
+          size="large"
+          class="get-started-btn">
+        </p-button>
+        
+        <p-button 
+          icon="pi pi-book" 
+          label="Saznajte više"
+          [rounded]="true"
+          [outlined]="true"
+          size="large"
+          severity="secondary"
+          class="learn-more-btn">
+        </p-button>
+      </div>
+    </div>
+    
+    <div class="hero-image">
+      <div class="floating-card card-1">
+        <i class="pi pi-calendar"></i>
+        <span>Jednostavno zakazivanje</span>
+      </div>
+      <div class="floating-card card-2">
+        <i class="pi pi-users"></i>
+        <span>Upravljanje klijentima</span>
+      </div>
+      <div class="floating-card card-3">
+        <i class="pi pi-chart-line"></i>
+        <span>Analitika</span>
+      </div>
+    </div>
   </section>
 
   <!-- Statistics -->
   <section class="stats">
-    <div class="stat">
-      <h2>1,200+</h2>
-      <p>Appointments Booked</p>
-    </div>
-    <div class="stat">
-      <h2>350+</h2>
-      <p>Active Clients</p>
-    </div>
-    <div class="stat">
-      <h2>50+</h2>
-      <p>Employees Managed</p>
+    <div class="stats-grid">
+      <div *ngFor="let stat of stats" class="stat-card">
+        <div class="stat-icon">
+          <i class="pi" [ngClass]="stat.icon"></i>
+        </div>
+        <h2 class="stat-value">{{ stat.value }}+</h2>
+        <p class="stat-label">{{ stat.label }}</p>
+      </div>
     </div>
   </section>
 
   <!-- Features -->
   <section class="features">
-    <mat-card class="feature-card">
-      <mat-icon>event_available</mat-icon>
-      <h3>Easy Appointments</h3>
-      <p>Schedule, reschedule, and cancel with just a few clicks.</p>
-    </mat-card>
-    <mat-card class="feature-card">
-      <mat-icon>people</mat-icon>
-      <h3>Client Management</h3>
-      <p>Keep customer profiles, histories and notes all in one place.</p>
-    </mat-card>
-    <mat-card class="feature-card">
-      <mat-icon>bar_chart</mat-icon>
-      <h3>Insights & Reports</h3>
-      <p>Track your weekly performance with built-in analytics.</p>
-    </mat-card>
+    <div class="section-header">
+      <h2 class="section-title">Moćne funkcionalnosti</h2>
+      <p class="section-subtitle">Sve što vam je potrebno za efikasno upravljanje poslom</p>
+    </div>
+    
+    <div class="features-grid">
+      <p-card *ngFor="let feature of features" class="feature-card">
+        <div class="feature-icon">
+          <i class="pi" [ngClass]="feature.icon"></i>
+        </div>
+        <h3 class="feature-title">{{ feature.title }}</h3>
+        <p class="feature-description">{{ feature.description }}</p>
+      </p-card>
+    </div>
   </section>
 
   <!-- Testimonials -->
   <section class="testimonials">
-    <h2>What Our Users Say</h2>
-    <mat-card class="testimonial-card">
-      <p>“Flowzen completely transformed how we manage bookings—so intuitive!”</p>
-      <span class="author">— Sarah, Salon Owner</span>
-    </mat-card>
-    <mat-card class="testimonial-card">
-      <p>“Our team loves the analytics dashboard for keeping track of performance.”</p>
-      <span class="author">— Mark, Spa Manager</span>
-    </mat-card>
-    <mat-card class="testimonial-card">
-      <p>“Client management has never been easier. Highly recommended.”</p>
-      <span class="author">— Lisa, Dental Clinic</span>
-    </mat-card>
+    <div class="section-header">
+      <h2 class="section-title">Šta kažu naši korisnici</h2>
+      <p class="section-subtitle">Poverenje profesionalaca širom sveta</p>
+    </div>
+    
+    <div class="testimonials-grid">
+      <p-card *ngFor="let testimonial of testimonials" class="testimonial-card">
+        <div class="quote-icon">
+          <i class="pi pi-quote-right"></i>
+        </div>
+        <p class="testimonial-text">{{ testimonial.text }}</p>
+        <div class="testimonial-author">
+          <div class="author-avatar">
+            {{ testimonial.author.charAt(0) }}
+          </div>
+          <div class="author-info">
+            <span class="author-name">{{ testimonial.author }}</span>
+            <span class="author-role">{{ testimonial.role }}</span>
+          </div>
+        </div>
+      </p-card>
+    </div>
   </section>
 
-  <!-- Newsletter Call-out -->
+  <!-- Newsletter -->
   <section class="newsletter">
-    <h2>Stay in the Loop</h2>
-    <p>Subscribe for updates, tips, and special offers.</p>
-    <form class="newsletter-form">
-      <mat-form-field appearance="fill">
-        <mat-label>Email address</mat-label>
-        <input matInput placeholder="you@example.com" type="email" />
-      </mat-form-field>
-      <button mat-flat-button color="accent">Subscribe</button>
-    </form>
+    <div class="newsletter-content">
+      <div class="newsletter-icon">
+        <i class="pi pi-envelope"></i>
+      </div>
+      <h2 class="newsletter-title">Budite u toku</h2>
+      <p class="newsletter-subtitle">Pretplatite se za novosti, savete i specijalne ponude</p>
+      
+      <form class="newsletter-form" (submit)="subscribe()">
+        <div class="input-wrapper">
+          <i class="pi pi-envelope input-icon"></i>
+          <input 
+            pInputText 
+            type="email" 
+            [(ngModel)]="email"
+            name="email"
+            placeholder="Unesite vašu email adresu"
+            class="newsletter-input" 
+            required />
+        </div>
+        <p-button 
+          icon="pi pi-send" 
+          label="Pretplati se"
+          [rounded]="true"
+          type="submit"
+          class="subscribe-btn">
+        </p-button>
+      </form>
+    </div>
   </section>
 
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-content">
+      <div class="footer-brand">
+        <img src="/flowzen-logo.png" alt="Flowzen" class="footer-logo">
+        <span class="footer-brand-name">Flowzen</span>
+      </div>
+      <p class="footer-text">© 2024 Flowzen. Sva prava zadržana.</p>
+    </div>
+  </footer>
 </div>

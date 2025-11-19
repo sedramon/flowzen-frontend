@@ -1,27 +1,8 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { Component, OnInit } from '@angular/core';
 import { UserAdministrationService } from './services/user-administration.service';
 import { User } from '../../models/User';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../core/services/auth.service';
-import {
-  MatTable,
-  MatTableDataSource,
-  MatTableModule,
-} from '@angular/material/table';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatIconModule } from '@angular/material/icon';
-import { MatIconButton } from '@angular/material/button';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatCardModule } from '@angular/material/card';
 import { Role } from '../../models/Role';
 import { MatDialog } from '@angular/material/dialog';
 import { EditRoleDialogComponent } from './dialogs/edit-role-dialog/edit-role-dialog.component';
@@ -29,75 +10,57 @@ import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialo
 import { AddRoleDialogComponent } from './dialogs/add-role-dialog/add-role-dialog.component';
 import { AddUserDialogComponent } from './dialogs/add-user-dialog/add-user-dialog.component';
 import { EditUserDialogComponent } from './dialogs/edit-user-dialog/edit-user-dialog.component';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatChipsModule } from '@angular/material/chips';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { AvatarModule } from 'primeng/avatar';
+import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-user-administration',
   standalone: true,
   imports: [
-    FlexLayoutModule,
     CommonModule,
-    MatPaginatorModule,
-    MatTableModule,
-    MatSortModule,
-    MatIconModule,
-    MatIconButton,
-    MatDividerModule,
-    MatSnackBarModule,
-    MatChipsModule,
-    MatDividerModule,
-    MatCardModule,
+    TableModule,
+    ButtonModule,
+    CardModule,
+    TagModule,
+    ToastModule,
+    AvatarModule,
+    DividerModule,
+    TooltipModule
   ],
+  providers: [MessageService],
   templateUrl: './user-administration.component.html',
   styleUrl: './user-administration.component.scss',
 })
-export class UserAdministrationComponent implements OnInit, AfterViewInit {
+export class UserAdministrationComponent implements OnInit {
   users: User[] = [];
   roles: Role[] = [];
-
-  displayedColumnsUsers: string[] = ['name', 'email', 'role', 'actions'];
-  dataSourceUsers = new MatTableDataSource<User>(this.users);
-
-  displayedColumnsRoles: string[] = ['name', 'actions'];
-  dataSourceRoles = new MatTableDataSource<Role>(this.roles);
-
-  // Use @ViewChildren instead of @ViewChild to get multiple paginators
-  @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-  // Use @ViewChild for each table's sort
-  @ViewChild('userSort', { static: false })
-  set userSort(ms: MatSort) {
-    if (ms) {
-      this.dataSourceUsers.sort = ms;
-    }
-  }
-  @ViewChild('roleSort')
-  set roleSort(ms: MatSort) {
-    if (ms) {
-      this.dataSourceRoles.sort = ms;
-    }
-  }
 
   constructor(
     private userAdministrationService: UserAdministrationService,
     private authService: AuthService,
     private dialog: MatDialog,
     private userAdminService: UserAdministrationService,
-    private snackBar: MatSnackBar
+    private messageService: MessageService
   ) { }
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
-      // Ako iz nekog razloga korisnik nije dostupan, uradi fallback (npr. redirect ili error)
       return;
     }
 
-    // Učitavanje podataka sa API-ja
+    // Fetch users and roles
     this.userAdministrationService.fetchUsers(this.authService.requireCurrentTenantId()).subscribe({
       next: (data) => {
         console.log('Users fetched:', data);
-        this.dataSourceUsers.data = data;
+        this.users = data;
       },
       error: (err) => {
         console.error('Error fetching users:', err);
@@ -107,14 +70,14 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     this.userAdministrationService.fetchRoles(this.authService.requireCurrentTenantId()).subscribe({
       next: (data) => {
         console.log('Roles fetched:', data);
-        this.dataSourceRoles.data = data;
+        this.roles = data;
       },
       error: (err) => {
         console.error('Error fetching roles:', err);
       },
     });
 
-    // Pretplata na BehaviorSubject za reaktivno ažuriranje
+    // Subscribe to reactive updates
     this.userAdministrationService.users$.subscribe((data) => {
       this.users = data;
     });
@@ -124,20 +87,10 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
     });
   }
 
-  ngAfterViewInit(): void {
-    // Assign paginators and sorts correctly
-    if (this.paginators.length > 1) {
-      this.dataSourceUsers.paginator = this.paginators.toArray()[0];
-      this.dataSourceRoles.paginator = this.paginators.toArray()[1];
-    }
-  }
-
   openEditRoleDialog(role: Role) {
     const dialogRef = this.dialog.open(EditRoleDialogComponent, {
-      width: '900px',
-      maxWidth: '95vw',
-      height: '80vh',
-      maxHeight: '80vh',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       disableClose: false,
       autoFocus: true,
       data: { role },
@@ -150,14 +103,14 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
         console.log('Role to edit:', updatedData);
         this.userAdminService.updateRole(role._id!, updatedData).subscribe(
           (updatedRole) => {
-            this.showSnackbar(`Role "${role.name}" updated successfully`);
-            this.dataSourceRoles.data = this.dataSourceRoles.data.map((r) =>
+            this.showToast(`Uloga "${role.name}" uspešno ažurirana`);
+            this.roles = this.roles.map((r) =>
               r._id === updatedRole._id ? updatedRole : r
             );
           },
           (error) => {
             console.error('Error updating role:', error);
-            this.showSnackbar('Failed to update role', true);
+            this.showToast('Neuspešno ažuriranje uloge', true);
           }
         );
       }
@@ -166,8 +119,8 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openEditUserDialog(user: User) {
     const dialogRef = this.dialog.open(EditUserDialogComponent, {
-      width: '600px',
-      height: '500px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: { user },
     });
 
@@ -175,14 +128,14 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       if (updatedData) {
         this.userAdminService.updateUser(user._id!, updatedData).subscribe(
           (updatedUser) => {
-            this.showSnackbar(`User "${user.name}" updated successfully`);
-            this.dataSourceUsers.data = this.dataSourceUsers.data.map((u) =>
+            this.showToast(`Korisnik "${user.name}" uspešno ažuriran`);
+            this.users = this.users.map((u) =>
               u._id === updatedUser._id ? updatedUser : u
             );
           },
           (error) => {
             console.error('Error updating user:', error);
-            this.showSnackbar('Failed to update user', true);
+            this.showToast('Neuspešno ažuriranje korisnika', true);
           }
         );
       }
@@ -191,10 +144,8 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openAddRoleDialog() {
     const dialogRef = this.dialog.open(AddRoleDialogComponent, {
-      width: '900px',
-      maxWidth: '95vw',
-      height: '80vh',
-      maxHeight: '80vh',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       disableClose: false,
       autoFocus: true,
     });
@@ -203,13 +154,12 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       if (role) {
         this.userAdministrationService.createRole(role).subscribe(
           (createdRole) => {
-            const updatedData = [...this.dataSourceRoles.data, createdRole];
-            this.dataSourceRoles.data = updatedData;
-            this.showSnackbar(`Role "${role.name}" created successfully`);
+            this.roles = [...this.roles, createdRole];
+            this.showToast(`Uloga "${role.name}" uspešno kreirana`);
           },
           (error) => {
             console.error('Error creating role:', error);
-            this.showSnackbar('Failed to create role', true);
+            this.showToast('Neuspešno kreiranje uloge', true);
           }
         );
       }
@@ -218,21 +168,20 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   openAddUserDialog() {
     const dialogRef = this.dialog.open(AddUserDialogComponent, {
-      width: '600px',
-      height: '600px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
     });
 
     dialogRef.afterClosed().subscribe((user: User | undefined) => {
       if (user) {
         this.userAdministrationService.createUser(user).subscribe(
           (createdUser) => {
-            const updatedData = [...this.dataSourceUsers.data, createdUser];
-            this.dataSourceUsers.data = updatedData;
-            this.showSnackbar(`User "${user.name}" created successfully`);
+            this.users = [...this.users, createdUser];
+            this.showToast(`Korisnik "${user.name}" uspešno kreiran`);
           },
           (error) => {
             console.error('Error creating user:', error);
-            this.showSnackbar('Failed to create user', true);
+            this.showToast('Neuspešno kreiranje korisnika', true);
           }
         );
       }
@@ -241,11 +190,11 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   deleteUser(user: User) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '500px',
-      height: '250px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: {
-        title: 'Delete Facility',
-        message: `Are you sure you want to delete ${user.name}?`,
+        title: 'Brisanje korisnika',
+        message: `Da li ste sigurni da želite da obrišete ${user.name}?`,
       },
     });
 
@@ -253,13 +202,11 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
       if (result) {
         this.userAdministrationService.deleteUser(user._id!).subscribe({
           next: () => {
-            this.dataSourceUsers.data = this.dataSourceUsers.data.filter(
-              (u) => u._id !== user._id
-            );
-            this.showSnackbar(`User "${user.name}" deleted successfully`);
+            this.users = this.users.filter((u) => u._id !== user._id);
+            this.showToast(`Korisnik "${user.name}" uspešno obrisan`);
           },
           error: (err) => {
-            this.showSnackbar('Failed to delete user', true);
+            this.showToast('Neuspešno brisanje korisnika', true);
           },
         });
       }
@@ -268,11 +215,11 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
 
   deleteRole(selectedRole: Role) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '500px',
-      height: '250px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: {
-        title: 'Delete Facility',
-        message: `Are you sure you want to delete ${selectedRole.name}?`,
+        title: 'Brisanje uloge',
+        message: `Da li ste sigurni da želite da obrišete ${selectedRole.name}?`,
       },
     });
 
@@ -282,27 +229,23 @@ export class UserAdministrationComponent implements OnInit, AfterViewInit {
           .deleteRole(selectedRole!._id!)
           .subscribe({
             next: () => {
-              this.dataSourceRoles.data = this.dataSourceRoles.data.filter(
-                (r) => r._id !== selectedRole!._id
-              );
-              this.showSnackbar(
-                `Role "${selectedRole!.name}" deleted successfully`
-              );
+              this.roles = this.roles.filter((r) => r._id !== selectedRole!._id);
+              this.showToast(`Uloga "${selectedRole!.name}" uspešno obrisana`);
             },
             error: (err) => {
-              this.showSnackbar('Failed to delete role', true);
+              this.showToast('Neuspešno brisanje uloge', true);
             },
           });
       }
     });
   }
 
-  showSnackbar(message: string, isError: boolean = false) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000, // 3 seconds
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'], // Ensure it's an array
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
     });
   }
 }

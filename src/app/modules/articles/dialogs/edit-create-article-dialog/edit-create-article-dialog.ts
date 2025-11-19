@@ -1,20 +1,40 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
 import { AuthService } from '../../../../core/services/auth.service';
+import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-edit-create-article-dialog',
-  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule, MatSelectModule, MatCheckboxModule],
+  standalone: true,
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatDialogModule, 
+    ButtonModule,
+    InputTextModule,
+    InputNumberModule,
+    SelectModule,
+    CheckboxModule
+  ],
   templateUrl: './edit-create-article-dialog.html',
-  styleUrl: './edit-create-article-dialog.scss'
+  styleUrl: './edit-create-article-dialog.scss',
+  animations: [
+    trigger('dialogPop', [
+      transition(':enter', [
+        animate('250ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+          style({ transform: 'scale(0.95)', opacity: 0, offset: 0 }),
+          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
 export class EditCreateArticleDialog implements OnInit {
   isEditMode = false;
@@ -33,6 +53,21 @@ export class EditCreateArticleDialog implements OnInit {
     remark: FormControl<string>;
   }>;
 
+  unitOptions = [
+    { label: 'Komad', value: 'piece' },
+    { label: 'Kilogram', value: 'kg' },
+    { label: 'Litar', value: 'liter' },
+    { label: 'Kutija', value: 'box' },
+    { label: 'Mililitar', value: 'mililiter' }
+  ];
+
+  taxRateOptions = [
+    { label: '0%', value: 0 },
+    { label: '20%', value: 20 }
+  ];
+
+  supplierOptions: { label: string; value: string }[] = [];
+
   constructor(
     private dialogRef: MatDialogRef<EditCreateArticleDialog>,
     private fb: FormBuilder,
@@ -41,6 +76,14 @@ export class EditCreateArticleDialog implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    // Initialize supplier options
+    if (this.data?.suppliers) {
+      this.supplierOptions = this.data.suppliers.map((supplier: any) => ({
+        label: supplier.name,
+        value: supplier._id
+      }));
+    }
+
     this.articleForm = this.fb.group({
       name: ['', Validators.required],
       unitOfMeasure: ['', Validators.required],
@@ -57,7 +100,7 @@ export class EditCreateArticleDialog implements OnInit {
 
     this.articleForm.get('tenant')!.setValue(this.authService.requireCurrentTenantId());
 
-    if (this.data.article) {
+    if (this.data?.article) {
       this.isEditMode = true;
 
       const { supplier, tenant, ...rest } = this.data.article;
@@ -73,6 +116,14 @@ export class EditCreateArticleDialog implements OnInit {
   }
 
   save() {
-    this.dialogRef.close(this.articleForm.value)
+    if (this.articleForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.articleForm.controls).forEach(key => {
+        this.articleForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    this.dialogRef.close(this.articleForm.value);
   }
 }

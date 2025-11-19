@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -10,8 +10,7 @@ import { CardModule } from 'primeng/card';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ToastModule } from 'primeng/toast';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { AuthService } from '../../core/services/auth.service';
+import { MessageService } from 'primeng/api';
 
 @Component({
   selector: 'app-login',
@@ -24,7 +23,6 @@ import { AuthService } from '../../core/services/auth.service';
     InputTextModule, 
     PasswordModule, 
     CardModule, 
-    MessageModule,
     ToastModule,
     RouterModule
   ],
@@ -82,16 +80,16 @@ export class LoginComponent implements OnInit {
           this.isLoading = false;
           this.messageService.add({
             severity: 'success',
-            summary: 'Success',
-            detail: 'Login successful!'
+            summary: 'Uspešno',
+            detail: 'Uspešna prijava!'
           });
         },
         error: (error) => {
           this.isLoading = false;
           this.messageService.add({
             severity: 'error',
-            summary: 'Login Failed',
-            detail: error.error?.message || 'Invalid credentials'
+            summary: 'Neuspešna prijava',
+            detail: error.error?.message || 'Neispravni podaci za prijavu'
           });
         }
       });
@@ -114,9 +112,9 @@ export class LoginComponent implements OnInit {
     const emailField = this.loginForm.get('username');
     if (emailField?.invalid) {
       if (emailField.errors?.['required']) {
-        errors.push('Email is required');
+        errors.push('Email je obavezan');
       } else if (emailField.errors?.['email']) {
-        errors.push('Please enter a valid email address');
+        errors.push('Molimo unesite ispravnu email adresu');
       }
     }
     
@@ -124,10 +122,10 @@ export class LoginComponent implements OnInit {
     const passwordField = this.loginForm.get('password');
     if (passwordField?.invalid) {
       if (passwordField.errors?.['required']) {
-        errors.push('Password is required');
+        errors.push('Lozinka je obavezna');
       } else if (passwordField.errors?.['minlength']) {
         const minLength = passwordField.errors['minlength'].requiredLength;
-        errors.push(`Password must be at least ${minLength} characters`);
+        errors.push(`Lozinka mora imati najmanje ${minLength} karaktera`);
       }
     }
     
@@ -135,7 +133,7 @@ export class LoginComponent implements OnInit {
     if (errors.length > 0) {
       this.messageService.add({
         severity: 'warn',
-        summary: 'Validation Error',
+        summary: 'Greška u validaciji',
         detail: errors.join('. '),
         life: 5000
       });

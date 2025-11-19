@@ -15,7 +15,7 @@
             pInputText
             id="username"
             type="email"
-            placeholder="Enter your email"
+            placeholder="Unesite vaš email"
             formControlName="username"
             [class.ng-invalid]="isFieldInvalid('username')"
             [class.ng-dirty]="loginForm.get('username')?.dirty"
@@ -25,11 +25,11 @@
       </div>
       
       <div class="form-group">
-        <label for="password" class="form-label">Password</label>
+        <label for="password" class="form-label">Lozinka</label>
         <div class="form-input">
           <p-password
             id="password"
-            placeholder="Enter your password"
+            placeholder="Unesite vašu lozinku"
             formControlName="password"
             [feedback]="false"
             [toggleMask]="true"
@@ -42,7 +42,7 @@
       
       <p-button
         type="submit"
-        [label]="isLoading ? 'Logging in...' : 'LOGIN'"
+        [label]="isLoading ? 'Prijava u toku...' : 'PRIJAVA'"
         [disabled]="loginForm.invalid || isLoading"
         class="login-button"
         severity="primary"
@@ -55,8 +55,6 @@
       <p>Klijent? <a routerLink="/client-login">Prijavite se ovde</a></p>
     </div>
     
-    <!-- Toast for notifications -->
-    <p-toast position="top-right"></p-toast>
   </p-card>
 </div>
 <!-- Toast for notifications - moved outside to avoid positioning issues -->

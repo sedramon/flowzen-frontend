@@ -1,57 +1,383 @@
-.employee-tiles {
-    width: 320px;
-    height: 400px;
-    border-radius: 25px;
-    padding: 25px;
-    transition: 0.25s ease-in-out;
-    background-color: #323232;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    cursor: pointer;
-    margin-bottom: 20px;
-
-    mat-chip {
-        border: greenyellow solid 1px;
-    }
+.employees-container {
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
 }
+
+// Header Section
+.employees-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  flex: 1;
+}
+
+.employee-count {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: linear-gradient(135deg, rgba(139, 92, 246, 0.15), rgba(99, 102, 241, 0.15));
+  padding: 1rem 1.5rem;
+  border-radius: 16px;
+  border: 1px solid rgba(139, 92, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
   
-
-.employee-tiles:hover{
-    transform: scale(1.025);
+  .count-number {
+    font-size: 2.5rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #8b5cf6 0%, #c4b5fd 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+  }
+  
+  .count-label {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
 }
 
-.employee-contact-details {
-    background-color: #232323;
-    width: 100%;
-    height: 200px;
-    border-radius: 25px;
+.search-section {
+  flex: 1;
+  max-width: 400px;
+}
 
-    mat-icon {
-        margin-right: 10px;
+.search-field {
+  width: 100%;
+  
+  ::ng-deep {
+    .p-inputtext {
+      background: rgba(139, 92, 246, 0.1) !important;
+      border: 2px solid rgba(139, 92, 246, 0.3) !important;
+      border-radius: 12px !important;
+      color: rgba(255, 255, 255, 0.9) !important;
+      padding: 0.75rem 1rem 0.75rem 2.5rem !important;
+      font-size: 1rem !important;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.5) !important;
+      }
+      
+      &:focus {
+        border-color: rgba(139, 92, 246, 0.6) !important;
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.2) !important;
+        background: rgba(139, 92, 246, 0.15) !important;
+      }
     }
+    
+    .p-icon {
+      color: rgba(139, 92, 246, 0.7) !important;
+    }
+  }
 }
 
-.employee-name {
-    margin-bottom: 10px;
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
-.main-container{
-    padding: 0px 25px;
+.action-btn {
+  ::ng-deep .p-button {
+    background: rgba(139, 92, 246, 0.1) !important;
+    border-color: rgba(139, 92, 246, 0.3) !important;
+    color: rgba(255, 255, 255, 0.9) !important;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    &:hover:not(:disabled) {
+      background: rgba(139, 92, 246, 0.25) !important;
+      border-color: rgba(139, 92, 246, 0.5) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3);
+    }
+  }
 }
 
-.search-input {
-    border: none;
-    color: white;
-    border-radius: 25px;
+.add-btn {
+  ::ng-deep .p-button {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(124, 58, 237, 1), rgba(79, 70, 229, 1)) !important;
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5) !important;
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
+    }
+  }
+}
+
+// Divider Styling
+::ng-deep {
+  .p-divider {
+    &.p-divider-horizontal {
+      margin: 1.5rem 0;
+      
+      &::before {
+        border-top-color: rgba(139, 92, 246, 0.2);
+      }
+    }
+    
+    &.p-divider-vertical {
+      height: 50px;
+      
+      &::before {
+        border-left-color: rgba(139, 92, 246, 0.3);
+      }
+    }
+  }
+}
+
+// Employee Cards Grid
+.employees-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+  padding: 0.5rem 0;
+}
+
+.employee-card {
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px;
+  overflow: hidden;
+  
+  ::ng-deep {
+    .p-card {
+      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
+      border: 1px solid rgba(139, 92, 246, 0.2);
+      border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      
+      .p-card-header {
+        padding: 1rem;
+        background: transparent;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+      }
+      
+      .p-card-body {
+        padding: 0;
+        
+        .p-card-content {
+          padding: 1.5rem;
+        }
+      }
+    }
+  }
+  
+  &:hover {
+    transform: translateY(-4px);
+    
+    ::ng-deep .p-card {
+      border-color: rgba(139, 92, 246, 0.4);
+      box-shadow: 0 12px 32px rgba(139, 92, 246, 0.3);
+    }
+  }
+}
+
+.card-header {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.avatar-section {
+  margin-top: 0.5rem;
+  
+  .employee-avatar {
+    ::ng-deep {
+      width: 120px !important;
+      height: 120px !important;
+      border: 3px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 4px 16px rgba(139, 92, 246, 0.3);
+      transition: all 0.3s ease;
+      
+      img {
+        object-fit: cover;
+      }
+    }
+  }
+}
+
+.employee-card:hover .employee-avatar {
+  ::ng-deep {
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    transform: scale(1.05);
+  }
+}
+
+.employee-info {
+  text-align: center;
+  
+  .employee-name {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    letter-spacing: 0.3px;
+  }
+  
+  .employee-role {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(139, 92, 246, 0.9);
+    font-weight: 500;
+  }
+}
+
+.contact-details {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 16px;
+  padding: 1.25rem;
+  border: 1px solid rgba(139, 92, 246, 0.15);
+}
+
+.detail-row {
+  display: flex;
+  justify-content: space-around;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.detail-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  
+  .detail-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+  }
+  
+  .detail-value {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+  }
+}
+
+.contact-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+  
+  i {
+    color: rgba(139, 92, 246, 0.8);
     font-size: 1rem;
-    outline: none;
-    transition: width 0.3s ease-in-out, padding 0.3s ease-in-out;
-    width: 0;
-    opacity: 0;
-    background-color: #181818;
+    flex-shrink: 0;
+  }
+  
+  span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
-input[matInput] {
-    transition: all 0.3s ease-in-out;
-    width: 0;
-    overflow: hidden;
+// Tag Styling
+::ng-deep {
+  .p-tag {
+    font-weight: 600;
+    font-size: 0.75rem;
+    padding: 0.4rem 0.75rem;
+    
+    &.p-tag-success {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(22, 163, 74, 0.2)) !important;
+      color: rgb(134, 239, 172) !important;
+      border: 1px solid rgba(34, 197, 94, 0.4);
+    }
+    
+    &.p-tag-danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.2)) !important;
+      color: rgb(252, 165, 165) !important;
+      border: 1px solid rgba(239, 68, 68, 0.4);
+    }
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .employees-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .employees-container {
+    padding: 1rem;
+  }
+  
+  .employees-header {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 1rem;
+  }
+  
+  .header-left {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .search-section {
+    max-width: none;
+  }
+  
+  .header-right {
+    justify-content: space-between;
+    
+    .action-btn ::ng-deep .p-button .p-button-label {
+      display: none;
+    }
+  }
+  
+  .employees-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .employee-count {
+    justify-content: center;
+  }
 }

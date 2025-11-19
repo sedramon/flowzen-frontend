@@ -1,144 +1,239 @@
-<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-    <div fxFlex="80" class="clients-details-column">
-        <!-- Client Details -->
-        <mat-card>
-            <div class="title-container" fxLayout="row" fxLayoutAlign="start center" fxFlexFill>
-                <button mat-raised-button (click)="goBack()">
-                    <mat-icon>arrow_back</mat-icon>
-                </button>
+<div class="client-detail-container">
+  <!-- Navigation Sidebar -->
+  <div class="nav-sidebar">
+    <p-card class="nav-card">
+      <ng-template pTemplate="header">
+        <div class="nav-header">
+          <i class="pi pi-bars"></i>
+          <h3>Navigacija</h3>
+        </div>
+      </ng-template>
 
-                <span fxFlex></span>
+      <div class="nav-buttons">
+        <p-button 
+          icon="pi pi-info-circle" 
+          label="Detalji klijenta"
+          [text]="selectedSection === 'details'"
+          [raised]="selectedSection !== 'details'"
+          (onClick)="selectSection('details')"
+          class="nav-button">
+        </p-button>
 
-                <div class="title">
-                    <span>{{ sectionTitle }}</span>
-                </div>
+        <p-button 
+          icon="pi pi-receipt" 
+          label="Računi klijenta"
+          [text]="selectedSection === 'bills'"
+          [raised]="selectedSection !== 'bills'"
+          (onClick)="selectSection('bills')"
+          class="nav-button">
+        </p-button>
 
+        <p-button 
+          icon="pi pi-calendar" 
+          label="Termini klijenta"
+          [text]="selectedSection === 'appointments'"
+          [raised]="selectedSection !== 'appointments'"
+          (onClick)="selectSection('appointments')"
+          class="nav-button">
+        </p-button>
+
+        <p-button 
+          icon="pi pi-comment" 
+          label="Napomene o klijentu"
+          [text]="selectedSection === 'remarks'"
+          [raised]="selectedSection !== 'remarks'"
+          (onClick)="selectSection('remarks')"
+          class="nav-button">
+        </p-button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <p-card class="content-card">
+      <!-- Header with Back Button and Title -->
+      <ng-template pTemplate="header">
+        <div class="content-header">
+          <p-button 
+            icon="pi pi-arrow-left" 
+            [rounded]="true"
+            [text]="true"
+            (onClick)="goBack()"
+            class="back-btn">
+          </p-button>
+          
+          <div class="title-section">
+            <h2>{{ sectionTitle }}</h2>
+          </div>
+        </div>
+      </ng-template>
+
+      <!-- Content Sections -->
+      <ng-container *ngIf="client">
+        <ng-container [ngSwitch]="selectedSection">
+          
+          <!-- Details Section -->
+          <div *ngSwitchCase="'details'" class="details-section">
+            <div class="form-fields">
+              <p-floatLabel>
+                <input 
+                  pInputText 
+                  id="firstName" 
+                  [(ngModel)]="client.firstName" 
+                  (ngModelChange)="hasChanged = true"
+                  class="input-field" />
+                <label for="firstName">Ime klijenta</label>
+              </p-floatLabel>
+
+              <p-floatLabel>
+                <input 
+                  pInputText 
+                  id="lastName" 
+                  [(ngModel)]="client.lastName" 
+                  (ngModelChange)="hasChanged = true"
+                  class="input-field" />
+                <label for="lastName">Prezime klijenta</label>
+              </p-floatLabel>
+
+              <p-floatLabel>
+                <input 
+                  pInputText 
+                  id="address" 
+                  [(ngModel)]="client.address" 
+                  (ngModelChange)="hasChanged = true"
+                  class="input-field" />
+                <label for="address">Adresa klijenta</label>
+              </p-floatLabel>
+
+              <p-floatLabel>
+                <input 
+                  pInputText 
+                  id="email" 
+                  [(ngModel)]="client.contactEmail" 
+                  (ngModelChange)="hasChanged = true"
+                  class="input-field" />
+                <label for="email">Email klijenta</label>
+              </p-floatLabel>
+
+              <p-floatLabel>
+                <input 
+                  pInputText 
+                  id="phone" 
+                  [(ngModel)]="client.contactPhone" 
+                  (ngModelChange)="hasChanged = true"
+                  class="input-field" />
+                <label for="phone">Telefon klijenta</label>
+              </p-floatLabel>
             </div>
 
-            <ng-container *ngIf="client">
-            <ng-container [ngSwitch]="selectedSection">
-                <mat-card-content *ngSwitchCase="'details'">
-                <div fxLayout="column" fxLayoutGap="16px">
+            <!-- User Connection Card -->
+            <div class="user-connection-card">
+              <div class="connection-header">
+                <i class="pi" [ngClass]="client.user ? 'pi-user' : 'pi-user-plus'"></i>
+                <h3>Povezivanje sa User nalogom</h3>
+              </div>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Client Name</mat-label>
-                        <input matInput [(ngModel)]="client.firstName" (ngModelChange)="hasChanged = true" name="firstName">
-                    </mat-form-field>
+              <p-divider></p-divider>
 
-                    <mat-form-field appearance="outline">
-                        <mat-label>Client Last Name</mat-label>
-                        <input matInput [(ngModel)]="client.lastName" (ngModelChange)="hasChanged = true" name="lastName">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                        <mat-label>Client Address</mat-label>
-                        <input matInput [(ngModel)]="client.address" (ngModelChange)="hasChanged = true" name="address">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                        <mat-label>Client Email</mat-label>
-                        <input matInput [(ngModel)]="client.contactEmail" (ngModelChange)="hasChanged = true" name="email">
-                    </mat-form-field>
-
-                    <mat-form-field appearance="outline">
-                        <mat-label>Client Phone</mat-label>
-                        <input matInput [(ngModel)]="client.contactPhone" (ngModelChange)="hasChanged = true" name="phone">
-                    </mat-form-field>
-
-                    <div class="user-connection-card">
-                        <h3 class="card-title">
-                            <mat-icon>{{ client.user ? 'person' : 'person_add' }}</mat-icon>
-                            Povezivanje sa User nalogom
-                        </h3>
-                        
-                        <div *ngIf="client.user && connectedUser" class="connected-user">
-                            <p class="connected-label"><strong>User nalog</strong></p>
-                            <div class="user-info">
-                                <span class="user-name">{{ connectedUser.name }}</span>
-                                <span class="user-email">{{ connectedUser.email }}</span>
-                            </div>
-                            <div class="user-actions">
-                                <button mat-stroked-button color="warn" (click)="disconnectUser()">
-                                    <mat-icon>link_off</mat-icon>
-                                    Diskonektuj nalog
-                                </button>
-                                <button mat-stroked-button color="primary" [matMenuTriggerFor]="userMenu" [disabled]="availableUsers.length === 0">
-                                    <mat-icon>swap_horiz</mat-icon>
-                                    Promeni nalog
-                                </button>
-                            </div>
-                        </div>
-
-                        <mat-menu #userMenu="matMenu" xPosition="before">
-                            <button mat-menu-item *ngFor="let user of availableUsers" (click)="connectUser(user._id!)">
-                                <div>
-                                    <p style="margin: 0; font-weight: 500;">{{ user.name }}</p>
-                                    <p style="margin: 0; color: #666; font-size: 0.9em;">{{ user.email }}</p>
-                                </div>
-                            </button>
-                        </mat-menu>
-
-                        <div *ngIf="!client.user && isLoadingUsers" class="loading-section">
-                            <mat-spinner diameter="24"></mat-spinner>
-                        </div>
-
-                        <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length > 0" class="select-user-section">
-                            <p class="select-label">Izaberi User nalog sa kojim želiš da povežeš ovog klijenta:</p>
-                            <button mat-raised-button color="primary" [matMenuTriggerFor]="userMenu">
-                                <mat-icon>person_add</mat-icon>
-                                Izaberi User nalog ({{ availableUsers.length }} dostupno)
-                            </button>
-                        </div>
-
-                        <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length === 0 && allUsers.length > 0" class="no-users-warning">
-                            <p>⚠️ Svi User nalozi su već povezani sa drugim klijentima</p>
-                        </div>
-                    </div>
-
-                    <button mat-raised-button color="primary" (click)="saveClient()" [disabled]="!hasChanged">Save</button>
+              <!-- Connected User Section -->
+              <div *ngIf="client.user && connectedUser" class="connected-user">
+                <div class="connected-label">
+                  <strong>User nalog</strong>
                 </div>
-            </mat-card-content>
-            <mat-card-content *ngSwitchCase="'bills'">
-                <h1>Bills</h1>
-            </mat-card-content>
-            <mat-card-content *ngSwitchCase="'appointments'">
-                <h1>Future Appoitments</h1>
-                <h1>Past Appoitments</h1>
-            </mat-card-content>
-            <mat-card-content *ngSwitchCase="'remarks'">
-                <h1>Remarks</h1>
-            </mat-card-content>
-            </ng-container>
-            </ng-container>
-            
-        </mat-card>
-    </div>
-    <div fxFlex="20" class="nav-column">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title><mat-icon>menu</mat-icon> Navigation</mat-card-title>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <mat-card-content>
-                <div fxLayout="column" fxLayoutGap="8px">
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('details')">
-                        <mat-icon>info</mat-icon> Client Details
-                    </button>
-
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('bills')">
-                        <mat-icon>receipt</mat-icon> Client Bills
-                    </button>
-
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('appointments')">
-                        <mat-icon>schedule</mat-icon> Client Appointments
-                    </button>
-
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('remarks')">
-                        <mat-icon>comment</mat-icon> Client Remarks
-                    </button>
+                <div class="user-info">
+                  <div class="user-details">
+                    <span class="user-name">{{ connectedUser.name }}</span>
+                    <span class="user-email">{{ connectedUser.email }}</span>
+                  </div>
                 </div>
-            </mat-card-content>
-        </mat-card>
-    </div>
+                
+                <div class="user-actions">
+                  <p-button 
+                    icon="pi pi-link" 
+                    label="Diskonektuj nalog"
+                    severity="danger"
+                    [outlined]="true"
+                    [rounded]="true"
+                    (onClick)="disconnectUser()">
+                  </p-button>
+                  
+                  <p-button 
+                    icon="pi pi-sync" 
+                    label="Promeni nalog"
+                    [outlined]="true"
+                    [rounded]="true"
+                    (onClick)="userMenu.toggle($event)"
+                    [disabled]="availableUsers.length === 0">
+                  </p-button>
+                </div>
+              </div>
 
+              <p-menu #userMenu [model]="userMenuItems" [popup]="true" appendTo="body"></p-menu>
+
+              <!-- Loading Section -->
+              <div *ngIf="!client.user && isLoadingUsers" class="loading-section">
+                <p-progressSpinner styleClass="w-4rem h-4rem" strokeWidth="4"></p-progressSpinner>
+                <span>Učitavanje korisnika...</span>
+              </div>
+
+              <!-- Select User Section -->
+              <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length > 0" class="select-user-section">
+                <p class="select-label">Izaberi User nalog sa kojim želiš da povežeš ovog klijenta:</p>
+                <p-button 
+                  icon="pi pi-user-plus" 
+                  [label]="'Izaberi User nalog (' + availableUsers.length + ' dostupno)'"
+                  [rounded]="true"
+                  (onClick)="userMenu.toggle($event)">
+                </p-button>
+              </div>
+
+              <!-- No Users Warning -->
+              <div *ngIf="!client.user && !isLoadingUsers && availableUsers.length === 0 && allUsers.length > 0" class="no-users-warning">
+                <i class="pi pi-exclamation-triangle"></i>
+                <p>Svi User nalozi su već povezani sa drugim klijentima</p>
+              </div>
+            </div>
+
+            <!-- Save Button -->
+            <div class="save-section">
+              <p-button 
+                icon="pi pi-save" 
+                label="Sačuvaj"
+                [rounded]="true"
+                (onClick)="saveClient()"
+                [disabled]="!hasChanged"
+                class="save-btn">
+              </p-button>
+            </div>
+          </div>
+
+          <!-- Bills Section -->
+          <div *ngSwitchCase="'bills'" class="section-placeholder">
+            <i class="pi pi-receipt"></i>
+            <h2>Računi</h2>
+            <p>Računi klijenta će biti prikazani ovde</p>
+          </div>
+
+          <!-- Appointments Section -->
+          <div *ngSwitchCase="'appointments'" class="section-placeholder">
+            <i class="pi pi-calendar"></i>
+            <h2>Termini</h2>
+            <p>Budući i prošli termini će biti prikazani ovde</p>
+          </div>
+
+          <!-- Remarks Section -->
+          <div *ngSwitchCase="'remarks'" class="section-placeholder">
+            <i class="pi pi-comment"></i>
+            <h2>Napomene</h2>
+            <p>Napomene o klijentu će biti prikazane ovde</p>
+          </div>
+
+        </ng-container>
+      </ng-container>
+    </p-card>
+  </div>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

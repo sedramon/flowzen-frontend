@@ -1,54 +1,90 @@
-<mat-card class="appointments-container" [class.resizing]="isResizing">
-  <!-- Toolbar -->
-  <mat-toolbar class="toolbar-custom">
-    <div class="toolbar-item title-container" [@titleAnim]="toolbarState">
-      <span class="title" *ngIf="selectedDate"><mat-icon>schedule</mat-icon>Raspored za zaposlene</span>
-    </div>
-    
-    <!-- Facility Selector -->
-    <div class="toolbar-item facility-container" [@dateAnim]="toolbarState">
-      <mat-form-field appearance="outline" class="facility-selector">
-        <mat-label>Izaberi objekat</mat-label>
-        <mat-select [formControl]="facilityControl">
-          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <div class="work-hours-display" *ngIf="currentFacility">
-        <mat-icon>access_time</mat-icon>
-        <span>{{ workHoursString }}</span>
+<div class="appointments-container" [class.resizing]="isResizing">
+  <!-- Modern Header -->
+  <div class="appointments-header">
+    <!-- Top Row: Title and Action Buttons -->
+    <div class="header-top" [@titleAnim]="toolbarState" *ngIf="selectedDate">
+      <div class="header-title">
+        <i class="pi pi-calendar"></i>
+        <h2>Raspored za zaposlene</h2>
+      </div>
+
+      <div class="action-buttons">
+        <p-button 
+          icon="pi pi-upload" 
+          label="Masovni unos"
+          [rounded]="true"
+          severity="secondary"
+          (onClick)="openBulkAppointments()"
+          class="bulk-btn">
+        </p-button>
+
+        <p-button 
+          icon="pi pi-bell" 
+          label="Obavesti waitlist"
+          [rounded]="true"
+          (onClick)="openWaitlistNotifyDialog()"
+          class="notify-btn">
+        </p-button>
       </div>
     </div>
-    
-    <div class="toolbar-item datepicker-container" [@dateAnim]="toolbarState">
-      <button mat-icon-button (click)="shiftDate(-1)" style="margin-right: 20px; cursor: pointer;">
-        <mat-icon>chevron_left</mat-icon>
-      </button>
-      <mat-form-field appearance="outline" class="date-picker">
-        <mat-label>Izaberi datum</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="dateControl"
-          (dateChange)="onDateChange($event.value)" />
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-      </mat-form-field>
-      <button mat-icon-button (click)="shiftDate(1)" style="margin-left: 20px; cursor: pointer">
-        <mat-icon>chevron_right</mat-icon>
-      </button>
-      <button mat-raised-button (click)="setToday()" style="margin-left: 16px; color: white;">
-        <mat-icon>today</mat-icon>
-        Danas
-      </button>
-      <button mat-raised-button color="accent" (click)="openBulkAppointments()" style="margin-left: 50px;">
-        <mat-icon>file_upload</mat-icon>
-        Masovni unos termina
-      </button>
-      <button mat-raised-button color="primary" (click)="openWaitlistNotifyDialog()" style="margin-left: 10px;">
-        <mat-icon>notifications</mat-icon>
-        Obavesti waitlist
-      </button>
+
+    <!-- Bottom Row: Facility, Date, and Work Hours -->
+    <div class="header-bottom" [@dateAnim]="toolbarState">
+      <!-- Facility Selector -->
+      <div class="facility-section">
+        <p-select 
+          [formControl]="facilityControl"
+          [options]="facilities"
+          optionLabel="name"
+          optionValue="_id"
+          placeholder="Izaberi objekat"
+          styleClass="facility-select">
+        </p-select>
+        
+        <div class="work-hours-badge" *ngIf="currentFacility">
+          <i class="pi pi-clock"></i>
+          <span>{{ workHoursString }}</span>
+        </div>
+      </div>
+
+      <!-- Date Navigation -->
+      <div class="date-navigation">
+        <p-button 
+          icon="pi pi-chevron-left" 
+          [rounded]="true"
+          [text]="true"
+          (onClick)="shiftDate(-1)"
+          class="nav-btn">
+        </p-button>
+
+        <p-datepicker 
+          [formControl]="dateControl"
+          (onSelect)="onDateChange($event)"
+          placeholder="Izaberi datum"
+          dateFormat="dd.mm.yy"
+          [showIcon]="true"
+          inputId="appointment-date"
+          styleClass="date-picker">
+        </p-datepicker>
+
+        <p-button 
+          icon="pi pi-chevron-right" 
+          [rounded]="true"
+          [text]="true"
+          (onClick)="shiftDate(1)"
+          class="nav-btn">
+        </p-button>
+
+        <p-button 
+          icon="pi pi-calendar" 
+          label="Danas"
+          [rounded]="true"
+          (onClick)="setToday()"
+          class="today-btn">
+        </p-button>
+      </div>
     </div>
-  </mat-toolbar>
+  </div>
 
   <ng-container *ngIf="loading">
     <div class="loading-spinner-container">
@@ -186,4 +222,4 @@
   
   <!-- Hidden POS Checkout Component for Angular compiler detection -->
   <app-pos-checkout *ngIf="false" style="display: none !important;"></app-pos-checkout>
-</mat-card>
+</div>

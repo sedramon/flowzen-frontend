@@ -1,145 +1,235 @@
-<div class="dialog-container" fxLayout="column">
-  <h2>Edit Employee</h2>
-  <div class="dialog-content" #dialogContent>
-    <div style="padding: 20px;">
-      <!-- User Image -->
-      <div style="display: flex; align-items: center;">
-        <img
-          [src]="avatarPreview || 'user-profile-image.png'"
-          alt="employee-image"
-          width="125"
-          height="125"
-          style="margin: 25px 25px 25px 0; cursor: pointer; border-radius: 50%; object-fit: cover; display: block;"
-          (click)="onAvatarClick()"
-        >
-        <input
-          id="avatarInput"
-          type="file"
-          accept="image/*"
-          style="display: none"
-          (change)="onAvatarSelected($event)"
-        >
-      </div>
-
-      <!-- Name Inputs -->
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <!-- First Name Input -->
-        <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-          <mat-label>Name</mat-label>
-          <input matInput [formControl]="employeeForm.controls['firstName']" required>
-          <mat-error *ngIf="employeeForm.controls['firstName'].hasError('required')">
-            First Name is required
-          </mat-error>
-        </mat-form-field>
-        <!-- Last Name Input -->
-        <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-          <mat-label>Name</mat-label>
-          <input matInput [formControl]="employeeForm.controls['lastName']" required>
-          <mat-error *ngIf="employeeForm.controls['lastName'].hasError('required')">
-            Last Name is required
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Email and Phone Inputs -->
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <!-- Email Input -->
-        <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-          <mat-label>Email</mat-label>
-          <input matInput [formControl]="employeeForm.controls['contactEmail']" required>
-          <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('required')">
-            Email is required
-          </mat-error>
-          <mat-error *ngIf="employeeForm.controls['contactEmail'].hasError('email')">
-            Enter a valid email
-          </mat-error>
-        </mat-form-field>
-        <!-- Phone Input -->
-        <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-          <mat-label>Phone</mat-label>
-          <input matInput [formControl]="employeeForm.controls['contactPhone']" required>
-          <mat-hint>Must be 10 numbers</mat-hint>
-          <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('required')">
-            Phone is required
-          </mat-error>
-          <mat-error *ngIf="employeeForm.controls['contactPhone'].hasError('pattern')">
-            Enter a valid phone
-          </mat-error>
-        </mat-form-field>
-      </div>
-
-      <!-- Date of Birth Input -->
-      <mat-form-field appearance="outline" style="width: 100%" class="mat-form-field-css">
-        <mat-label>Date of birth</mat-label>
-        <input matInput [matDatepicker]="picker" [formControl]="employeeForm.controls['dateOfBirth']" required>
-        <mat-datepicker-toggle matSuffix [for]="picker"></mat-datepicker-toggle>
-        <mat-datepicker #picker></mat-datepicker>
-        <mat-error *ngIf="employeeForm.controls['dateOfBirth'].hasError('required')">
-          Date of birth is required
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Job Role Input -->
-      <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-        <mat-label>Job Role</mat-label>
-        <input matInput [formControl]="employeeForm.controls['jobRole']" required>
-        <mat-error *ngIf="employeeForm.controls['jobRole'].hasError('required')">
-          Job Role is required
-        </mat-error>
-      </mat-form-field>
-
-      <!-- Facilities Multi-Selector -->
-      <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-        <mat-label>Facilities</mat-label>
-        <mat-select [formControl]="employeeForm.controls['facilities']" multiple>
-          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-        <mat-hint>Select one or more facilities where employee works</mat-hint>
-      </mat-form-field>
-
-      <!-- Selected Facilities Chips -->
-      <div *ngIf="employeeForm.controls['facilities'].value && employeeForm.controls['facilities'].value.length > 0" style="margin-bottom: 16px;">
-        <mat-chip-listbox>
-          <mat-chip-option *ngFor="let facilityId of employeeForm.controls['facilities'].value" 
-                   [removable]="true" 
-                   (removed)="removeFacility(facilityId)">
-            {{ getFacilityName(facilityId) }}
-            <mat-icon matChipRemove>cancel</mat-icon>
-          </mat-chip-option>
-        </mat-chip-listbox>
-      </div>
-
-      <!-- Active and Appointments -->
-      <div fxLayout="row" fxLayoutAlign="space-between center">
-        <!-- Active Checkbox -->
-        <mat-form-field appearance="outline" style="width: 100%; margin-right: 10px;" class="mat-form-field-css">
-          <mat-label>Active</mat-label>
-          <mat-select [formControl]="employeeForm.controls['isActive']">
-            <mat-option [value]="true">Yes</mat-option>
-            <mat-option [value]="false">No</mat-option>
-          </mat-select>
-        </mat-form-field>
-        <!-- Include in Appointments -->
-        <mat-form-field appearance="outline" style="width: 100%;" class="mat-form-field-css">
-          <mat-label>Include in Appointments</mat-label>
-          <mat-select [formControl]="employeeForm.controls['includeInAppoitments']">
-            <mat-option [value]="true">Yes</mat-option>
-            <mat-option [value]="false">No</mat-option>
-          </mat-select>
-        </mat-form-field>
-      </div>
-
+<div [@dialogPop] class="admin-dialog admin-dialog--large">
+  <!-- Header -->
+  <div class="admin-dialog__header">
+    <div class="admin-dialog__icon">
+      <i class="pi pi-user-edit"></i>
+    </div>
+    <div class="admin-dialog__title">
+      <h2>Izmeni zaposlenog</h2>
+      <p>Ažurirajte podatke o zaposlenom</p>
     </div>
   </div>
+  
+  <!-- Content -->
+  <div class="admin-dialog__content">
+    <form [formGroup]="employeeForm" class="form-grid">
+      <!-- Avatar Upload Section - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-image"></i>
+          Profilna slika
+        </label>
+        <div class="avatar-upload-container">
+          <img
+            [src]="avatarPreview || 'user-profile-image.png'"
+            alt="Profilna slika"
+            class="avatar-preview"
+            (click)="onAvatarClick()"
+          />
+          <div class="avatar-upload-info">
+            <p-button 
+              label="Izaberi sliku" 
+              icon="pi pi-upload"
+              [outlined]="true"
+              (onClick)="onAvatarClick()">
+            </p-button>
+            <small class="field-hint">Kliknite na sliku ili dugme za upload</small>
+          </div>
+          <input
+            id="avatarInput"
+            type="file"
+            accept="image/*"
+            style="display: none"
+            (change)="onAvatarSelected($event)"
+          />
+        </div>
+      </div>
 
-  <!-- Dialog Actions -->
-  <div mat-dialog-actions class="dialog-actions" fxLayout="row" fxLayoutAlign="space-between center" class="mat-dialog-buttons">
-    <button mat-raised-button color="primary" (click)="updateEmployee()" [disabled]="employeeForm.invalid">
-      Save
-    </button>
-    <button mat-raised-button (click)="deleteEmployee()" style="background-color: red; color: white;">Delete Employee</button>
-    <button mat-raised-button (click)="closeDialog()">Cancel</button>
+      <!-- First Name -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-user"></i>
+          Ime
+        </label>
+        <input 
+          pInputText 
+          formControlName="firstName" 
+          placeholder="Unesite ime"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="employeeForm.controls['firstName'].touched && employeeForm.controls['firstName'].hasError('required')">
+          Ime je obavezno
+        </small>
+      </div>
+
+      <!-- Last Name -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-user"></i>
+          Prezime
+        </label>
+        <input 
+          pInputText 
+          formControlName="lastName" 
+          placeholder="Unesite prezime"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="employeeForm.controls['lastName'].touched && employeeForm.controls['lastName'].hasError('required')">
+          Prezime je obavezno
+        </small>
+      </div>
+
+      <!-- Email -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-envelope"></i>
+          Email
+        </label>
+        <input 
+          pInputText 
+          type="email"
+          formControlName="contactEmail" 
+          placeholder="primer@email.com"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="employeeForm.controls['contactEmail'].touched && employeeForm.controls['contactEmail'].hasError('required')">
+          Email je obavezan
+        </small>
+        <small class="p-error" *ngIf="employeeForm.controls['contactEmail'].touched && employeeForm.controls['contactEmail'].hasError('email')">
+          Unesite validan email
+        </small>
+      </div>
+
+      <!-- Phone -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-phone"></i>
+          Telefon
+        </label>
+        <input 
+          pInputText 
+          type="tel"
+          formControlName="contactPhone" 
+          placeholder="0601234567"
+          class="p-inputtext-lg w-full" />
+        <small class="field-hint">Mora biti 10 cifara</small>
+        <small class="p-error" *ngIf="employeeForm.controls['contactPhone'].touched && employeeForm.controls['contactPhone'].hasError('required')">
+          Telefon je obavezan
+        </small>
+        <small class="p-error" *ngIf="employeeForm.controls['contactPhone'].touched && employeeForm.controls['contactPhone'].hasError('pattern')">
+          Unesite validan broj telefona
+        </small>
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-calendar"></i>
+          Datum rođenja
+        </label>
+        <p-datepicker 
+          formControlName="dateOfBirth"
+          dateFormat="dd.mm.yy"
+          placeholder="Izaberite datum"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-datepicker>
+        <small class="p-error" *ngIf="employeeForm.controls['dateOfBirth'].touched && employeeForm.controls['dateOfBirth'].hasError('required')">
+          Datum rođenja je obavezan
+        </small>
+      </div>
+
+      <!-- Job Role -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-briefcase"></i>
+          Pozicija
+        </label>
+        <input 
+          pInputText 
+          formControlName="jobRole" 
+          placeholder="Frizer, Maser..."
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="employeeForm.controls['jobRole'].touched && employeeForm.controls['jobRole'].hasError('required')">
+          Pozicija je obavezna
+        </small>
+      </div>
+
+      <!-- Facilities Multi-Selector - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-building"></i>
+          Objekti
+        </label>
+        <p-multiSelect 
+          formControlName="facilities"
+          [options]="facilityOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite objekte"
+          display="chip"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-multiSelect>
+        <small class="field-hint">Izaberite jedan ili više objekata gde zaposleni radi</small>
+      </div>
+
+      <!-- Active -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-check-circle"></i>
+          Aktivan
+        </label>
+        <p-select 
+          formControlName="isActive"
+          [options]="[
+            {label: 'Da', value: true},
+            {label: 'Ne', value: false}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite status"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <!-- Include In Appointments -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-calendar-plus"></i>
+          Uključi u termine
+        </label>
+        <p-select 
+          formControlName="includeInAppoitments"
+          [options]="[
+            {label: 'Da', value: true},
+            {label: 'Ne', value: false}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite opciju"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="admin-dialog__actions">
+    <p-button 
+      label="Odustani" 
+      [text]="true"
+      (onClick)="closeDialog()">
+    </p-button>
+    <p-button 
+      label="Obriši" 
+      severity="danger"
+      [outlined]="true"
+      (onClick)="deleteEmployee()">
+    </p-button>
+    <p-button 
+      label="Sačuvaj izmene" 
+      (onClick)="updateEmployee()" 
+      [disabled]="employeeForm.invalid">
+    </p-button>
   </div>
 </div>

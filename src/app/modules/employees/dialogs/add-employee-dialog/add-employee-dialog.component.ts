@@ -1,25 +1,23 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { Component, OnInit } from '@angular/core';
 import {
   FormControl,
   FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
 import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatDatepickerModule } from '@angular/material/datepicker';
 import { provideNativeDateAdapter } from '@angular/material/core';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { DatePickerModule } from 'primeng/datepicker';
 import { AuthService } from '../../../../core/services/auth.service';
 import { EmployeesService } from '../../services/employees.service';
 import { Facility } from '../../../../models/Facility';
 import { AppointmentsService } from '../../../appointments/services/appointment.service';
+import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-add-employee-dialog',
@@ -27,26 +25,32 @@ import { AppointmentsService } from '../../../appointments/services/appointment.
   providers: [provideNativeDateAdapter()],
   imports: [
     CommonModule,
-    MatFormFieldModule,
-    MatSelectModule,
     ReactiveFormsModule,
-    MatButtonModule,
     MatDialogModule,
-    MatInputModule,
-    FlexLayoutModule,
-    MatDatepickerModule,
-    MatIconModule,
-    MatChipsModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    MultiSelectModule,
+    DatePickerModule
   ],
   templateUrl: './add-employee-dialog.component.html',
   styleUrl: './add-employee-dialog.component.scss',
+  animations: [
+    trigger('dialogPop', [
+      transition(':enter', [
+        animate('250ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+          style({ transform: 'scale(0.95)', opacity: 0, offset: 0 }),
+          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
-export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
-  @ViewChild('dialogContent') dialogContent!: ElementRef<HTMLDivElement>;
-
+export class AddEmployeeDialogComponent implements OnInit {
   avatarPreview: string | ArrayBuffer | null = null;
   selectedAvatarFile: File | null = null;
   facilities: Facility[] = [];
+  facilityOptions: { label: string; value: string }[] = [];
 
   employeeForm = new FormGroup({
     firstName: new FormControl<string>('', [Validators.required]),
@@ -68,8 +72,6 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     avatarUrl: new FormControl<string>('')
   });
 
-  workingDayControl = new FormControl<Date | null>(null);
-
   constructor(
     private authService: AuthService,
     private dialogRef: MatDialogRef<AddEmployeeDialogComponent>,
@@ -85,15 +87,20 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
     // Load facilities for the current tenant
     this.appointmentsService.getFacilities().subscribe((facilities: any[]) => {
       this.facilities = facilities;
+      this.facilityOptions = facilities.map(f => ({
+        label: f.name,
+        value: f._id
+      }));
     });
-  }
-
-  ngAfterViewInit() {
-    // this.scrollToBottom();
   }
 
   createEmployee() {
     if (this.employeeForm.valid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.employeeForm.controls).forEach(key => {
+        this.employeeForm.get(key)?.markAsTouched();
+      });
+
       if (this.selectedAvatarFile) {
         this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
           next: (res) => {
@@ -112,6 +119,11 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
         const { avatarUrl, ...employeeData } = this.employeeForm.value;
         this.dialogRef.close(employeeData);
       }
+    } else {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.employeeForm.controls).forEach(key => {
+        this.employeeForm.get(key)?.markAsTouched();
+      });
     }
   }
 
@@ -130,52 +142,6 @@ export class AddEmployeeDialogComponent implements OnInit, AfterViewInit {
       const reader = new FileReader();
       reader.onload = e => this.avatarPreview = reader.result;
       reader.readAsDataURL(file);
-    }
-  }
-
-  updateEmployee() {
-    if (this.employeeForm.valid) {
-      let avatarUrl = this.employeeForm.value.avatarUrl;
-      if (this.selectedAvatarFile) {
-        this.employeesService.uploadAvatar(this.selectedAvatarFile).subscribe({
-          next: (res) => {
-            avatarUrl = res.url;
-            const employee = {
-              ...this.employeeForm.value,
-              avatarUrl,
-            };
-            this.dialogRef.close(employee);
-          },
-          error: () => {
-            alert('Greška pri uploadu slike!');
-          }
-        });
-      } else {
-        const employee = {
-          ...this.employeeForm.value
-        };
-        this.dialogRef.close(employee);
-      }
-    }
-  }
-
-  removeFacility(facilityId: string) {
-    const currentFacilities = this.employeeForm.controls['facilities'].value || [];
-    const updatedFacilities = currentFacilities.filter(id => id !== facilityId);
-    this.employeeForm.controls['facilities'].setValue(updatedFacilities);
-  }
-
-  getFacilityName(facilityId: string): string {
-    const facility = this.facilities.find(f => f._id === facilityId);
-    return facility ? facility.name : 'Unknown Facility';
-  }
-
-  private scrollToBottom() {
-    if (this.dialogContent) {
-      this.dialogContent.nativeElement.scrollTo({
-        top: this.dialogContent.nativeElement.scrollHeight,
-        behavior: 'smooth'
-      });
     }
   }
 }

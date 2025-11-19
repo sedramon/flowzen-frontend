@@ -1,67 +1,50 @@
-import {
-  AfterViewInit,
-  Component,
-  OnInit,
-  QueryList,
-  ViewChild,
-  ViewChildren,
-} from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SettingsService } from './services/settings.service';
 import { Facility } from '../../models/Facility';
-import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { AuthService } from '../../core/services/auth.service';
-import { MatCardModule } from '@angular/material/card';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatButtonModule } from '@angular/material/button';
-import { CommonModule, NgSwitchCase } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
-import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { CreateEditFacilityDialog } from './dialogs/create-edit-facility-dialog/create-edit-facility-dialog';
 import { catchError, EMPTY, filter, forkJoin, switchMap, tap } from 'rxjs';
 import { EffectiveSettings, RawSettings } from '../../models/Settings';
-import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TableModule } from 'primeng/table';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { DividerModule } from 'primeng/divider';
+import { TooltipModule } from 'primeng/tooltip';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 
 @Component({
   selector: 'app-settings',
   standalone: true,
   imports: [
-    MatCardModule,
-    FlexLayoutModule,
-    MatIconModule,
-    MatDividerModule,
-    MatButtonModule,
+    CommonModule,
     FormsModule,
     ReactiveFormsModule,
-    CommonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule
+    ButtonModule,
+    CardModule,
+    TableModule,
+    ToastModule,
+    InputTextModule,
+    SelectModule,
+    DividerModule,
+    TooltipModule,
+    FloatLabelModule,
+    ProgressSpinnerModule
   ],
+  providers: [MessageService],
   templateUrl: './settings.component.html',
   styleUrl: './settings.component.scss',
 })
-export class SettingsComponent implements OnInit, AfterViewInit {
+export class SettingsComponent implements OnInit {
   facilities: Facility[] = [];
-
-  dataSourceFacilities = new MatTableDataSource<Facility>(this.facilities);
-  displayedColumFacilities: string[] = [
-    'name',
-    'address',
-    'openingHour',
-    'closingHour',
-    'actions',
-  ];
 
   effectiveSettings: EffectiveSettings | null = null;
   tenantRaw: RawSettings | null = null;
@@ -76,25 +59,17 @@ export class SettingsComponent implements OnInit, AfterViewInit {
   error?: string;
 
   selectedSection: string = 'general';
-  sectionTitle: string = 'General';
+  sectionTitle: string = 'Opšta podešavanja';
   sectionIcon: string = 'settings';
 
   private tenantId!: string;
   private userId!: string;
 
-  @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-  @ViewChild('facilitySort', { static: false })
-  set facilitySort(ms: MatSort) {
-    if (ms) {
-      this.dataSourceFacilities.sort = ms;
-    }
-  }
-
   constructor(
     private settingsService: SettingsService,
     private authService: AuthService,
     private dialog: MatDialog,
-    private snackBar: MatSnackBar,
+    private messageService: MessageService,
     private fb: FormBuilder
   ) { }
 
@@ -107,20 +82,12 @@ export class SettingsComponent implements OnInit, AfterViewInit {
 
     // facilities
     this.settingsService.getAllFacilities(this.tenantId).subscribe({
-      next: (data) => (this.dataSourceFacilities.data = data),
+      next: (data) => (this.facilities = data),
       error: (err) => console.error('Error fetching facilities:', err),
     });
 
     // settings
     this.loadSettings();
-  }
-
-  ngAfterViewInit(): void {
-    const pagArray = this.paginators.toArray();
-    if (pagArray.length > 0) {
-      console.log('SETTING PAGINATOR FOR FACILITIES');
-      this.dataSourceFacilities.paginator = pagArray[0];
-    }
   }
 
   openAddFacilityDialog() {
@@ -132,15 +99,12 @@ export class SettingsComponent implements OnInit, AfterViewInit {
       filter(result => !!result),
       switchMap((result) => this.settingsService.createFacility(result)),
       tap((newFacility) => {
-        this.dataSourceFacilities.data = [
-          ...this.dataSourceFacilities.data,
-          newFacility
-        ],
-          this.snackBar.open('Succesfully created facility', 'Okay', { duration: 2000 })
+        this.facilities = [...this.facilities, newFacility];
+        this.showToast('Objekat uspešno kreiran');
       }),
       catchError(err => {
         console.warn('Failed to create facility!', err);
-        this.snackBar.open('Failed to create facility', 'Okay', { duration: 2000 })
+        this.showToast('Neuspešno kreiranje objekta', true);
         return EMPTY;
       })
     ).subscribe();
@@ -156,12 +120,12 @@ export class SettingsComponent implements OnInit, AfterViewInit {
       filter(result => !!result),
       switchMap((result) => this.settingsService.updateFacility(facility._id!, result)),
       tap((updatedFacility) => {
-        this.dataSourceFacilities.data = this.dataSourceFacilities.data.map(f => f._id === facility._id ? updatedFacility : f)
-        this.snackBar.open('Succesfully updated facility', 'Okay', { duration: 2000 })
+        this.facilities = this.facilities.map(f => f._id === facility._id ? updatedFacility : f);
+        this.showToast('Objekat uspešno ažuriran');
       }),
       catchError(err => {
-        console.warn('Failed to create facility!', err);
-        this.snackBar.open('Failed to create facility', 'Okay', { duration: 2000 })
+        console.warn('Failed to update facility!', err);
+        this.showToast('Neuspešno ažuriranje objekta', true);
         return EMPTY;
       })
     ).subscribe();
@@ -169,11 +133,11 @@ export class SettingsComponent implements OnInit, AfterViewInit {
 
   deleteFacility(facility: Facility) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '500px',
-      height: '250px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: {
-        title: 'Delete Facility',
-        message: `Are you sure you want to delete ${facility.name}?`,
+        title: 'Brisanje objekta',
+        message: `Da li ste sigurni da želite da obrišete ${facility.name}?`,
       },
     });
 
@@ -181,13 +145,11 @@ export class SettingsComponent implements OnInit, AfterViewInit {
       if (result) {
         this.settingsService.deleteFacility(facility._id!).subscribe({
           next: () => {
-            this.dataSourceFacilities.data = this.dataSourceFacilities.data.filter(
-              (f) => f._id !== facility._id
-            );
-            this.snackBar.open('Facility deleted successfully!', 'Close', { duration: 2000 });
+            this.facilities = this.facilities.filter((f) => f._id !== facility._id);
+            this.showToast('Objekat uspešno obrisan!');
           },
           error: (err) => {
-            this.snackBar.open('Failed to delete facility', 'Close', { duration: 2000 });
+            this.showToast('Neuspešno brisanje objekta', true);
           },
         });
       }
@@ -198,11 +160,11 @@ export class SettingsComponent implements OnInit, AfterViewInit {
     this.selectedSection = section;
     switch (section) {
       case 'general':
-        this.sectionTitle = 'General';
+        this.sectionTitle = 'Opšte';
         this.sectionIcon = 'settings';
         break;
       case 'facilities':
-        this.sectionTitle = 'Facilities';
+        this.sectionTitle = 'Objekti';
         this.sectionIcon = 'business';
         break;
     }
@@ -224,7 +186,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
         this.loading = false;
       },
       error: (err) => {
-        this.error = 'Failed to load settings';
+        this.error = 'Neuspešno učitavanje podešavanja';
         console.error(err);
         this.loading = false;
       },
@@ -273,7 +235,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
 
     this.settingsService.upsertUserSettings(this.tenantId, this.userId, payload)
       .pipe(
-        tap(() => this.snackBar.open('Personal settings saved', 'OK', { duration: 1500 })),
+        tap(() => this.showToast('Lična podešavanja sačuvana')),
         switchMap(() => this.settingsService.getEffectiveSettings(this.tenantId, this.userId)),
         tap(eff => (this.effectiveSettings = eff)),
         switchMap(() => this.settingsService.getUserSettingsRaw(this.tenantId, this.userId)),
@@ -283,7 +245,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
         next: () => (this.savingUser = false),
         error: err => {
           console.error(err);
-          this.snackBar.open('Failed to save personal settings', 'OK', { duration: 2000 });
+          this.showToast('Neuspešno čuvanje ličnih podešavanja', true);
           this.savingUser = false;
         }
       });
@@ -305,7 +267,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
 
     this.settingsService.upsertTenantSettings(this.tenantId, payload)
       .pipe(
-        tap(() => this.snackBar.open('Tenant settings saved', 'OK', { duration: 1500 })),
+        tap(() => this.showToast('Podrazumevana podešavanja sačuvana')),
         switchMap(() => this.settingsService.getEffectiveSettings(this.tenantId, this.userId)),
         tap(eff => (this.effectiveSettings = eff)),
         switchMap(() => this.settingsService.getTenantSettingsRaw(this.tenantId)),
@@ -315,7 +277,7 @@ export class SettingsComponent implements OnInit, AfterViewInit {
         next: () => (this.savingTenant = false),
         error: err => {
           console.error(err);
-          this.snackBar.open('Failed to save tenant settings', 'OK', { duration: 2000 });
+          this.showToast('Neuspešno čuvanje podrazumevanih podešavanja', true);
           this.savingTenant = false;
         }
       });
@@ -350,5 +312,14 @@ export class SettingsComponent implements OnInit, AfterViewInit {
       navbarShortcutsCsv: ''
     });
     this.saveUserSettings();
+  }
+
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
+    });
   }
 } 

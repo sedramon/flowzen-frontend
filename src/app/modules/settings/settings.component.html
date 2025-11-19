@@ -1,254 +1,421 @@
-<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-    <div fxFlex="20" class="nav-column">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>
-                    <mat-icon>menu</mat-icon> Navigation
-                </mat-card-title>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <mat-card-content>
-                <div fxLayout="column" fxLayoutGap="8px">
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('general')">
-                        <mat-icon>settings</mat-icon> General
-                    </button>
-                    <button mat-raised-button class="navigation-button" (click)="selectSection('facilities')">
-                        <mat-icon>business</mat-icon> Facilities
-                    </button>
+<div class="settings-container">
+  <!-- Navigation Sidebar -->
+  <div class="nav-sidebar">
+    <p-card class="nav-card">
+      <ng-template pTemplate="header">
+        <div class="nav-header">
+          <i class="pi pi-bars"></i>
+          <h3>Navigacija</h3>
+        </div>
+      </ng-template>
+
+      <div class="nav-buttons">
+        <p-button 
+          icon="pi pi-cog" 
+          label="Opšte"
+          [text]="selectedSection === 'general'"
+          [raised]="selectedSection !== 'general'"
+          (onClick)="selectSection('general')"
+          class="nav-button">
+        </p-button>
+
+        <p-button 
+          icon="pi pi-building" 
+          label="Objekti"
+          [text]="selectedSection === 'facilities'"
+          [raised]="selectedSection !== 'facilities'"
+          (onClick)="selectSection('facilities')"
+          class="nav-button">
+        </p-button>
+      </div>
+    </p-card>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <p-card class="content-card">
+      <!-- Header -->
+      <ng-template pTemplate="header">
+        <div class="content-header">
+          <i class="pi" [ngClass]="sectionIcon === 'settings' ? 'pi-cog' : 'pi-building'"></i>
+          <div class="header-text">
+            <h2>{{ sectionTitle }}</h2>
+            <p>{{ selectedSection === 'general' ? 'Konfigurišite podešavanja aplikacije' : 'Upravljajte i pregledajte sve svoje objekte ovde' }}</p>
+          </div>
+        </div>
+      </ng-template>
+
+      <ng-container [ngSwitch]="selectedSection">
+        <!-- General Section -->
+        <div *ngSwitchCase="'general'">
+          <ng-container *ngIf="loading">
+            <div class="loading-state">
+              <p-progressSpinner></p-progressSpinner>
+              <span>Učitavanje podešavanja...</span>
+            </div>
+          </ng-container>
+
+          <ng-container *ngIf="!loading && !error">
+            <!-- Tenant Defaults Form -->
+            <div class="settings-section">
+              <div class="section-title">
+                <h3>Podrazumevana podešavanja</h3>
+                <p>Primenjuje se na sve korisnike osim ako nije zamenjeno</p>
+              </div>
+
+              <form [formGroup]="tenantForm" (ngSubmit)="saveTenantSettings()" class="settings-form">
+                <div class="form-row">
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="language"
+                      [options]="[
+                        {label: 'Engleski', value: 'en'},
+                        {label: 'Srpski', value: 'sr'},
+                        {label: 'Španski', value: 'es'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="tenant-language">
+                    </p-select>
+                    <label for="tenant-language">Jezik</label>
+                  </p-floatLabel>
+
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="currency"
+                      [options]="[
+                        {label: 'RSD', value: 'RSD'},
+                        {label: 'EUR', value: 'EUR'},
+                        {label: 'USD', value: 'USD'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="tenant-currency">
+                    </p-select>
+                    <label for="tenant-currency">Valuta</label>
+                  </p-floatLabel>
                 </div>
-            </mat-card-content>
-        </mat-card>
-    </div>
-    <div fxFlex="80" class="content-column">
-        <mat-card>
-            <mat-card-header>
-                <mat-card-title>
-                    <mat-icon>{{ sectionIcon }}</mat-icon> {{ sectionTitle }}
-                </mat-card-title>
-                <mat-card-subtitle>
-                    Manage and view all your facilities here.
-                </mat-card-subtitle>
-            </mat-card-header>
-            <mat-divider></mat-divider>
-            <ng-container [ngSwitch]="selectedSection">
-                <mat-card-content *ngSwitchCase="'general'">
-                    <ng-container *ngIf="loading">Loading settings…</ng-container>
-                    <ng-container *ngIf="!loading && !error">
 
-                        <!-- Tenant Defaults (editable) -->
-                        <mat-card class="block" style="margin-bottom:16px;">
-                            <mat-card-header>
-                                <mat-card-title>Tenant Defaults</mat-card-title>
-                                <mat-card-subtitle>Applies to all users unless overridden</mat-card-subtitle>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <form [formGroup]="tenantForm" (ngSubmit)="saveTenantSettings()" fxLayout="row wrap"
-                                    fxLayoutGap="16px">
+                <div class="form-row">
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="theme"
+                      [options]="[
+                        {label: 'Svetla', value: 'light'},
+                        {label: 'Tamna', value: 'dark'},
+                        {label: 'Sistemska', value: 'system'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="tenant-theme">
+                    </p-select>
+                    <label for="tenant-theme">Tema</label>
+                  </p-floatLabel>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Language</mat-label>
-                                        <mat-select formControlName="language">
-                                            <mat-option value="en">English</mat-option>
-                                            <mat-option value="sr">Serbian</mat-option>
-                                            <mat-option value="es">Spanish</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                  <p-floatLabel class="form-field">
+                    <input 
+                      pInputText 
+                      id="tenant-landing" 
+                      formControlName="landingPage"
+                      placeholder="/home"
+                      class="input-field" />
+                    <label for="tenant-landing">Početna stranica</label>
+                  </p-floatLabel>
+                </div>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Currency</mat-label>
-                                        <mat-select formControlName="currency">
-                                            <mat-option value="RSD">RSD</mat-option>
-                                            <mat-option value="EUR">EUR</mat-option>
-                                            <mat-option value="USD">USD</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                <p-floatLabel class="form-field-full">
+                  <input 
+                    pInputText 
+                    id="tenant-shortcuts" 
+                    formControlName="navbarShortcutsCsv"
+                    placeholder="/home, /appointments"
+                    class="input-field" />
+                  <label for="tenant-shortcuts">Prečice u navigaciji (odvojene zarezom)</label>
+                </p-floatLabel>
+                <span class="field-hint">Konvertovaćemo ovo u niz pri čuvanju</span>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Theme</mat-label>
-                                        <mat-select formControlName="theme">
-                                            <mat-option value="light">Light</mat-option>
-                                            <mat-option value="dark">Dark</mat-option>
-                                            <mat-option value="system">System</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                <div class="form-actions">
+                  <p-button 
+                    icon="pi pi-refresh" 
+                    label="Resetuj"
+                    [outlined]="true"
+                    severity="secondary"
+                    [rounded]="true"
+                    type="button"
+                    (onClick)="resetTenantForm()">
+                  </p-button>
+                  
+                  <p-button 
+                    icon="pi pi-save" 
+                    [label]="savingTenant ? 'Čuvanje...' : 'Sačuvaj podrazumevana podešavanja'"
+                    [rounded]="true"
+                    type="submit"
+                    [disabled]="tenantForm.invalid || savingTenant">
+                  </p-button>
+                </div>
+              </form>
+            </div>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Landing Page</mat-label>
-                                        <input matInput formControlName="landingPage" placeholder="/home">
-                                    </mat-form-field>
+            <p-divider></p-divider>
 
-                                    <mat-form-field appearance="fill" fxFlex="100">
-                                        <mat-label>Navbar Shortcuts (comma separated)</mat-label>
-                                        <input matInput formControlName="navbarShortcutsCsv"
-                                            placeholder="/home, /appointments">
-                                        <mat-hint>We’ll convert this to an array on save</mat-hint>
-                                    </mat-form-field>
+            <!-- Personal Settings Form -->
+            <div class="settings-section">
+              <div class="section-title">
+                <h3>Moja lična podešavanja</h3>
+                <p>Zamenjuje podrazumevana podešavanja samo za ovog korisnika</p>
+              </div>
 
-                                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="end center">
-                                        <button mat-stroked-button type="button"
-                                            (click)="resetTenantForm()">Reset</button>
-                                        <button mat-flat-button color="primary" type="submit" style="margin-left:8px"
-                                            [disabled]="tenantForm.invalid || savingTenant">
-                                            {{ savingTenant ? 'Saving…' : 'Save Tenant Defaults' }}
-                                        </button>
-                                    </div>
-                                </form>
-                            </mat-card-content>
-                        </mat-card>
+              <form [formGroup]="userForm" (ngSubmit)="saveUserSettings()" class="settings-form">
+                <div class="form-row">
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="language"
+                      [options]="[
+                        {label: '— Nasleđeno —', value: null},
+                        {label: 'Engleski', value: 'en'},
+                        {label: 'Srpski', value: 'sr'},
+                        {label: 'Španski', value: 'es'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="user-language">
+                    </p-select>
+                    <label for="user-language">Jezik</label>
+                  </p-floatLabel>
 
-                        <!-- User Overrides (editable) -->
-                        <mat-card class="block" style="margin-bottom:16px;">
-                            <mat-card-header>
-                                <mat-card-title>My Personal Settings</mat-card-title>
-                                <mat-card-subtitle>Overrides tenant defaults for this user only</mat-card-subtitle>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <form [formGroup]="userForm" (ngSubmit)="saveUserSettings()" fxLayout="row wrap"
-                                    fxLayoutGap="16px">
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="currency"
+                      [options]="[
+                        {label: '— Nasleđeno —', value: null},
+                        {label: 'RSD', value: 'RSD'},
+                        {label: 'EUR', value: 'EUR'},
+                        {label: 'USD', value: 'USD'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="user-currency">
+                    </p-select>
+                    <label for="user-currency">Valuta</label>
+                  </p-floatLabel>
+                </div>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Language</mat-label>
-                                        <mat-select formControlName="language">
-                                            <mat-option [value]="null">— Inherit —</mat-option>
-                                            <mat-option value="en">English</mat-option>
-                                            <mat-option value="sr">Serbian</mat-option>
-                                            <mat-option value="es">Spanish</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                <div class="form-row">
+                  <p-floatLabel class="form-field">
+                    <p-select 
+                      formControlName="theme"
+                      [options]="[
+                        {label: '— Nasleđeno —', value: null},
+                        {label: 'Svetla', value: 'light'},
+                        {label: 'Tamna', value: 'dark'},
+                        {label: 'Sistemska', value: 'system'}
+                      ]"
+                      optionLabel="label"
+                      optionValue="value"
+                      styleClass="custom-select"
+                      inputId="user-theme">
+                    </p-select>
+                    <label for="user-theme">Tema</label>
+                  </p-floatLabel>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Currency</mat-label>
-                                        <mat-select formControlName="currency">
-                                            <mat-option [value]="null">— Inherit —</mat-option>
-                                            <mat-option value="RSD">RSD</mat-option>
-                                            <mat-option value="EUR">EUR</mat-option>
-                                            <mat-option value="USD">USD</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                  <p-floatLabel class="form-field">
+                    <input 
+                      pInputText 
+                      id="user-landing" 
+                      formControlName="landingPage"
+                      placeholder="Ostavite prazno za nasleđivanje"
+                      class="input-field" />
+                    <label for="user-landing">Početna stranica</label>
+                  </p-floatLabel>
+                </div>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Theme</mat-label>
-                                        <mat-select formControlName="theme">
-                                            <mat-option [value]="null">— Inherit —</mat-option>
-                                            <mat-option value="light">Light</mat-option>
-                                            <mat-option value="dark">Dark</mat-option>
-                                            <mat-option value="system">System</mat-option>
-                                        </mat-select>
-                                    </mat-form-field>
+                <p-floatLabel class="form-field-full">
+                  <input 
+                    pInputText 
+                    id="user-shortcuts" 
+                    formControlName="navbarShortcutsCsv"
+                    placeholder="/home, /appointments"
+                    class="input-field" />
+                  <label for="user-shortcuts">Prečice u navigaciji (ostavite prazno za nasleđivanje)</label>
+                </p-floatLabel>
 
-                                    <mat-form-field appearance="fill" fxFlex="45">
-                                        <mat-label>Landing Page</mat-label>
-                                        <input matInput formControlName="landingPage"
-                                            placeholder="Leave empty to inherit">
-                                    </mat-form-field>
+                <div class="form-actions space-between">
+                  <p-button 
+                    icon="pi pi-times" 
+                    label="Obriši sva zamenjivanja"
+                    severity="danger"
+                    [outlined]="true"
+                    [rounded]="true"
+                    type="button"
+                    (onClick)="clearUserOverrides()">
+                  </p-button>
+                  
+                  <div class="button-group">
+                    <p-button 
+                      icon="pi pi-refresh" 
+                      label="Resetuj"
+                      [outlined]="true"
+                      severity="secondary"
+                      [rounded]="true"
+                      type="button"
+                      (onClick)="resetUserForm()">
+                    </p-button>
+                    
+                    <p-button 
+                      icon="pi pi-save" 
+                      [label]="savingUser ? 'Čuvanje...' : 'Sačuvaj lična podešavanja'"
+                      [rounded]="true"
+                      type="submit"
+                      [disabled]="userForm.invalid || savingUser">
+                    </p-button>
+                  </div>
+                </div>
+              </form>
+            </div>
 
-                                    <mat-form-field appearance="fill" fxFlex="100">
-                                        <mat-label>Navbar Shortcuts (comma separated; leave empty to
-                                            inherit)</mat-label>
-                                        <input matInput formControlName="navbarShortcutsCsv"
-                                            placeholder="/home, /appointments">
-                                    </mat-form-field>
+            <p-divider></p-divider>
 
-                                    <div fxFlex="100" fxLayout="row" fxLayoutAlign="space-between center">
-                                        <button mat-stroked-button type="button" color="warn"
-                                            (click)="clearUserOverrides()">
-                                            Clear All Overrides
-                                        </button>
-                                        <div>
-                                            <button mat-stroked-button type="button"
-                                                (click)="resetUserForm()">Reset</button>
-                                            <button mat-flat-button color="primary" type="submit"
-                                                style="margin-left:8px" [disabled]="userForm.invalid || savingUser">
-                                                {{ savingUser ? 'Saving…' : 'Save Personal Settings' }}
-                                            </button>
-                                        </div>
-                                    </div>
-                                </form>
-                            </mat-card-content>
-                        </mat-card>
+            <!-- Effective Settings Display -->
+            <div class="settings-section">
+              <div class="section-title">
+                <h3>Aktivna podešavanja</h3>
+                <p>Ono što aplikacija zapravo koristi</p>
+              </div>
 
-                        <!-- Effective (read-only) -->
-                        <mat-card class="block">
-                            <mat-card-header>
-                                <mat-card-title>Effective Settings</mat-card-title>
-                                <mat-card-subtitle>What the app will actually use</mat-card-subtitle>
-                            </mat-card-header>
-                            <mat-card-content>
-                                <p><strong>Language:</strong> {{ effectiveSettings?.language }}</p>
-                                <p><strong>Currency:</strong> {{ effectiveSettings?.currency }}</p>
-                                <p><strong>Theme:</strong> {{ effectiveSettings?.theme }}</p>
-                                <p><strong>Landing Page:</strong> {{ effectiveSettings?.landingPage }}</p>
-                                <p><strong>Navbar Shortcuts:</strong> {{ (effectiveSettings?.navbarShortcuts ||
-                                    []).join(', ') }}</p>
-                            </mat-card-content>
-                        </mat-card>
+              <div class="effective-settings">
+                <div class="effective-item">
+                  <span class="effective-label">Jezik:</span>
+                  <span class="effective-value">{{ effectiveSettings?.language || 'Nije podešeno' }}</span>
+                </div>
+                <div class="effective-item">
+                  <span class="effective-label">Valuta:</span>
+                  <span class="effective-value">{{ effectiveSettings?.currency || 'Nije podešeno' }}</span>
+                </div>
+                <div class="effective-item">
+                  <span class="effective-label">Tema:</span>
+                  <span class="effective-value">{{ effectiveSettings?.theme || 'Nije podešeno' }}</span>
+                </div>
+                <div class="effective-item">
+                  <span class="effective-label">Početna stranica:</span>
+                  <span class="effective-value">{{ effectiveSettings?.landingPage || 'Nije podešeno' }}</span>
+                </div>
+                <div class="effective-item">
+                  <span class="effective-label">Prečice u navigaciji:</span>
+                  <span class="effective-value">{{ (effectiveSettings?.navbarShortcuts || []).join(', ') || 'Nema' }}</span>
+                </div>
+              </div>
+            </div>
+          </ng-container>
 
-                    </ng-container>
+          <ng-container *ngIf="error">
+            <div class="error-state">
+              <i class="pi pi-exclamation-circle"></i>
+              <p>{{ error }}</p>
+            </div>
+          </ng-container>
+        </div>
 
-                    <ng-container *ngIf="error">
-                        <p class="error">{{ error }}</p>
-                    </ng-container>
-                </mat-card-content>
-                <mat-card-content *ngSwitchCase="'facilities'" class="table-card">
-                    <div class="table-wrapper">
-                        <div *ngIf="dataSourceFacilities.data.length; else noFacilities">
-                            <table mat-table #facilitySort="matSort" [dataSource]="dataSourceFacilities" matSort>
-                                <ng-container matColumnDef="name">
-                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                                    <td mat-cell *matCellDef="let facility">{{ facility.name }}</td>
-                                </ng-container>
-                                <ng-container matColumnDef="address">
-                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
-                                    <td mat-cell *matCellDef="let facility">{{ facility.address }}</td>
-                                </ng-container>
-                                <ng-container matColumnDef="openingHour">
-                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Opening Hour</th>
-                                    <td mat-cell *matCellDef="let facility">{{ facility.openingHour }}</td>
-                                </ng-container>
-                                <ng-container matColumnDef="closingHour">
-                                    <th mat-header-cell *matHeaderCellDef mat-sort-header>Closing Hour</th>
-                                    <td mat-cell *matCellDef="let facility">{{ facility.closingHour }}</td>
-                                </ng-container>
-                                <ng-container matColumnDef="actions">
-                                    <th mat-header-cell *matHeaderCellDef>
-                                        <div fxLayout="row" fxLayoutAlign="end center">
-                                            Actions
-                                            <button mat-icon-button (click)="openAddFacilityDialog()"
-                                                style="margin-left: 10px;">
-                                                <mat-icon style="color: greenyellow;">add</mat-icon>
-                                            </button>
-                                        </div>
-                                    </th>
-                                    <td mat-cell *matCellDef="let facility">
-                                        <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                                            <button mat-icon-button
-                                                (click)="editFacility(facility); $event.stopPropagation()"
-                                                style="margin: 0px 10px;">
-                                                <mat-icon style="color: orange">edit</mat-icon>
-                                            </button>
-                                            <button mat-icon-button
-                                                (click)="deleteFacility(facility); $event.stopPropagation()"
-                                                style="margin: 0px 10px;">
-                                                <mat-icon style="color: red">delete</mat-icon>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </ng-container>
+        <!-- Facilities Section -->
+        <div *ngSwitchCase="'facilities'" class="facilities-section">
+          <p-table 
+            [value]="facilities" 
+            [paginator]="true" 
+            [rows]="10" 
+            [rowsPerPageOptions]="[5, 10, 20]"
+            [showCurrentPageReport]="true"
+            currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} objekata"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            styleClass="p-datatable-sm">
+            
+            <ng-template pTemplate="header">
+              <tr>
+                <th pSortableColumn="name">
+                  Naziv <p-sortIcon field="name"></p-sortIcon>
+                </th>
+                <th pSortableColumn="address">
+                  Adresa <p-sortIcon field="address"></p-sortIcon>
+                </th>
+                <th pSortableColumn="openingHour">
+                  Vreme otvaranja <p-sortIcon field="openingHour"></p-sortIcon>
+                </th>
+                <th pSortableColumn="closingHour">
+                  Vreme zatvaranja <p-sortIcon field="closingHour"></p-sortIcon>
+                </th>
+                <th class="actions-column">
+                  <div class="actions-header">
+                    Akcije
+                    <p-button 
+                      icon="pi pi-plus" 
+                      [rounded]="true"
+                      [text]="true"
+                      pTooltip="Dodaj objekat"
+                      tooltipPosition="top"
+                      (onClick)="openAddFacilityDialog()"
+                      class="add-facility-btn">
+                    </p-button>
+                  </div>
+                </th>
+              </tr>
+            </ng-template>
 
-                                <tr mat-header-row *matHeaderRowDef="displayedColumFacilities"
-                                    class="custom-header-row"></tr>
-                                <tr mat-row *matRowDef="let row; columns: displayedColumFacilities" class="custom-row"
-                                    (click)="editFacility(row)"></tr>
-                            </table>
-                        </div>
-                        <mat-paginator [pageSizeOptions]="[5, 10, 20]" showFirstLastButtons></mat-paginator>
-                    </div>
-                    <ng-template #noFacilities>
-                        <p>No facilities found.</p>
-                    </ng-template>
-                </mat-card-content>
-            </ng-container>
+            <ng-template pTemplate="body" let-facility>
+              <tr (click)="editFacility(facility)" class="table-row">
+                <td>{{ facility.name }}</td>
+                <td>{{ facility.address }}</td>
+                <td>{{ facility.openingHour }}</td>
+                <td>{{ facility.closingHour }}</td>
+                <td class="actions-column">
+                  <div class="action-buttons">
+                    <p-button 
+                      icon="pi pi-pencil" 
+                      [text]="true"
+                      [rounded]="true"
+                      severity="warning"
+                      pTooltip="Izmeni"
+                      tooltipPosition="top"
+                      (onClick)="editFacility(facility); $event.stopPropagation()">
+                    </p-button>
+                    <p-button 
+                      icon="pi pi-trash" 
+                      [text]="true"
+                      [rounded]="true"
+                      severity="danger"
+                      pTooltip="Obriši"
+                      tooltipPosition="top"
+                      (onClick)="deleteFacility(facility); $event.stopPropagation()">
+                    </p-button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
 
-        </mat-card>
-    </div>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="5" class="empty-message">
+                  <div class="empty-state">
+                    <i class="pi pi-building"></i>
+                    <p>Nema pronađenih objekata.</p>
+                    <p-button 
+                      icon="pi pi-plus" 
+                      label="Dodaj objekat"
+                      [rounded]="true"
+                      (onClick)="openAddFacilityDialog()">
+                    </p-button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
+        </div>
+      </ng-container>
+    </p-card>
+  </div>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

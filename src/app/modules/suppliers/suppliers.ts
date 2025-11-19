@@ -1,52 +1,50 @@
-import { AfterViewInit, Component, OnInit, QueryList, ViewChild, ViewChildren } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { SuppliersService } from './services/suppliers.service';
 import { AuthService } from '../../core/services/auth.service';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatIconModule } from '@angular/material/icon';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatNoDataRow, MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Supplier } from '../../models/Supplier';
-import { MatSort, MatSortModule } from '@angular/material/sort';
-import { MatPaginator, MatPaginatorModule } from '@angular/material/paginator';
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { catchError, EMPTY, filter, switchMap, tap } from 'rxjs';
-import { MatSnackBar } from '@angular/material/snack-bar';
 import { EditCreateSupplierDialog } from './dialogs/edit-create-supplier-dialog/edit-create-supplier-dialog';
 import { ShowActivityDialog } from './dialogs/show-activity-dialog/show-activity-dialog';
-import { MatChipGrid, MatChipSet, MatChipsModule } from '@angular/material/chips';
+import { FormsModule } from '@angular/forms';
+import { TableModule } from 'primeng/table';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { InputTextModule } from 'primeng/inputtext';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-suppliers',
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    FlexLayoutModule,
-    MatIconModule,
-    MatDividerModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatTableModule,
-    MatSortModule,
-    MatPaginatorModule,
-    MatIconModule,
-    MatChipsModule
+    FormsModule,
+    TableModule,
+    ButtonModule,
+    CardModule,
+    TagModule,
+    ToastModule,
+    InputTextModule,
+    IconFieldModule,
+    InputIconModule,
+    TooltipModule
   ],
+  providers: [MessageService],
   templateUrl: './suppliers.html',
   styleUrl: './suppliers.scss'
 })
-export class Suppliers implements OnInit, AfterViewInit {
-  dataSourceSuppliers = new MatTableDataSource<Supplier>([]);
-  displayedColumnsSuppliers = ['name', 'address', 'city', 'contactEmail', 'contactPhone', 'contactLandline', 'pib', 'isActive', 'actions'];
-
-  filterValues: { [key: string]: string } = {
+export class Suppliers implements OnInit {
+  suppliers: Supplier[] = [];
+  filteredSuppliers: Supplier[] = [];
+  
+  filterValues = {
     name: '',
     contactEmail: '',
     contactPhone: '',
@@ -54,66 +52,73 @@ export class Suppliers implements OnInit, AfterViewInit {
     city: ''
   };
 
-  @ViewChildren(MatPaginator) paginators!: QueryList<MatPaginator>;
-  @ViewChild('suppliersSort')
-  set suppliersSort(ms: MatSort) {
-    if (ms) {
-      this.dataSourceSuppliers.sort = ms;
-      this.dataSourceSuppliers.filterPredicate = this.createFilter();
-    }
-  }
-
-
-  constructor(private suppliersService: SuppliersService, private authService: AuthService, private dialog: MatDialog, private snackBar: MatSnackBar) { }
+  constructor(
+    private suppliersService: SuppliersService,
+    private authService: AuthService,
+    private dialog: MatDialog,
+    private messageService: MessageService
+  ) { }
 
   ngOnInit(): void {
     this.suppliersService.getAllSuppliers(this.authService.requireCurrentTenantId()).subscribe(
-      s => this.dataSourceSuppliers.data = s
+      s => {
+        this.suppliers = s;
+        this.filteredSuppliers = s;
+      }
     );
   }
 
-  ngAfterViewInit(): void {
-    if (this.paginators.length) {
-      this.dataSourceSuppliers.paginator = this.paginators.first;
-    }
+  applyFilter() {
+    this.filteredSuppliers = this.suppliers.filter(supplier => {
+      const matchName = !this.filterValues.name || 
+        supplier.name?.toLowerCase().includes(this.filterValues.name.toLowerCase());
+      const matchEmail = !this.filterValues.contactEmail || 
+        supplier.contactEmail?.toLowerCase().includes(this.filterValues.contactEmail.toLowerCase());
+      const matchPhone = !this.filterValues.contactPhone || 
+        supplier.contactPhone?.toLowerCase().includes(this.filterValues.contactPhone.toLowerCase());
+      const matchAddress = !this.filterValues.address || 
+        supplier.address?.toLowerCase().includes(this.filterValues.address.toLowerCase());
+      const matchCity = !this.filterValues.city || 
+        supplier.city?.toLowerCase().includes(this.filterValues.city.toLowerCase());
+
+      return matchName && matchEmail && matchPhone && matchAddress && matchCity;
+    });
   }
 
-  applyFilter(column: string, value: string) {
-    this.filterValues[column] = value.trim().toLowerCase();
-    this.dataSourceSuppliers.filter = JSON.stringify(this.filterValues);
-  }
-
-  createFilter(): (data: Supplier, filter: string) => boolean {
-    return (data: Supplier, filter: string): boolean => {
-      const searchTerms = JSON.parse(filter);
-      return Object.keys(searchTerms).every(key => {
-        const term = searchTerms[key];
-        if (!term) {
-          return true;
-        }
-        const value = (data as any)[key]?.toString().toLowerCase() || '';
-        return value.includes(term);
-      });
+  clearFilters() {
+    this.filterValues = {
+      name: '',
+      contactEmail: '',
+      contactPhone: '',
+      address: '',
+      city: ''
     };
+    this.filteredSuppliers = this.suppliers;
   }
 
 
   editSupplier(supplier: Supplier) {
     const dialogRef = this.dialog.open(EditCreateSupplierDialog, {
-      width: '800px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: supplier
     })
 
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
       switchMap((result) => this.suppliersService.updateSupplier(supplier._id!, result)),
-      tap((updateSupplier) => {
-        this.snackBar.open('Supplier update succesfully', 'Okay', { duration: 2000 })
-        this.dataSourceSuppliers.data = this.dataSourceSuppliers.data.map(s => s._id === supplier._id ? updateSupplier : s);
+      tap((updatedSupplier) => {
+        this.showToast('Dobavljač uspešno ažuriran');
+        const idx = this.suppliers.findIndex(s => s._id === supplier._id);
+        if (idx > -1) {
+          this.suppliers[idx] = updatedSupplier;
+          this.suppliers = [...this.suppliers];
+        }
+        this.applyFilter();
       }),
       catchError(err => {
         console.error('Error updating supplier:', err);
-        this.snackBar.open('Failed to update supplier', 'Okay', { duration: 2000 });
+        this.showToast('Neuspešno ažuriranje dobavljača', true);
         return EMPTY;
       })
     ).subscribe();
@@ -121,11 +126,11 @@ export class Suppliers implements OnInit, AfterViewInit {
 
   deleteSupplier(supplier: Supplier) {
     const dialogRef = this.dialog.open(ConfirmDeleteDialogComponent, {
-      width: '500px',
-      height: '250px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: {
-        title: 'Delete Supplier',
-        message: `Are you sure you want to delete ${supplier.name}?`,
+        title: 'Brisanje dobavljača',
+        message: `Da li ste sigurni da želite da obrišete ${supplier.name}?`,
       }
     })
 
@@ -133,12 +138,13 @@ export class Suppliers implements OnInit, AfterViewInit {
       filter(confirmed => !!confirmed),
       switchMap(() => this.suppliersService.deleteSupplier(supplier._id!)),
       tap(() => {
-        this.snackBar.open('Supplier deleted succesfully', 'Okay', { duration: 2000 });
-        this.dataSourceSuppliers.data = this.dataSourceSuppliers.data.filter(s => s._id !== supplier._id);
+        this.suppliers = this.suppliers.filter(s => s._id !== supplier._id);
+        this.applyFilter();
+        this.showToast('Dobavljač uspešno obrisan');
       }),
       catchError(err => {
-        console.error('Error deleteing supplier:', err);
-        this.snackBar.open('Failed to delete supplier', 'Okay', { duration: 2000 })
+        console.error('Error deleting supplier:', err);
+        this.showToast('Neuspešno brisanje dobavljača', true);
         return EMPTY;
       })
     ).subscribe();
@@ -150,26 +156,34 @@ export class Suppliers implements OnInit, AfterViewInit {
     })
   }
 
-  addSuplier() {
+  addSupplier() {
     const dialogRef = this.dialog.open(EditCreateSupplierDialog, {
-      width: '800px'
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop'
     })
 
     dialogRef.afterClosed().pipe(
       filter(result => !!result),
       switchMap((result) => this.suppliersService.createSupplier(result)),
       tap((newSupplier) => {
-        this.snackBar.open('Supplier created succesfully', 'Okay', { duration: 2000 });
-        this.dataSourceSuppliers.data = [
-          ...this.dataSourceSuppliers.data,
-          newSupplier
-        ]
+        this.showToast('Dobavljač uspešno kreiran');
+        this.suppliers = [...this.suppliers, newSupplier];
+        this.applyFilter();
       }),
       catchError(err => {
         console.error('Error creating supplier:', err);
-        this.snackBar.open('Failed to create supplier', 'Okay', { duration: 2000 });
+        this.showToast('Neuspešno kreiranje dobavljača', true);
         return EMPTY;
       })
     ).subscribe();
+  }
+
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
+    });
   }
 }

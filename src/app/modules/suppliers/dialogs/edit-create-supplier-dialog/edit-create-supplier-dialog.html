@@ -1,90 +1,190 @@
-<div class="dialog-container" fxLayout="column">
-  <h2 mat-dialog-title>
-    {{ isEditMode ? 'Edit Supplier' : 'Create Supplier' }}
-  </h2>
+<div [@dialogPop] class="admin-dialog admin-dialog--large">
+  <!-- Header -->
+  <div class="admin-dialog__header">
+    <div class="admin-dialog__icon">
+      <i class="pi" [ngClass]="isEditMode ? 'pi-pencil' : 'pi-plus-circle'"></i>
+    </div>
+    <div class="admin-dialog__title">
+      <h2>{{ isEditMode ? 'Izmeni dobavljača' : 'Novi dobavljač' }}</h2>
+      <p>{{ isEditMode ? 'Ažurirajte podatke o dobavljaču' : 'Kreirajte novog dobavljača' }}</p>
+    </div>
+  </div>
+  
+  <!-- Content -->
+  <div class="admin-dialog__content">
+    <form [formGroup]="supplierForm" class="form-grid">
+      <!-- Name - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-building"></i>
+          Naziv dobavljača
+        </label>
+        <input 
+          pInputText 
+          formControlName="name" 
+          placeholder="Unesite naziv dobavljača"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="supplierForm.get('name')?.touched && supplierForm.get('name')?.hasError('required')">
+          Naziv dobavljača je obavezan
+        </small>
+      </div>
 
-  <div mat-dialog-content style="padding: 20px">
-    <form [formGroup]="supplierForm" class="grid-dialog-content">
-      <mat-form-field appearance="outline" style="width: 100%">
-        <mat-label>Name</mat-label>
-        <input matInput formControlName="name" placeholder="Service Name" />
-        <mat-error *ngIf="supplierForm.get('name')?.hasError('required')">
-          Name is required
-        </mat-error>
-      </mat-form-field>
+      <!-- Address - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-map-marker"></i>
+          Adresa
+        </label>
+        <input 
+          pInputText 
+          formControlName="address" 
+          placeholder="Unesite adresu"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="supplierForm.get('address')?.touched && supplierForm.get('address')?.hasError('required')">
+          Adresa je obavezna
+        </small>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Address</mat-label>
-        <input matInput formControlName="address" placeholder="Address" />
-        <mat-error *ngIf="supplierForm.get('address')?.hasError('required')">
-          Address is required
-        </mat-error>
-      </mat-form-field>
+      <!-- City -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-map"></i>
+          Grad
+        </label>
+        <input 
+          pInputText 
+          formControlName="city" 
+          placeholder="Unesite grad"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="supplierForm.get('city')?.touched && supplierForm.get('city')?.hasError('required')">
+          Grad je obavezan
+        </small>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>City</mat-label>
-        <input matInput formControlName="city" placeholder="City" />
-        <mat-error *ngIf="supplierForm.get('city')?.hasError('required')">
-          City is required
-        </mat-error>
-      </mat-form-field>
+      <!-- PIB -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-id-card"></i>
+          PIB
+        </label>
+        <input 
+          pInputText 
+          formControlName="pib" 
+          placeholder="Unesite PIB"
+          class="p-inputtext-lg w-full" />
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Email</mat-label>
-        <input matInput formControlName="contactEmail" placeholder="Contact Email" />
-        <mat-error *ngIf="supplierForm.get('contactEmail')?.hasError('required')">
-          Email is required
-        </mat-error>
-        <mat-error *ngIf="supplierForm.get('contactEmail')?.hasError('email')">
-          Email is not in right format
-        </mat-error>
-      </mat-form-field>
+      <!-- Email -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-envelope"></i>
+          Email
+        </label>
+        <input 
+          pInputText 
+          type="email"
+          formControlName="contactEmail" 
+          placeholder="primer@email.com"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="supplierForm.get('contactEmail')?.touched && supplierForm.get('contactEmail')?.hasError('required')">
+          Email je obavezan
+        </small>
+        <small class="p-error" *ngIf="supplierForm.get('contactEmail')?.touched && supplierForm.get('contactEmail')?.hasError('email')">
+          Email nije u ispravnom formatu
+        </small>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Phone</mat-label>
-        <input matInput formControlName="contactPhone" placeholder="Contact Phone" />
-        <mat-error *ngIf="supplierForm.get('contactPhone')?.hasError('required')">
-          Phone is required
-        </mat-error>
-      </mat-form-field>
+      <!-- Phone -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-phone"></i>
+          Telefon
+        </label>
+        <input 
+          pInputText 
+          type="tel"
+          formControlName="contactPhone" 
+          placeholder="0601234567"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="supplierForm.get('contactPhone')?.touched && supplierForm.get('contactPhone')?.hasError('required')">
+          Telefon je obavezan
+        </small>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Landline</mat-label>
-        <input matInput formControlName="contactLandline" placeholder="Contact Landline" />
-      </mat-form-field>
+      <!-- Landline -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-phone"></i>
+          Fiksni telefon
+        </label>
+        <input 
+          pInputText 
+          type="tel"
+          formControlName="contactLandline" 
+          placeholder="011123456"
+          class="p-inputtext-lg w-full" />
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Contact Person</mat-label>
-        <input matInput formControlName="contactPerson" placeholder="Contact Person" />
-      </mat-form-field>
+      <!-- Contact Person -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-user"></i>
+          Kontakt osoba
+        </label>
+        <input 
+          pInputText 
+          formControlName="contactPerson" 
+          placeholder="Unesite ime kontakt osobe"
+          class="p-inputtext-lg w-full" />
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>PIB</mat-label>
-        <input matInput formControlName="pib" placeholder="PIB" />
-      </mat-form-field>
+      <!-- Active -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-check-circle"></i>
+          Aktivan
+        </label>
+        <p-select 
+          formControlName="isActive"
+          [options]="[
+            {label: 'Da', value: true},
+            {label: 'Ne', value: false}
+          ]"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite status"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
 
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Active</mat-label>
-        <mat-select formControlName="isActive">
-          <mat-option [value]="true">True</mat-option>
-          <mat-option [value]="false">False</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <div></div>
-
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Remark</mat-label>
-        <textarea matInput formControlName="remark" rows="4" placeholder="Any notes or comments"></textarea>
-      </mat-form-field>
-
+      <!-- Remark - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-comment"></i>
+          Napomena
+        </label>
+        <textarea 
+          formControlName="remark" 
+          rows="4"
+          placeholder="Bilo kakve napomene ili komentari"
+          class="w-full">
+        </textarea>
+      </div>
     </form>
   </div>
 
-  <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-around center" class="mat-dialog-buttons">
-    <button mat-raised-button color="primary" (click)="save()" [disabled]="supplierForm.invalid">
-      {{ isEditMode ? 'Update' : 'Create' }}
-    </button>
-    <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+  <!-- Actions -->
+  <div class="admin-dialog__actions">
+    <p-button 
+      label="Odustani" 
+      [text]="true"
+      (onClick)="close()">
+    </p-button>
+    <p-button 
+      [label]="isEditMode ? 'Sačuvaj izmene' : 'Kreiraj dobavljača'" 
+      (onClick)="save()" 
+      [disabled]="supplierForm.invalid">
+    </p-button>
   </div>
 </div>

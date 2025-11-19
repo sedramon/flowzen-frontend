@@ -1,104 +1,195 @@
-<div class="outer-dialog-container">
-  <div [@dialogPop] class="dialog-container" [ngClass]="{ 'preview-mode': isPreviewMode }">
-    <h2 class="dialog-title">
-      <span *ngIf="!isPreviewMode">{{ data.service ? 'Azuriraj uslugu' : 'Nova usluga' }}</span>
-      <span *ngIf="isPreviewMode">Pregled termina - {{ data.status }}</span>
-    </h2>
-    
-    <!-- Preview mode header -->
-    <div *ngIf="isPreviewMode" class="preview-header">
-      <div class="status-badge" [ngClass]="data.status?.toLowerCase()">
-        {{ data.status }}
-      </div>
-      <div class="preview-info">
-        <p><strong>Datum:</strong> {{ appointmentData?.date | date:'dd.MM.yyyy' }}</p>
-        <p *ngIf="appointmentData?.sale"><strong>Broj računa:</strong> {{ appointmentData.sale?.number }}</p>
-      </div>
+<div [@dialogPop] class="admin-dialog">
+  <!-- Header -->
+  <div class="admin-dialog__header">
+    <div class="admin-dialog__icon">
+      <i class="pi" [ngClass]="isPreviewMode ? 'pi-eye' : 'pi-calendar-plus'"></i>
     </div>
-    
-    <div class="dialog-content">
+    <div class="admin-dialog__title">
+      <h2 *ngIf="!isPreviewMode">{{ data.service ? 'Ažuriraj termin' : 'Novi termin' }}</h2>
+      <h2 *ngIf="isPreviewMode">Pregled termina</h2>
+      <p *ngIf="!isPreviewMode">{{ data.service ? 'Izmenite detalje termina' : 'Kreirajte novi termin za klijenta' }}</p>
+      <p *ngIf="isPreviewMode">Status: {{ data.status }}</p>
+    </div>
+  </div>
+  
+  <!-- Preview mode status -->
+  <div *ngIf="isPreviewMode" class="admin-dialog__section-title">
+    <p-tag [value]="data.status" [severity]="getStatusSeverity(data.status)" [rounded]="true"></p-tag>
+    <p style="margin-top: 8px; font-size: 0.9em;">
+      <strong>Datum:</strong> {{ appointmentData?.date | date:'dd.MM.yyyy' }}
+      <span *ngIf="appointmentData?.sale"> | <strong>Broj računa:</strong> {{ appointmentData.sale?.number }}</span>
+    </p>
+  </div>
+
+  
+  <!-- Content -->
+  <div class="admin-dialog__content">
+    <div class="form-grid">
       <!-- Facility Selection -->
-      <mat-form-field appearance="outline" class="dialog-field">
-        <mat-label>Izaberi objekat</mat-label>
-        <mat-select [(value)]="selectedFacility" [disabled]="isPreviewMode || data.facility">
-          <mat-option *ngFor="let facility of data.facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="dialog-field">
-        <mat-label>Izaberite Klijenta</mat-label>
-        <mat-select [(value)]="selectedClient" [disabled]="isPreviewMode">
-          <mat-option *ngFor="let client of data.clients" [value]="client._id">
-            {{client.firstName}} {{client.lastName}}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <!-- Dropdown za usluge -->
-      <mat-form-field appearance="outline" class="dialog-field">
-        <mat-label>Izaberi uslugu</mat-label>
-        <mat-select [(value)]="selectedService" (selectionChange)="onServiceChange()" [disabled]="isPreviewMode">
-          <mat-option *ngFor="let service of data.services" [value]="service._id">
-            {{ service.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <!-- Početak termina -->
-      <div class="section-label">Početak</div>
-      <div class="time-picker">
-        <mat-form-field appearance="outline" class="dialog-field time-field">
-          <mat-label>Početak - Sati</mat-label>
-          <mat-select [(value)]="selectedHour" (selectionChange)="onStartTimeChange()" [disabled]="isPreviewMode">
-            <mat-option *ngFor="let hour of hours" [value]="hour">
-              {{ hour }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="dialog-field time-field">
-          <mat-label>Početak - Minuti</mat-label>
-          <mat-select [(value)]="selectedMinute" (selectionChange)="onStartTimeChange()" [disabled]="isPreviewMode">
-            <mat-option *ngFor="let min of minutes" [value]="min">
-              {{ min < 10 ? '0' + min : min }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-building"></i>
+          Objekat
+        </label>
+        <p-select 
+          [(ngModel)]="selectedFacility" 
+          [options]="facilityOptions"
+          [disabled]="isPreviewMode || data.facility"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite objekat"
+          styleClass="w-full">
+        </p-select>
       </div>
 
-      <!-- Kraj termina -->
-      <div class="section-label">Kraj</div>
-      <div class="time-picker">
-        <mat-form-field appearance="outline" class="dialog-field time-field">
-          <mat-label>Kraj - Sati</mat-label>
-          <mat-select [(value)]="endHour" [disabled]="isPreviewMode">
-            <mat-option *ngFor="let hour of hours" [value]="hour">
-              {{ hour }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <mat-form-field appearance="outline" class="dialog-field time-field">
-          <mat-label>Kraj - Minuti</mat-label>
-          <mat-select [(value)]="endMinute" [disabled]="isPreviewMode">
-            <mat-option *ngFor="let min of minutes" [value]="min">
-              {{ min < 10 ? '0' + min : min }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
+      <!-- Client Selection -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-user"></i>
+          Klijent
+        </label>
+        <p-select 
+          [(ngModel)]="selectedClient" 
+          [options]="clientOptions"
+          [disabled]="isPreviewMode"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          filterPlaceholder="Pretraži klijente"
+          placeholder="Izaberite klijenta"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <!-- Service Selection - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-briefcase"></i>
+          Usluga
+        </label>
+        <p-select 
+          [(ngModel)]="selectedService" 
+          [options]="serviceOptions"
+          (onChange)="onServiceChange()"
+          [disabled]="isPreviewMode"
+          optionLabel="label"
+          optionValue="value"
+          [filter]="true"
+          filterPlaceholder="Pretraži usluge"
+          placeholder="Izaberite uslugu"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <!-- Time Range - full width with start and end in one row -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-clock"></i>
+          Trajanje termina
+        </label>
+        <div class="time-range-container">
+          <!-- Start Time -->
+          <div class="time-section">
+            <span class="time-section-label">Početak</span>
+            <div class="time-picker">
+              <div class="time-field-wrapper">
+                <p-select 
+                  [(ngModel)]="selectedHour" 
+                  [options]="hourOptions"
+                  (onChange)="onStartTimeChange()"
+                  [disabled]="isPreviewMode"
+                  optionLabel="label"
+                  optionValue="value"
+                  [appendTo]="'body'"
+                  placeholder="HH"
+                  styleClass="w-full">
+                </p-select>
+              </div>
+              <span class="time-separator">:</span>
+              <div class="time-field-wrapper">
+                <p-select 
+                  [(ngModel)]="selectedMinute" 
+                  [options]="minuteOptions"
+                  (onChange)="onStartTimeChange()"
+                  [disabled]="isPreviewMode"
+                  optionLabel="label"
+                  optionValue="value"
+                  [appendTo]="'body'"
+                  placeholder="MM"
+                  styleClass="w-full">
+                </p-select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Arrow Separator -->
+          <div class="time-range-separator">
+            <i class="pi pi-arrow-right"></i>
+          </div>
+
+          <!-- End Time -->
+          <div class="time-section">
+            <span class="time-section-label">Kraj</span>
+            <div class="time-picker">
+              <div class="time-field-wrapper">
+                <p-select 
+                  [(ngModel)]="endHour" 
+                  [options]="hourOptions"
+                  [disabled]="isPreviewMode"
+                  optionLabel="label"
+                  optionValue="value"
+                  [appendTo]="'body'"
+                  placeholder="HH"
+                  styleClass="w-full">
+                </p-select>
+              </div>
+              <span class="time-separator">:</span>
+              <div class="time-field-wrapper">
+                <p-select 
+                  [(ngModel)]="endMinute" 
+                  [options]="minuteOptions"
+                  [disabled]="isPreviewMode"
+                  optionLabel="label"
+                  optionValue="value"
+                  [appendTo]="'body'"
+                  placeholder="MM"
+                  styleClass="w-full">
+                </p-select>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-    <div class="dialog-actions">
-      <!-- Normal mode actions -->
-      <ng-container *ngIf="!isPreviewMode">
-        <button mat-button (click)="onCancel()">Odustani</button>
-        <button mat-raised-button color="primary" (click)="onSave()" [disabled]="!selectedFacility || !selectedService || !selectedClient">Sačuvaj</button>
-        <button mat-raised-button color="warn" *ngIf="data.service" (click)="onDelete()">Obriši</button>
-      </ng-container>
-      
-      <!-- Preview mode actions -->
-      <ng-container *ngIf="isPreviewMode">
-        <button mat-button (click)="onCancel()">Zatvori</button>
-      </ng-container>
-    </div>
+  </div>
+
+  <!-- Actions -->
+  <div class="admin-dialog__actions">
+    <ng-container *ngIf="!isPreviewMode">
+      <p-button 
+        label="Odustani" 
+        [text]="true"
+        (onClick)="onCancel()">
+      </p-button>
+      <p-button 
+        label="Obriši" 
+        severity="danger"
+        [outlined]="true"
+        *ngIf="data.service" 
+        (onClick)="onDelete()">
+      </p-button>
+      <p-button 
+        label="Sačuvaj" 
+        (onClick)="onSave()" 
+        [disabled]="!selectedFacility || !selectedService || !selectedClient">
+      </p-button>
+    </ng-container>
+    
+    <ng-container *ngIf="isPreviewMode">
+      <p-button 
+        label="Zatvori" 
+        (onClick)="onCancel()">
+      </p-button>
+    </ng-container>
   </div>
 </div>

@@ -1,11 +1,33 @@
-<div class="dialog-container" fxLayout="column">
-  <h3 mat-dialog-title>Potvrda</h3>
-  <div mat-dialog-content class="content">
-    <p>{{data.message}}</p>
+<div [@dialogPop] class="admin-dialog admin-dialog--danger">
+  <!-- Header -->
+  <div class="admin-dialog__header">
+    <div class="admin-dialog__icon admin-dialog__icon--danger">
+      <i class="pi pi-exclamation-triangle"></i>
+    </div>
+    <div class="admin-dialog__title">
+      <h2>{{ data.title || 'Potvrda brisanja' }}</h2>
+      <p>Ova akcija se ne može poništiti</p>
+    </div>
   </div>
-  <div mat-dialog-actions class="actions">
-    <button mat-raised-button (click)="confirmDelete()" class="confirm-btn">Da</button>
-    <button mat-raised-button (click)="cancelDelete()" class="cancel-btn">Ne</button>
+  
+  <!-- Content -->
+  <div class="admin-dialog__content">
+    <div class="confirmation-message">
+      <p>{{ data.message }}</p>
+    </div>
   </div>
 
+  <!-- Actions -->
+  <div class="admin-dialog__actions">
+    <p-button 
+      label="Odustani" 
+      [text]="true"
+      (onClick)="cancelDelete()">
+    </p-button>
+    <p-button 
+      label="Obriši" 
+      severity="danger"
+      (onClick)="confirmDelete()">
+    </p-button>
+  </div>
 </div>

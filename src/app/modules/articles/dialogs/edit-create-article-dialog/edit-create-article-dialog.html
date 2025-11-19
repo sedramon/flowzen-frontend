@@ -1,91 +1,195 @@
-<div class="dialog-container" fxLayout="column">
-    <h2 mat-dialog-title>
-        {{ isEditMode ? 'Edit Article' : 'Create Article' }}
-    </h2>
-
-    <div mat-dialog-content style="padding: 20px">
-        <form [formGroup]="articleForm" class="grid-dialog-content">
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Name</mat-label>
-                <input matInput formControlName="name" placeholder="Service Name" required />
-                @if (articleForm.get('name')?.hasError('required')) {
-                <mat-error>Name is required</mat-error>
-                }
-            </mat-form-field>
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Unit of Measure</mat-label>
-                <mat-select formControlName="unitOfMeasure">
-                    <mat-option [value]="'piece'">Piece</mat-option>
-                    <mat-option [value]="'kg'">Kg</mat-option>
-                    <mat-option [value]="'liter'">Liter</mat-option>
-                    <mat-option [value]="'box'">Box</mat-option>
-                    <mat-option [value]="'mililiter'">Mililiter</mat-option>
-                </mat-select>
-                @if (articleForm.get('unitOfMeasure')?.hasError('required')) {
-                <mat-error>Unit of Measure is required</mat-error>
-                }
-            </mat-form-field>
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Price</mat-label>
-                <input type="number" matInput formControlName="price" placeholder="Price" required />
-                @if (articleForm.get('price')?.hasError('required')) {
-                <mat-error>Price is required</mat-error>
-                }
-            </mat-form-field>
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Sale Price</mat-label>
-                <input type="number" matInput formControlName="salePrice" placeholder="Sale Price" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Tax Rates</mat-label>
-                <mat-select formControlName="taxRates">
-                    <mat-option [value]="0">0 %</mat-option>
-                    <mat-option [value]="20">20 %</mat-option>
-                </mat-select>
-            </mat-form-field>
-
-            <div></div>
-
-            <mat-checkbox formControlName="isOnSale">
-                On Sale
-            </mat-checkbox>
-
-            <mat-checkbox formControlName="isActive">
-                Active
-            </mat-checkbox>
-
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Code</mat-label>
-                <input matInput formControlName="code" placeholder="Code" />
-            </mat-form-field>
-
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Supplier</mat-label>
-                <mat-select formControlName="supplier">
-                    @for (supplier of data.suppliers; track (supplier.id ?? $index)) {
-                    <mat-option [value]="supplier._id">
-                        {{ supplier.name }}
-                    </mat-option>
-                    }
-
-                </mat-select>
-            </mat-form-field>
-
-
-            <mat-form-field appearance="outline" style="width: 100%">
-                <mat-label>Remark</mat-label>
-                <textarea matInput formControlName="remark" rows="4" placeholder="Any notes or comments"></textarea>
-            </mat-form-field>
-
-
-        </form>
+<div [@dialogPop] class="admin-dialog admin-dialog--large">
+  <!-- Header -->
+  <div class="admin-dialog__header">
+    <div class="admin-dialog__icon">
+      <i class="pi" [ngClass]="isEditMode ? 'pi-pencil' : 'pi-plus-circle'"></i>
     </div>
-
-    <div mat-dialog-actions fxLayout="row" fxLayoutAlign="space-around center" class="mat-dialog-buttons">
-        <button mat-raised-button color="primary" (click)="save()" [disabled]="articleForm.invalid">
-            {{ isEditMode ? 'Update' : 'Create' }}
-        </button>
-        <button mat-raised-button color="warn" (click)="close()">Cancel</button>
+    <div class="admin-dialog__title">
+      <h2>{{ isEditMode ? 'Izmeni artikal' : 'Novi artikal' }}</h2>
+      <p>{{ isEditMode ? 'Ažurirajte podatke o artiklu' : 'Kreirajte novi artikal' }}</p>
     </div>
+  </div>
+  
+  <!-- Content -->
+  <div class="admin-dialog__content">
+    <form [formGroup]="articleForm" class="form-grid">
+      <!-- Name - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-tag"></i>
+          Naziv artikla
+        </label>
+        <input 
+          pInputText 
+          formControlName="name" 
+          placeholder="Unesite naziv artikla"
+          class="p-inputtext-lg w-full" />
+        <small class="p-error" *ngIf="articleForm.get('name')?.touched && articleForm.get('name')?.hasError('required')">
+          Naziv artikla je obavezan
+        </small>
+      </div>
+
+      <!-- Unit of Measure -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-ruler"></i>
+          Jedinica mere
+        </label>
+        <p-select 
+          formControlName="unitOfMeasure"
+          [options]="unitOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite jedinicu mere"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+        <small class="p-error" *ngIf="articleForm.get('unitOfMeasure')?.touched && articleForm.get('unitOfMeasure')?.hasError('required')">
+          Jedinica mere je obavezna
+        </small>
+      </div>
+
+      <!-- Code -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-barcode"></i>
+          Šifra
+        </label>
+        <input 
+          pInputText 
+          formControlName="code" 
+          placeholder="Unesite šifru artikla"
+          class="p-inputtext-lg w-full" />
+      </div>
+
+      <!-- Price -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-dollar"></i>
+          Cena
+        </label>
+        <p-inputnumber 
+          formControlName="price"
+          mode="decimal"
+          [min]="0"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          styleClass="w-full"
+          inputStyleClass="w-full">
+        </p-inputnumber>
+        <small class="p-error" *ngIf="articleForm.get('price')?.touched && articleForm.get('price')?.hasError('required')">
+          Cena je obavezna
+        </small>
+      </div>
+
+      <!-- Sale Price -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-percentage"></i>
+          Prodajna cena
+        </label>
+        <p-inputnumber 
+          formControlName="salePrice"
+          mode="decimal"
+          [min]="0"
+          [maxFractionDigits]="2"
+          placeholder="0.00"
+          styleClass="w-full"
+          inputStyleClass="w-full">
+        </p-inputnumber>
+      </div>
+
+      <!-- Tax Rates -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-calculator"></i>
+          Poreska stopa
+        </label>
+        <p-select 
+          formControlName="taxRates"
+          [options]="taxRateOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite poresku stopu"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <!-- Supplier -->
+      <div class="form-field">
+        <label class="field-label">
+          <i class="pi pi-truck"></i>
+          Dobavljač
+        </label>
+        <p-select 
+          formControlName="supplier"
+          [options]="supplierOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Izaberite dobavljača"
+          [appendTo]="'body'"
+          styleClass="w-full">
+        </p-select>
+      </div>
+
+      <!-- On Sale Checkbox -->
+      <div class="form-field">
+        <div class="checkbox-wrapper">
+          <p-checkbox 
+            formControlName="isOnSale"
+            [binary]="true"
+            inputId="isOnSale">
+          </p-checkbox>
+          <label for="isOnSale" class="checkbox-label">
+            <i class="pi pi-tag"></i>
+            Na akciji
+          </label>
+        </div>
+      </div>
+
+      <!-- Active Checkbox -->
+      <div class="form-field">
+        <div class="checkbox-wrapper">
+          <p-checkbox 
+            formControlName="isActive"
+            [binary]="true"
+            inputId="isActive">
+          </p-checkbox>
+          <label for="isActive" class="checkbox-label">
+            <i class="pi pi-check-circle"></i>
+            Aktivan
+          </label>
+        </div>
+      </div>
+
+      <!-- Remark - full width -->
+      <div class="form-field full-width">
+        <label class="field-label">
+          <i class="pi pi-comment"></i>
+          Napomena
+        </label>
+        <textarea 
+          formControlName="remark" 
+          rows="4"
+          placeholder="Bilo kakve napomene ili komentari"
+          class="w-full">
+        </textarea>
+      </div>
+    </form>
+  </div>
+
+  <!-- Actions -->
+  <div class="admin-dialog__actions">
+    <p-button 
+      label="Odustani" 
+      [text]="true"
+      (onClick)="close()">
+    </p-button>
+    <p-button 
+      [label]="isEditMode ? 'Sačuvaj izmene' : 'Kreiraj artikal'" 
+      (onClick)="save()" 
+      [disabled]="articleForm.invalid">
+    </p-button>
+  </div>
 </div>

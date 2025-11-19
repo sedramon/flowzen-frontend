@@ -22,7 +22,7 @@
 }
 
 body {
-  background-color: var(--mat-sys-background);
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-weight: 400;
   line-height: 1.6;
@@ -331,10 +331,17 @@ mat-icon,
   background: transparent;
   box-shadow: none;
   padding: 0;
+  overflow: visible !important;
 }
 
 .admin-dialog-panel .mat-mdc-dialog-container {
   padding: 0 0 12px;
+  overflow: visible !important;
+}
+
+// Omogući overflow i na cdk overlay wrapper
+.cdk-global-overlay-wrapper {
+  overflow: visible !important;
 }
 
 .admin-dialog {
@@ -349,6 +356,7 @@ mat-icon,
   color: #f0f3ff;
   width: min(720px, calc(100vw - 48px));
   min-width: min(520px, calc(100vw - 48px));
+  overflow: visible; // Omogućava dropdown-ovima da izađu van dijaloga
 }
 
 .admin-dialog__header {
@@ -394,8 +402,9 @@ mat-icon,
   display: flex;
   flex-direction: column;
   gap: 22px;
-  max-height: 60vh;
+  max-height: none; // Uklonili limit da dropdown može da se prikaže
   padding-right: 6px;
+  overflow: visible; // Omogućava dropdown-ovima da budu vidljivi
 }
 
 .admin-dialog__content::-webkit-scrollbar {
@@ -702,7 +711,6 @@ mat-icon,
   min-height: calc(100vh - 64px);
   text-align: center;
   padding: 25px;
-  background-color: #232323;
 }
 
 mat-card.card {
@@ -962,5 +970,769 @@ mat-card.card {
 
   100% {
     background-position: 0% 50%;
+  }
+}
+
+// ============================================
+// PrimeNG Select Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-select {
+    width: 100%;
+
+    .p-select {
+      width: 100%;
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+
+      &:not(.p-disabled):hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: #1a1a1a;
+      }
+
+      &:not(.p-disabled).p-focus {
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        background: #2a2a2a;
+      }
+
+      &.p-disabled {
+        opacity: 0.6;
+        background: #151515;
+        cursor: not-allowed;
+      }
+    }
+
+    .p-select-label {
+      color: rgba(255, 255, 255, 0.9);
+      padding: 1rem;
+      font-size: 1rem;
+
+      &.p-placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .p-select-dropdown {
+      color: rgba(139, 92, 246, 0.9);
+    }
+  }
+}
+
+// Dropdown overlay panel styling (renders inside dialog)
+.admin-dialog .p-select-overlay,
+.p-select-overlay {
+  background: #1a1a1a !important;
+  border: 2px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  max-width: 400px !important;
+  z-index: 1050 !important; // Ispod Material Dialog backdrop (1000) ali iznad sadržaja
+
+  .p-select-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 0.75rem;
+
+    .p-select-filter {
+      background: #2a2a2a !important;
+      border: 1px solid rgba(139, 92, 246, 0.3) !important;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9) !important;
+      padding: 0.5rem;
+
+      &:focus {
+        border-color: rgba(139, 92, 246, 0.6) !important;
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15) !important;
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .p-inputicon {
+      color: rgba(139, 92, 246, 0.7);
+    }
+  }
+
+  .p-select-list-container {
+    max-height: 200px !important;
+    overflow-y: auto !important;
+  }
+
+  .p-select-list {
+    background: #1a1a1a;
+    padding: 0.5rem 0;
+
+    .p-select-option {
+      color: rgba(255, 255, 255, 0.85) !important;
+      padding: 0.5rem 1rem;
+      margin: 0 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+      font-size: 0.95rem;
+
+      &:not(.p-disabled):hover {
+        background: rgba(139, 92, 246, 0.15) !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+      }
+
+      &.p-selected {
+        background: rgba(139, 92, 246, 0.25) !important;
+        color: #ffffff !important;
+        font-weight: 500;
+      }
+
+      &.p-focus:not(.p-selected) {
+        background: rgba(139, 92, 246, 0.2) !important;
+      }
+    }
+  }
+
+  .p-select-empty-message {
+    color: rgba(255, 255, 255, 0.6);
+    padding: 1rem;
+    text-align: center;
+  }
+}
+
+// Custom scrollbar for dropdown lists
+.p-select-list-container {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: rgba(139, 92, 246, 0.05);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(139, 92, 246, 0.3);
+    border-radius: 10px;
+
+    &:hover {
+      background: rgba(139, 92, 246, 0.5);
+    }
+  }
+}
+
+// ============================================
+// Admin Dialog Form Styling
+// ============================================
+.admin-dialog {
+  .form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    &.full-width {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .field-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i {
+      color: rgba(139, 92, 246, 0.8);
+      font-size: 1rem;
+    }
+  }
+
+  // Time Range Container - holds start and end times in one row
+  .time-range-container {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    padding: 1rem;
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 12px;
+  }
+
+  .time-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .time-section-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: rgba(139, 92, 246, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .time-picker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .time-field-wrapper {
+    flex: 1;
+  }
+
+  .time-separator {
+    font-size: 1.5rem;
+    font-weight: 600;
+    color: rgba(139, 92, 246, 0.6);
+    padding: 0 0.25rem;
+  }
+
+  .time-range-separator {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: rgba(139, 92, 246, 0.7);
+    font-size: 1.25rem;
+    margin-top: 1.5rem; // Offset for label height
+
+    i {
+      animation: pulse 2s ease-in-out infinite;
+    }
+  }
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 0.6;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.1);
+  }
+}
+
+// ============================================
+// PrimeNG Input Text Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  input.p-inputtext {
+    width: 100%;
+    background: #1a1a1a;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &:enabled:hover {
+      border-color: rgba(139, 92, 246, 0.5);
+      background: #1a1a1a;
+    }
+
+    &:enabled:focus {
+      outline: none;
+      border-color: rgba(139, 92, 246, 0.6);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      background: #2a2a2a;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      background: #151515;
+      cursor: not-allowed;
+    }
+  }
+
+  // Validation messages
+  small.p-error {
+    display: block;
+    color: #ff6b6b;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+
+  small.field-hint {
+    display: block;
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+    font-style: italic;
+  }
+
+  // Confirmation message styling
+  .confirmation-message {
+    padding: 1rem;
+    background: rgba(139, 92, 246, 0.08);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+    border-radius: 12px;
+    
+    p {
+      margin: 0;
+      font-size: 1rem;
+      line-height: 1.6;
+      color: rgba(255, 255, 255, 0.9);
+      text-align: center;
+    }
+  }
+}
+
+// ============================================
+// Danger Dialog Variant (for delete confirmations)
+// ============================================
+.admin-dialog--danger {
+  .admin-dialog__icon--danger {
+    background: rgba(239, 68, 68, 0.15);
+    box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3), 0 16px 32px rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+  }
+
+  .confirmation-message {
+    background: rgba(239, 68, 68, 0.08);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+  }
+}
+
+// ============================================
+// Large Dialog Variant (for complex forms)
+// ============================================
+.admin-dialog--large {
+  width: min(900px, calc(100vw - 48px));
+  max-height: 90vh;
+
+  .admin-dialog__content {
+    max-height: 65vh;
+    overflow-y: auto;
+    padding-right: 1rem;
+
+    &::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    &::-webkit-scrollbar-track {
+      background: rgba(139, 92, 246, 0.05);
+      border-radius: 10px;
+    }
+
+    &::-webkit-scrollbar-thumb {
+      background: rgba(139, 92, 246, 0.3);
+      border-radius: 10px;
+
+      &:hover {
+        background: rgba(139, 92, 246, 0.5);
+      }
+    }
+  }
+}
+
+// ============================================
+// Avatar Upload Component
+// ============================================
+.admin-dialog {
+  .avatar-upload-container {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem;
+    background: rgba(139, 92, 246, 0.05);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: 12px;
+  }
+
+  .avatar-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 3px solid rgba(139, 92, 246, 0.3);
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.6);
+      transform: scale(1.05);
+      box-shadow: 0 6px 16px rgba(139, 92, 246, 0.3);
+    }
+  }
+
+  .avatar-upload-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+// ============================================
+// PrimeNG Calendar Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-calendar {
+    width: 100%;
+
+    .p-calendar {
+      width: 100%;
+
+      .p-inputtext {
+        width: 100%;
+      }
+    }
+
+    .p-datepicker {
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 1rem;
+
+      .p-datepicker-header {
+        background: transparent;
+        border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+        padding: 0.5rem;
+        margin-bottom: 0.5rem;
+
+        .p-datepicker-title {
+          color: rgba(255, 255, 255, 0.9);
+
+          .p-datepicker-month,
+          .p-datepicker-year {
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 600;
+          }
+        }
+
+        button {
+          color: rgba(139, 92, 246, 0.9);
+
+          &:hover {
+            background: rgba(139, 92, 246, 0.15);
+            color: rgba(139, 92, 246, 1);
+          }
+        }
+      }
+
+      .p-datepicker-calendar {
+        thead {
+          tr th {
+            color: rgba(139, 92, 246, 0.8);
+            font-weight: 600;
+            padding: 0.5rem;
+          }
+        }
+
+        tbody {
+          tr td {
+            padding: 0.25rem;
+
+            span {
+              color: rgba(255, 255, 255, 0.85);
+              border-radius: 8px;
+              transition: all 0.2s ease;
+
+              &:hover {
+                background: rgba(139, 92, 246, 0.15);
+                color: rgba(255, 255, 255, 0.95);
+              }
+
+              &.p-highlight {
+                background: rgba(139, 92, 246, 0.5);
+                color: #ffffff;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// PrimeNG Checkbox Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-checkbox {
+    .p-checkbox {
+      .p-checkbox-box {
+        background: #2a2a2a;
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 6px;
+        width: 20px;
+        height: 20px;
+        transition: all 0.3s ease;
+
+        &:hover {
+          border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        &.p-highlight {
+          background: rgba(139, 92, 246, 0.6);
+          border-color: rgba(139, 92, 246, 0.8);
+
+          .p-checkbox-icon {
+            color: #ffffff;
+          }
+        }
+
+        &.p-focus {
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// PrimeNG InputNumber Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-inputnumber {
+    width: 100%;
+    display: block;
+
+    .p-inputnumber {
+      width: 100%;
+
+      .p-inputnumber-input {
+        width: 100%;
+        background: #1a1a1a;
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 12px;
+        padding: 0.75rem 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+        transition: all 0.3s ease;
+
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+
+        &:enabled:hover {
+          border-color: rgba(139, 92, 246, 0.5);
+          background: #1a1a1a;
+        }
+
+        &:enabled:focus {
+          outline: none;
+          border-color: rgba(139, 92, 246, 0.6);
+          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+          background: #2a2a2a;
+        }
+
+        &:disabled {
+          opacity: 0.6;
+          background: #151515;
+          cursor: not-allowed;
+        }
+      }
+
+      .p-inputnumber-button {
+        background: rgba(139, 92, 246, 0.2);
+        border: 1px solid rgba(139, 92, 246, 0.3);
+        color: rgba(139, 92, 246, 0.9);
+        transition: all 0.2s ease;
+
+        &:hover {
+          background: rgba(139, 92, 246, 0.3);
+          border-color: rgba(139, 92, 246, 0.5);
+          color: rgba(139, 92, 246, 1);
+        }
+
+        &:active {
+          background: rgba(139, 92, 246, 0.4);
+        }
+      }
+    }
+  }
+}
+
+// ============================================
+// Textarea Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  textarea {
+    width: 100%;
+    background: #1a1a1a;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: all 0.3s ease;
+
+    &::placeholder {
+      color: rgba(255, 255, 255, 0.4);
+    }
+
+    &:enabled:hover {
+      border-color: rgba(139, 92, 246, 0.5);
+      background: #1a1a1a;
+    }
+
+    &:enabled:focus {
+      outline: none;
+      border-color: rgba(139, 92, 246, 0.6);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      background: #2a2a2a;
+    }
+
+    &:disabled {
+      opacity: 0.6;
+      background: #151515;
+      cursor: not-allowed;
+    }
+  }
+}
+
+// ============================================
+// PrimeNG Password Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-password {
+    width: 100%;
+    display: block;
+
+    .p-password {
+      width: 100%;
+
+      input.p-inputtext {
+        width: 100%;
+      }
+    }
+  }
+}
+
+// ============================================
+// PrimeNG MultiSelect Styling for Admin Dialogs
+// ============================================
+.admin-dialog {
+  p-multiselect {
+    width: 100%;
+
+    .p-multiselect {
+      width: 100%;
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+
+      &:not(.p-disabled):hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: #1a1a1a;
+      }
+
+      &:not(.p-disabled).p-focus {
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        background: #2a2a2a;
+      }
+    }
+
+    .p-multiselect-label {
+      color: rgba(255, 255, 255, 0.9);
+      padding: 0.75rem 1rem;
+
+      &.p-placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .p-multiselect-chip {
+      background: rgba(139, 92, 246, 0.25);
+      color: #ffffff;
+      border-radius: 8px;
+      padding: 0.25rem 0.5rem;
+      margin-right: 0.5rem;
+
+      .p-multiselect-chip-icon {
+        color: rgba(255, 255, 255, 0.8);
+        margin-left: 0.5rem;
+      }
+    }
+  }
+}
+
+// MultiSelect overlay panel (renders in body or dialog)
+.p-multiselect-overlay {
+  background: #1a1a1a !important;
+  border: 2px solid rgba(139, 92, 246, 0.3) !important;
+  border-radius: 12px !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5) !important;
+  max-width: 400px !important;
+  z-index: 1050 !important;
+
+  .p-multiselect-header {
+    background: #1a1a1a;
+    border-bottom: 1px solid rgba(139, 92, 246, 0.2);
+    padding: 0.75rem;
+
+    .p-multiselect-filter {
+      background: #2a2a2a !important;
+      border: 1px solid rgba(139, 92, 246, 0.3) !important;
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.9) !important;
+      padding: 0.5rem;
+
+      &:focus {
+        border-color: rgba(139, 92, 246, 0.6) !important;
+        box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15) !important;
+      }
+    }
+  }
+
+  .p-multiselect-list-container {
+    max-height: 200px !important;
+  }
+
+  .p-multiselect-list {
+    background: #1a1a1a;
+    padding: 0.5rem 0;
+
+    .p-multiselect-option {
+      color: rgba(255, 255, 255, 0.85) !important;
+      padding: 0.5rem 1rem;
+      margin: 0 0.5rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:not(.p-disabled):hover {
+        background: rgba(139, 92, 246, 0.15) !important;
+        color: rgba(255, 255, 255, 0.95) !important;
+      }
+
+      &.p-selected {
+        background: rgba(139, 92, 246, 0.25) !important;
+        color: #ffffff !important;
+      }
+
+      .p-checkbox {
+        .p-checkbox-box {
+          background: #2a2a2a;
+          border: 2px solid rgba(139, 92, 246, 0.3);
+
+          &.p-highlight {
+            background: rgba(139, 92, 246, 0.5);
+            border-color: rgba(139, 92, 246, 0.6);
+          }
+        }
+      }
+    }
   }
 }

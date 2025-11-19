@@ -131,6 +131,72 @@ export class AuthService {
   }
 
   /**
+   * Validate the current session with the backend
+   * This verifies the JWT cookie is still valid and syncs user data
+   */
+  validateSession(): void {
+    this.log('validateSession:start');
+    this.http
+      .get<{ valid: boolean; user: any }>(`${this.apiUrl}/auth/validate`, {
+        withCredentials: true,
+      })
+      .subscribe({
+        next: (response) => {
+          this.log('validateSession:success', { valid: response.valid });
+          
+          if (response.valid && response.user) {
+            // Extract and normalize user data from validation response
+            const scopes: string[] = Array.isArray(response.user.scopes)
+              ? response.user.scopes
+              : [];
+
+            const tenantInfoRaw = response.user.tenant ?? null;
+            const tenantInfo = this.normalizeTenantInfo(tenantInfoRaw);
+            const tenantId =
+              typeof tenantInfoRaw === 'string'
+                ? tenantInfoRaw
+                : tenantInfo?._id ?? tenantInfo?.tenantId ?? null;
+
+            const user: AuthenticatedUser = {
+              userId: response.user.userId,
+              tenant: tenantId ?? undefined,
+              tenantId,
+              tenantInfo,
+              email: response.user.email,
+              username: response.user.name || response.user.email,
+              name: response.user.name,
+              role: response.user.role,
+              scopes,
+              isGlobalAdmin: response.user.role === 'global_admin',
+            };
+
+            const normalizedUser = this.normalizeUser(user);
+            this.saveUser(normalizedUser);
+            this.userSubject.next(normalizedUser);
+            
+            this.log('validateSession:user-updated', {
+              userId: normalizedUser.userId,
+              tenantId: normalizedUser.tenantId,
+            });
+          } else {
+            // Session is not valid, clear local data
+            this.log('validateSession:invalid-session');
+            this.clearSession();
+          }
+        },
+        error: (err) => {
+          // Session validation failed (401, 403, network error, etc.)
+          this.log('validateSession:error', this.serializeError(err));
+          
+          // Clear session on authentication errors
+          if (err.status === 401 || err.status === 403) {
+            this.clearSession();
+          }
+        },
+      });
+  }
+
+  /**
    * Save user data to localStorage
    * Note: JWT is in httpOnly cookie, we only store user info for UI purposes
    */

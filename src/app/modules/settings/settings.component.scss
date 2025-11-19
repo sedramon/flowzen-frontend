@@ -1,137 +1,712 @@
-.content-column {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-    border-radius: 12px;
-
-
-    mat-card-header {
-        background: linear-gradient(60deg,
-                #f72585,
-                #7209b7,
-                #3a0ca3,
-                #4361ee,
-                #f72585);
-        background-size: 300% 300%;
-        animation: gradientPan 70s ease infinite;
-        padding: 1rem;
-        margin: 1rem;
-        border-radius: 25px;
-    }
-
-
-    mat-card-title {
-        margin-bottom: 10px;
-        font-size: 1.25rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-
-        mat-icon {
-            margin-right: 10px;
-        }
-    }
-
-    mat-card-subtitle {
-        margin-bottom: 10px;
-        font-size: 0.9rem;
-        opacity: 0.8;
-    }
-
-    .custom-row,
-    .mat-row {
-        transition: background-color 150ms ease;
-
-        &:hover {
-            background-color: rgba(255, 255, 255, 0.05);
-            cursor: pointer;
-        }
-    }
+.settings-container {
+  display: flex;
+  gap: 2rem;
+  padding: 2rem;
+  min-height: calc(100vh - 70px);
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
 }
 
-.nav-column>mat-card {
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-    border-radius: 12px;
-    height: 100%;
-
-    mat-card-title {
-        margin-bottom: 10px;
-        font-size: 1.25rem;
-        font-weight: 600;
-        display: flex;
-        align-items: center;
-
-        mat-icon {
-            margin-right: 10px;
-        }
-    }
-
-    .navigation-button {
-        margin: 10px;
-    }
+// Navigation Sidebar
+.nav-sidebar {
+  width: 280px;
+  flex-shrink: 0;
 }
 
-.table-wrapper {
-    display: flex;
-    flex-direction: column;
+.nav-card {
+  ::ng-deep {
+    .p-card {
+      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      
+      .p-card-header {
+        background: transparent;
+        padding: 1.5rem 1.5rem 1rem 1.5rem;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
+      }
+      
+      .p-card-body {
+        padding: 0;
+        
+        .p-card-content {
+          padding: 1.5rem;
+        }
+      }
+    }
+  }
+}
+
+.nav-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  
+  i {
+    font-size: 2rem;
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h3 {
+    margin: 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+  }
+}
+
+.nav-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.nav-button {
+  ::ng-deep .p-button {
+    width: 100%;
+    justify-content: flex-start;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    
+    &.p-button-text {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+      color: white;
+      border: none;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+    }
+    
+    &.p-button-raised {
+      background: rgba(139, 92, 246, 0.08);
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      color: rgba(255, 255, 255, 0.9);
+      
+      &:hover {
+        background: rgba(139, 92, 246, 0.15);
+        border-color: rgba(139, 92, 246, 0.5);
+        transform: translateX(4px);
+      }
+    }
+  }
+}
+
+// Main Content
+.main-content {
+  flex: 1;
+}
+
+.content-card {
+  ::ng-deep {
+    .p-card {
+      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
+      border: 1px solid rgba(139, 92, 246, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+      
+      .p-card-header {
+        background: transparent;
+        padding: 2rem 2.5rem;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
+      }
+      
+      .p-card-body {
+        padding: 0;
+        
+        .p-card-content {
+          padding: 2rem 2.5rem;
+        }
+      }
+    }
+  }
+}
+
+.content-header {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem 1.5rem;
+  
+  i {
+    font-size: 3.5rem;
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
+
+.header-text {
+  h2 {
+    margin: 0 0 0.75rem 0;
+    font-size: 2rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    line-height: 1.2;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.6);
+    line-height: 1.5;
+  }
+}
+
+// Settings Forms
+.settings-section {
+  margin-bottom: 2rem;
+}
+
+.section-title {
+  margin-bottom: 2rem;
+  
+  h3 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+  }
+  
+  p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: rgba(255, 255, 255, 0.6);
+  }
+}
+
+.settings-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-field,
+.form-field-full {
+  ::ng-deep .p-float-label {
+    margin-top: 1rem;
+    
+    label {
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 500;
+      left: 1rem;
+    }
+    
+    .p-inputtext:focus ~ label,
+    .p-inputtext.p-filled ~ label,
+    .p-select-label:focus ~ label,
+    .p-select.p-variant-filled ~ label {
+      color: rgba(139, 92, 246, 0.9);
+    }
+  }
+}
+
+.input-field {
+  width: 100%;
+  padding: 1rem;
+  background: #1a1a1a;
+  border: 2px solid rgba(139, 92, 246, 0.3);
+  border-radius: 12px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.4);
+  }
+  
+  &:enabled:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    background: #1a1a1a;
+  }
+  
+  &:enabled:focus {
+    border-color: rgba(139, 92, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+    background: #2a2a2a;
+    outline: none;
+  }
+}
+
+::ng-deep {
+  .custom-select {
+    width: 100%;
+    background: #1a1a1a;
+    border: 2px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    
+    .p-select-label {
+      padding: 1rem;
+      color: rgba(255, 255, 255, 0.9);
+    }
+    
+    .p-select-dropdown {
+      color: rgba(139, 92, 246, 0.7);
+    }
+    
+    &:not(.p-disabled):hover {
+      border-color: rgba(139, 92, 246, 0.5);
+    }
+    
+    &:not(.p-disabled).p-focus {
+      border-color: rgba(139, 92, 246, 0.6);
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+      background: #2a2a2a;
+    }
+  }
+  
+  .p-select-overlay {
+    background: #1a1a1a;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
+    
+    .p-select-option {
+      color: rgba(255, 255, 255, 0.9);
+      padding: 0.75rem 1rem;
+      
+      &:not(.p-disabled):hover {
+        background: rgba(139, 92, 246, 0.15);
+      }
+      
+      &.p-select-option-selected {
+        background: rgba(139, 92, 246, 0.25);
+        color: white;
+      }
+    }
+  }
+}
+
+.field-hint {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: -0.5rem;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+  margin-top: 1rem;
+  
+  &.space-between {
     justify-content: space-between;
-    background-color: transparent;
-    height: 100%; 
-
-
-    table {
-        background-color: #232323;
-    }
-
-    mat-paginator {
-        background-color: transparent;
-    }
-}
-
-
-.table-card {
-    margin: 20px;
-    height: 100%;
-    padding: 0px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, .5);
-    background-color: #2b2b2b;
-}
-
-.table-container {
-  flex: 1 1 auto;
-  overflow: auto;
-}
-
-.custom-row {
-    height: 80px;
-
-    td {
-        border-bottom: 1px solid #ffffff;
-    }
-
-    td.mat-cell {
-        padding: 16px;
-        border-bottom: none;
-    }
-
-    &:nth-child(odd) {
-        background-color: rgba(255, 255, 255, 0.02);
-    }
-
-    &:hover {
-        background-color: rgba(255, 255, 255, 0.05);
-    }
-}
-
-.custom-header-row {
-    background-color: #333;
-    color: white;
+  }
+  
+  ::ng-deep .p-button {
+    padding: 0.875rem 1.75rem;
     font-weight: 600;
-    padding: 16px;
-    border-bottom: none;
+    transition: all 0.3s ease;
+    
+    &[type="submit"]:not(:disabled) {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+      border: none;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+      
+      &:hover {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+      }
+    }
+  }
 }
 
-.bottom-paginator {
-  margin-top: auto;
-  align-self: flex-end;
+.button-group {
+  display: flex;
+  gap: 1rem;
+}
+
+// Effective Settings Display
+.effective-settings {
+  background: rgba(139, 92, 246, 0.05);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 12px;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.effective-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.1);
+  
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.effective-label {
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 0.95rem;
+}
+
+.effective-value {
+  color: rgba(139, 92, 246, 0.9);
+  font-weight: 500;
+  font-size: 1rem;
+}
+
+// Loading State
+.loading-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 4rem 2rem;
+  
+  span {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
+    font-weight: 500;
+  }
+  
+  ::ng-deep .p-progress-spinner-circle {
+    stroke: rgba(139, 92, 246, 0.8);
+  }
+}
+
+// Error State
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 4rem 2rem;
+  color: rgba(239, 68, 68, 0.9);
+  
+  i {
+    font-size: 5rem;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+}
+
+// Facilities Table
+.facilities-section {
+  ::ng-deep {
+    .p-datatable {
+      .p-datatable-header {
+        background: rgba(139, 92, 246, 0.08);
+        border: none;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.15);
+        padding: 1.5rem;
+        color: rgba(255, 255, 255, 0.9);
+      }
+      
+      .p-datatable-thead > tr > th {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.2);
+        padding: 1.25rem 1.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 700;
+        font-size: 0.95rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        
+        .p-sortable-column-icon {
+          color: rgba(139, 92, 246, 0.6);
+          margin-left: 0.5rem;
+        }
+        
+        &:hover {
+          background: rgba(139, 92, 246, 0.05);
+          color: rgba(255, 255, 255, 0.9);
+        }
+      }
+      
+      .p-datatable-tbody > tr {
+        background: transparent;
+        border-bottom: 2px solid rgba(139, 92, 246, 0.08);
+        transition: all 0.2s ease;
+        
+        &:hover {
+          background: rgba(139, 92, 246, 0.08);
+          cursor: pointer;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+        
+        > td {
+          padding: 1.5rem 1.5rem;
+          border: none;
+          color: rgba(255, 255, 255, 0.85);
+          font-size: 1rem;
+          vertical-align: middle;
+        }
+      }
+      
+      .p-datatable-emptymessage > td {
+        padding: 2rem;
+        text-align: center;
+      }
+      
+      .p-paginator {
+        background: rgba(139, 92, 246, 0.05);
+        border: none;
+        border-top: 2px solid rgba(139, 92, 246, 0.15);
+        padding: 1.5rem;
+        color: rgba(255, 255, 255, 0.7);
+        
+        .p-paginator-current {
+          color: rgba(255, 255, 255, 0.7);
+          margin-right: 1rem;
+        }
+        
+        .p-paginator-pages {
+          gap: 0.5rem;
+          
+          .p-paginator-page {
+            min-width: 3rem;
+            height: 3rem;
+            border-radius: 10px;
+            background: transparent;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.95rem;
+            transition: all 0.2s ease;
+            
+            &:hover {
+              background: rgba(139, 92, 246, 0.15);
+              border-color: rgba(139, 92, 246, 0.5);
+              color: rgba(255, 255, 255, 0.9);
+              transform: scale(1.05);
+            }
+            
+            &.p-highlight {
+              background: linear-gradient(135deg, rgba(139, 92, 246, 0.8), rgba(99, 102, 241, 0.8));
+              border-color: transparent;
+              color: white;
+              box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
+            }
+          }
+        }
+        
+        .p-paginator-first,
+        .p-paginator-prev,
+        .p-paginator-next,
+        .p-paginator-last {
+          min-width: 3rem;
+          height: 3rem;
+          border-radius: 10px;
+          background: transparent;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          color: rgba(139, 92, 246, 0.7);
+          margin: 0 0.25rem;
+          transition: all 0.2s ease;
+          
+          &:hover:not(:disabled) {
+            background: rgba(139, 92, 246, 0.15);
+            border-color: rgba(139, 92, 246, 0.5);
+            color: rgba(139, 92, 246, 0.9);
+            transform: scale(1.05);
+          }
+          
+          &:disabled {
+            opacity: 0.3;
+            cursor: not-allowed;
+          }
+        }
+        
+        .p-dropdown {
+          background: #1a1a1a;
+          border: 1px solid rgba(139, 92, 246, 0.3);
+          border-radius: 10px;
+          color: rgba(255, 255, 255, 0.9);
+          min-width: 5rem;
+          height: 3rem;
+          margin-left: 1rem;
+          
+          &:hover {
+            border-color: rgba(139, 92, 246, 0.5);
+            background: #1a1a1a;
+          }
+          
+          .p-dropdown-label {
+            color: rgba(255, 255, 255, 0.9);
+          }
+          
+          .p-dropdown-trigger {
+            color: rgba(139, 92, 246, 0.7);
+          }
+        }
+      }
+    }
+  }
+}
+
+.actions-column {
+  width: 180px;
+}
+
+.actions-header {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 1rem;
+}
+
+.add-facility-btn {
+  ::ng-deep .p-button {
+    color: rgba(34, 197, 94, 0.9) !important;
+    
+    &:hover {
+      background: rgba(34, 197, 94, 0.15);
+      transform: scale(1.1);
+    }
+  }
+}
+
+.action-buttons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  
+  ::ng-deep .p-button {
+    min-width: 3rem;
+    height: 3rem;
+    transition: all 0.2s ease;
+    
+    &:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    .p-button-icon {
+      font-size: 1.1rem;
+    }
+    
+    &.p-button-warning {
+      color: rgb(251, 191, 36) !important;
+      
+      &:hover:not(:disabled) {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(251, 191, 36, 0.4);
+      }
+    }
+    
+    &.p-button-danger {
+      color: rgb(239, 68, 68) !important;
+      
+      &:hover:not(:disabled) {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4);
+      }
+    }
+  }
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.5rem;
+  padding: 4rem;
+  color: rgba(255, 255, 255, 0.5);
+  
+  i {
+    font-size: 5rem;
+    opacity: 0.3;
+  }
+  
+  p {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 500;
+  }
+}
+
+// Responsive Design
+@media (max-width: 1200px) {
+  .settings-container {
+    flex-direction: column;
+  }
+  
+  .nav-sidebar {
+    width: 100%;
+  }
+  
+  .nav-buttons {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  
+  .nav-button {
+    flex: 1;
+    min-width: 200px;
+  }
+  
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .settings-container {
+    padding: 1rem;
+    gap: 1rem;
+  }
+  
+  .content-header {
+    gap: 1rem;
+    
+    i {
+      font-size: 2.5rem;
+    }
+  }
+  
+  .header-text h2 {
+    font-size: 1.5rem;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+    
+    &.space-between {
+      flex-direction: column;
+    }
+    
+    ::ng-deep .p-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+  
+  .button-group {
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .nav-buttons {
+    flex-direction: column;
+  }
+  
+  .nav-button {
+    min-width: 100%;
+  }
 }

@@ -1,20 +1,13 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import {
-  MatDialogModule,
-  MAT_DIALOG_DATA,
-  MatDialogRef,
-} from '@angular/material/dialog';
-import { FlexLayoutModule } from '@angular/flex-layout';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { CheckboxModule } from 'primeng/checkbox';
+import { TooltipModule } from 'primeng/tooltip';
 import { ScopeService } from '../../../../core/services/scope.service';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCardModule } from '@angular/material/card';
-import { MatTooltipModule } from '@angular/material/tooltip';
+import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-edit-role-dialog',
@@ -22,27 +15,33 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatCheckboxModule,
-    MatInputModule,
-    MatButtonModule,
     MatDialogModule,
-    FlexLayoutModule,
-    MatIconModule,
-    MatCardModule,
-    MatTooltipModule,
+    ButtonModule,
+    InputTextModule,
+    CheckboxModule,
+    TooltipModule
   ],
   templateUrl: './edit-role-dialog.component.html',
-  styleUrls: ['./edit-role-dialog.component.scss'],
+  styleUrl: './edit-role-dialog.component.scss',
+  animations: [
+    trigger('dialogPop', [
+      transition(':enter', [
+        animate('250ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+          style({ transform: 'scale(0.95)', opacity: 0, offset: 0 }),
+          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
 export class EditRoleDialogComponent implements OnInit {
   roleForm = new FormGroup({
     name: new FormControl<string>('', [Validators.required]),
-    modules: new FormGroup({}), // Dynamic FormGroup for modules
+    modules: new FormGroup({}),
   });
 
   allScopes: any[] = [];
-  scopeGroups: Record<string, Record<string, string>> = {}; // module -> { action -> scopeId }
+  scopeGroups: Record<string, Record<string, string>> = {};
   uniqueModules: string[] = [];
 
   constructor(
@@ -117,6 +116,17 @@ export class EditRoleDialogComponent implements OnInit {
   }
 
   save(): void {
+    if (this.roleForm.controls['name'].invalid) {
+      Object.keys(this.roleForm.controls).forEach(key => {
+        this.roleForm.get(key)?.markAsTouched();
+      });
+      return;
+    }
+
+    if (this.totalSelectedCount === 0) {
+      return;
+    }
+
     const selectedScopeIds: string[] = [];
     const modulesFormGroup = this.roleForm.get('modules') as FormGroup;
     
@@ -231,19 +241,19 @@ export class EditRoleDialogComponent implements OnInit {
 
   getActionDisplayText(action: string): string {
     const displayTexts: { [key: string]: string } = {
-      access: 'Access',
-      read: 'Read',
-      create: 'Create',
-      update: 'Update',
-      delete: 'Delete',
-      sale: 'Sales',
-      refund: 'Refund',
-      session: 'Sessions',
-      report: 'Reports',
-      settings: 'Settings',
-      cash_management: 'Cash Mgmt',
-      cash_reports: 'Cash Reports',
-      cash_analytics: 'Cash Analytics'
+      access: 'Pristup',
+      read: 'Čitanje',
+      create: 'Kreiranje',
+      update: 'Ažuriranje',
+      delete: 'Brisanje',
+      sale: 'Prodaja',
+      refund: 'Povrat',
+      session: 'Sesije',
+      report: 'Izveštaji',
+      settings: 'Podešavanja',
+      cash_management: 'Kasa',
+      cash_reports: 'Izveštaji kase',
+      cash_analytics: 'Analitika kase'
     };
     
     return displayTexts[action] || action.charAt(0).toUpperCase() + action.slice(1);
@@ -251,26 +261,44 @@ export class EditRoleDialogComponent implements OnInit {
 
   getActionTooltip(action: string): string {
     const tooltipTexts: { [key: string]: string } = {
-      access: 'Access Control',
-      read: 'Read Access',
-      create: 'Create Access',
-      update: 'Update Access',
-      delete: 'Delete Access',
-      sale: 'Sales Management',
-      refund: 'Refund Management',
-      session: 'Session Management',
-      report: 'Report Access',
-      settings: 'Settings Access',
-      cash_management: 'Cash Management Dashboard',
-      cash_reports: 'Cash Reports & Analytics',
-      cash_analytics: 'Cash Analytics & Insights'
+      access: 'Kontrola pristupa',
+      read: 'Pristup čitanju',
+      create: 'Pristup kreiranju',
+      update: 'Pristup ažuriranju',
+      delete: 'Pristup brisanju',
+      sale: 'Upravljanje prodajom',
+      refund: 'Upravljanje povratima',
+      session: 'Upravljanje sesijama',
+      report: 'Pristup izveštajima',
+      settings: 'Pristup podešavanjima',
+      cash_management: 'Upravljanje kasom',
+      cash_reports: 'Izveštaji i analitika kase',
+      cash_analytics: 'Analitika i uvidi kase'
     };
     
     return tooltipTexts[action] || action.charAt(0).toUpperCase() + action.slice(1);
   }
 
   getModuleDisplayName(module: string): string {
-    return module
+    const displayNames: { [key: string]: string } = {
+      appointments: 'Termini',
+      clients: 'Klijenti',
+      employees: 'Zaposleni',
+      services: 'Usluge',
+      facilities: 'Objekti',
+      pos: 'Kasa',
+      sales: 'Prodaja',
+      products: 'Proizvodi',
+      reports: 'Izveštaji',
+      analytics: 'Analitika',
+      settings: 'Podešavanja',
+      user_administration: 'Administracija korisnika',
+      tenants: 'Tenanti',
+      roles: 'Uloge',
+      scopes: 'Dozvole'
+    };
+    
+    return displayNames[module] || module
       .split('_')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ');
@@ -278,44 +306,44 @@ export class EditRoleDialogComponent implements OnInit {
 
   getModuleIcon(module: string): string {
     const iconMap: { [key: string]: string } = {
-      appointments: 'event',
-      clients: 'people',
-      employees: 'person',
-      services: 'build',
-      facilities: 'business',
-      pos: 'point_of_sale',
-      sales: 'shopping_cart',
-      products: 'inventory',
-      reports: 'assessment',
-      analytics: 'analytics',
-      settings: 'settings',
-      user_administration: 'admin_panel_settings',
-      tenants: 'apartment',
-      roles: 'account_box',
-      scopes: 'security'
+      appointments: 'pi-calendar',
+      clients: 'pi-users',
+      employees: 'pi-user',
+      services: 'pi-wrench',
+      facilities: 'pi-building',
+      pos: 'pi-shopping-cart',
+      sales: 'pi-dollar',
+      products: 'pi-box',
+      reports: 'pi-chart-bar',
+      analytics: 'pi-chart-line',
+      settings: 'pi-cog',
+      user_administration: 'pi-shield',
+      tenants: 'pi-building-columns',
+      roles: 'pi-id-card',
+      scopes: 'pi-lock'
     };
     
-    return iconMap[module.toLowerCase()] || 'folder';
+    return iconMap[module.toLowerCase()] || 'pi-folder';
   }
 
   getActionIcon(action: string): string {
     const iconMap: { [key: string]: string } = {
-      access: 'lock_open',
-      read: 'visibility',
-      create: 'add',
-      update: 'edit',
-      delete: 'delete',
-      cancel: 'cancel',
-      sale: 'point_of_sale',
-      refund: 'undo',
-      session: 'event',
-      report: 'bar_chart',
-      settings: 'settings',
-      cash_management: 'account_balance',
-      cash_reports: 'assessment',
-      cash_analytics: 'analytics'
+      access: 'pi-lock-open',
+      read: 'pi-eye',
+      create: 'pi-plus',
+      update: 'pi-pencil',
+      delete: 'pi-trash',
+      cancel: 'pi-times',
+      sale: 'pi-shopping-cart',
+      refund: 'pi-undo',
+      session: 'pi-calendar',
+      report: 'pi-chart-bar',
+      settings: 'pi-cog',
+      cash_management: 'pi-wallet',
+      cash_reports: 'pi-file',
+      cash_analytics: 'pi-chart-line'
     };
     
-    return iconMap[action] || 'check_box';
+    return iconMap[action] || 'pi-check-square';
   }
 }

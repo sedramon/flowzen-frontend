@@ -3,19 +3,37 @@ import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/materia
 import { Service } from '../../../../models/Service';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatButtonModule } from '@angular/material/button';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { CheckboxModule } from 'primeng/checkbox';
 import { AuthService } from '../../../../core/services/auth.service';
-import { MatCheckboxModule } from '@angular/material/checkbox';
+import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-create-service-dialog',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, MatButtonModule, MatDialogModule, MatInputModule, FlexLayoutModule, MatCheckboxModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatDialogModule, 
+    ButtonModule,
+    InputTextModule,
+    InputNumberModule,
+    CheckboxModule
+  ],
   templateUrl: './create-service-dialog.component.html',
-  styleUrl: './create-service-dialog.component.scss'
+  styleUrl: './create-service-dialog.component.scss',
+  animations: [
+    trigger('dialogPop', [
+      transition(':enter', [
+        animate('250ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+          style({ transform: 'scale(0.95)', opacity: 0, offset: 0 }),
+          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
 export class CreateServiceDialogComponent implements OnInit {
   isEditMode = false;
@@ -30,7 +48,7 @@ export class CreateServiceDialogComponent implements OnInit {
       Validators.required,
       Validators.min(1)
     ]),
-    isActive: new FormControl<boolean | null>(null, [Validators.required]),
+    isActive: new FormControl<boolean>(true, [Validators.required]),
     tenant: new FormControl<string>('', [Validators.required])
   });
 
@@ -40,7 +58,7 @@ export class CreateServiceDialogComponent implements OnInit {
     private authService: AuthService
   ) { }
 
- ngOnInit(): void {
+  ngOnInit(): void {
     if (this.data) {
       this.isEditMode = true;
       this.serviceForm.patchValue({
@@ -56,10 +74,13 @@ export class CreateServiceDialogComponent implements OnInit {
 
   save(): void {
     if (this.serviceForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.serviceForm.controls).forEach(key => {
+        this.serviceForm.get(key)?.markAsTouched();
+      });
       return;
     }
 
-    // Just grab the form values: { name, price, durationMinutes }
     const formValue = this.serviceForm.value as {
       name: string;
       price: number;
@@ -68,7 +89,6 @@ export class CreateServiceDialogComponent implements OnInit {
       tenant: string
     };
 
-    // Return only the “body” fields. Parent will attach the _id if needed.
     this.dialogRef.close({
       name: formValue.name,
       price: formValue.price,

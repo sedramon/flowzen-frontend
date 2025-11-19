@@ -1,18 +1,7 @@
 import { Component, OnInit } from '@angular/core';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { EmployeesService } from './services/employees.service';
 import { CommonModule } from '@angular/common';
-import { MatButtonModule, MatIconButton } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatIconModule } from '@angular/material/icon';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatSortModule } from '@angular/material/sort';
-import { MatTableModule } from '@angular/material/table';
 import { Employee } from '../../models/Employee';
-import { animate, state, style, transition, trigger } from '@angular/animations';
 import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { AddEmployeeDialogComponent } from './dialogs/add-employee-dialog/add-employee-dialog.component';
@@ -20,29 +9,55 @@ import { EditEmployeeDialogComponent } from './dialogs/edit-employee-dialog/edit
 import { map, Observable, of } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
+import { ButtonModule } from 'primeng/button';
+import { CardModule } from 'primeng/card';
+import { ChipModule } from 'primeng/chip';
+import { DividerModule } from 'primeng/divider';
+import { IconFieldModule } from 'primeng/iconfield';
+import { InputIconModule } from 'primeng/inputicon';
+import { InputTextModule } from 'primeng/inputtext';
+import { AvatarModule } from 'primeng/avatar';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { BadgeModule } from 'primeng/badge';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
 
 @Component({
   selector: 'app-employees',
   standalone: true,
-  imports: [FlexLayoutModule, CommonModule, MatPaginatorModule, MatTableModule, MatSortModule, MatIconModule, MatIconButton, MatDividerModule, MatSnackBarModule, MatChipsModule, MatDividerModule, MatCardModule, MatButtonModule, FormsModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ButtonModule,
+    CardModule,
+    ChipModule,
+    DividerModule,
+    IconFieldModule,
+    InputIconModule,
+    InputTextModule,
+    AvatarModule,
+    ToastModule,
+    BadgeModule,
+    TagModule,
+    TooltipModule
+  ],
+  providers: [MessageService],
   templateUrl: './employees.component.html',
-  styleUrl: './employees.component.scss',
-  animations: [
-    trigger('expandSearch', [
-      state('collapsed', style({ width: '0px', padding: '0px', opacity: 0 })),
-      state('expanded', style({ width: '250px', padding: '15px', opacity: 1 })),
-      transition('collapsed <=> expanded', animate('300ms ease-in-out'))
-    ])
-  ]
+  styleUrl: './employees.component.scss'
 })
 export class EmployeesComponent implements OnInit {
   employees$: Observable<Employee[]> = of([]);
   filteredEmployees$: Observable<Employee[]> = of([]);
-  searchExpanded = false;
   searchQuery = '';
   apiUrl = environment.apiUrl;
 
-  constructor(private employeeService: EmployeesService, private dialog: MatDialog, private snackBar: MatSnackBar, private authService: AuthService) { }
+  constructor(
+    private employeeService: EmployeesService, 
+    private dialog: MatDialog, 
+    private messageService: MessageService, 
+    private authService: AuthService
+  ) { }
 
   ngOnInit(): void {
     const currentUser = this.authService.getCurrentUser();
@@ -62,14 +77,7 @@ export class EmployeesComponent implements OnInit {
      this.filteredEmployees$ = this.employees$;
   }
 
-  toggleSearch() {
-    this.searchExpanded = !this.searchExpanded;
-    if (!this.searchExpanded) {
-      this.searchQuery = ''; // Reset search when closing
-    }
-  }
-
-  // Computed property to filter employees dynamically
+  // Filter employees dynamically
   filterEmployees() {
     this.filteredEmployees$ = this.employees$.pipe(
       map(employees => employees.filter(emp => {
@@ -88,19 +96,19 @@ export class EmployeesComponent implements OnInit {
 
   openAddEmployeeDialog() {
     const dialogRef = this.dialog.open(AddEmployeeDialogComponent, {
-      width: '750px',
-      height: '950px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
     });
 
     dialogRef.afterClosed().subscribe((employee) => {
       if (employee) {
         this.employeeService.createEmployee(employee).subscribe(
           () => {
-            this.showSnackbar(`Employee "${employee.firstName} ${employee.lastName}" created successfully`);
+            this.showToast(`Zaposleni "${employee.firstName} ${employee.lastName}" uspešno kreiran`);
           },
           (error) => {
             console.error('Error creating employee:', error);
-            this.showSnackbar('Failed to create employee', true);
+            this.showToast('Neuspešno kreiranje zaposlenog', true);
           }
         );
       }
@@ -109,8 +117,8 @@ export class EmployeesComponent implements OnInit {
 
   openEditEmployeeDialog(employee: Employee) {
     const dialogRef = this.dialog.open(EditEmployeeDialogComponent, {
-      width: '750px',
-      height: '950px',
+      panelClass: 'admin-dialog-panel',
+      backdropClass: 'custom-backdrop',
       data: { employee }
     });
 
@@ -118,23 +126,23 @@ export class EmployeesComponent implements OnInit {
       if (updatedEmployee) {
         this.employeeService.updateEmployee(employee._id!, updatedEmployee).subscribe(
           () => {
-            this.showSnackbar(`Employee "${updatedEmployee.firstName} ${updatedEmployee.lastName}" updated successfully`);
+            this.showToast(`Zaposleni "${updatedEmployee.firstName} ${updatedEmployee.lastName}" uspešno ažuriran`);
           },
           (error) => {
             console.error('Error updating employee:', error);
-            this.showSnackbar('Failed to update employee', true);
+            this.showToast('Neuspešno ažuriranje zaposlenog', true);
           }
         );
       }
     });
   }
 
-  showSnackbar(message: string, isError: boolean = false) {
-    this.snackBar.open(message, 'Close', {
-      duration: 3000, // 3 seconds
-      horizontalPosition: 'center',
-      verticalPosition: 'bottom',
-      panelClass: isError ? ['snackbar-error'] : ['snackbar-success'] // Ensure it's an array
+  showToast(message: string, isError: boolean = false) {
+    this.messageService.add({
+      severity: isError ? 'error' : 'success',
+      summary: isError ? 'Greška' : 'Uspešno',
+      detail: message,
+      life: 3000
     });
   }
 }

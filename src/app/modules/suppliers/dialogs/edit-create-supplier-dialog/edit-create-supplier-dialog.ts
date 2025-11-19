@@ -1,26 +1,42 @@
 import { CommonModule } from '@angular/common';
 import { Component, Inject, OnInit } from '@angular/core';
-import { FormBuilder, FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatButtonModule } from '@angular/material/button';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatFormField, MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
+import { FormBuilder, FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
+import { MAT_DIALOG_DATA, MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
 import { Supplier } from '../../../../models/Supplier';
 import { AuthService } from '../../../../core/services/auth.service';
-import { FlexLayoutModule } from '@angular/flex-layout';
-import { MatSelect, MatSelectModule } from '@angular/material/select';
+import { trigger, style, animate, transition, keyframes } from '@angular/animations';
 
 @Component({
   selector: 'app-edit-create-supplier-dialog',
   standalone: true,
-  imports: [CommonModule, MatFormFieldModule, ReactiveFormsModule, FormsModule, MatButtonModule, MatInputModule, FlexLayoutModule, MatSelectModule],
+  imports: [
+    CommonModule, 
+    ReactiveFormsModule, 
+    MatDialogModule, 
+    ButtonModule,
+    InputTextModule,
+    SelectModule
+  ],
   templateUrl: './edit-create-supplier-dialog.html',
-  styleUrl: './edit-create-supplier-dialog.scss'
+  styleUrl: './edit-create-supplier-dialog.scss',
+  animations: [
+    trigger('dialogPop', [
+      transition(':enter', [
+        animate('250ms cubic-bezier(0.68, -0.55, 0.265, 1.55)', keyframes([
+          style({ transform: 'scale(0.95)', opacity: 0, offset: 0 }),
+          style({ transform: 'scale(1)', opacity: 1, offset: 1 })
+        ]))
+      ])
+    ])
+  ]
 })
 export class EditCreateSupplierDialog implements OnInit {
 
   isEditMode = false;
-  supplierForm! : FormGroup<{
+  supplierForm!: FormGroup<{
     name: FormControl<string>;
     address: FormControl<string>;
     city: FormControl<string>;
@@ -42,14 +58,13 @@ export class EditCreateSupplierDialog implements OnInit {
   ) {
   }
 
-
   ngOnInit(): void {
     this.supplierForm = this.fb.group({
       name: ['', Validators.required],
       address: ['', Validators.required],
       city: ['', Validators.required],
       contactPhone: ['', Validators.required],
-      contactEmail: ['', Validators.required],
+      contactEmail: ['', [Validators.required, Validators.email]],
       contactLandline: [''],
       contactPerson: [''],
       pib: [''],
@@ -68,17 +83,19 @@ export class EditCreateSupplierDialog implements OnInit {
     this.supplierForm.get('tenant')?.setValue(this.authService.requireCurrentTenantId());
   }
 
-
   save() {
     if (this.supplierForm.invalid) {
+      // Mark all fields as touched to show validation errors
+      Object.keys(this.supplierForm.controls).forEach(key => {
+        this.supplierForm.get(key)?.markAsTouched();
+      });
       return;
     }
 
-    this.dialogRef.close(this.supplierForm.value)
+    this.dialogRef.close(this.supplierForm.value);
   }
 
   close() {
     this.dialogRef.close();
   }
-
 }

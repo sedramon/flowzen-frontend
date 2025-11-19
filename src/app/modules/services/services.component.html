@@ -1,108 +1,144 @@
-<div class="main-container" fxLayout="row" fxLayoutGap="24px" fxLayoutAlign="start stretch">
-  <div fxFlex="80" class="services-table">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>miscellaneous_services</mat-icon> Services
-        </mat-card-title>
-        <mat-card-subtitle>
-          Manage and view all your services here.
-        </mat-card-subtitle>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-      <mat-card-content class="table-card">
-        <div class="table-wrapper">
-          <div *ngIf="dataSourceServices.data.length; else noServices">
-            <table mat-table #servicesSort="matSort" [dataSource]="dataSourceServices" matSort>
-
-              <!-- Name -->
-              <ng-container matColumnDef="name">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.name }}</td>
-              </ng-container>
-
-              <!-- Price -->
-              <ng-container matColumnDef="price">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Price</th>
-                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.price }}</td>
-              </ng-container>
-
-              <!-- Duration Minutes -->
-              <ng-container matColumnDef="durationMinutes">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Duration Minutes</th>
-                <td mat-cell *matCellDef="let service" style="font-weight: bold;">{{ service.durationMinutes }}</td>
-              </ng-container>
-
-              <!-- Active -->
-              <ng-container matColumnDef="active">
-                <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
-                <td mat-cell *matCellDef="let service">
-                    <mat-chip *ngIf="service.isActive" style="background-color: rgba(172, 255, 47, 0.722);">Active</mat-chip>
-                    <mat-chip *ngIf="!service.isActive" style="background-color: rgba(255, 0, 0, 0.722);">Inactive</mat-chip>
-                </td>
-              </ng-container>
-
-
-              <!-- Actions -->
-              <ng-container matColumnDef="actions">
-                <th mat-header-cell *matHeaderCellDef>
-                  <div fxLayout="row" fxLayoutAlign="end center">
-                    Actions
-                    <button mat-icon-button (click)="addOrEditService(); $event.stopPropagation()"
-                      style="margin-left: 8px;">
-                      <mat-icon style="color: greenyellow;">add</mat-icon>
-                    </button>
-                  </div>
-                </th>
-                <td mat-cell *matCellDef="let service" (click)="$event.stopPropagation()">
-                  <div fxLayout="row" fxLayoutAlign="end center">
-                    <button mat-icon-button (click)="addOrEditService(service); $event.stopPropagation()"
-                      style="margin: 0 4px; color: orange;">
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button mat-icon-button (click)="deleteService(service); $event.stopPropagation()"
-                      style="margin: 0 4px; color: red;">
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </div>
-                </td>
-              </ng-container>
-
-
-              <!-- Header & Row Declarations -->
-              <tr mat-header-row *matHeaderRowDef="displayedColumnsServices" class="custom-header-row"></tr>
-              <tr mat-row *matRowDef="let service; columns: displayedColumnsServices" class="custom-row"
-                (click)="addOrEditService(service)"></tr>
-            </table>
-
-
-          </div>
-          <mat-paginator [pageSizeOptions]="[10,25, 50]" showFirstLastButtons class="bottom-paginator"></mat-paginator>
+<div class="services-container">
+  <!-- Filter Card -->
+  <p-card class="filter-card">
+    <ng-template pTemplate="header">
+      <div class="filter-header">
+        <div class="filter-header-content">
+          <i class="pi pi-filter"></i>
+          <h3>Pretraga i filteri</h3>
         </div>
+      </div>
+    </ng-template>
 
-        <ng-template #noServices>
-          <p>No services found.</p>
-        </ng-template>
-      </mat-card-content>
-    </mat-card>
-  </div>
-  <div fxFlex="20" class="filter-column">
-    <mat-card>
-      <mat-card-header>
-        <mat-card-title>
-          <mat-icon>filter_list</mat-icon> Filters
-        </mat-card-title>
-      </mat-card-header>
-      <mat-divider></mat-divider>
-       <mat-card-content fxLayout="column" style="margin-top: 20px">
-        <mat-form-field appearance="outline">
-          <mat-label>Search Services</mat-label>
-          <input matInput [(ngModel)]="searchQuery" (ngModelChange)="applyFilter()" placeholder="Name…" />
-        </mat-form-field>
+    <div class="filter-content">
+      <p-iconField iconPosition="left" class="search-field">
+        <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+        <input 
+          pInputText 
+          type="text" 
+          [(ngModel)]="searchQuery" 
+          (input)="applyFilter()"
+          placeholder="Pretražite usluge po nazivu..."
+          class="search-input" />
+      </p-iconField>
 
-        <button mat-flat-button color="accent" (click)="clearFilters()">Clear</button>
-      </mat-card-content>
-    </mat-card>
-  </div>
+      <p-button 
+        icon="pi pi-times" 
+        label="Očisti"
+        [outlined]="true"
+        severity="secondary"
+        [rounded]="true"
+        (onClick)="clearFilters()"
+        class="clear-btn">
+      </p-button>
+    </div>
+  </p-card>
 
+  <!-- Services Table Card -->
+  <p-card class="services-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-content">
+          <i class="pi pi-briefcase"></i>
+          <div class="header-text">
+            <h2>Usluge</h2>
+            <p>Upravljajte i pregledajte sve svoje usluge ovde.</p>
+          </div>
+        </div>
+        <p-button 
+          icon="pi pi-plus" 
+          label="Dodaj uslugu"
+          [rounded]="true"
+          (onClick)="addOrEditService()"
+          class="add-btn">
+        </p-button>
+      </div>
+    </ng-template>
+
+    <p-table 
+      [value]="filteredServices" 
+      [paginator]="true" 
+      [rows]="10" 
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} usluga"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">
+            Naziv <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="price">
+            Cena <p-sortIcon field="price"></p-sortIcon>
+          </th>
+          <th pSortableColumn="durationMinutes">
+            Trajanje (min) <p-sortIcon field="durationMinutes"></p-sortIcon>
+          </th>
+          <th pSortableColumn="isActive">
+            Status <p-sortIcon field="isActive"></p-sortIcon>
+          </th>
+          <th class="actions-column">Akcije</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-service>
+        <tr (click)="addOrEditService(service)" class="table-row">
+          <td>
+            <span class="service-name">{{ service.name }}</span>
+          </td>
+          <td>
+            <span class="service-price">{{ service.price | currency:'EUR' }}</span>
+          </td>
+          <td>
+            <span class="service-duration">{{ service.durationMinutes }} min</span>
+          </td>
+          <td>
+            <p-tag 
+              [value]="service.isActive ? 'Aktivan' : 'Neaktivan'" 
+              [severity]="service.isActive ? 'success' : 'danger'"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="actions-column">
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-pencil" 
+                [text]="true"
+                [rounded]="true"
+                severity="warning"
+                pTooltip="Izmeni"
+                tooltipPosition="top"
+                (onClick)="addOrEditService(service); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                pTooltip="Obriši"
+                tooltipPosition="top"
+                (onClick)="deleteService(service); $event.stopPropagation()">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="5" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-briefcase"></i>
+              <p>Nema pronađenih usluga.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

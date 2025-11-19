@@ -1,129 +1,197 @@
-<div class="main-container" fxLayout="column" fxLayoutAlign="space-evenly center">
-
-  <!-- Users Table Card -->
-  <mat-card>
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>person</mat-icon> Users
-      </mat-card-title>
-      <mat-card-subtitle>
-        Manage and view all registered users along with their details.
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-divider></mat-divider>
-    <mat-card-content>
-      <div class="table-wrapper">
-        <div *ngIf="dataSourceUsers.data.length; else noUsers">
-          <table mat-table #userSort="matSort" [dataSource]="dataSourceUsers" matSort>
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-              <td mat-cell *matCellDef="let user">
-                <div fxLayout="row" fxLayoutAlign="start center">
-                  <img src="user-profile-image.png" alt="user-image" width="50px" style="margin-right: 10px;">
-                  {{ user.name }}
-                </div>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="email">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-              <td mat-cell *matCellDef="let user">{{ user.email }}</td>
-            </ng-container>
-
-            <ng-container matColumnDef="role">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>User Roles</th>
-              <td mat-cell *matCellDef="let user">
-                <mat-chip>
-                  {{ user.role.name }}
-                </mat-chip>
-              </td>
-            </ng-container>
-
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>
-                <div fxLayout="row" fxLayoutAlign="end center">
-                  Actions
-                  <button mat-icon-button (click)="openAddUserDialog()" style="margin-left: 10px;">
-                    <mat-icon style="color: greenyellow">add</mat-icon>
-                  </button>
-                </div>
-              </th>
-              <td mat-cell *matCellDef="let user">
-                <div fxLayout="row" fxLayoutAlign="end center">
-                  <button mat-icon-button (click)="openEditUserDialog(user); $event.stopPropagation()" style="margin: 0px 10px;">
-                    <mat-icon style="color: orange;">edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="deleteUser(user); $event.stopPropagation()" style="margin: 0px 10px;">
-                    <mat-icon style="color: red">delete</mat-icon>
-                  </button>
-                </div>
-              </td>
-            </ng-container>
-
-            <tr mat-header-row *matHeaderRowDef="displayedColumnsUsers" class="custom-header-row"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumnsUsers" (click)="openEditUserDialog(row)" class="custom-row"></tr>
-          </table>
+<div class="user-admin-container">
+  <!-- Users Section -->
+  <p-card class="users-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-content">
+          <i class="pi pi-users"></i>
+          <div class="header-text">
+            <h2>Korisnici</h2>
+            <p>Upravljajte i pregledajte sve registrovane korisnike sa njihovim detaljima.</p>
+          </div>
         </div>
-        <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+        <p-button 
+          icon="pi pi-plus" 
+          label="Dodaj korisnika"
+          [rounded]="true"
+          (onClick)="openAddUserDialog()"
+          class="add-btn">
+        </p-button>
       </div>
-      <ng-template #noUsers>
-        <p>No users found.</p>
+    </ng-template>
+
+    <p-table 
+      [value]="users" 
+      [paginator]="true" 
+      [rows]="10" 
+      [rowsPerPageOptions]="[5, 10, 25]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} korisnika"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm"
+      [globalFilterFields]="['name', 'email', 'role.name']">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">
+            Ime <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="email">
+            Email <p-sortIcon field="email"></p-sortIcon>
+          </th>
+          <th pSortableColumn="role.name">
+            Uloga <p-sortIcon field="role.name"></p-sortIcon>
+          </th>
+          <th class="actions-column">Akcije</th>
+        </tr>
       </ng-template>
-    </mat-card-content>
-  </mat-card>
 
-  <!-- Roles Table Card -->
-  <mat-card style="margin-top: 20px;">
-    <mat-card-header>
-      <mat-card-title>
-        <mat-icon>assignment_ind</mat-icon> Roles
-      </mat-card-title>
-      <mat-card-subtitle>
-        Review and manage user roles and their associated permissions.
-      </mat-card-subtitle>
-    </mat-card-header>
-    <mat-divider></mat-divider>
-    <mat-card-content>
-      <div class="table-wrapper">
-        <div *ngIf="dataSourceRoles.data.length; else noRoles">
-          <table mat-table #roleSort="matSort" [dataSource]="dataSourceRoles" matSort>
-            <ng-container matColumnDef="name">
-              <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-              <td mat-cell *matCellDef="let role"><mat-chip>
-                  {{ role.name }}
-                </mat-chip></td>
-            </ng-container>
+      <ng-template pTemplate="body" let-user>
+        <tr (click)="openEditUserDialog(user)" class="table-row">
+          <td>
+            <div class="user-cell">
+              <p-avatar 
+                image="user-profile-image.png"
+                shape="circle"
+                size="normal">
+              </p-avatar>
+              <span class="user-name">{{ user.name }}</span>
+            </div>
+          </td>
+          <td>{{ user.email }}</td>
+          <td>
+            <p-tag 
+              [value]="user.role.name" 
+              severity="info"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="actions-column">
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-pencil" 
+                [text]="true"
+                [rounded]="true"
+                severity="warning"
+                pTooltip="Izmeni"
+                tooltipPosition="top"
+                (onClick)="openEditUserDialog(user); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                pTooltip="Obriši"
+                tooltipPosition="top"
+                (onClick)="deleteUser(user); $event.stopPropagation()">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
 
-            <ng-container matColumnDef="actions">
-              <th mat-header-cell *matHeaderCellDef>
-                <div fxLayout="row" fxLayoutAlign="end center">
-                  Actions
-                  <button mat-icon-button (click)="openAddRoleDialog()" style="margin-left: 10px;">
-                    <mat-icon style="color: greenyellow;">add</mat-icon>
-                  </button>
-                </div>
-              </th>
-              <td mat-cell *matCellDef="let role">
-                <div fxLayout="row" fxLayoutAlign="end center">
-                  <button mat-icon-button (click)="openEditRoleDialog(role); $event.stopPropagation()" style="margin: 0px 10px;">
-                    <mat-icon style="color: orange;">edit</mat-icon>
-                  </button>
-                  <button mat-icon-button (click)="deleteRole(role); $event.stopPropagation()" style="margin: 0px 10px;">
-                    <mat-icon style="color: red">delete</mat-icon>
-                  </button>
-                </div>
-              </td>
-            </ng-container>
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="4" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-users"></i>
+              <p>Nema pronađenih korisnika.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
 
-            <tr mat-header-row *matHeaderRowDef="displayedColumnsRoles" class="custom-header-row"></tr>
-            <tr mat-row *matRowDef="let row; columns: displayedColumnsRoles" (click)="openEditRoleDialog(row)" class="custom-row"></tr>
-          </table>
+  <!-- Roles Section -->
+  <p-card class="roles-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-content">
+          <i class="pi pi-shield"></i>
+          <div class="header-text">
+            <h2>Uloge</h2>
+            <p>Pregledajte i upravljajte ulogama korisnika i njihovim dozvolama.</p>
+          </div>
         </div>
-        <mat-paginator [pageSizeOptions]="[5, 10, 25]" showFirstLastButtons></mat-paginator>
+        <p-button 
+          icon="pi pi-plus" 
+          label="Dodaj ulogu"
+          [rounded]="true"
+          (onClick)="openAddRoleDialog()"
+          class="add-btn">
+        </p-button>
       </div>
-      <ng-template #noRoles>
-        <p>No roles found.</p>
+    </ng-template>
+
+    <p-table 
+      [value]="roles" 
+      [paginator]="true" 
+      [rows]="10" 
+      [rowsPerPageOptions]="[5, 10, 25]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} uloga"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm"
+      [globalFilterFields]="['name']">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">
+            Naziv uloge <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th class="actions-column">Akcije</th>
+        </tr>
       </ng-template>
-    </mat-card-content>
-  </mat-card>
+
+      <ng-template pTemplate="body" let-role>
+        <tr (click)="openEditRoleDialog(role)" class="table-row">
+          <td>
+            <p-tag 
+              [value]="role.name" 
+              severity="secondary"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="actions-column">
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-pencil" 
+                [text]="true"
+                [rounded]="true"
+                severity="warning"
+                pTooltip="Izmeni"
+                tooltipPosition="top"
+                (onClick)="openEditRoleDialog(role); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                pTooltip="Obriši"
+                tooltipPosition="top"
+                (onClick)="deleteRole(role); $event.stopPropagation()">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="2" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-shield"></i>
+              <p>Nema pronađenih uloga.</p>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>

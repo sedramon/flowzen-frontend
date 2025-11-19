@@ -1,128 +1,230 @@
-<div class="main-container" fxLayout="column" fxLayoutGap="24px">
-    <mat-card class="card">
-        <mat-card-header>
-            <mat-card-title><mat-icon>filter_list</mat-icon>Filter</mat-card-title>
-            <mat-card-subtitle>Select your filters</mat-card-subtitle>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content class="filter-grid">
-            <mat-form-field appearance="outline">
-                <mat-label>Name</mat-label>
-                <input #nameFilter matInput (input)="applyFilter('name', nameFilter.value)"
-                    placeholder="Filter by name" />
-            </mat-form-field>
+<div class="suppliers-container">
+  <!-- Filter Card -->
+  <p-card class="filter-card">
+    <ng-template pTemplate="header">
+      <div class="filter-header">
+        <div class="filter-header-content">
+          <i class="pi pi-filter"></i>
+          <h3>Pretraga i filteri</h3>
+        </div>
+      </div>
+    </ng-template>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Email</mat-label>
-                <input #emailFilter matInput (input)="applyFilter('contactEmail', emailFilter.value)"
-                    placeholder="Filter by email" />
-            </mat-form-field>
+    <div class="filter-content">
+      <div class="filter-grid">
+        <p-iconField iconPosition="left" class="filter-field">
+          <p-inputIcon styleClass="pi pi-search"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="filterValues.name" 
+            (input)="applyFilter()"
+            placeholder="Naziv..."
+            class="filter-input" />
+        </p-iconField>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Phone</mat-label>
-                <input #phoneFilter matInput (input)="applyFilter('contactPhone', phoneFilter.value)"
-                    placeholder="Filter by phone" />
-            </mat-form-field>
+        <p-iconField iconPosition="left" class="filter-field">
+          <p-inputIcon styleClass="pi pi-envelope"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="filterValues.contactEmail" 
+            (input)="applyFilter()"
+            placeholder="Email..."
+            class="filter-input" />
+        </p-iconField>
 
-            <mat-form-field appearance="outline">
-                <mat-label>Address</mat-label>
-                <input #addressFilter matInput (input)="applyFilter('address', addressFilter.value)"
-                    placeholder="Filter by address" />
-            </mat-form-field>
+        <p-iconField iconPosition="left" class="filter-field">
+          <p-inputIcon styleClass="pi pi-phone"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="filterValues.contactPhone" 
+            (input)="applyFilter()"
+            placeholder="Telefon..."
+            class="filter-input" />
+        </p-iconField>
 
-            <mat-form-field appearance="outline">
-                <mat-label>City</mat-label>
-                <input #cityFilter matInput (input)="applyFilter('city', cityFilter.value)"
-                    placeholder="Filter by city" />
-            </mat-form-field>
-        </mat-card-content>
-    </mat-card>
-    <mat-card class="card">
-        <mat-card-header><mat-card-title><mat-icon>local_shipping</mat-icon>Suppliers</mat-card-title>
-            <mat-card-subtitle>Manage and view your suppliers</mat-card-subtitle>
-        </mat-card-header>
-        <mat-divider></mat-divider>
-        <mat-card-content class="table-card">
-            <div class="table-wrapper">
-                <div *ngIf="this.dataSourceSuppliers.data.length; else noSuppliers">
-                    <table mat-table #suppliersSort="matSort" [dataSource]="dataSourceSuppliers" matSort>
-                        <ng-container matColumnDef="name">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Name</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.name}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="address">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Address</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.address}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="city">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>City</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.city}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="contactEmail">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Email</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.contactEmail}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="contactPhone">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Phone</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.contactPhone}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="contactLandline">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Landline</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.contactLandline}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="pib">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>PIB</th>
-                            <td mat-cell *matCellDef="let supplier">{{supplier.pib}}</td>
-                        </ng-container>
-                        <ng-container matColumnDef="isActive">
-                            <th mat-header-cell *matHeaderCellDef mat-sort-header>Active</th>
-                            <td mat-cell *matCellDef="let supplier">
-                                <mat-chip-set>
-                                    <mat-chip>
-                                        {{ supplier.isActive ? 'Active' : 'Inactive'}}
-                                    </mat-chip>
-                                </mat-chip-set>
-                            </td>
-                        </ng-container>
-                        <ng-container matColumnDef="actions">
-                            <th mat-header-cell *matHeaderCellDef>
-                                <div fxLayout="row" fxLayoutAlign="end center">
-                                    Actions <button mat-icon-button (click)="addSuplier()"
-                                        style="margin-left: 10px;"><mat-icon
-                                            style="color: greenyellow;">add</mat-icon></button>
-                                </div>
-                            </th>
-                            <td mat-cell *matCellDef="let supplier">
-                                <div fxLayout="row" fxLayoutAlign="end center" fxLayoutGap="8px">
-                                    <button mat-icon-button (click)="activitySupplier(); $event.stopPropagation()">
-                                        <mat-icon style="color: aqua;">trending_up</mat-icon>
-                                    </button>
-                                    <button mat-icon-button (click)="editSupplier(supplier); $event.stopPropagation()">
-                                        <mat-icon style="color: orange;">edit</mat-icon>
-                                    </button>
-                                    <button mat-icon-button
-                                        (click)="deleteSupplier(supplier); $event.stopPropagation()">
-                                        <mat-icon style="color: red;">delete</mat-icon>
-                                    </button>
-                                </div>
-                            </td>
-                        </ng-container>
+        <p-iconField iconPosition="left" class="filter-field">
+          <p-inputIcon styleClass="pi pi-map-marker"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="filterValues.address" 
+            (input)="applyFilter()"
+            placeholder="Adresa..."
+            class="filter-input" />
+        </p-iconField>
 
-                        <tr mat-header-row *matHeaderRowDef="displayedColumnsSuppliers" class="custom-header-row"></tr>
-                        <tr mat-row *matRowDef="let supplier; columns: displayedColumnsSuppliers" class="custom-row"
-                            (click)="editSupplier(supplier)">
-                        </tr>
-                    </table>
-                </div>
-                <mat-paginator [pageSizeOptions]="[10, 25, 50]" showFirstLastButtons
-                    class="bottom-paginator"></mat-paginator>
-                <ng-template #noSuppliers>
-                    <div class="no-data-block">
-                        <p>No suppliers found.</p>
-                        <button mat-flat-button (click)="addSuplier()">+ Add Supplier</button>
-                    </div>
-                </ng-template>
+        <p-iconField iconPosition="left" class="filter-field">
+          <p-inputIcon styleClass="pi pi-building"></p-inputIcon>
+          <input 
+            pInputText 
+            type="text" 
+            [(ngModel)]="filterValues.city" 
+            (input)="applyFilter()"
+            placeholder="Grad..."
+            class="filter-input" />
+        </p-iconField>
+      </div>
+
+      <p-button 
+        icon="pi pi-times" 
+        label="Očisti filtere"
+        [outlined]="true"
+        severity="secondary"
+        [rounded]="true"
+        (onClick)="clearFilters()"
+        class="clear-btn">
+      </p-button>
+    </div>
+  </p-card>
+
+  <!-- Suppliers Table Card -->
+  <p-card class="suppliers-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <div class="header-content">
+          <i class="pi pi-truck"></i>
+          <div class="header-text">
+            <h2>Dobavljači</h2>
+            <p>Upravljajte i pregledajte svoje dobavljače</p>
+          </div>
+        </div>
+        <p-button 
+          icon="pi pi-plus" 
+          label="Dodaj dobavljača"
+          [rounded]="true"
+          (onClick)="addSupplier()"
+          class="add-btn">
+        </p-button>
+      </div>
+    </ng-template>
+
+    <p-table 
+      [value]="filteredSuppliers" 
+      [paginator]="true" 
+      [rows]="10" 
+      [rowsPerPageOptions]="[10, 25, 50]"
+      [showCurrentPageReport]="true"
+      currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} dobavljača"
+      [tableStyle]="{ 'min-width': '50rem' }"
+      styleClass="p-datatable-sm">
+      
+      <ng-template pTemplate="header">
+        <tr>
+          <th pSortableColumn="name">
+            Naziv <p-sortIcon field="name"></p-sortIcon>
+          </th>
+          <th pSortableColumn="address">
+            Adresa <p-sortIcon field="address"></p-sortIcon>
+          </th>
+          <th pSortableColumn="city">
+            Grad <p-sortIcon field="city"></p-sortIcon>
+          </th>
+          <th pSortableColumn="contactEmail">
+            Email <p-sortIcon field="contactEmail"></p-sortIcon>
+          </th>
+          <th pSortableColumn="contactPhone">
+            Telefon <p-sortIcon field="contactPhone"></p-sortIcon>
+          </th>
+          <th pSortableColumn="contactLandline">
+            Fiksni <p-sortIcon field="contactLandline"></p-sortIcon>
+          </th>
+          <th pSortableColumn="pib">
+            PIB <p-sortIcon field="pib"></p-sortIcon>
+          </th>
+          <th pSortableColumn="isActive">
+            Status <p-sortIcon field="isActive"></p-sortIcon>
+          </th>
+          <th class="actions-column">Akcije</th>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="body" let-supplier>
+        <tr (click)="editSupplier(supplier)" class="table-row">
+          <td>
+            <span class="supplier-name">{{ supplier.name }}</span>
+          </td>
+          <td>
+            <span class="supplier-address">{{ supplier.address || '-' }}</span>
+          </td>
+          <td>
+            <span class="supplier-city">{{ supplier.city || '-' }}</span>
+          </td>
+          <td>
+            <span class="supplier-email">{{ supplier.contactEmail || '-' }}</span>
+          </td>
+          <td>
+            <span class="supplier-phone">{{ supplier.contactPhone || '-' }}</span>
+          </td>
+          <td>
+            <span class="supplier-landline">{{ supplier.contactLandline || '-' }}</span>
+          </td>
+          <td>
+            <span class="supplier-pib">{{ supplier.pib || '-' }}</span>
+          </td>
+          <td>
+            <p-tag 
+              [value]="supplier.isActive ? 'Aktivan' : 'Neaktivan'" 
+              [severity]="supplier.isActive ? 'success' : 'danger'"
+              [rounded]="true">
+            </p-tag>
+          </td>
+          <td class="actions-column">
+            <div class="action-buttons">
+              <p-button 
+                icon="pi pi-chart-line" 
+                [text]="true"
+                [rounded]="true"
+                severity="info"
+                pTooltip="Aktivnost"
+                tooltipPosition="top"
+                (onClick)="activitySupplier(); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-pencil" 
+                [text]="true"
+                [rounded]="true"
+                severity="warning"
+                pTooltip="Izmeni"
+                tooltipPosition="top"
+                (onClick)="editSupplier(supplier); $event.stopPropagation()">
+              </p-button>
+              <p-button 
+                icon="pi pi-trash" 
+                [text]="true"
+                [rounded]="true"
+                severity="danger"
+                pTooltip="Obriši"
+                tooltipPosition="top"
+                (onClick)="deleteSupplier(supplier); $event.stopPropagation()">
+              </p-button>
             </div>
-        </mat-card-content>
-    </mat-card>
+          </td>
+        </tr>
+      </ng-template>
+
+      <ng-template pTemplate="emptymessage">
+        <tr>
+          <td colspan="9" class="empty-message">
+            <div class="empty-state">
+              <i class="pi pi-truck"></i>
+              <p>Nema pronađenih dobavljača.</p>
+              <p-button 
+                icon="pi pi-plus" 
+                label="Dodaj dobavljača"
+                [rounded]="true"
+                (onClick)="addSupplier()"
+                class="empty-add-btn">
+              </p-button>
+            </div>
+          </td>
+        </tr>
+      </ng-template>
+    </p-table>
+  </p-card>
 </div>
+
+<!-- Toast for notifications -->
+<p-toast position="top-right"></p-toast>
