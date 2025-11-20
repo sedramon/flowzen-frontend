@@ -339,7 +339,7 @@ export class AppointmentsComponent implements OnInit, AfterViewInit {
     this.servicesService
       .getAllServices(this.authService.requireCurrentTenantId())
       .subscribe((fetchedServices) => {
-        this.services = fetchedServices;
+        this.services = fetchedServices.filter(s => s.isActive);
 
         const today = new Date();
         this.dateControl.setValue(today);

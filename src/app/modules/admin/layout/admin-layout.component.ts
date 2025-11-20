@@ -37,52 +37,52 @@ interface AdminNavItem {
 export class AdminLayoutComponent implements OnInit, OnDestroy {
   readonly navItems: AdminNavItem[] = [
     {
-      label: 'Overview',
+      label: 'Pregled',
       icon: 'analytics',
       route: 'overview',
       scope: 'global.tenants:read',
-      description: 'Centralized insight across tenants and activity.',
+      description: 'Centralizovani uvid u tenante i aktivnosti.',
     },
     {
-      label: 'Tenants',
+      label: 'Tenanti',
       icon: 'domain',
       route: 'tenants',
       scope: 'global.tenants:read',
-      description: 'Manage tenant lifecycle, licenses and suspension.',
+      description: 'Upravljanje životnim ciklusom, licencama i suspenzijama.',
     },
     {
-      label: 'Users',
+      label: 'Korisnici',
       icon: 'groups',
       route: 'users',
       scope: 'global.users:read',
-      description: 'View and maintain users across all tenants.',
+      description: 'Pregled i održavanje korisnika na svim tenantima.',
     },
     {
-      label: 'Roles',
+      label: 'Uloge',
       icon: 'workspace_premium',
       route: 'roles',
       scope: 'global.users:read',
-      description: 'Design reusable permission sets for teams.',
+      description: 'Dizajniranje setova dozvola za timove.',
     },
     {
-      label: 'Scopes',
+      label: 'Scope-ovi',
       icon: 'tune',
       route: 'scopes',
       scope: 'global.scopes:*',
-      description: 'Curate RBAC scopes for global administration.',
+      description: 'Upravljanje RBAC scope-ovima za globalnu administraciju.',
     },
     {
       label: 'Audit Log',
       icon: 'history',
       route: 'audit',
       scope: 'global.audit:*',
-      description: 'Review high-privilege changes and activity.',
+      description: 'Pregled izmena visokih privilegija i aktivnosti.',
     },
   ];
 
   visibleNavItems: AdminNavItem[] = [];
-  pageTitle = 'Overview';
-  pageDescription = 'Centralized insight across tenants and activity.';
+  pageTitle = 'Pregled';
+  pageDescription = 'Centralizovani uvid u tenante i aktivnosti.';
   activeRoute = 'overview';
   sidenavOpened = true;
 

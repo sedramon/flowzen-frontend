@@ -40,12 +40,12 @@ interface ScopeSegments {
 
 const SCOPE_GROUP_META: Record<'global' | 'tenant', Omit<ScopeGroup, 'key' | 'scopes'>> = {
   global: {
-    label: 'Global scopes',
-    description: 'Applies platform-wide; zahtevaju globalne privilegije.',
+    label: 'Globalni scope-ovi',
+    description: 'Primenjuje se na celoj platformi; zahtevaju globalne privilegije.',
     icon: 'public',
   },
   tenant: {
-    label: 'Tenant scopes',
+    label: 'Tenant scope-ovi',
     description: 'Aktiviraju se unutar jednog tenant konteksta.',
     icon: 'apartment',
   },

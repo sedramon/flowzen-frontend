@@ -49,7 +49,7 @@ export interface AdminAuditDetailDialogData {
         </div>
 
         <section class="metadata">
-          <span class="label">Metadata</span>
+          <span class="label">Metapodaci</span>
           <pre>{{ formattedMetadata }}</pre>
         </section>
       </mat-dialog-content>

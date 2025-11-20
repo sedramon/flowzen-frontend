@@ -1,210 +1,202 @@
 @if (!loading) {
-  <section class="overview">
-    <header class="overview__header">
-      <div>
-        <h2>Operational pulse</h2>
-        @if (overview) {
-          <div class="overview__headline-metrics">
-            <div class="headline-metric headline-metric--active">
-              <span class="headline-metric__label">Aktivni</span>
-              <span class="headline-metric__value">{{ overview?.active ?? 0 }}</span>
-            </div>
-            <div class="headline-metric headline-metric--pending">
-              <span class="headline-metric__label">Pending</span>
-              <span class="headline-metric__value">{{ overview?.pending ?? 0 }}</span>
-            </div>
-            <div class="headline-metric headline-metric--suspended">
-              <span class="headline-metric__label">Suspendovani</span>
-              <span class="headline-metric__value">{{ overview?.suspended ?? 0 }}</span>
-            </div>
-          </div>
-        } @else {
-          <p class="overview__headline-placeholder">
-            Stay ahead of tenant health, onboarding velocity and sensitive admin actions.
-          </p>
-        }
-      </div>
-      <div class="overview__actions">
-        <button mat-stroked-button color="primary" (click)="refresh()">
-          <mat-icon>refresh</mat-icon>
-          Osveži
-        </button>
-        <button
-          mat-flat-button
-          class="overview__tenants"
-          (click)="navigate('/admin/tenants')"
-        >
-          <mat-icon>domain</mat-icon>
-          Tenants
-        </button>
-      </div>
-    </header>
-
-    @if (stats.length) {
-      <section class="overview__stats">
-        @for (stat of stats; track stat.label) {
-          <mat-card class="stat-card" [ngClass]="'stat-card--' + stat.accent">
-            <mat-icon>{{ stat.icon }}</mat-icon>
-            <div class="stat-card__content">
-              <span class="stat-card__label">{{ stat.label }}</span>
-              <span class="stat-card__value">{{ stat.value }}</span>
-              <span class="stat-card__trend">{{ stat.trend }}</span>
-            </div>
-          </mat-card>
-        }
-      </section>
-    } @else {
-      <div class="overview__stats--empty">
-        <p>Nije bilo moguće učitati statistiku.</p>
-      </div>
-    }
-
-    @if (summaryMetrics.length) {
-      <section class="overview__summary">
-        @for (metric of summaryMetrics; track metric.label) {
-          <mat-card class="summary-card">
-            <div class="summary-card__header">
-              <span class="summary-card__label">{{ metric.label }}</span>
-              <span class="summary-card__value">{{ metric.value }}</span>
-            </div>
-            <mat-progress-bar
-              class="summary-card__progress"
-              [color]="metric.accent"
-              mode="determinate"
-              [value]="metric.progress"
-            ></mat-progress-bar>
-            <span class="summary-card__subtitle">{{ metric.subtitle }}</span>
-          </mat-card>
-        }
-      </section>
-    }
-
-    <section class="overview__quick">
-      @for (action of quickActions; track action.label) {
-        <mat-card class="quick-card">
-          <div class="quick-card__icon">
-            <mat-icon>{{ action.icon }}</mat-icon>
-          </div>
-          <div class="quick-card__body">
-            <h4>{{ action.label }}</h4>
-            <p>{{ action.description }}</p>
-          </div>
-          <button mat-stroked-button [color]="action.color" (click)="navigate(action.route)">
-            Otvori
-            <mat-icon>arrow_outward</mat-icon>
-          </button>
-        </mat-card>
-      }
-    </section>
-
-    <section class="overview__grid">
-      <mat-card class="insights-card">
-        <header>
-          <h3>Priority insights</h3>
-          <button mat-icon-button matTooltip="Upcoming signals and recommended actions">
-            <mat-icon>info</mat-icon>
-          </button>
-        </header>
-
-        <div class="insights-card__list">
-          @for (insight of insights; track insight.title) {
-            <article class="insight" [ngClass]="'insight--' + insight.accent">
-              <div class="insight__icon">
-                <mat-icon>{{ insight.icon }}</mat-icon>
-              </div>
-              <div class="insight__body">
-                <h4>{{ insight.title }}</h4>
-                <p>{{ insight.description }}</p>
-                @if (insight.action) {
-                  <button mat-button color="primary">
-                    {{ insight.action }}
-                    <mat-icon>arrow_forward</mat-icon>
-                  </button>
-                }
-              </div>
-            </article>
-          }
+<section class="overview">
+  <header class="overview__header">
+    <div>
+      <h2>Operativni puls</h2>
+      @if (overview) {
+      <div class="overview__headline-metrics">
+        <div class="headline-metric headline-metric--active">
+          <span class="headline-metric__label">Aktivni</span>
+          <span class="headline-metric__value">{{ overview?.active ?? 0 }}</span>
         </div>
-      </mat-card>
+        <div class="headline-metric headline-metric--pending">
+          <span class="headline-metric__label">Na čekanju</span>
+          <span class="headline-metric__value">{{ overview?.pending ?? 0 }}</span>
+        </div>
+        <div class="headline-metric headline-metric--suspended">
+          <span class="headline-metric__label">Suspendovani</span>
+          <span class="headline-metric__value">{{ overview?.suspended ?? 0 }}</span>
+        </div>
+      </div>
+      } @else {
+      <p class="overview__headline-placeholder">
+        Budite u toku sa statusom tenanata, brzinom onboardinga i osetljivim admin akcijama.
+      </p>
+      }
+    </div>
+    <div class="overview__actions">
+      <button mat-stroked-button color="primary" (click)="refresh()">
+        <mat-icon>refresh</mat-icon>
+        Osveži
+      </button>
+      <button mat-flat-button class="overview__tenants" (click)="navigate('/admin/tenants')">
+        <mat-icon>domain</mat-icon>
+        Tenanti
+      </button>
+    </div>
+  </header>
 
-      <mat-card class="activity-card">
-        <header>
-          <h3>Recent activity</h3>
-          <mat-chip-set>
-            <mat-chip selected>Audit</mat-chip>
-            <mat-chip>Security</mat-chip>
-            <mat-chip>Licensing</mat-chip>
-          </mat-chip-set>
-        </header>
-
-        <mat-divider></mat-divider>
-
-        @if (recentActivity.length) {
-          <ul class="activity-feed">
-            @for (item of recentActivity; track item.timeAgo) {
-              <li [ngClass]="'activity-feed__item--' + item.tone">
-                <div class="activity-feed__icon">
-                  <mat-icon>{{ item.icon }}</mat-icon>
-                </div>
-                <div class="activity-feed__body">
-                  <div class="activity-feed__headline">
-                    <span class="activity-feed__actor">{{ item.actor }}</span>
-                    <span class="activity-feed__action">{{ item.action }}</span>
-                  </div>
-                  <div class="activity-feed__meta">{{ item.meta }}</div>
-                </div>
-                <div class="activity-feed__time">
-                  <mat-icon>schedule</mat-icon>
-                  <span>{{ item.timeAgo }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-        } @else {
-          <div class="activity-feed__empty">
-            <mat-icon>inventory_2</mat-icon>
-            <p>Još uvek nema audit zapisa za prikaz.</p>
-          </div>
-        }
-      </mat-card>
-
-      <mat-card class="tenants-card">
-        <header>
-          <h3>Recent tenants</h3>
-          <mat-chip-set>
-            <mat-chip color="primary" selected>{{ recentTenants.length }}</mat-chip>
-          </mat-chip-set>
-        </header>
-
-        @if (recentTenants.length) {
-          <div class="tenants-card__list">
-            @for (tenant of recentTenants; track tenant.name) {
-              <div class="tenants-card__row" [ngClass]="'tenants-card__row--' + tenant.status">
-                <div class="tenants-card__info">
-                  <h4>{{ tenant.name }}</h4>
-                  <span class="tenants-card__meta">{{ tenant.createdAt }}</span>
-                </div>
-                <div class="tenants-card__status">
-                  <mat-chip [color]="tenant.status === 'suspended' ? 'warn' : 'primary'" selected>
-                    {{ tenant.status | titlecase }}
-                  </mat-chip>
-                  <span class="tenants-card__license">{{ tenant.license }}</span>
-                </div>
-              </div>
-            }
-          </div>
-        } @else {
-          <div class="tenants-card__empty">
-            <mat-icon>domain_disabled</mat-icon>
-            <p>Nema novih tenanata u poslednjih nekoliko dana.</p>
-          </div>
-        }
-      </mat-card>
-    </section>
+  @if (stats.length) {
+  <section class="overview__stats">
+    @for (stat of stats; track stat.label) {
+    <mat-card class="stat-card" [ngClass]="'stat-card--' + stat.accent">
+      <mat-icon>{{ stat.icon }}</mat-icon>
+      <div class="stat-card__content">
+        <span class="stat-card__label">{{ stat.label }}</span>
+        <span class="stat-card__value">{{ stat.value }}</span>
+        <span class="stat-card__trend">{{ stat.trend }}</span>
+      </div>
+    </mat-card>
+    }
   </section>
-} @else {
-  <div class="overview__loading">
-    <mat-progress-spinner mode="indeterminate" diameter="56"></mat-progress-spinner>
-    <p>Učitavanje global admin pregleda...</p>
+  } @else {
+  <div class="overview__stats--empty">
+    <p>Nije bilo moguće učitati statistiku.</p>
   </div>
+  }
+
+  @if (summaryMetrics.length) {
+  <section class="overview__summary">
+    @for (metric of summaryMetrics; track metric.label) {
+    <mat-card class="summary-card">
+      <div class="summary-card__header">
+        <span class="summary-card__label">{{ metric.label }}</span>
+        <span class="summary-card__value">{{ metric.value }}</span>
+      </div>
+      <mat-progress-bar class="summary-card__progress" [color]="metric.accent" mode="determinate"
+        [value]="metric.progress"></mat-progress-bar>
+      <span class="summary-card__subtitle">{{ metric.subtitle }}</span>
+    </mat-card>
+    }
+  </section>
+  }
+
+  <section class="overview__quick">
+    @for (action of quickActions; track action.label) {
+    <mat-card class="quick-card">
+      <div class="quick-card__icon">
+        <mat-icon>{{ action.icon }}</mat-icon>
+      </div>
+      <div class="quick-card__body">
+        <h4>{{ action.label }}</h4>
+        <p>{{ action.description }}</p>
+      </div>
+      <button mat-stroked-button [color]="action.color" (click)="navigate(action.route)">
+        Otvori
+        <mat-icon>arrow_outward</mat-icon>
+      </button>
+    </mat-card>
+    }
+  </section>
+
+  <section class="overview__grid">
+    <mat-card class="insights-card">
+      <header>
+        <h3>Prioritetni uvidi</h3>
+        <button mat-icon-button matTooltip="Predstojeći signali i preporučene akcije">
+          <mat-icon>info</mat-icon>
+        </button>
+      </header>
+
+      <div class="insights-card__list">
+        @for (insight of insights; track insight.title) {
+        <article class="insight" [ngClass]="'insight--' + insight.accent">
+          <div class="insight__icon">
+            <mat-icon>{{ insight.icon }}</mat-icon>
+          </div>
+          <div class="insight__body">
+            <h4>{{ insight.title }}</h4>
+            <p>{{ insight.description }}</p>
+            @if (insight.action) {
+            <button mat-button color="primary">
+              {{ insight.action }}
+              <mat-icon>arrow_forward</mat-icon>
+            </button>
+            }
+          </div>
+        </article>
+        }
+      </div>
+    </mat-card>
+
+    <mat-card class="activity-card">
+      <header>
+        <h3>Nedavna aktivnost</h3>
+        <mat-chip-set>
+          <mat-chip selected>Revizija</mat-chip>
+          <mat-chip>Bezbednost</mat-chip>
+          <mat-chip>Licenciranje</mat-chip>
+        </mat-chip-set>
+      </header>
+
+      <mat-divider></mat-divider>
+
+      @if (recentActivity.length) {
+      <ul class="activity-feed">
+        @for (item of recentActivity; track item.timeAgo) {
+        <li [ngClass]="'activity-feed__item--' + item.tone">
+          <div class="activity-feed__icon">
+            <mat-icon>{{ item.icon }}</mat-icon>
+          </div>
+          <div class="activity-feed__body">
+            <div class="activity-feed__headline">
+              <span class="activity-feed__actor">{{ item.actor }}</span>
+              <span class="activity-feed__action">{{ item.action }}</span>
+            </div>
+            <div class="activity-feed__meta">{{ item.meta }}</div>
+          </div>
+          <div class="activity-feed__time">
+            <mat-icon>schedule</mat-icon>
+            <span>{{ item.timeAgo }}</span>
+          </div>
+        </li>
+        }
+      </ul>
+      } @else {
+      <div class="activity-feed__empty">
+        <mat-icon>inventory_2</mat-icon>
+        <p>Još uvek nema audit zapisa za prikaz.</p>
+      </div>
+      }
+    </mat-card>
+
+    <mat-card class="tenants-card">
+      <header>
+        <h3>Nedavni tenanti</h3>
+        <mat-chip-set>
+          <mat-chip color="primary" selected>{{ recentTenants.length }}</mat-chip>
+        </mat-chip-set>
+      </header>
+
+      @if (recentTenants.length) {
+      <div class="tenants-card__list">
+        @for (tenant of recentTenants; track tenant.name) {
+        <div class="tenants-card__row" [ngClass]="'tenants-card__row--' + tenant.status">
+          <div class="tenants-card__info">
+            <h4>{{ tenant.name }}</h4>
+            <span class="tenants-card__meta">{{ tenant.createdAt }}</span>
+          </div>
+          <div class="tenants-card__status">
+            <mat-chip [color]="tenant.status === 'suspended' ? 'warn' : 'primary'" selected>
+              {{ tenant.status | titlecase }}
+            </mat-chip>
+            <span class="tenants-card__license">{{ tenant.license }}</span>
+          </div>
+        </div>
+        }
+      </div>
+      } @else {
+      <div class="tenants-card__empty">
+        <mat-icon>domain_disabled</mat-icon>
+        <p>Nema novih tenanata u poslednjih nekoliko dana.</p>
+      </div>
+      }
+    </mat-card>
+  </section>
+</section>
+} @else {
+<div class="overview__loading">
+  <mat-progress-spinner mode="indeterminate" diameter="56"></mat-progress-spinner>
+  <p>Učitavanje global admin pregleda...</p>
+</div>
 }

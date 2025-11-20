@@ -5,7 +5,7 @@
         <mat-icon>tune</mat-icon>
       </div>
       <div class="admin-page-hero__text">
-        <h2>Scope governance</h2>
+        <h2>Upravljanje scope-ovima</h2>
         <p>Održavaj konzistentan katalog globalnih i tenant scope-ova.</p>
       </div>
     </div>
@@ -25,15 +25,11 @@
   <section class="admin-scopes__filters" [formGroup]="filterForm">
     <mat-form-field appearance="outline">
       <mat-icon matPrefix>search</mat-icon>
-      <input
-        matInput
-        placeholder="Pretraga po nazivu ili opisu"
-        formControlName="search"
-      />
+      <input matInput placeholder="Pretraga po nazivu ili opisu" formControlName="search" />
       @if (filterForm.value.search) {
-        <button matSuffix mat-icon-button (click)="clearSearch()">
-          <mat-icon>close</mat-icon>
-        </button>
+      <button matSuffix mat-icon-button (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
       }
     </mat-form-field>
 
@@ -54,114 +50,97 @@
   </section>
 
   @if (!loading) {
-    <section class="admin-scopes__groups">
-      @if (scopeGroups.length) {
-        @for (group of scopeGroups; track group.key) {
-          <mat-card class="scope-group">
-            <div class="scope-group__header">
-              <div class="scope-group__title">
-                <mat-icon>{{ group.icon }}</mat-icon>
-                <div>
-                  <h3>{{ group.label }}</h3>
-                  <p>{{ group.description }}</p>
-                </div>
-              </div>
-              <mat-chip appearance="outlined">{{ group.scopes.length }} scope definicija</mat-chip>
-            </div>
-
-            <div class="scope-group__grid">
-              @for (scope of group.scopes; track trackScopeId($index, scope)) {
-                @let segments = getScopeSegments(scope);
-                <mat-card class="scope-card">
-                  <header>
-                    <div class="scope-card__headline">
-                      <h4>{{ scope.name }}</h4>
-                      <div class="scope-card__segments">
-                        <mat-chip>{{ segments.namespace }}</mat-chip>
-                        <mat-chip>{{ segments.action }}</mat-chip>
-                      </div>
-                    </div>
-                    <div class="scope-card__header-actions">
-                      <button
-                        mat-icon-button
-                        matTooltip="Kopiraj scope"
-                        (click)="copyScopeName(scope)"
-                        [disabled]="isProcessingScope(scope)"
-                      >
-                        <mat-icon>content_copy</mat-icon>
-                      </button>
-                      <button
-                        mat-icon-button
-                        matTooltip="Izmeni"
-                        (click)="openEditDialog(scope)"
-                        [disabled]="isProcessingScope(scope)"
-                      >
-                        <mat-icon>edit</mat-icon>
-                      </button>
-                    </div>
-                  </header>
-
-                  <p class="scope-card__description">
-                    {{ scope.description || 'Scope nema dodatni opis.' }}
-                  </p>
-
-                  <section class="scope-card__meta">
-                    <div>
-                      <span class="label">Kategorija</span>
-                      <span class="value">{{ (scope.category || 'tenant') | titlecase }}</span>
-                    </div>
-                    <div>
-                      <span class="label">Ažuriran</span>
-                      <span class="value">{{ scope.updatedAt | date: 'dd.MM.yyyy HH:mm' }}</span>
-                    </div>
-                    <div>
-                      <span class="label">Kreiran</span>
-                      <span class="value">{{ scope.createdAt | date: 'dd.MM.yyyy' }}</span>
-                    </div>
-                  </section>
-
-                  <footer class="scope-card__actions">
-                    <button
-                      mat-button
-                      color="primary"
-                      (click)="openEditDialog(scope)"
-                      [disabled]="isProcessingScope(scope)"
-                    >
-                      <mat-icon>tune</mat-icon>
-                      Izmeni
-                    </button>
-                    <button
-                      mat-stroked-button
-                      color="warn"
-                      (click)="confirmDelete(scope)"
-                      [disabled]="isProcessingScope(scope)"
-                    >
-                      <mat-icon>delete</mat-icon>
-                      Obriši
-                    </button>
-                  </footer>
-
-                  @if (isProcessingScope(scope)) {
-                    <div class="scope-card__overlay">
-                      <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
-                    </div>
-                  }
-                </mat-card>
-              }
-            </div>
-          </mat-card>
-        }
-      } @else {
-        <div class="admin-scopes__empty">
-          <mat-icon>inventory_2</mat-icon>
-          <p>Nema scope definicija koje odgovaraju filterima.</p>
+  <section class="admin-scopes__groups">
+    @if (scopeGroups.length) {
+    @for (group of scopeGroups; track group.key) {
+    <mat-card class="scope-group">
+      <div class="scope-group__header">
+        <div class="scope-group__title">
+          <mat-icon>{{ group.icon }}</mat-icon>
+          <div>
+            <h3>{{ group.label }}</h3>
+            <p>{{ group.description }}</p>
+          </div>
         </div>
-      }
-    </section>
-  } @else {
-    <div class="admin-scopes__loading">
-      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-      <p>Učitavanje scope definicija...</p>
+        <mat-chip appearance="outlined">{{ group.scopes.length }} scope definicija</mat-chip>
+      </div>
+
+      <div class="scope-group__grid">
+        @for (scope of group.scopes; track trackScopeId($index, scope)) {
+        @let segments = getScopeSegments(scope);
+        <mat-card class="scope-card">
+          <header>
+            <div class="scope-card__headline">
+              <h4>{{ scope.name }}</h4>
+              <div class="scope-card__segments">
+                <mat-chip>{{ segments.namespace }}</mat-chip>
+                <mat-chip>{{ segments.action }}</mat-chip>
+              </div>
+            </div>
+            <div class="scope-card__header-actions">
+              <button mat-icon-button matTooltip="Kopiraj scope" (click)="copyScopeName(scope)"
+                [disabled]="isProcessingScope(scope)">
+                <mat-icon>content_copy</mat-icon>
+              </button>
+              <button mat-icon-button matTooltip="Izmeni" (click)="openEditDialog(scope)"
+                [disabled]="isProcessingScope(scope)">
+                <mat-icon>edit</mat-icon>
+              </button>
+            </div>
+          </header>
+
+          <p class="scope-card__description">
+            {{ scope.description || 'Scope nema dodatni opis.' }}
+          </p>
+
+          <section class="scope-card__meta">
+            <div>
+              <span class="label">Kategorija</span>
+              <span class="value">{{ (scope.category || 'tenant') | titlecase }}</span>
+            </div>
+            <div>
+              <span class="label">Ažuriran</span>
+              <span class="value">{{ scope.updatedAt | date: 'dd.MM.yyyy HH:mm' }}</span>
+            </div>
+            <div>
+              <span class="label">Kreiran</span>
+              <span class="value">{{ scope.createdAt | date: 'dd.MM.yyyy' }}</span>
+            </div>
+          </section>
+
+          <footer class="scope-card__actions">
+            <button mat-button color="primary" (click)="openEditDialog(scope)" [disabled]="isProcessingScope(scope)">
+              <mat-icon>tune</mat-icon>
+              Izmeni
+            </button>
+            <button mat-stroked-button color="warn" (click)="confirmDelete(scope)"
+              [disabled]="isProcessingScope(scope)">
+              <mat-icon>delete</mat-icon>
+              Obriši
+            </button>
+          </footer>
+
+          @if (isProcessingScope(scope)) {
+          <div class="scope-card__overlay">
+            <mat-progress-spinner diameter="32" mode="indeterminate"></mat-progress-spinner>
+          </div>
+          }
+        </mat-card>
+        }
+      </div>
+    </mat-card>
+    }
+    } @else {
+    <div class="admin-scopes__empty">
+      <mat-icon>inventory_2</mat-icon>
+      <p>Nema scope definicija koje odgovaraju filterima.</p>
     </div>
+    }
+  </section>
+  } @else {
+  <div class="admin-scopes__loading">
+    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    <p>Učitavanje scope definicija...</p>
+  </div>
   }
 </section>

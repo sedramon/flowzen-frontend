@@ -148,30 +148,30 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
     return [
       {
         icon: 'apartment',
-        label: 'Active tenants',
+        label: 'Aktivni tenanti',
         value: (overview.active ?? 0).toString(),
         trend: `${overview.total ?? 0} ukupno`,
         accent: 'blue',
       },
       {
         icon: 'groups',
-        label: 'Pending tenants',
+        label: 'Tenanti na čekanju',
         value: (overview.pending ?? 0).toString(),
-        trend: `${overview.suspended ?? 0} suspended`,
+        trend: `${overview.suspended ?? 0} suspendovanih`,
         accent: 'purple',
       },
       {
         icon: 'vpn_key',
-        label: 'Licenses expiring soon',
+        label: 'Licence uskoro ističu',
         value: (overview.licensesExpiringSoon ?? 0).toString(),
-        trend: '30-day horizon',
+        trend: '30 dana horizont',
         accent: 'teal',
       },
       {
         icon: 'gpp_maybe',
-        label: 'Audit entries today',
+        label: 'Audit zapisi danas',
         value: auditCount.toString(),
-        trend: 'Latest 5 activities',
+        trend: 'Poslednjih 5 aktivnosti',
         accent: 'amber',
       },
     ];
@@ -182,30 +182,30 @@ export class AdminOverviewComponent implements OnInit, OnDestroy {
 
     return [
       {
-        title: 'License renewals due',
+        title: 'Obnova licenci',
         description:
           expiring > 0
-            ? `${expiring} tenant${expiring === 1 ? '' : 's'} require license review in the next 30 days.`
+            ? `${expiring} tenant${expiring === 1 ? '' : 'a'} zahteva pregled licenci u narednih 30 dana.`
             : 'Sve licence su uredne u narednih 30 dana.',
         icon: 'event_available',
         accent: expiring > 0 ? 'warning' : 'success',
         action: expiring > 0 ? 'Pregledaj licence' : undefined,
       },
       {
-        title: 'Tenant onboarding',
+        title: 'Onboarding tenanata',
         description:
           overview.pending > 0
-            ? `${overview.pending} tenant${overview.pending === 1 ? '' : 's'} čeka aktivaciju.`
+            ? `${overview.pending} tenant${overview.pending === 1 ? '' : 'a'} čeka aktivaciju.`
             : 'Nema tenanata na čekanju.',
         icon: 'hourglass_bottom',
         accent: overview.pending > 0 ? 'audit' : 'success',
         action: overview.pending > 0 ? 'Pregledaj pending' : undefined,
       },
       {
-        title: 'Global stability',
+        title: 'Globalna stabilnost',
         description:
           overview.suspended > 0
-            ? `${overview.suspended} tenant${overview.suspended === 1 ? '' : 's'} trenutno suspendovan.`
+            ? `${overview.suspended} tenant${overview.suspended === 1 ? '' : 'a'} trenutno suspendovan.`
             : 'Nema suspendovanih tenanata.',
         icon: 'rocket_launch',
         accent: overview.suspended > 0 ? 'audit' : 'success',

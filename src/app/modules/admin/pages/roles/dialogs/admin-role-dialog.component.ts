@@ -224,8 +224,8 @@ export class AdminRoleDialogComponent implements OnInit, OnDestroy {
     };
 
     const buckets: ScopeBucket[] = [
-      { key: 'global', label: 'Global scopes', scopes: [] },
-      { key: 'tenant', label: 'Tenant scopes', scopes: [] },
+      { key: 'global', label: 'Globalni scope-ovi', scopes: [] },
+      { key: 'tenant', label: 'Tenant scope-ovi', scopes: [] },
     ];
 
     this.allScopes.forEach((scope) => {

@@ -15,20 +15,11 @@
         <mat-icon>refresh</mat-icon>
         Osveži
       </button>
-      <button
-        mat-flat-button
-        color="accent"
-        class="admin-roles__create"
-        (click)="openCreateDialog()"
-        [disabled]="loading || creatingRole"
-      >
+      <button mat-flat-button color="accent" class="admin-roles__create" (click)="openCreateDialog()"
+        [disabled]="loading || creatingRole">
         <mat-icon *ngIf="!creatingRole">workspace_premium</mat-icon>
-        <mat-progress-spinner
-          *ngIf="creatingRole"
-          diameter="18"
-          mode="indeterminate"
-          class="button-spinner"
-        ></mat-progress-spinner>
+        <mat-progress-spinner *ngIf="creatingRole" diameter="18" mode="indeterminate"
+          class="button-spinner"></mat-progress-spinner>
         <span>{{ creatingRole ? 'Kreiranje...' : 'Nova rola' }}</span>
       </button>
     </div>
@@ -39,9 +30,9 @@
       <mat-icon matPrefix>search</mat-icon>
       <input matInput placeholder="Pretraga po nazivu, tipu ili scope-u" formControlName="search" />
       @if (filterForm.value.search) {
-        <button matSuffix mat-icon-button (click)="clearSearch()">
-          <mat-icon>close</mat-icon>
-        </button>
+      <button matSuffix mat-icon-button (click)="clearSearch()">
+        <mat-icon>close</mat-icon>
+      </button>
       }
     </mat-form-field>
 
@@ -61,125 +52,115 @@
     </mat-button-toggle-group>
 
     <mat-form-field appearance="outline" class="tenant-filter">
-      <mat-label>Tenant filter</mat-label>
+      <mat-label>Filter tenanata</mat-label>
       <mat-select formControlName="tenant">
         <mat-option [value]="null">Sve vrednosti</mat-option>
         @for (tenant of tenants; track tenant._id) {
-          <mat-option [value]="tenant._id">{{ tenant.name }}</mat-option>
+        <mat-option [value]="tenant._id">{{ tenant.name }}</mat-option>
         }
       </mat-select>
       @if (tenantsLoading) {
-        <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
+      <mat-progress-spinner diameter="20" mode="indeterminate"></mat-progress-spinner>
       }
     </mat-form-field>
   </section>
 
   @if (!loading) {
-    <section class="admin-roles__content">
-      @if (roleGroups.length) {
-        @for (group of roleGroups; track group.key) {
-          <mat-card class="admin-roles__section">
-            <div class="section-header">
-              <div class="section-title">
-                <mat-icon>{{ group.icon }}</mat-icon>
-                <div>
-                  <h3>{{ group.label }}</h3>
-                  <p>{{ group.description }}</p>
-                </div>
+  <section class="admin-roles__content">
+    @if (roleGroups.length) {
+    @for (group of roleGroups; track group.key) {
+    <mat-card class="admin-roles__section">
+      <div class="section-header">
+        <div class="section-title">
+          <mat-icon>{{ group.icon }}</mat-icon>
+          <div>
+            <h3>{{ group.label }}</h3>
+            <p>{{ group.description }}</p>
+          </div>
+        </div>
+        <mat-chip appearance="outlined" color="primary">
+          {{ group.roles.length }} role
+        </mat-chip>
+      </div>
+
+      <div class="role-card-grid">
+        @for (role of group.roles; track role._id || role.name) {
+        <mat-card class="role-card">
+          <header>
+            <div class="role-card__identity">
+              <div class="role-avatar" [class.role-avatar--global]="role.type === 'global'">
+                <mat-icon>{{ role.type === 'global' ? 'public' : 'apartment' }}</mat-icon>
               </div>
-              <mat-chip appearance="outlined" color="primary">
-                {{ group.roles.length }} role
-              </mat-chip>
+              <div>
+                <h4>{{ role.name }}</h4>
+                <span class="role-card__meta">
+                  {{ role.type === 'global' ? 'Global' : role.tenant?.name || 'Tenant' }}
+                </span>
+              </div>
             </div>
+            <mat-chip-set aria-label="Role type">
+              <mat-chip [selected]="role.type === 'global'">
+                {{ role.type === 'global' ? 'Global' : 'Tenant' }}
+              </mat-chip>
+            </mat-chip-set>
+          </header>
 
-            <div class="role-card-grid">
-              @for (role of group.roles; track role._id || role.name) {
-                <mat-card class="role-card">
-                  <header>
-                    <div class="role-card__identity">
-                      <div class="role-avatar" [class.role-avatar--global]="role.type === 'global'">
-                        <mat-icon>{{ role.type === 'global' ? 'public' : 'apartment' }}</mat-icon>
-                      </div>
-                      <div>
-                        <h4>{{ role.name }}</h4>
-                        <span class="role-card__meta">
-                          {{ role.type === 'global' ? 'Global' : role.tenant?.name || 'Tenant' }}
-                        </span>
-                      </div>
-                    </div>
-                    <mat-chip-set aria-label="Role type">
-                      <mat-chip [selected]="role.type === 'global'">
-                        {{ role.type === 'global' ? 'Global' : 'Tenant' }}
-                      </mat-chip>
-                    </mat-chip-set>
-                  </header>
-
-                  <section class="role-card__scopes">
-                    <div class="scopes-header">
-                      <span class="label">Scopes</span>
-                      <span class="count">{{ role.availableScopes?.length || 0 }}</span>
-                    </div>
-                    <div class="scopes-list">
-                      @if (role.availableScopes?.length) {
-                        @for (scope of role.availableScopes; track scope._id || scope) {
-                          <mat-chip>
-                            {{
-                              typeof scope === 'string'
-                                ? scope
-                                : scope.name
-                            }}
-                          </mat-chip>
-                        }
-                      } @else {
-                        <span class="placeholder">Nema dodeljenih scope-ova</span>
-                      }
-                    </div>
-                  </section>
-
-                  <footer class="role-card__actions">
-                    <button
-                      mat-stroked-button
-                      color="primary"
-                      (click)="openEditDialog(role)"
-                      [disabled]="isProcessingRole(role)"
-                    >
-                      <mat-icon>edit</mat-icon>
-                      Izmeni
-                    </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      matTooltip="Obriši rolu"
-                      (click)="confirmDelete(role)"
-                      [disabled]="isProcessingRole(role)"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </footer>
-
-                  @if (isProcessingRole(role)) {
-                    <div class="role-card__overlay">
-                      <mat-progress-spinner diameter="28" mode="indeterminate"></mat-progress-spinner>
-                    </div>
-                  }
-                </mat-card>
+          <section class="role-card__scopes">
+            <div class="scopes-header">
+              <span class="label">Scopes</span>
+              <span class="count">{{ role.availableScopes?.length || 0 }}</span>
+            </div>
+            <div class="scopes-list">
+              @if (role.availableScopes?.length) {
+              @for (scope of role.availableScopes; track scope._id || scope) {
+              <mat-chip>
+                {{
+                typeof scope === 'string'
+                ? scope
+                : scope.name
+                }}
+              </mat-chip>
+              }
+              } @else {
+              <span class="placeholder">Nema dodeljenih scope-ova</span>
               }
             </div>
-          </mat-card>
+          </section>
+
+          <footer class="role-card__actions">
+            <button mat-stroked-button color="primary" (click)="openEditDialog(role)"
+              [disabled]="isProcessingRole(role)">
+              <mat-icon>edit</mat-icon>
+              Izmeni
+            </button>
+            <button mat-icon-button color="warn" matTooltip="Obriši rolu" (click)="confirmDelete(role)"
+              [disabled]="isProcessingRole(role)">
+              <mat-icon>delete</mat-icon>
+            </button>
+          </footer>
+
+          @if (isProcessingRole(role)) {
+          <div class="role-card__overlay">
+            <mat-progress-spinner diameter="28" mode="indeterminate"></mat-progress-spinner>
+          </div>
+          }
+        </mat-card>
         }
-      } @else {
-        <div class="admin-roles__empty">
-          <mat-icon>category</mat-icon>
-          <p>Nema rola koje ispunjavaju kriterijume.</p>
-          <span>Promeni filtere ili kreiraj novu rolu.</span>
-        </div>
-      }
-    </section>
-  } @else {
-    <div class="admin-roles__loading">
-      <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
-      <p>Učitavanje rola...</p>
+      </div>
+    </mat-card>
+    }
+    } @else {
+    <div class="admin-roles__empty">
+      <mat-icon>category</mat-icon>
+      <p>Nema rola koje ispunjavaju kriterijume.</p>
+      <span>Promeni filtere ili kreiraj novu rolu.</span>
     </div>
+    }
+  </section>
+  } @else {
+  <div class="admin-roles__loading">
+    <mat-progress-spinner mode="indeterminate" diameter="48"></mat-progress-spinner>
+    <p>Učitavanje rola...</p>
+  </div>
   }
 </section>
-
