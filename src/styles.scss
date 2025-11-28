@@ -22,7 +22,6 @@
 }
 
 body {
-  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
   font-weight: 400;
   line-height: 1.6;
@@ -30,6 +29,505 @@ body {
   -moz-osx-font-smoothing: grayscale;
   padding: 0;
   margin: 0;
+}
+
+/* Dark theme - body background */
+html[data-theme="dark"] body,
+html.theme-dark body,
+html.theme-system body {
+  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%) !important;
+  color: rgb(255, 255, 255) !important;
+  
+
+  .login-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .filter-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .clients-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .employee-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .users-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .roles-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .services-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .articles-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .suppliers-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .nav-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .content-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+  }
+
+  .p-select {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: #1a1a1a !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.5) !important;
+      background: #1a1a1a !important;
+    }
+
+    &:focus {
+      border-color: rgba(139, 92, 246, 0.6) !important;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+      background: #2a2a2a !important;
+    }
+  }
+  
+
+  .section-title {
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .feature-card {
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.6), rgba(45, 27, 78, 0.6)) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: white !important;
+  }
+
+  .testimonial-card {
+    background: linear-gradient(135deg, rgba(26, 31, 58, 0.6), rgba(45, 27, 78, 0.6)) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+    color: white !important;
+  }
+}
+
+/* Light theme - body background */
+html[data-theme="light"] body,
+html.theme-light body {
+  background: linear-gradient(135deg, #ecd8ff 0%, #c5a3ff 50%, #ebd1ff 100%) !important;
+  color: rgb(38, 38, 38) !important;
+
+  .p-inputtext {
+    color: rgba(38, 38, 38, 0.95) !important;
+    background: #ffffff !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+    
+    &::placeholder {
+      color: rgba(38, 38, 38, 0.4) !important;
+    }
+  }
+
+  .facility-select {
+    color: rgba(38, 38, 38, 0.95) !important;
+    background: #ffffff !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important;
+
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.5) !important;
+      background: #ffffff !important;
+    }
+
+    &:focus {
+      border-color: rgba(139, 92, 246, 0.6) !important;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15) !important;
+      background: #f5f5f5 !important;
+    }
+  }
+
+  /* General p-select styles for light theme */
+  .p-select {
+    background: #ffffff !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    
+    .p-select-label {
+      background: #ffffff !important;
+      color: rgba(38, 38, 38, 0.95) !important;
+      
+      &.p-placeholder {
+        color: rgba(38, 38, 38, 0.4) !important;
+      }
+    }
+    
+    &:hover {
+      border-color: rgba(139, 92, 246, 0.5) !important;
+      background: #ffffff !important;
+    }
+    
+    &:focus {
+      border-color: rgba(139, 92, 246, 0.6) !important;
+      background: #ffffff !important;
+    }
+  }
+
+  .sort-field {
+    label {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+    
+    .p-select {
+      background: #ffffff !important;
+      border: 2px solid rgba(139, 92, 246, 0.3) !important;
+      
+      .p-select-label {
+        background: #ffffff !important;
+        color: rgba(38, 38, 38, 0.95) !important;
+        
+        &.p-placeholder {
+          color: rgba(38, 38, 38, 0.4) !important;
+        }
+      }
+      
+      &:hover {
+        border-color: rgba(139, 92, 246, 0.5) !important;
+        background: #ffffff !important;
+      }
+      
+      &:focus {
+        border-color: rgba(139, 92, 246, 0.6) !important;
+        background: #ffffff !important;
+      }
+    }
+    
+    .p-datepicker {
+      .p-inputtext {
+        background: #ffffff !important;
+        color: rgba(38, 38, 38, 0.95) !important;
+        
+        &::placeholder {
+          color: rgba(38, 38, 38, 0.4) !important;
+        }
+      }
+    }
+  }
+  
+  .date-field {
+    .p-datepicker {
+      .p-inputtext {
+        background: #ffffff !important;
+        color: rgba(38, 38, 38, 0.95) !important;
+        
+        &::placeholder {
+          color: rgba(38, 38, 38, 0.4) !important;
+        }
+      }
+    }
+    
+    .p-select {
+      background: #ffffff !important;
+      border: 2px solid rgba(139, 92, 246, 0.3) !important;
+      
+      .p-select-label {
+        background: #ffffff !important;
+        color: rgba(38, 38, 38, 0.95) !important;
+        
+        &.p-placeholder {
+          color: rgba(38, 38, 38, 0.4) !important;
+        }
+      }
+    }
+  }
+  
+  /* Clear button text color for light theme */
+  .clear-btn {
+    .p-button {
+      color: rgba(38, 38, 38, 0.85) !important;
+      
+      .p-button-label {
+        color: rgba(38, 38, 38, 0.85) !important;
+      }
+    }
+
+    .p-button-icon {
+      color: rgba(38, 38, 38, 0.85) !important;
+    }
+  }
+
+  label {
+    color: rgba(38, 38, 38, 0.95) !important;
+  }
+  
+  .form-actions {
+    .clear-all-btn {
+      .p-button-label {
+        color: red !important;
+      }
+
+      .p-button-icon {
+        color: red !important;
+      }
+    }
+
+    .reset-btn {
+      .p-button-label {
+        color: rgba(38, 38, 38, 0.85) !important;
+      }
+
+      .p-button-icon {
+        color: rgba(38, 38, 38, 0.85) !important;
+      }
+    }
+  }
+
+  .floating-card {
+    color: white !important;
+  }
+
+  .hero-badge {
+    color: white !important;
+  }
+
+  .stat-label {
+    color: white !important;
+  }
+
+  .p-button-label {
+    color: white !important;
+  }
+
+  .p-button-icon {
+    color: white !important;
+  }
+  
+  .newsletter-subtitle {
+    color: white !important;
+  }
+
+  .login-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 252, 0.99)) !important;
+  }
+
+  .section-title {
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Clients component - text colors for light theme */
+  .client-name {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .client-phone {
+    color: rgba(27, 28, 28, 0.75) !important;
+  }
+
+  .client-date {
+    color: rgba(27, 28, 28, 0.65) !important;
+  }
+
+  .user-name {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+  
+
+  .header-text {
+    h2 {
+      color: rgba(27, 28, 28, 0.95) !important;
+    }
+    
+    p {
+      color: rgba(27, 28, 28, 0.6) !important;
+    }
+  }
+
+  .nav-header {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .effective-label {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .section-placeholder {
+    color: rgba(27, 28, 28, 0.95) !important;
+
+    i {
+      color: rgba(27, 28, 28, 0.95) !important;
+    }
+
+    h2 {
+      color: rgba(27, 28, 28, 0.95) !important;
+    }
+    
+    p {
+      color: rgba(27, 28, 28, 0.6) !important;
+    }
+  }
+
+  .filter-header-content {
+    h3 {
+      color: rgba(27, 28, 28, 0.95) !important;
+    }
+  }
+
+  .p-tag {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .service-name {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .service-duration {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .article-name {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .article-unit {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .article-tax {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .article-supplier {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .supplier-name {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .supplier-address {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+  
+  .supplier-city {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+  
+  .supplier-phone {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .supplier-landline {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+  
+  .supplier-pib {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+
+  .name-cell {
+    color: rgba(27, 28, 28, 0.95) !important;
+  }
+  
+
+  /* Datatable text colors for light theme */
+  .p-datatable {
+    .p-datatable-header {
+      color: rgba(27, 28, 28, 0.9) !important;
+      background: rgba(139, 92, 246, 0.05) !important;
+    }
+    
+    .p-datatable-thead > tr > th {
+      color: rgba(27, 28, 28, 0.8) !important;
+      font-weight: 700 !important;
+      background: rgba(139, 92, 246, 0.05) !important;
+      border-bottom: 2px solid rgba(139, 92, 246, 0.2) !important;
+    }
+    
+    .p-datatable-tbody > tr > td {
+      color: rgba(27, 28, 28, 0.85) !important;
+    }
+  }
+
+  /* Action buttons in table for light theme */
+  .action-buttons {
+    .p-button {
+      &.p-button-warning {
+        color: rgb(217, 119, 6) !important;
+        
+        .p-button-icon {
+          color: rgb(217, 119, 6) !important;
+        }
+      }
+      
+      &.p-button-info {
+        color: rgb(37, 99, 235) !important;
+        
+        .p-button-icon {
+          color: rgb(37, 99, 235) !important;
+        }
+      }
+      
+      &.p-button-danger {
+        color: rgb(220, 38, 38) !important;
+        
+        .p-button-icon {
+          color: rgb(220, 38, 38) !important;
+        }
+      }
+      
+      .p-button-icon {
+        color: rgba(27, 28, 28, 0.7) !important;
+      }
+    }
+  }
+
+  /* Paginator text colors for light theme */
+  .p-paginator {
+    color: rgba(27, 28, 28, 0.7) !important;
+    
+    .p-paginator-current {
+      color: rgba(27, 28, 28, 0.7) !important;
+    }
+    
+    .p-paginator-page {
+      color: rgba(27, 28, 28, 0.7) !important;
+      
+      &:hover {
+        color: rgba(27, 28, 28, 0.9) !important;
+      }
+    }
+  }
+
+  .feature-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 252, 0.99)) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .testimonial-card {
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.98), rgba(250, 250, 252, 0.99)) !important;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
+  }
 }
 
 /* Modern typography scale */

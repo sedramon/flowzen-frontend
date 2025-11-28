@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { SettingsService } from './services/settings.service';
 import { Facility } from '../../models/Facility';
 import { AuthService } from '../../core/services/auth.service';
+import { ThemeService } from '../../core/services/theme.service';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
@@ -68,6 +69,7 @@ export class SettingsComponent implements OnInit {
   constructor(
     private settingsService: SettingsService,
     private authService: AuthService,
+    private themeService: ThemeService,
     private dialog: MatDialog,
     private messageService: MessageService,
     private fb: FormBuilder
@@ -237,7 +239,20 @@ export class SettingsComponent implements OnInit {
       .pipe(
         tap(() => this.showToast('Lična podešavanja sačuvana')),
         switchMap(() => this.settingsService.getEffectiveSettings(this.tenantId, this.userId)),
-        tap(eff => (this.effectiveSettings = eff)),
+        tap(eff => {
+          this.effectiveSettings = eff;
+          // Ažuriraj temu kada se promene settings
+          const themeToApply = (eff.theme as any) || 'system';
+          this.themeService.setTheme(themeToApply);
+          
+          // Toast poruka za promenu teme
+          const themeLabels: Record<string, string> = {
+            'light': 'Svetla',
+            'dark': 'Tamna',
+            'system': 'Sistemska'
+          };
+          this.showToast(`Tema promenjena na: ${themeLabels[themeToApply] || themeToApply}`);
+        }),
         switchMap(() => this.settingsService.getUserSettingsRaw(this.tenantId, this.userId)),
         tap(raw => (this.userRaw = raw))
       )
@@ -269,7 +284,20 @@ export class SettingsComponent implements OnInit {
       .pipe(
         tap(() => this.showToast('Podrazumevana podešavanja sačuvana')),
         switchMap(() => this.settingsService.getEffectiveSettings(this.tenantId, this.userId)),
-        tap(eff => (this.effectiveSettings = eff)),
+        tap(eff => {
+          this.effectiveSettings = eff;
+          // Ažuriraj temu kada se promene settings
+          const themeToApply = (eff.theme as any) || 'system';
+          this.themeService.setTheme(themeToApply);
+          
+          // Toast poruka za promenu teme
+          const themeLabels: Record<string, string> = {
+            'light': 'Svetla',
+            'dark': 'Tamna',
+            'system': 'Sistemska'
+          };
+          this.showToast(`Tema promenjena na: ${themeLabels[themeToApply] || themeToApply}`);
+        }),
         switchMap(() => this.settingsService.getTenantSettingsRaw(this.tenantId)),
         tap(raw => (this.tenantRaw = raw))
       )

@@ -9,7 +9,6 @@
   min-height: calc(100vh - 64px);
   display: flex;
   flex-direction: column;
-  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
   padding: 2rem;
   gap: 2rem;
 }
@@ -440,7 +439,7 @@
 
 .schedule-grid {
   margin: 20px;
-  border: 2px solid #8c0055;
+  border: 2px solid rgba(139, 92, 246, 0.3);
   border-radius: 20px;
   display: flex;
   flex-direction: column;

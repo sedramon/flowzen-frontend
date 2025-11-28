@@ -66,8 +66,14 @@ export class SettingsService {
     }
 
     getEffectiveSettings(tenantId: string, userId: string): Observable<EffectiveSettings> {
+        if (!tenantId || !userId) {
+            console.warn('[SettingsService] getEffectiveSettings called with invalid params', { tenantId, userId });
+        }
         const params = new HttpParams().set('tenant', tenantId).set('user', userId);
-        return this.http.get<EffectiveSettings>(`${this.apiUrl}/settings`, { params });
+        return this.http.get<EffectiveSettings>(`${this.apiUrl}/settings`, { 
+            params,
+            withCredentials: true // Osiguraj da se šalju cookies za autentifikaciju
+        });
     }
 
     getTenantSettingsRaw(tenantId: string): Observable<RawSettings> {

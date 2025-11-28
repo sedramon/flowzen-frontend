@@ -3,7 +3,6 @@
   gap: 2rem;
   padding: 2rem;
   min-height: calc(100vh - 70px);
-  background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%);
 }
 
 // Navigation Sidebar
@@ -56,7 +55,6 @@
     margin: 0;
     font-size: 1.5rem;
     font-weight: 700;
-    color: rgba(255, 255, 255, 0.95);
   }
 }
 
@@ -320,6 +318,29 @@
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
       }
+    }
+  }
+}
+
+.reset-btn {
+  ::ng-deep .p-button {
+    padding: 0.875rem 1.5rem;
+    border: 2px solid rgba(139, 92, 246, 0.4);
+    background: transparent;
+    color: rgba(255, 255, 255, 0.85);
+    font-weight: 600;
+    transition: all 0.3s ease;
+    
+    &:hover:not(:disabled) {
+      background: rgba(139, 92, 246, 0.15);
+      border-color: rgba(139, 92, 246, 0.6);
+      color: rgba(255, 255, 255, 0.95);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+    }
+    
+    &:active:not(:disabled) {
+      transform: translateY(0);
     }
   }
 }
