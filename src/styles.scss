@@ -37,7 +37,7 @@ html.theme-dark body,
 html.theme-system body {
   background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%) !important;
   color: rgb(255, 255, 255) !important;
-  
+
 
   .login-card {
     background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
@@ -101,7 +101,7 @@ html.theme-system body {
       background: #2a2a2a !important;
     }
   }
-  
+
 
   .section-title {
     background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
@@ -137,9 +137,42 @@ html.theme-light body {
     border: 2px solid rgba(139, 92, 246, 0.3) !important;
     border-radius: 12px !important;
     transition: all 0.3s ease !important;
-    
+
     &::placeholder {
       color: rgba(38, 38, 38, 0.4) !important;
+    }
+  }
+
+  .p-card {
+    color: rgba(38, 38, 38, 0.95) !important;
+    background: #ffffff !important;
+  }
+
+  .search-field {
+    .p-inputicon {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .p-inputtext {
+      color: rgba(38, 38, 38, 0.95) !important;
+      
+      &::placeholder {
+        color: rgba(38, 38, 38, 0.60) !important;
+      }
+    }
+  }
+
+  .filter-field {
+    .p-inputicon {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .p-inputtext {
+      color: rgba(38, 38, 38, 0.95) !important;
+      
+      &::placeholder {
+        color: rgba(38, 38, 38, 0.60) !important;
+      }
     }
   }
 
@@ -166,21 +199,23 @@ html.theme-light body {
   .p-select {
     background: #ffffff !important;
     border: 2px solid rgba(139, 92, 246, 0.3) !important;
-    
+    border-radius: 12px !important;
+
     .p-select-label {
       background: #ffffff !important;
       color: rgba(38, 38, 38, 0.95) !important;
-      
+      border-radius: 12px !important;
+
       &.p-placeholder {
         color: rgba(38, 38, 38, 0.4) !important;
       }
     }
-    
+
     &:hover {
       border-color: rgba(139, 92, 246, 0.5) !important;
       background: #ffffff !important;
     }
-    
+
     &:focus {
       border-color: rgba(139, 92, 246, 0.6) !important;
       background: #ffffff !important;
@@ -191,75 +226,75 @@ html.theme-light body {
     label {
       color: rgba(38, 38, 38, 0.95) !important;
     }
-    
+
     .p-select {
       background: #ffffff !important;
       border: 2px solid rgba(139, 92, 246, 0.3) !important;
-      
+
       .p-select-label {
         background: #ffffff !important;
         color: rgba(38, 38, 38, 0.95) !important;
-        
+
         &.p-placeholder {
           color: rgba(38, 38, 38, 0.4) !important;
         }
       }
-      
+
       &:hover {
         border-color: rgba(139, 92, 246, 0.5) !important;
         background: #ffffff !important;
       }
-      
+
       &:focus {
         border-color: rgba(139, 92, 246, 0.6) !important;
         background: #ffffff !important;
       }
     }
-    
+
     .p-datepicker {
       .p-inputtext {
         background: #ffffff !important;
         color: rgba(38, 38, 38, 0.95) !important;
-        
+
         &::placeholder {
           color: rgba(38, 38, 38, 0.4) !important;
         }
       }
     }
   }
-  
+
   .date-field {
     .p-datepicker {
       .p-inputtext {
         background: #ffffff !important;
         color: rgba(38, 38, 38, 0.95) !important;
-        
+
         &::placeholder {
           color: rgba(38, 38, 38, 0.4) !important;
         }
       }
     }
-    
+
     .p-select {
       background: #ffffff !important;
       border: 2px solid rgba(139, 92, 246, 0.3) !important;
-      
+
       .p-select-label {
         background: #ffffff !important;
         color: rgba(38, 38, 38, 0.95) !important;
-        
+
         &.p-placeholder {
           color: rgba(38, 38, 38, 0.4) !important;
         }
       }
     }
   }
-  
+
   /* Clear button text color for light theme */
   .clear-btn {
     .p-button {
       color: rgba(38, 38, 38, 0.85) !important;
-      
+
       .p-button-label {
         color: rgba(38, 38, 38, 0.85) !important;
       }
@@ -273,7 +308,7 @@ html.theme-light body {
   label {
     color: rgba(38, 38, 38, 0.95) !important;
   }
-  
+
   .form-actions {
     .clear-all-btn {
       .p-button-label {
@@ -315,7 +350,7 @@ html.theme-light body {
   .p-button-icon {
     color: white !important;
   }
-  
+
   .newsletter-subtitle {
     color: white !important;
   }
@@ -347,13 +382,13 @@ html.theme-light body {
   .user-name {
     color: rgba(27, 28, 28, 0.95) !important;
   }
-  
+
 
   .header-text {
     h2 {
       color: rgba(27, 28, 28, 0.95) !important;
     }
-    
+
     p {
       color: rgba(27, 28, 28, 0.6) !important;
     }
@@ -377,7 +412,7 @@ html.theme-light body {
     h2 {
       color: rgba(27, 28, 28, 0.95) !important;
     }
-    
+
     p {
       color: rgba(27, 28, 28, 0.6) !important;
     }
@@ -387,10 +422,6 @@ html.theme-light body {
     h3 {
       color: rgba(27, 28, 28, 0.95) !important;
     }
-  }
-
-  .p-tag {
-    color: rgba(27, 28, 28, 0.95) !important;
   }
 
   .service-name {
@@ -424,11 +455,11 @@ html.theme-light body {
   .supplier-address {
     color: rgba(27, 28, 28, 0.95) !important;
   }
-  
+
   .supplier-city {
     color: rgba(27, 28, 28, 0.95) !important;
   }
-  
+
   .supplier-phone {
     color: rgba(27, 28, 28, 0.95) !important;
   }
@@ -436,7 +467,7 @@ html.theme-light body {
   .supplier-landline {
     color: rgba(27, 28, 28, 0.95) !important;
   }
-  
+
   .supplier-pib {
     color: rgba(27, 28, 28, 0.95) !important;
   }
@@ -444,7 +475,7 @@ html.theme-light body {
   .name-cell {
     color: rgba(27, 28, 28, 0.95) !important;
   }
-  
+
 
   /* Datatable text colors for light theme */
   .p-datatable {
@@ -452,15 +483,15 @@ html.theme-light body {
       color: rgba(27, 28, 28, 0.9) !important;
       background: rgba(139, 92, 246, 0.05) !important;
     }
-    
-    .p-datatable-thead > tr > th {
+
+    .p-datatable-thead>tr>th {
       color: rgba(27, 28, 28, 0.8) !important;
       font-weight: 700 !important;
       background: rgba(139, 92, 246, 0.05) !important;
       border-bottom: 2px solid rgba(139, 92, 246, 0.2) !important;
     }
-    
-    .p-datatable-tbody > tr > td {
+
+    .p-datatable-tbody>tr>td {
       color: rgba(27, 28, 28, 0.85) !important;
     }
   }
@@ -470,28 +501,28 @@ html.theme-light body {
     .p-button {
       &.p-button-warning {
         color: rgb(217, 119, 6) !important;
-        
+
         .p-button-icon {
           color: rgb(217, 119, 6) !important;
         }
       }
-      
+
       &.p-button-info {
         color: rgb(37, 99, 235) !important;
-        
+
         .p-button-icon {
           color: rgb(37, 99, 235) !important;
         }
       }
-      
+
       &.p-button-danger {
         color: rgb(220, 38, 38) !important;
-        
+
         .p-button-icon {
           color: rgb(220, 38, 38) !important;
         }
       }
-      
+
       .p-button-icon {
         color: rgba(27, 28, 28, 0.7) !important;
       }
@@ -501,14 +532,14 @@ html.theme-light body {
   /* Paginator text colors for light theme */
   .p-paginator {
     color: rgba(27, 28, 28, 0.7) !important;
-    
+
     .p-paginator-current {
       color: rgba(27, 28, 28, 0.7) !important;
     }
-    
+
     .p-paginator-page {
       color: rgba(27, 28, 28, 0.7) !important;
-      
+
       &:hover {
         color: rgba(27, 28, 28, 0.9) !important;
       }
@@ -528,10 +559,669 @@ html.theme-light body {
     border: 1px solid rgba(139, 92, 246, 0.2) !important;
     box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
   }
+
+  /* PrimeNG Select Overlay - Light Theme */
+  .admin-dialog .p-select-overlay,
+  .p-select-overlay {
+    background: #ffffff !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 12px !important;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15) !important;
+    max-width: 400px !important;
+    z-index: 1050 !important;
+
+    .p-select-header {
+      background: #ffffff !important;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+      padding: 0.75rem;
+
+      .p-select-filter {
+        background: #f5f5f5 !important;
+        border: 1px solid rgba(139, 92, 246, 0.3) !important;
+        border-radius: 8px;
+        color: rgba(38, 38, 38, 0.95) !important;
+        padding: 0.5rem;
+
+        &:focus {
+          border-color: rgba(139, 92, 246, 0.6) !important;
+          box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15) !important;
+          background: #ffffff !important;
+        }
+
+        &::placeholder {
+          color: rgba(38, 38, 38, 0.4) !important;
+        }
+      }
+
+      .p-inputicon {
+        color: rgba(139, 92, 246, 0.7) !important;
+      }
+    }
+
+    .p-select-list-container {
+      max-height: 200px !important;
+      overflow-y: auto !important;
+      background: #ffffff !important;
+    }
+
+    .p-select-list {
+      background: #ffffff !important;
+      padding: 0.5rem 0;
+
+      .p-select-option {
+        color: rgba(38, 38, 38, 0.95) !important;
+        padding: 0.5rem 1rem;
+        margin: 0 0.5rem;
+        border-radius: 8px;
+        transition: all 0.2s ease;
+        font-size: 0.95rem;
+
+        &:not(.p-disabled):hover {
+          background: rgba(139, 92, 246, 0.1) !important;
+          color: rgba(38, 38, 38, 0.95) !important;
+        }
+
+        &.p-selected {
+          background: rgba(139, 92, 246, 0.2) !important;
+          color: rgba(38, 38, 38, 0.95) !important;
+          font-weight: 500;
+        }
+
+        &.p-focus:not(.p-selected) {
+          background: rgba(139, 92, 246, 0.15) !important;
+        }
+      }
+    }
+
+    .p-select-empty-message {
+      color: rgba(38, 38, 38, 0.6) !important;
+      padding: 1rem;
+      text-align: center;
+    }
+
+    // Custom scrollbar for dropdown lists - Light Theme
+    .p-select-list-container {
+      &::-webkit-scrollbar {
+        width: 6px;
+      }
+
+      &::-webkit-scrollbar-track {
+        background: rgba(139, 92, 246, 0.05) !important;
+        border-radius: 10px;
+      }
+
+      &::-webkit-scrollbar-thumb {
+        background: rgba(139, 92, 246, 0.3) !important;
+        border-radius: 10px;
+
+        &:hover {
+          background: rgba(139, 92, 246, 0.5) !important;
+        }
+      }
+    }
+  }
+
+  .title-section {
+    h2 {
+      background: linear-gradient(135deg, #6d28d9, #8b5cf6) !important;
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      background-clip: text !important;
+    }
+  }
+
+  .count-number {
+    background: linear-gradient(135deg, #6d28d9, #8b5cf6) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
+  /* PrimeNG Datepicker Overlay - Light Theme */
+  .p-datepicker-panel,
+  .p-datepicker {
+    background: #ffffff !important;
+    border-radius: 12px !important;
+
+    .p-datepicker-header {
+      background: transparent !important;
+      border-bottom: 1px solid rgba(139, 92, 246, 0.2) !important;
+      padding: 0.5rem !important;
+      margin-bottom: 0.5rem !important;
+
+      .p-datepicker-title {
+        color: rgba(38, 38, 38, 0.95) !important;
+
+        .p-datepicker-month,
+        .p-datepicker-year {
+          color: rgba(38, 38, 38, 0.95) !important;
+          font-weight: 600 !important;
+        }
+      }
+
+      button {
+        color: rgba(139, 92, 246, 0.9) !important;
+
+        &:hover {
+          background: rgba(139, 92, 246, 0.1) !important;
+          color: rgba(139, 92, 246, 1) !important;
+        }
+      }
+    }
+
+    .p-datepicker-calendar {
+      thead {
+        tr th {
+          color: rgba(139, 92, 246, 0.8) !important;
+          font-weight: 600 !important;
+          padding: 0.5rem !important;
+        }
+      }
+
+      tbody {
+        tr td {
+          padding: 0.25rem !important;
+
+          span {
+            color: rgba(38, 38, 38, 0.95) !important;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+
+            &:hover {
+              background: rgba(139, 92, 246, 0.1) !important;
+              color: rgba(38, 38, 38, 0.95) !important;
+            }
+
+            &.p-highlight {
+              background: rgba(139, 92, 246, 0.2) !important;
+              color: rgba(38, 38, 38, 0.95) !important;
+              font-weight: 500 !important;
+            }
+
+            &.p-today {
+              background: rgba(139, 92, 246, 0.05) !important;
+              color: rgba(139, 92, 246, 0.9) !important;
+              font-weight: 600 !important;
+            }
+
+            &.p-today.p-highlight {
+              background: rgba(139, 92, 246, 0.25) !important;
+              color: rgba(38, 38, 38, 0.95) !important;
+            }
+          }
+        }
+      }
+    }
+
+    .p-datepicker-buttonbar {
+      border-top: 1px solid rgba(139, 92, 246, 0.2) !important;
+      padding-top: 0.5rem !important;
+      margin-top: 0.5rem !important;
+
+      button {
+        color: rgba(139, 92, 246, 0.9) !important;
+
+        &:hover {
+          background: rgba(139, 92, 246, 0.1) !important;
+          color: rgba(139, 92, 246, 1) !important;
+        }
+      }
+    }
+  }
+
+  /* Client Detail View - Connected User Account - Light Theme */
+  .connection-header {
+    h3 {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+  }
+
+  .connected-label {
+    strong {
+      color: rgba(38, 38, 38, 0.85) !important;
+    }
+  }
+
+  .user-name {
+    color: rgba(139, 92, 246, 0.9) !important;
+  }
+
+  .user-email {
+    color: rgba(38, 38, 38, 0.7) !important;
+  }
+
+  .loading-section {
+    span {
+      color: rgba(38, 38, 38, 0.7) !important;
+    }
+  }
+
+  .no-users-warning {
+    p {
+      color: rgba(38, 38, 38, 0.9) !important;
+    }
+  }
+
+  /* Float Label - Light Theme */
+  .p-float-label {
+    label {
+      color: rgba(38, 38, 38, 0.6) !important;
+
+      &.p-label-active {
+        color: rgba(139, 92, 246, 0.9) !important;
+      }
+    }
+  }
+
+  /* Navigation Buttons - Light Theme */
+  .nav-button {
+    .p-button {
+      &.p-button-raised {
+        color: rgba(38, 38, 38, 0.9) !important;
+
+        .p-button-label {
+          color: rgba(38, 38, 38, 0.9) !important;
+        }
+
+        .p-button-icon {
+          color: rgba(38, 38, 38, 0.9) !important;
+        }
+      }
+    }
+  }
+
+  /* Navigation Header - Light Theme */
+  .nav-header {
+    h3 {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+  }
+
+  .module-header-content {
+    .module-title {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .module-count {
+      color: rgba(38, 38, 38, 0.7) !important;
+    }
+
+    .module-icon {
+      color: rgba(139, 92, 246, 0.9) !important;
+    }
+
+  }
+
+  .appointments-header {
+    background: #ffffff !important;
+
+    .header-top {
+      .header-title {
+        h2 {
+          color: rgba(38, 38, 38, 0.95) !important;
+        }
+      }
+    }
+  }
+
+  .today-btn {
+    .p-button-icon {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .p-button-label {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+  }
+
+  .bulk-btn {
+    .p-button-icon {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .p-button-label {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+  }
+
+  .notify-btn {
+    .p-button {
+      .p-button-icon {
+        color: white !important;
+      }
+
+      .p-button-label {
+        color: white !important;
+      }
+    }
+  }
+
+  .scopes-title {
+    color: rgba(38, 38, 38, 0.95) !important;
+  }
+
+  /* Employee Cards - Light Theme */
+  .employee-card {
+    ::ng-deep {
+      .p-card {
+        background: #ffffff !important;
+        border: 1px solid rgba(139, 92, 246, 0.2) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1) !important;
+      }
+    }
+
+    .employee-name {
+      color: rgba(38, 38, 38, 0.95) !important;
+    }
+
+    .employee-role {
+      color: rgba(139, 92, 246, 0.9) !important;
+    }
+
+    .contact-details {
+      background: rgba(139, 92, 246, 0.08) !important;
+      border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    }
+
+    .detail-label {
+      color: rgba(38, 38, 38, 0.6) !important;
+    }
+
+    .detail-value {
+      color: rgba(38, 38, 38, 0.9) !important;
+    }
+
+    .contact-item {
+      color: rgba(38, 38, 38, 0.85) !important;
+
+      i {
+        color: rgba(139, 92, 246, 0.8) !important;
+      }
+    }
+  }
+
+  /* Employee Card Tag/Chip - Light Theme */
+  .p-tag {
+    color: rgba(27, 28, 28, 0.95) !important;
+
+    &.p-tag-success {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.25), rgba(22, 163, 74, 0.25)) !important;
+      color: rgb(22, 163, 74) !important;
+      border: 1px solid rgba(34, 197, 94, 0.4) !important;
+      font-weight: 600 !important;
+    }
+
+    &.p-tag-danger {
+      background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.25)) !important;
+      color: rgb(220, 38, 38) !important;
+      border: 1px solid rgba(239, 68, 68, 0.4) !important;
+      font-weight: 600 !important;
+    }
+  }
+
+  /* Employee Count Badge - Light Theme */
+  .employee-count {
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(99, 102, 241, 0.1)) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3) !important;
+
+    .count-label {
+      color: rgba(38, 38, 38, 0.9) !important;
+    }
+  }
+
+  .confirmation-message {
+    p {
+      color: rgba(38, 38, 38, 0.9) !important;
+    }
+  }
+
+  /* Admin Dialog - Light Theme */
+  .admin-dialog {
+    background: #ffffff !important;
+    border: 1px solid rgba(139, 92, 246, 0.2) !important;
+    box-shadow: 0 24px 56px rgba(0, 0, 0, 0.15) !important;
+    color: rgba(38, 38, 38, 0.95) !important;
+
+    .admin-dialog__title {
+      h2 {
+        color: rgba(38, 38, 38, 0.95) !important;
+      }
+
+      p {
+        color: rgba(38, 38, 38, 0.7) !important;
+      }
+    }
+
+    .admin-dialog__section-title {
+      h3 {
+        color: rgba(38, 38, 38, 0.95) !important;
+      }
+
+      p {
+        color: rgba(38, 38, 38, 0.7) !important;
+      }
+    }
+
+    .admin-dialog__icon {
+      background: rgba(139, 92, 246, 0.1) !important;
+      box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.2), 0 16px 32px rgba(139, 92, 246, 0.1) !important;
+    }
+
+    .admin-dialog__content {
+      &::-webkit-scrollbar-thumb {
+        background: rgba(139, 92, 246, 0.3) !important;
+      }
+    }
+
+    /* Button Styles - Light Theme */
+    button[mat-stroked-button] {
+      border-color: rgba(139, 92, 246, 0.3) !important;
+      color: rgba(38, 38, 38, 0.9) !important;
+      background: rgba(139, 92, 246, 0.05) !important;
+      box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.2), 0 12px 26px rgba(139, 92, 246, 0.1) !important;
+
+      &[color="primary"] {
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        color: rgba(37, 99, 235, 0.9) !important;
+        box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.2), 0 14px 28px rgba(59, 130, 246, 0.1) !important;
+      }
+
+      &[color="warn"] {
+        border-color: rgba(239, 68, 68, 0.4) !important;
+        color: rgba(220, 38, 38, 0.9) !important;
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.2), 0 14px 28px rgba(239, 68, 68, 0.1) !important;
+      }
+
+      &[color="accent"] {
+        border-color: rgba(139, 92, 246, 0.4) !important;
+        color: rgba(139, 92, 246, 0.9) !important;
+        box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.2), 0 14px 28px rgba(139, 92, 246, 0.1) !important;
+      }
+
+      &:not(:disabled):hover {
+        background: rgba(139, 92, 246, 0.1) !important;
+        box-shadow: inset 0 0 0 1px rgba(139, 92, 246, 0.3), 0 18px 36px rgba(139, 92, 246, 0.15) !important;
+      }
+    }
+
+    button[mat-icon-button] {
+      background: rgba(139, 92, 246, 0.08) !important;
+      color: rgba(38, 38, 38, 0.9) !important;
+
+      &:not(:disabled):hover {
+        background: rgba(139, 92, 246, 0.15) !important;
+        box-shadow: 0 14px 24px rgba(139, 92, 246, 0.15) !important;
+      }
+    }
+
+    button[mat-button] {
+      color: rgba(38, 38, 38, 0.9) !important;
+
+      &:not(:disabled):hover {
+        background: rgba(139, 92, 246, 0.08) !important;
+      }
+    }
+
+    /* PrimeNG Buttons - Light Theme */
+    .p-button {
+      &.p-button-outlined {
+        border-color: rgba(139, 92, 246, 0.3) !important;
+        color: rgba(38, 38, 38, 0.9) !important;
+        background: rgba(139, 92, 246, 0.05) !important;
+
+        &:not(:disabled):hover {
+          background: rgba(139, 92, 246, 0.1) !important;
+          border-color: rgba(139, 92, 246, 0.5) !important;
+        }
+      }
+
+      &.p-button-text {
+        color: rgba(38, 38, 38, 0.9) !important;
+
+        &:not(:disabled):hover {
+          background: rgba(139, 92, 246, 0.08) !important;
+        }
+      }
+
+      .p-button-icon {
+        color: inherit !important;
+      }
+
+      .p-button-label {
+        color: inherit !important;
+      }
+    }
+
+    /* Confirm Dialog Description - Light Theme */
+    .confirm-dialog__description {
+      color: rgba(38, 38, 38, 0.8) !important;
+    }
+
+    /* PrimeNG Buttons in Admin Dialog - Light Theme */
+    .admin-dialog__actions {
+      .p-button {
+        /* Save Button - Purple Gradient Style */
+        &:not(.p-button-outlined):not(.p-button-text):not(.p-button-danger) {
+          background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+          border: none !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5) !important;
+          }
+        }
+
+        /* Delete Button - Red Outlined Style */
+        &.p-button-danger.p-button-outlined {
+          border-color: rgba(239, 68, 68, 0.6) !important;
+          color: rgb(220, 38, 38) !important;
+          background: rgba(239, 68, 68, 0.1) !important;
+
+          &:hover:not(:disabled) {
+            background: rgba(239, 68, 68, 0.2) !important;
+            border-color: rgba(239, 68, 68, 0.8) !important;
+            color: rgb(220, 38, 38) !important;
+          }
+        }
+
+        /* Delete Button - Red Solid Style */
+        &.p-button-danger:not(.p-button-outlined) {
+          background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(220, 38, 38, 0.9)) !important;
+          border: none !important;
+          color: white !important;
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.4) !important;
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 1), rgba(220, 38, 38, 1)) !important;
+            transform: translateY(-2px) !important;
+            box-shadow: 0 6px 20px rgba(239, 68, 68, 0.5) !important;
+          }
+        }
+
+        /* Text Button (Cancel) */
+        &.p-button-text {
+          color: rgba(38, 38, 38, 0.7) !important;
+
+          &:hover:not(:disabled) {
+            background: rgba(139, 92, 246, 0.08) !important;
+            color: rgba(38, 38, 38, 0.9) !important;
+          }
+        }
+      }
+    }
+
+    /* Danger Dialog - Light Theme */
+    .admin-dialog--danger {
+      .admin-dialog__icon--danger {
+        background: rgba(239, 68, 68, 0.15) !important;
+        box-shadow: inset 0 0 0 1px rgba(239, 68, 68, 0.3), 0 16px 32px rgba(239, 68, 68, 0.15) !important;
+        color: rgb(220, 38, 38) !important;
+      }
+
+      .confirmation-message {
+        background: rgba(239, 68, 68, 0.1) !important;
+        border: 1px solid rgba(239, 68, 68, 0.3) !important;
+
+        p {
+          color: rgba(38, 38, 38, 0.9) !important;
+        }
+      }
+    }
+  }
+}
+
+/* Admin Dialog Buttons - Dark Theme */
+.admin-dialog__actions {
+  .p-button {
+    /* Save Button - Purple Gradient Style */
+    &:not(.p-button-outlined):not(.p-button-text):not(.p-button-danger) {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+      border: none !important;
+      color: white !important;
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4) !important;
+
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5) !important;
+      }
+    }
+
+    /* Delete Button - Red Outlined Style */
+    &.p-button-danger.p-button-outlined {
+      border-color: rgba(239, 68, 68, 0.6) !important;
+      color: rgb(252, 165, 165) !important;
+      background: rgba(239, 68, 68, 0.15) !important;
+
+      &:hover:not(:disabled) {
+        background: rgba(239, 68, 68, 0.25) !important;
+        border-color: rgba(239, 68, 68, 0.8) !important;
+        color: rgb(254, 202, 202) !important;
+      }
+    }
+
+    /* Text Button (Cancel) */
+    &.p-button-text {
+      color: rgba(240, 243, 255, 0.8) !important;
+
+      &:hover:not(:disabled) {
+        background: rgba(255, 255, 255, 0.08) !important;
+        color: rgba(240, 243, 255, 0.95) !important;
+      }
+    }
+  }
 }
 
 /* Modern typography scale */
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-family: 'Inter', sans-serif;
   font-weight: 600;
   line-height: 1.2;
@@ -545,7 +1235,10 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 /* Button and form elements */
-button, input, textarea, select {
+button,
+input,
+textarea,
+select {
   font-family: 'Inter', sans-serif;
 }
 
@@ -1154,8 +1847,8 @@ mat-icon,
   box-shadow: 0 10px 24px rgba(57, 38, 102, 0.34);
 }
 
-.admin-dialog mat-checkbox .mdc-form-field > label,
-.admin-dialog mat-slide-toggle .mdc-form-field > label {
+.admin-dialog mat-checkbox .mdc-form-field>label,
+.admin-dialog mat-slide-toggle .mdc-form-field>label {
   color: rgba(235, 239, 255, 0.88);
   font-weight: 500;
 }
@@ -1331,12 +2024,12 @@ mat-card.card {
 }
 
 .grid-dialog-content {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 16px;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
-.grid-dialog-content > :last-child:nth-child(odd) {
+.grid-dialog-content> :last-child:nth-child(odd) {
   grid-column: 1 / -1;
 }
 
@@ -1444,6 +2137,7 @@ mat-card.card {
   .mat-dialog-buttons {
     padding: 24px;
     border-top: 1px solid #626262;
+
     button {
       width: 200px;
       transition: 0.2s ease-in-out;
@@ -1710,10 +2404,13 @@ mat-card.card {
 }
 
 @keyframes pulse {
-  0%, 100% {
+
+  0%,
+  100% {
     opacity: 0.6;
     transform: scale(1);
   }
+
   50% {
     opacity: 1;
     transform: scale(1.1);
@@ -1780,7 +2477,7 @@ mat-card.card {
     background: rgba(139, 92, 246, 0.08);
     border: 1px solid rgba(139, 92, 246, 0.2);
     border-radius: 12px;
-    
+
     p {
       margin: 0;
       font-size: 1rem;
