@@ -1,0 +1,335 @@
+@keyframes cardFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+::ng-deep {
+  .agent-card {
+    --p-card-background: transparent !important;
+    --p-content-background: transparent !important;
+    --accent-color: #00cfff;
+    --accent-rgb: 0, 207, 255;
+    animation: cardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) backwards;
+    
+    @for $i from 1 through 10 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{$i * 0.1}s;
+      }
+    }
+    
+    .p-card {
+      background: linear-gradient(135deg, 
+        rgba(var(--accent-rgb), 0.05), 
+        rgba(var(--accent-rgb), 0.03)
+      ) !important;
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(var(--accent-rgb), 0.2);
+      border-radius: 16px;
+      box-shadow: 
+        0 4px 16px rgba(0, 0, 0, 0.2),
+        inset 0 0 20px rgba(var(--accent-rgb), 0.05);
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      overflow: hidden;
+      color: white;
+
+      &:hover {
+        transform: translateY(-4px);
+        background: linear-gradient(135deg, 
+          rgba(var(--accent-rgb), 0.1), 
+          rgba(var(--accent-rgb), 0.06)
+        ) !important;
+        box-shadow: 
+          0 8px 24px rgba(var(--accent-rgb), 0.3),
+          inset 0 0 30px rgba(var(--accent-rgb), 0.1);
+        border-color: rgba(var(--accent-rgb), 0.4);
+      }
+
+      .p-card-body {
+        padding: 0;
+        background: transparent !important;
+      }
+    }
+  }
+}
+
+.agent-card-content {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding: 1.5rem;
+  gap: 1rem;
+  cursor: pointer;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  will-change: transform, opacity;
+  transform-origin: center;
+  
+  &.navigating {
+    animation: cardExit 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    pointer-events: none;
+  }
+}
+
+@keyframes cardExit {
+  0% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+    filter: blur(0px);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(0.95) translateY(-10px);
+    filter: blur(2px);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(0.9) translateY(-20px);
+    filter: blur(4px);
+  }
+}
+
+.minion-image-wrapper {
+  --accent-color: #00cfff;
+  --secondary-accent-color: #0099cc;
+  --accent-rgb: 0, 207, 255;
+  --secondary-accent-rgb: 0, 153, 204;
+  
+  position: relative;
+  width: 100%;
+  min-height: 300px;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  padding: 1rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  cursor: pointer;
+  background: linear-gradient(135deg, 
+    rgba(var(--accent-rgb), 0.08),
+    rgba(var(--secondary-accent-rgb), 0.08)
+  );
+  background-size: 200% 200%;
+  animation: gradientShift 10s ease infinite;
+  box-shadow: 
+    inset 0 0 30px rgba(var(--accent-rgb), 0.05),
+    0 4px 12px rgba(0, 0, 0, 0.2);
+  mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+  -webkit-mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+  
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: 
+      radial-gradient(circle at 20% 60%, rgba(var(--accent-rgb), 0.15), transparent 60%),
+      radial-gradient(circle at 80% 40%, rgba(var(--secondary-accent-rgb), 0.15), transparent 60%);
+    animation: pulseGlow 6s ease-in-out infinite;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    background: 
+      radial-gradient(circle at 50% 50%, rgba(var(--accent-rgb), 0.1), transparent 70%);
+    animation: subtleGlow 8s ease-in-out infinite alternate;
+    pointer-events: none;
+    mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+    -webkit-mask-image: radial-gradient(ellipse 100% 100% at center, black 70%, transparent 100%);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+@keyframes subtleGlow {
+  0% {
+    opacity: 0.3;
+    transform: scale(0.95);
+  }
+  100% {
+    opacity: 0.6;
+    transform: scale(1.1);
+  }
+}
+
+.minion-image {
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center bottom;
+  border-radius: 8px;
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.3));
+}
+
+.agent-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+}
+
+.agent-name {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: white;
+  flex: 1;
+}
+
+.badges {
+  display: flex;
+  gap: 0.5rem;
+}
+
+::ng-deep {
+  .type-badge .p-badge {
+    background: #00cfff;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+
+  .status-badge .p-badge {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-weight: 500;
+  }
+}
+
+.agent-description {
+  margin: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  display: -webkit-box;
+  // -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.agent-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.agent-tags {
+  --accent-color: #00cfff;
+  --accent-rgb: 0, 207, 255;
+}
+
+::ng-deep {
+  .agent-tag .p-tag {
+    background: linear-gradient(135deg, 
+      rgba(var(--accent-rgb), 0.1), 
+      rgba(var(--accent-rgb), 0.05)
+    );
+    color: var(--accent-color);
+    border: 1px solid rgba(var(--accent-rgb), 0.3);
+    font-size: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+}
+
+.agent-actions {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.agent-actions {
+  --accent-color: #00cfff;
+}
+
+::ng-deep {
+  .agent-actions .p-button {
+    background: transparent !important;
+    border: none !important;
+    color: var(--accent-color);
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    transition: all 0.2s ease;
+    box-shadow: none !important;
+    cursor: pointer !important;
+    outline: none !important;
+    border: none !important;
+
+    .p-button-icon {
+      font-size: 1.4rem;
+    }
+
+    &:hover {
+      background: transparent !important;
+      color: var(--accent-color);
+      border: none !important;
+      transform: scale(1.2);
+      opacity: 0.8;
+      cursor: pointer !important;
+      outline: none !important;
+    }
+
+    &:focus,
+    &:focus-visible,
+    &:focus-within {
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
+    }
+
+    // Remove autofocus border on initial load
+    &[autofocus] {
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+}
+

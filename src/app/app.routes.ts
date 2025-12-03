@@ -26,6 +26,7 @@ import { ClientLoginComponent } from './modules/client-login/client-login.compon
 import { ClientDashboardComponent } from './modules/client-dashboard/client-dashboard.component';
 import { ClaimAppointmentComponent } from './modules/appointments/claim-appointment/claim-appointment.component';
 import { TenantAccessGuard } from './core/guards/tenant-access.guard';
+import { GlobalScopeGuard } from './core/guards/global-scope.guard';
 
 export const routes: Routes = [
   {
@@ -244,6 +245,48 @@ export const routes: Routes = [
           title: 'Unauthorized',
           icon: 'lock'
         }
+      },
+      {
+        path: 'flowzen-ai',
+        loadComponent: () =>
+          import('./modules/flowzen-ai/components/flowzen-ai-dashboard/flowzen-ai-dashboard.component').then(
+            (m) => m.FlowzenAiDashboardComponent,
+          ),
+        data: {
+          title: 'Flowzen AI',
+          scope: 'global.beta:*',
+          description: 'Upravljanje AI agentima i minionima.',
+          icon: 'smart_toy'
+        },
+        canActivate: [GlobalScopeGuard],
+      },
+      {
+        path: 'flowzen-ai/:id',
+        loadComponent: () =>
+          import('./modules/flowzen-ai/components/agent-detail/agent-detail.component').then(
+            (m) => m.AgentDetailComponent,
+          ),
+        data: {
+          title: 'Agent Details',
+          scope: 'global.beta:*',
+          description: 'Detalji AI agenta.',
+          icon: 'smart_toy'
+        },
+        canActivate: [GlobalScopeGuard],
+      },
+      {
+        path: 'demo-chile',
+        loadComponent: () =>
+          import('./modules/demo-chile/demo-chile.component').then(
+            (m) => m.DemoChileComponent,
+          ),
+        data: {
+          title: 'Demo Chile',
+          scope: 'global.beta:*',
+          description: 'Demo komponenta za Chile.',
+          icon: 'public'
+        },
+        canActivate: [GlobalScopeGuard],
       }
     ],
   },

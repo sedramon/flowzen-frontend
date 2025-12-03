@@ -1,0 +1,641 @@
+<div class="chile-shop">
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo" (click)="setActiveSection('chile')">
+                <img src="{{ getImagePath('logo/Screenshot 2025-11-20 234437.png') }}" alt="Chile Logo"
+                    class="logo-image">
+            </div>
+
+            <div class="nav-links">
+                <a (click)="setActiveSection('chile')" [class.active]="activeSection === 'chile'"
+                    class="nav-link">Chile</a>
+                <a (click)="setActiveSection('priča')" [class.active]="activeSection === 'priča'"
+                    class="nav-link">Priča</a>
+                <a (click)="setActiveSection('kolekcije')" [class.active]="activeSection === 'kolekcije'"
+                    class="nav-link">Kolekcije</a>
+                <a (click)="setActiveSection('proizvodi')" [class.active]="activeSection === 'proizvodi'"
+                    class="nav-link">Proizvodi</a>
+                <a (click)="setActiveSection('favoriti')" [class.active]="activeSection === 'favoriti'"
+                    class="nav-link">Favoriti</a>
+                <a (click)="setActiveSection('promocije')" [class.active]="activeSection === 'promocije'"
+                    class="nav-link">Promocije</a>
+            </div>
+
+            <div class="nav-actions">
+                <button class="icon-btn">
+                    <span class="material-icons">search</span>
+                </button>
+                <button class="icon-btn" (click)="setActiveSection('favoriti')">
+                    <span class="material-icons">favorite</span>
+                    <span class="cart-badge" *ngIf="favorites.length > 0">{{ favorites.length }}</span>
+                </button>
+                <button class="icon-btn cart-btn">
+                    <span class="material-icons">shopping_bag</span>
+                    <span class="cart-badge" *ngIf="cartCount > 0">{{ cartCount }}</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="chile" class="hero-section">
+        <div class="hero-image-container">
+            <img [src]="getImagePath(brandStory.mainImage)" alt="Chile Brand Story" class="hero-main-image">
+            <div class="floating-hearts">
+                <span class="floating-heart" *ngFor="let heart of floatingHearts" 
+                      [style.left.%]="heart.left"
+                      [style.top.%]="heart.top"
+                      [style.font-size.rem]="heart.size"
+                      [style.opacity]="heart.opacity"
+                      [style.animation-delay.s]="heart.delay"
+                      [style.animation-duration.s]="heart.duration">💙</span>
+            </div>
+            <div class="hero-overlay">
+                <div class="hero-content">
+                    <div class="family-seal">Made with 💙</div>
+                    <h1 class="hero-title">CHILE</h1>
+                    <p class="hero-subtitle">Oversized kultura sa dušom</p>
+                    <p class="hero-tagline">"Život je igra u kojoj je najvažnije sačuvati duh deteta"</p>
+                    <div class="hero-family-note">
+                        <span class="family-heart">💙</span>
+                        <span>Za Taru, od čiče</span>
+                    </div>
+                    <button class="cta-button" (click)="setActiveSection('priča')">
+                        Naša Priča
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Family Story Timeline -->
+    <section id="priča" class="story-timeline-section">
+        <div class="transition-hearts">
+            <span class="transition-heart" *ngFor="let heart of floatingHearts.slice(20, 30)" 
+                  [style.left.%]="heart.left"
+                  [style.top.%]="heart.top"
+                  [style.font-size.rem]="heart.size"
+                  [style.opacity]="heart.opacity * 0.7"
+                  [style.animation-delay.s]="heart.delay"
+                  [style.animation-duration.s]="heart.duration">💙</span>
+        </div>
+        <div class="section-container">
+            <div class="timeline-header">
+                <div class="family-seal-large">
+                    <div class="seal-inner">
+                        <span class="seal-heart">💙</span>
+                        <span class="seal-text">Chile Family</span>
+                    </div>
+                </div>
+                <h2 class="timeline-title">Kako je sve počelo</h2>
+            </div>
+            
+            <div class="timeline">
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <span class="timeline-icon">👶</span>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Tara se rodila</h3>
+                        <p>Najsrećniji čiča na svetu dobio je najveći dar - Taru. U tom trenutku, sve je počelo.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <span class="timeline-icon">💬</span>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>"Čile"</h3>
+                        <p>Tara je prva nazvala svog čiču "Čile". Jedna reč, jedna ljubav, jedna priča.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <span class="timeline-icon">👕</span>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Porodična tradicija</h3>
+                        <p>Dugogodišnja porodična tradicija u tekstilu, sada sa novim imenom i novom dušom.</p>
+                    </div>
+                </div>
+                
+                <div class="timeline-item">
+                    <div class="timeline-marker">
+                        <span class="timeline-icon">💙</span>
+                    </div>
+                    <div class="timeline-content">
+                        <h3>Chile Brand</h3>
+                        <p>Oversized trenerke izrađene sa pažnjom na detalje i puno ljubavi. Za sve koji veruju u duh deteta.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Brand Story Section -->
+    <section class="brand-story-section">
+        <div class="story-container">
+            <div class="story-decorative-top">
+                <div class="decorative-line"></div>
+                <div class="decorative-heart">💙</div>
+                <div class="decorative-line"></div>
+            </div>
+            
+            <div class="story-content">
+                <h2 class="story-title">{{ brandStory.title }}</h2>
+                <div class="story-text">
+                    <p *ngFor="let paragraph of brandStory.text.split('\n\n')">{{ paragraph }}</p>
+                </div>
+            </div>
+            
+            <div class="story-quote">
+                <div class="quote-mark">"</div>
+                <p class="quote-text">Zašto baš CHILE? Mislim da slika govori više od hiljadu reči.</p>
+                <p class="quote-author">— Čiča</p>
+            </div>
+            
+            <div class="story-signature">
+                <div class="signature-seal">
+                    <span class="signature-heart">💙</span>
+                </div>
+                <p class="signature-text">Vaš Chile, Tara i Chile Family</p>
+                <div class="signature-handwritten">Made with love</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Products Section -->
+    <section class="featured-section">
+        <div class="section-container">
+            <div class="section-header">
+                <div class="section-seal-small">💙</div>
+                <h2 class="section-title">Izdvajamo</h2>
+                <p class="section-subtitle">Proizvodi izrađeni sa ljubavlju i pažnjom</p>
+            </div>
+
+            <div class="featured-grid">
+                <div class="featured-card" *ngFor="let product of featuredProducts">
+                    <div class="product-image-wrapper">
+                        <img [src]="getImagePath(product.images[0])" [alt]="product.name" class="product-image">
+                        <button class="wishlist-btn" (click)="toggleFavorite(product.id)"
+                            [class.active]="isFavorite(product.id)">
+                            <span class="material-icons">{{ isFavorite(product.id) ? 'favorite' : 'favorite_border'
+                                }}</span>
+                        </button>
+                        <span class="product-badge" *ngIf="product.isNew">Novo</span>
+                    </div>
+                    <div class="product-details">
+                        <div class="product-family-badge">Made with 💙</div>
+                        <h3 class="product-name">{{ product.name }}</h3>
+                        <p class="product-description">{{ product.description }}</p>
+                        <div class="product-meta">
+                            <div class="color-indicator" [style.background-color]="product.colorHex"></div>
+                            <span class="product-price">{{ product.price | number:'1.0-0' }} RSD</span>
+                        </div>
+                        <button class="add-to-cart-btn" (click)="addToCart(product)">
+                            <span class="material-icons">favorite</span>
+                            Dodaj u korpu
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Collections Section with Color Selector -->
+    <section id="kolekcije" class="collections-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Kolekcije</h2>
+                <p class="section-subtitle">Zimska i letnja kolekcija</p>
+            </div>
+
+            <!-- Winter Collection -->
+            <div class="collection-block">
+                <div class="collection-header">
+                    <div class="collection-seal">💙</div>
+                    <h3 class="collection-title">Zimska Kolekcija</h3>
+                    <p class="collection-description">Futrovane trenerke za maksimalnu toplinu i udobnost</p>
+                    <p class="collection-note">Izrađeno sa pažnjom na detalje</p>
+                </div>
+                <div class="products-grid">
+                    <!-- Single product card with color selector -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Oversized Set', 'winter') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Oversized Set', 'winter'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Oversized Set', 'winter', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- T-Shirt -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Oversized Majica', 'winter') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Oversized Majica', 'winter'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Oversized Majica', 'winter', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- Shorts -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Oversized Šorc', 'winter') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Oversized Šorc', 'winter'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Oversized Šorc', 'winter', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Summer Collection -->
+            <div class="collection-block">
+                <div class="collection-header">
+                    <div class="collection-seal">💙</div>
+                    <h3 class="collection-title">Letnja Kolekcija</h3>
+                    <p class="collection-description">Lagane oversized trenerke za toplo vreme</p>
+                    <p class="collection-note">Izrađeno sa pažnjom na detalje</p>
+                </div>
+                <div class="products-grid">
+                    <!-- Single product card with color selector -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Oversized Set', 'summer') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Oversized Set', 'summer'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Oversized Set', 'summer', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- T-Shirt -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Letnja Majica', 'summer') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Letnja Majica', 'summer'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Letnja Majica', 'summer', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+
+                    <!-- Shorts -->
+                    <div class="product-card-with-colors">
+                        <ng-container *ngIf="getSelectedProduct('Chile Letnji Šorc', 'summer') as selectedProduct">
+                            <div class="product-image-container">
+                                <img [src]="getImagePath(selectedProduct.images[0])" [alt]="selectedProduct.name">
+                                <button class="wishlist-btn-small" (click)="toggleFavorite(selectedProduct.id)"
+                                    [class.active]="isFavorite(selectedProduct.id)">
+                                    <span class="material-icons">{{ isFavorite(selectedProduct.id) ? 'favorite' :
+                                        'favorite_border'
+                                        }}</span>
+                                </button>
+                            </div>
+                            <div class="product-info">
+                                <h4 class="product-title">{{ selectedProduct.name }}</h4>
+                                <p class="product-color-name">{{ selectedProduct.color }}</p>
+
+                                <!-- Color Selector -->
+                                <div class="color-selector">
+                                    <div class="color-option"
+                                        *ngFor="let variation of getColorVariations('Chile Letnji Šorc', 'summer'); let i = index"
+                                        [class.active]="selectedProduct.id === variation.id"
+                                        (click)="selectColor('Chile Letnji Šorc', 'summer', i)">
+                                        <div class="color-circle" [style.background-color]="variation.colorHex"></div>
+                                    </div>
+                                </div>
+
+                                <div class="product-price-row">
+                                    <span class="price">{{ selectedProduct.price | number:'1.0-0' }} RSD</span>
+                                </div>
+                                <button class="quick-add-btn" (click)="addToCart(selectedProduct)">
+                                    <span class="material-icons">add_shopping_cart</span>
+                                </button>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- All Products Section -->
+    <section id="proizvodi" class="all-products-section">
+        <div class="section-container">
+            <div class="section-header">
+                <div class="section-seal-small">💙</div>
+                <h2 class="section-title">Svi Proizvodi</h2>
+                <p class="section-subtitle">Kompletna ponuda izrađena sa ljubavlju</p>
+            </div>
+
+            <div class="products-grid-full">
+                <div class="product-card-simple" *ngFor="let product of allProducts">
+                    <div class="simple-image-wrapper">
+                        <img [src]="getImagePath(product.images[0])" [alt]="product.name">
+                        <div class="image-overlay">
+                            <button class="overlay-btn" (click)="addToCart(product)">
+                                Dodaj u korpu
+                            </button>
+                        </div>
+                    </div>
+                    <div class="simple-info">
+                        <h4>{{ product.name }}</h4>
+                        <div class="simple-meta">
+                            <div class="color-swatch" [style.background-color]="product.colorHex"></div>
+                            <span class="simple-price">{{ product.price | number:'1.0-0' }} RSD</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- New Products Section -->
+    <section id="novo" class="new-section">
+        <div class="section-container">
+            <div class="section-header">
+                <div class="section-seal-small">💙</div>
+                <h2 class="section-title">Novo u Ponudi</h2>
+                <p class="section-subtitle">Najnoviji proizvodi iz naše radionice</p>
+            </div>
+
+            <div class="new-products-grid">
+                <div class="new-product-card" *ngFor="let product of newProducts">
+                    <div class="new-image">
+                        <img [src]="getImagePath(product.images[0])" [alt]="product.name">
+                        <span class="new-badge">NEW</span>
+                    </div>
+                    <div class="new-details">
+                        <h3>{{ product.name }}</h3>
+                        <p>{{ product.description }}</p>
+                        <div class="new-footer">
+                            <span class="new-price">{{ product.price | number:'1.0-0' }} RSD</span>
+                            <button class="new-add-btn" (click)="addToCart(product)">
+                                Dodaj
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Favorites Section -->
+    <section id="favoriti" class="favorites-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Favoriti</h2>
+                <p class="section-subtitle">Tvoji omiljeni proizvodi</p>
+            </div>
+
+            <div class="favorites-content" *ngIf="favorites.length > 0">
+                <div class="products-grid-full">
+                    <div class="product-card-simple" *ngFor="let productId of favorites">
+                        <ng-container *ngFor="let product of allProducts">
+                            <ng-container *ngIf="product.id === productId">
+                                <div class="simple-image-wrapper">
+                                    <img [src]="getImagePath(product.images[0])" [alt]="product.name">
+                                    <button class="remove-favorite" (click)="toggleFavorite(product.id)">
+                                        <span class="material-icons">close</span>
+                                    </button>
+                                </div>
+                                <div class="simple-info">
+                                    <h4>{{ product.name }}</h4>
+                                    <div class="simple-meta">
+                                        <div class="color-swatch" [style.background-color]="product.colorHex">
+                                        </div>
+                                        <span class="simple-price">{{ product.price | number:'1.0-0' }}
+                                            RSD</span>
+                                    </div>
+                                </div>
+                            </ng-container>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+
+            <div class="empty-state" *ngIf="favorites.length === 0">
+                <span class="material-icons empty-icon">favorite_border</span>
+                <p>Još nemaš omiljene proizvode</p>
+                <button class="browse-btn" (click)="setActiveSection('proizvodi')">Pregledaj Proizvode</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Promotions Section -->
+    <section id="promocije" class="promo-section">
+        <div class="section-container">
+            <div class="section-header">
+                <h2 class="section-title">Promocije & Eventi</h2>
+                <p class="section-subtitle">Gde nas možeš pronaći</p>
+            </div>
+
+            <div class="promo-grid">
+                <div class="promo-card" *ngFor="let event of promoEvents">
+                    <div class="promo-icon">
+                        <span class="material-icons">store</span>
+                    </div>
+                    <div class="promo-content">
+                        <h3 class="promo-title">{{ event.title }}</h3>
+                        <div class="promo-details">
+                            <div class="promo-detail-item">
+                                <span class="material-icons">location_on</span>
+                                <span>{{ event.location }}</span>
+                            </div>
+                            <div class="promo-detail-item">
+                                <span class="material-icons">calendar_today</span>
+                                <span>{{ event.date }}</span>
+                            </div>
+                        </div>
+                        <p class="promo-description">{{ event.description }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3 class="footer-brand">CHILE</h3>
+                <p class="footer-tagline">Oversized kultura sa dušom</p>
+                <p class="footer-text">Sačuvaj duh deteta 💙</p>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-heading">Navigacija</h4>
+                <ul class="footer-links">
+                    <li><a (click)="setActiveSection('chile')">Početna</a></li>
+                    <li><a (click)="setActiveSection('kolekcije')">Kolekcije</a></li>
+                    <li><a (click)="setActiveSection('proizvodi')">Proizvodi</a></li>
+                    <li><a (click)="setActiveSection('promocije')">Promocije</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-heading">Informacije</h4>
+                <ul class="footer-links">
+                    <li><a href="#">O nama</a></li>
+                    <li><a href="#">Kontakt</a></li>
+                    <li><a href="#">Veličine</a></li>
+                    <li><a href="#">Dostava</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-section">
+                <h4 class="footer-heading">Prati nas</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link facebook">
+                        <span class="material-icons">facebook</span>
+                    </a>
+                    <a href="#" class="social-link instagram">
+                        <span class="material-icons">instagram</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <div class="footer-seal">
+                <span class="footer-heart">💙</span>
+                <span class="footer-seal-text">Made with love by Chile Family</span>
+            </div>
+            <p>&copy; 2025 Chile Brand. Sva prava zadržana.</p>
+        </div>
+    </footer>
+</div>

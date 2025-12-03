@@ -363,20 +363,36 @@ export class AdminRolesComponent implements OnInit, OnDestroy {
 
   private updateRole(roleId: string, payload: AdminRoleDialogResult): void {
     this.processingRoles.add(roleId);
+    
+    const updatePayload: any = {
+      availableScopes: payload.availableScopes || [],
+    };
+    
+    if (payload.name) {
+      updatePayload.name = payload.name;
+    }
+    
+    if (payload.type === 'tenant' && payload.tenantId) {
+      updatePayload.tenant = payload.tenantId;
+    } else if (payload.type === 'global') {
+      // For global roles, we might need to set tenant to null or omit it
+      // Check backend requirements
+    }
+    
+    console.log('[AdminRolesComponent] Updating role with payload:', updatePayload);
+    
     this.rolesService
-      .updateRole(roleId, {
-        name: payload.name,
-        availableScopes: payload.availableScopes,
-        tenant: payload.type === 'tenant' ? payload.tenantId ?? null : null,
-      })
+      .updateRole(roleId, updatePayload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
+        next: (updatedRole) => {
+          console.log('[AdminRolesComponent] Role updated successfully:', updatedRole);
           this.notifications.success('Rola je ažurirana.');
           this.processingRoles.delete(roleId);
           this.loadRoles(true);
         },
         error: (error: unknown) => {
+          console.error('[AdminRolesComponent] Failed to update role', error);
           this.logError('[AdminRolesComponent] Failed to update role', error);
           this.notifications.error('Ažuriranje role nije uspelo.');
           this.processingRoles.delete(roleId);

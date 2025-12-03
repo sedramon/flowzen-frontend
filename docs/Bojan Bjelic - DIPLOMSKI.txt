@@ -1,0 +1,2047 @@
+DIPLOMSKI RAD
+FLOWZEN APP
+Razvoj veb aplikacije za digitalno vođenje poslovanja salona i srodnih uslužnih delatnosti
+koristeći Angular i NestJS framework-ove okvire
+
+Mentor: Mladen Opačič
+
+Student: Bojan Bjelič
+Indeks: 5238
+
+Beograd, 2025.
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Sadržaj
+1. Metodologija ........................................................................................................................................ 3
+Uvodne napomene ............................................................................................................................... 3
+Predmet istraživanja ............................................................................................................................. 3
+Hipoteza .............................................................................................................................................. 4
+Ciljevi istraživanja ................................................................................................................................. 4
+2. Uvod .................................................................................................................................................... 5
+3. Baze podataka (MongoDB) .................................................................................................................... 6
+3.1 Kolekcije i dokumenti ...................................................................................................................... 7
+3.2 Veze između kolekcija ................................................................................................................... 13
+4. Backend (NestJS) ................................................................................................................................ 17
+4.1 Arhitektura aplikacije u NestJS-u .................................................................................................... 18
+4.2 Entiteti .......................................................................................................................................... 19
+4.3 DTO (Data Transfer Object) ............................................................................................................ 22
+4.4 Servisi i repozitorijumi ................................................................................................................... 25
+4.5 Kontroleri i API rute ........................................................................................................................ 28
+4.6 Autorizacija i autentifikacija (JWT) .................................................................................................. 31
+4.7 Admin Panel Modul za Superadmina .............................................................................................. 36
+4.8 Self-Service Funkcionalnost za Klijente .......................................................................................... 40
+5. Frontend (Angular) .............................................................................................................................. 42
+5.1 Struktura aplikacije ....................................................................................................................... 42
+5.2 Komponente ................................................................................................................................. 45
+5.3 Servisi i komunikacija sa backendom ............................................................................................. 48
+5.4 Routing i čuvanje stanja aplikacije .................................................................................................. 50
+5.5 Admin Panel Modul ....................................................................................................................... 52
+5.6 Self-Service Modul za Klijente ........................................................................................................ 55
+6. Implementacija poslovne logike .......................................................................................................... 57
+6.1 Upravljanje korisnicima i uloge (admin, zaposleni) .......................................................................... 58
+6.2 Upravljanje zakazivanjima.............................................................................................................. 61
+6.3 Evidencija poslovanja i statistike .................................................................................................... 64
+6.4 Self-Service Zakazivanje za Klijente ................................................................................................ 65
+7. Budući razvoj aplikacije ....................................................................................................................... 67
+
+8. Zaključak ............................................................................................................................... 68
+Literatura................................................................................................................................... 70
+
+2
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+1. Metodologija
+Razvoj softverskih rešenja zahteva jasno definisanu metodologiju koja obuhvata analizu
+problema, definisanje ciljeva, formulaciju hipoteza i primenu odgovarajućih metoda za
+implementaciju i evaluaciju sistema. Ova metodologija osigurava sistematičan pristup razvoju
+aplikacije i omogućava njenu validaciju kroz testiranje i evaluaciju funkcionalnosti.
+
+Uvodne napomene
+U ovom radu prikazan je proces razvoja veb aplikacije za vođenje kozmetičkih i frizerskih
+salona, klinika i ordinacija. Primarni fokus je na izradi backend sistema korišćenjem NestJS
+frameworka, organizaciji baze podataka u MongoDB, kao i razvoju korisničkog interfejsa pomoću
+Angular frameworka.
+Primenjena metodologija uključuje analizu zahteva, dizajn sistema, implementaciju, testiranje
+i evaluaciju funkcionalnosti. Takođe, posebna pažnja posvećena je sigurnosti sistema,
+višekorisničkoj podršci i optimizaciji performansi baze podataka.
+
+Predmet istraživanja
+
+Predmet istraživanja ovog rada je razvoj veb aplikacije koja omogućava efikasno upravljanje
+zakazivanjima, zaposlenima, korisnicima i fakturisanjem unutar kozmetičkih salona, frizerskih
+salona, klinika i ordinacija.
+Glavni aspekti istraživanja uključuju:
+•
+
+Optimizaciju procesa upravljanja terminima i zaposlenima
+
+•
+
+Višekorisničku podršku i izolaciju podataka između preduzeća (tenants)
+
+•
+
+Bezbednosne aspekte sistema (autentifikacija, autorizacija, zaštita podataka)
+
+•
+
+Performanse baze podataka i organizaciju podataka u NoSQL sistemima
+3
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Hipoteza
+
+Polazna hipoteza rada je da će razvoj veb aplikacije zasnovane na modernim tehnologijama
+(NestJS, MongoDB, Angular) omogućiti efikasnije upravljanje poslovanjem u sektorima
+kozmetičkih i frizerskih salona, klinika i ordinacija, smanjujući manuelni rad i povećavajući
+produktivnost zaposlenih.
+Osnovna istraživačka hipoteza može se formulisati na sledeći način:
+•
+
+Implementacija prilagođenog višekorisničkog sistema sa podrškom za više preduzeća
+omogućava efikasno i sigurno upravljanje poslovnim procesima.
+
+•
+
+Korišćenje NoSQL baze podataka (MongoDB) omogućava fleksibilnije čuvanje podataka
+i bolje performanse u odnosu na tradicionalne relacione baze u ovom tipu aplikacije.
+
+•
+
+Integracija NestJS frameworka za backend i Angular za frontend omogućava skalabilan i
+modularan sistem sa dobrom korisničkom interakcijom.
+
+Ciljevi istraživanja
+
+Glavni cilj istraživanja je razvoj i implementacija funkcionalne veb aplikacije za
+upravljanje poslovanjem u kozmetičkim i frizerskim salonima, klinikama i ordinacijama.
+Konkretni ciljevi su:
+•
+
+Projektovanje baze podataka i analiza modela podataka kako bi se omogućila fleksibilnost
+i efikasno upravljanje podacima.
+
+•
+
+Razvoj backend sistema korišćenjem NestJS sa podrškom za više preduzeća (tenants),
+sigurnosnim mehanizmima i optimizovanim API metodama.
+
+•
+
+Implementacija frontend aplikacije u Angularu, sa intuitivnim interfejsom i podrškom za
+upravljanje poslovnim procesima.
+
+•
+
+Testiranje i evaluacija sistema kako bi se osigurala stabilnost, performanse i sigurnost
+podataka.
+4
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+2. Uvod
+
+U savremenom poslovnom okruženju digitalizacija igra ključnu ulogu u poboljšanju
+efikasnosti i optimizaciji poslovnih procesa. Kozmetički i frizerski saloni, klinike i ordinacije često
+se suočavaju sa izazovima u organizaciji rada, uključujući zakazivanje termina, upravljanje
+zaposlenima, vođenje evidencije klijenata i analizu poslovnih performansi. Tradicionalne metode
+upravljanja, kao što su ručne evidencije ili statične Excel tabele, često su nepraktične i sklone
+greškama, što može negativno uticati na poslovanje.
+Cilj ovog rada je razvoj veb aplikacije koja omogućava automatizaciju i unapređenje
+poslovnih procesa u ovim sektorima. Aplikacija pruža administratorima mogućnost efikasnog
+upravljanja rasporedima, zaposlenima i klijentima, dok se termini zakazuju isključivo od strane
+zaposlenih putem sistema. Na ovaj način se centralizuje proces zakazivanja i omogućava bolja
+kontrola nad rasporedima i dostupnošću usluga.
+Tehnološki stack korišćen za implementaciju aplikacije sastoji se od NestJS frameworka
+za backend, MongoDB baze podataka i Angular frameworka za frontend. Ovaj izbor tehnologija
+omogućava visok stepen skalabilnosti, modularnosti i sigurnosti, što je od ključnog značaja za
+poslovne aplikacije.
+Struktura rada je organizovana na sledeći način:
+•
+
+U poglavlju 3 opisana je organizacija baze podataka u MongoDB sistemu, uključujući
+kolekcije i relacije.
+
+•
+
+Poglavlje 4 detaljno opisuje backend aplikacije razvijen u NestJS frameworku, uključujući
+strukturu API kontrolera, servisa, entiteta i generisanje JWT tokena.
+
+•
+
+Poglavlje 5 pokriva frontend aplikacije implementiran u Angular frameworku, sa
+naglaskom na komponente, servise i navigaciju.
+
+•
+
+Poglavlje 6 se bavi implementacijom biznis logike
+
+Ovaj rad pruža detaljan uvid u proces razvoja veb aplikacije za vođenje kozmetičkih i
+frizerskih salona, klinika i ordinacija, sa ciljem optimizacije poslovanja i poboljšanja korisničkog
+iskustva.
+
+5
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+3. Baze podataka (MongoDB)
+
+U savremenim informacionim sistemima izbor baze podataka igra ključnu ulogu u
+performansama, skalabilnosti i jednostavnosti razvoja aplikacije. Za potrebe ove aplikacije
+korišćena je MongoDB, NoSQL baza podataka zasnovana na modelu dokumenata, koja
+omogućava fleksibilnu strukturu podataka i lako prilagođavanje poslovnim zahtevima.
+Za razliku od relacionih baza podataka, gde se podaci organizuju u tabelama sa strogo
+definisanim kolonama i tipovima podataka, MongoDB koristi JSON-slične dokumente u okviru
+kolekcija, što omogućava dinamično skladištenje podataka i jednostavno skaliranje. Ovaj model
+je posebno pogodan za aplikacije koje zahtevaju brzu obradu podataka, fleksibilnost u menjanju
+strukture i rad sa složenim, hijerarhijski organizovanim podacima.
+U okviru ovog poglavlja biće prikazana organizacija baze podataka, pregled ključnih
+kolekcija i dokumenata, kao i relacije između njih.
+
+MongoDB
+
+6
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+3.1 Kolekcije i dokumenti
+
+Za potrebe razvoja aplikacije, baza podataka je implementirana korišćenjem MongoDB,
+što omogućava fleksibilno skladištenje podataka i prilagođavanje različitim poslovnim zahtevima.
+Aplikacija koristi više kolekcija koje su međusobno povezane putem referencijalnih ID-jeva, čime
+se obezbeđuje integrisan i organizovan sistem za upravljanje podacima.
+Glavne kolekcije u sistemu su:
+Tenants
+Skoro sve kolekcije u bazi podataka sadrže tenant referencu, jer sistem podržava više
+preduzeća (tenants). Ovaj koncept omogućava logičku izolaciju podataka između različitih
+klijenata sistema. Izuzetak su globalni administratori (User entiteti sa isGlobalAdmin = true), koji
+mogu imati null tenant.
+
+MongoDB – Tenant Kolekcija
+
+Users
+Korisnici su povezani sa preduzećem (tenant) i imaju ulogu (role) koja definiše
+njihove privilegije u sistemu. Korisnici mogu biti globalni administratori (isGlobalAdmin),
+u kom slučaju tenant može biti null. Dodatno, korisnici mogu imati direktno dodeljene
+
+7
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+dozvole (scopes) koje se dodaju na dozvole definisane kroz ulogu.
+
+MongoDB - User Kolekcija
+
+Roles & Scopes
+Svaka uloga (role) ima dodeljene dozvole (scopes), što omogućava fino podešavanje
+pristupa funkcionalnostima sistema.
+
+MongoDB - Role Kolekcija
+
+8
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+MongoDB - Scope Kolekcija
+
+Employees
+Zaposleni pripadaju određenom preduzeću i mogu imati zakazane termine (appointments).
+
+MongoDB - Employee Kolekcija
+
+9
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Facility
+Lokacije (objekti) gde se pružaju usluge. Svaki facility pripada određenom preduzeću (tenant) i
+ima adresu, radno vreme (openingHour, closingHour) i naziv.
+Services
+Usluge koje pruža salon/ordinacija.
+
+MongoDB - Service Kolekcija
+
+Appointments
+Zakazani termini povezuju zaposlenog (employee), klijenta (client), uslugu (service), facility
+(facility) i tenant (tenant). Svaki termin sadrži i polja za datum (date), vreme početka i završetka
+(startHour, endHour), status plaćanja (paid), status otkazivanja (cancelled) i opcionu referencu na
+Sale entitet (sale) za naplaćene termine.
+
+MongoDB - Appoitnment Kolekcija
+
+10
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Waitlist
+Lista čekanja za termine koji su trenutno zauzeti. Omogućava klijentima da se prijave na listu
+čekanja za željene termine. Kada se termin oslobodi, sistem automatski generiše claimToken i
+obaveštava klijente na waitlisti.
+
+Articles
+Dodatni proizvodi koji se mogu naplaćivati kroz fakture.
+
+MongoDB - Article Kolekcija
+
+11
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Settings
+Podešavanja sistema na nivou tenant-a ili korisnika. Omogućava konfiguraciju jezika, valute,
+teme, navigacionih prečica i početne stranice. Postoje dva tipa podešavanja: 'tenant' (za ceo
+tenant) i 'user' (za pojedinačnog korisnika).
+
+MongoDB - Settings Kolekcija
+
+Shifts
+Tipovi radnih smena definisani za svaki facility. Omogućava definisanje standardnih smena
+(morning, afternoon, evening, full, custom) sa bojama i labelama za prikaz u kalendaru.
+
+MongoDB - Shift Kolekcija
+
+12
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Suppliers
+Dobavljači artikala. Svaki supplier pripada određenom preduzeću (tenant) i sadrži podatke o
+kontaktu, adresi, PIB-u i kontakt osobi.
+
+MongoDB - Supplier Kolekcija
+
+3.2 Veze između kolekcija
+
+MongoDB je NoSQL baza podataka zasnovana na modelu dokumenata, što znači da ne
+koristi striktne relacije kao SQL baze, već se podaci organizuju kroz ugneždene reference i IDjeve drugih kolekcija. U ovoj aplikaciji, kolekcije su međusobno povezane pomoću ObjectId
+referenci, čime se obezbeđuje fleksibilnost i brzina upita.
+Glavne veze između kolekcija mogu se podeliti u nekoliko kategorija:
+
+Veza između korisnika i uloga (users → roles → scopes)
+Veza: JEDAN korisnik može imati JEDNU ulogu, a svaka uloga ima više dozvola (scopes).
+Korisnici (users) imaju atribut role, koji referencira odgovarajuću ulogu (roles). Svaka
+uloga (roles) poseduje listu dozvola (scopes), čime se regulišu prava pristupa. Dodatno,korisnici
+mogu imati direktno dodeljene dozvole kroz polje scopes, koje se kombinuju sa
+dozvolama iz uloge. Korisnici sa isGlobalAdmin = true mogu imati null tenant i pristupaju
+globalnim funkcionalnostima sistema.
+13
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Primer veze:
+•
+
+Korisnik ima role = "67c22392cb8e05e934b1221a", tenant =
+"67c22392cb8e05e934b1221b",
+
+•
+
+Uloga (67c22392cb8e05e934b1221a) ima availableScopes =
+["686a6038529305b4b72f5a67", "686a603e529305b4b72f5a6b"]]
+
+•
+
+Za global admin korisnika: role = "67c22392cb8e05e934b1221c", tenant = null,
+isGlobalAdmin = true, scopes = ["global.tenants:read", "global.users:read"]
+
+MongoDB - User Kolekcija
+
+MongoDB - Role Kolekcija
+
+Veza između zakazivanja i zaposlenih/usluga (appointments → employees, services, clients,
+facilities)
+Veza: JEDAN termin pripada JEDNOM zaposlenom, JEDNOJ usluzi, JEDNOM klijentu i
+JEDNOJ lokaciji (facility).
+Svaki termin (appointments) sadrži referencu na zaposlenog (employee), referencu na
+uslugu (service), referencu na klijenta (client) i referencu na lokaciju (facility) kako bi se
+14
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+evidentiralo ko pruža uslugu, kom klijentu, šta je tačno zakazano i gde se usluga pruža. Dodatno,
+termin može imati referencu na Sale entitet (sale) ako je termin naplaćen kroz POS sistem.
+Veza: između klijenata i korisnika (clients → users)
+Veza: JEDAN klijent može biti povezan sa JEDNIM User nalogom, što omogućava self-service
+funkcionalnost.
+Client entitet sadrži opciono polje user, koje referencira User entitet. Ova veza omogućava
+klijentima da se prijave na sistem koristeći User nalog i pristupe Client Dashboard-u gde mogu
+samostalno upravljati svojim terminima.
+Povezivanje se vrši kroz endpoint PUT /clients/connect-user/:clientId/:userId, dok se
+diskonektovanje vrši kroz PUT /clients/disconnect-user/:clientId.
+Veza između waitlist-a i ostalih kolekcija (waitlist → clients, employees, services, facilities)
+Veza: JEDAN waitlist entry pripada JEDNOM klijentu, JEDNOM zaposlenom, JEDNOJ usluzi i
+JEDNOJ lokaciji.
+WaitlistEntry entitet sadrži referencu na klijenta (client), zaposlenog (employee), uslugu
+(service), facility (facility) i tenant (tenant). Dodatno, sadrži preferirani datum (preferredDate),
+preferirano vreme (preferredStartHour, preferredEndHour), status obaveštenja (isNotified), claim
+token (claimToken) za prihvatanje termina i status prihvatanja (isClaimed). Sistem automatski
+generiše claimToken kada se termin oslobodi i obaveštava klijente na waitlisti.
+
+MongoDB - Appointment Kolekcija
+
+između radnih smena i ostalih kolekcija (working shifts → employees & facilities)
+Veza: JEDNA radna smena pripada JEDNOM zaposlenom i JEDNOJ lokaciji.
+Svaka radna smena ( working shift ) referencira:
+15
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+Facility ( facility ) u kom lokalu radi
+
+•
+
+Employee ( employee ) na kog zaposlenog se odnosi smena
+
+•
+
+Tenant (tenant) - preduzeće kojem pripada smena
+
+Svaka smena sadrži i datum (date), tip smene (shiftType), opciono vreme početka i završetka
+(startHour, endHour) i opcionu napomenu (note).
+
+MongoDB - Working Shift Kolekcija
+
+Veza između artikala i dobavljača (articles → suppliers)
+Veza: JEDAN artikal može biti povezan sa JEDNIM dobavljačem (opciono).
+Article entitet sadrži opcionu referencu na Supplier entitet (supplier), što omogućava
+praćenje porekla artikala i upravljanje nabavkom.
+
+MongoDB – Article Kolekcija
+
+Veza između svih kolekcija i preduzeća (tenant u svim kolekcijama)
+16
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Veza: Skoro sve kolekcije sadrže tenant referencu, jer sistem podržava više preduzeća.
+Svi podaci su razdvojeni po preduzećima (tenants). Svaka kolekcija sadrži tenant referencu,
+koja pokazuje kojem preduzeću pripada određeni korisnik, zaposleni, usluga, termin, sale ili
+artikal. Izuzetak su globalni administratori (User entiteti sa isGlobalAdmin = true), koji mogu imati
+null tenant i pristupaju svim tenant-ima u sistemu.
+
+MongoDB - Facility Kolekcija
+
+Svi entiteti unutar aplikacije (osim globalnih administratora) imaju odgovarajući tenant,
+čime se sprečava mešanje podataka između različitih preduzeća.
+
+4. Backend (NestJS)
+
+Backend aplikacije razvijen je korišćenjem NestJS frejmvorka, koji se zasniva na Node.js
+platformi i koristi TypeScript. Ovaj frejmvork je izabran zbog svoje skalabilnosti, jasno definisane
+strukture i podrške za modularnu arhitekturu, što olakšava organizaciju i održavanje koda.
+Glavna uloga backend dela sistema jeste upravljanje podacima i poslovnom logikom.
+Backend komunicira sa frontendom putem REST API-ja, dok je za čuvanje podataka korišćena
+MongoDB baza. Autentifikacija i autorizacija korisnika rešene su pomoću JWT (JSON Web
+Token) mehanizma, čime se obezbeđuje sigurnost pristupa i razmena podataka.
+
+17
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+4.1 Arhitektura aplikacije u NestJS-u
+
+Arhitektura aplikacije u NestJS-u zasniva se na principu modularnosti i razdvajanju
+odgovornosti (separation of concerns). Aplikacija je organizovana kroz više međusobno povezanih
+slojeva i komponenti:
+•
+
+Controller – sloj koji definiše API rute i zadužen je za prihvatanje HTTP zahteva od klijenta
+i vraćanje odgovora.
+
+•
+
+Service – sloj u kome se implementira poslovna logika. Servisi obrađuju podatke i
+komuniciraju sa repozitorijumima ili eksternim servisima.
+
+•
+
+DTO (Data Transfer Object) – objekti koji se koriste za validaciju i transfer podataka
+između slojeva aplikacije.
+
+•
+
+Schemas/Entities – definicije strukture podataka u bazi, u ovom slučaju MongoDB
+kolekcija.
+
+•
+
+Module fajl (*.module.ts) – povezuje kontrolere, servise i ostale komponente u celinu i
+registruje ih unutar aplikacije.
+
+Glavna aplikacija (app.module.ts) predstavlja ulaznu tačku i u njoj se registruju svi moduli
+sistema, kao što su:
+•
+
+Appointments (zakazivanja),
+
+•
+
+Clients (klijenti),
+
+•
+
+Employees (zaposleni),
+
+•
+
+Users i Auth (korisnici i autentifikacija),
+
+•
+
+Roles i Scopes (uloge i dozvole),
+
+•
+
+Services i Articles (usluge i artikli),
+
+•
+
+Tenants (više poslovnih jedinica u okviru sistema),
+
+•
+
+i drugi moduli specifični za poslovnu logiku (npr. suppliers, facility, shifts, working-shifts,
+settings, audit, pos - Point of Sale sistem za naplatu usluga i artikala).
+
+18
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Ova arhitektura omogućava jasan tok podataka:
+1. Klijent šalje zahtev ka određenom API endpointu.
+2. Controller obrađuje zahtev i prosleđuje ga servisu.
+3. Service izvršava poslovnu logiku i koristi repozitorijume/scheme za komunikaciju sa
+bazom.
+4. Dobijeni podaci vraćaju se nazad kroz kontroler u obliku HTTP odgovora.
+Takva organizacija koda omogućava da se backend lako proširuje dodavanjem novih modula,
+bez narušavanja postojeće strukture.
+
+4.2 Entiteti
+
+Entiteti predstavljaju osnovne objekte u sistemu i direktno odgovaraju strukturama
+podataka u bazi. Pošto aplikacija koristi MongoDB, entiteti su definisani kroz Mongoose šeme,
+koje određuju polja, tipove podataka i odnose sa drugim kolekcijama.
+Svaki entitet je organizovan unutar odgovarajućeg modula u folderu schemas, gde se kroz
+TypeScript klase i dekoratore definiše model podataka. Na ovaj način obezbeđuje se jasnoća i
+konzistentnost u radu sa kolekcijama baze podataka.
+Neki od najvažnijih entiteta u aplikaciji su:
+•
+
+User – definiše osnovne podatke o korisnicima sistema (npr. ime, e-mail, lozinka,
+pripadajuća uloga, tenant, isGlobalAdmin flag za globalne administratore i scopes za
+dodatne dozvole).Role – predstavlja uloge korisnika (npr. administrator, menadžer,
+zaposleni) i povezana je sa entitetom Scope, koji definiše dostupne dozvole.
+
+•
+
+Appointment – čuva podatke o zakazanim terminima (klijent, zaposleni, usluga, facility,
+datum, vreme početka i završetka, status plaćanja, status otkazivanja, opciona referenca na
+Sale).
+Service – predstavlja usluge koje se pružaju u salonu/ordinaciji.
+
+•
+•
+
+Client – sadrži informacije o klijentima. Client entitet može biti povezan sa User
+entitetomkroz polje user, što omogućava self-service funkcionalnost gde klijenti mogu
+samostalnoupravljati svojim terminima.
+19
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+•
+•
+
+Tenant – omogućava rad sa više poslovnih jedinica (multitenancy).
+WaitlistEntry – predstavlja entry na listi čekanja za termine. Sadrži referencu na klijenta,
+zaposlenog, uslugu, facility, preferirani datum i vreme, status obaveštenja i claim token.
+Facility – predstavlja lokaciju (objekat) gde se pružaju usluge. Sadrži naziv, adresu, radno
+vreme i referencu na tenant.
+
+Definisanje entiteta na ovaj način omogućava:
+•
+
+validaciju podataka prilikom upisa u bazu,
+
+•
+
+jasne odnose između kolekcija (npr. appointment povezuje korisnika i uslugu),
+
+•
+
+standardizovan pristup podacima unutar celokupne aplikacije.
+
+Na narednim slikama prikazani su pojedini entiteti, poput User i Appointment, kako bi se
+ilustrovao način na koji su šeme strukturisane u okviru aplikacije.
+
+NestJs - User Schema
+
+20
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Appointment Schema
+
+21
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Appointment Schema
+
+4.3 DTO (Data Transfer Object)
+
+DTO (Data Transfer Object) klase predstavljaju objekte koji se koriste za prenos podataka
+između slojeva aplikacije. Njihova glavna svrha jeste da obezbede validaciju i tipizaciju podataka
+koji se šalju putem HTTP zahteva, čime se unapređuje sigurnost i smanjuje mogućnost grešaka
+prilikom rada sa spoljnim unosom.
+
+22
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+U okviru aplikacije, DTO klase se definišu u posebnim folderima dto unutar svakog
+modula. One se implementiraju korišćenjem TypeScript klasa i često se kombinuju sa
+dekoratorima iz biblioteke class-validator i class-transformer (npr. @IsString(), @IsEmail(),
+@IsOptional()), što omogućava automatsku validaciju podataka.
+Na primer:
+•
+
+User DTO – koristi se prilikom registracije ili izmene korisnika (sadrži polja kao što su
+ime, email, lozinka, uloga).
+
+•
+
+Appointment DTO – definiše podatke potrebne za kreiranje ili ažuriranje termina (klijent,
+zaposleni, usluga, datum i vreme).
+
+•
+
+Service DTO – koristi se za dodavanje i izmenu usluga koje su dostupne u sistemu.
+
+Korišćenjem DTO objekata ostvaruje se:
+•
+
+doslednost podataka između frontenda i backenda,
+
+•
+
+automatska validacija unosa,
+
+•
+
+odvajanje poslovne logike od strukture ulaznih podataka,
+
+•
+
+lakše održavanje i proširivanje sistema.
+
+Na sledećim slikama prikazani su primeri pojedinih DTO klasa, kao što su CreateUserDto
+i CreateAppointmentDto, kako bi se ilustrovao način na koji su definisane i na koji se primenjuje
+validacija podataka.
+
+23
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Create User Dto
+
+NestJs - Create Appointment Dto
+
+24
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+4.4 Servisi i repozitorijumi
+
+Servisi u NestJS-u predstavljaju centralni sloj poslovne logike aplikacije. Oni služe za
+obradu podataka, implementaciju pravila sistema i komunikaciju sa bazom podataka. Na ovaj
+način, kontroleri ostaju čisti i fokusirani samo na prihvatanje i vraćanje HTTP zahteva, dok se
+sama logika izdvojeno obrađuje u servisima.
+U svakom modulu postoji poseban servis (npr. appointments.service.ts, users.service.ts,
+roles.service.ts), koji se obično povezuje sa repozitorijumima i entitetima. Servisi koriste DTO
+klase kao ulazne parametre i nakon validacije komuniciraju sa bazom podataka preko Mongoose
+modela.
+Primeri tipičnih funkcionalnosti servisa uključuju:
+•
+
+UserService – kreiranje i ažuriranje korisnika, pretraga korisnika po email adresi ili ID-u,
+brisanje korisnika.
+
+•
+
+AppointmentService – zakazivanje, izmena i otkazivanje termina, kao i pronalaženje
+termina po klijentu ili zaposlenom.
+
+•
+
+RoleService – upravljanje korisničkim ulogama i dostupnim dozvolama (scopes).
+
+•
+
+ServiceService – dodavanje i ažuriranje usluga koje salon/ordinacija pruža.
+
+NestJS takođe podstiče princip Dependency Injection, što znači da se servisi mogu lako
+ubacivati u kontrolere ili druge servise, čime se dobija fleksibilan i testabilan sistem.
+Repzitorijumi, u ovom kontekstu, predstavljaju sloj zadužen za rad sa bazom podataka.
+Pošto aplikacija koristi MongoDB sa Mongoose ORM-om, pristup bazi se ostvaruje kroz modele
+i šeme definisane unutar modula. Iako ne postoji klasičan „repository“ sloj kao u nekim drugim
+framework-ovima (npr. TypeORM u NestJS-u ili Entity Framework u .NET-u), u ovoj aplikaciji
+funkciju repozitorijuma preuzimaju Mongoose modeli koje servisi koriste za CRUD operacije.
+Ovakva podela slojeva omogućava:
+•
+
+jasnu separaciju odgovornosti (controller – service – database),
+
+•
+
+lakše testiranje i održavanje koda,
+
+•
+
+fleksibilnost za kasniju zamenu ili proširenje baze podataka bez izmene poslovne logike.
+25
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Na narednim slikama prikazani su primeri servisa, kao što su UserService i
+AppointmentService, kako bi se ilustrovao način na koji se implementira poslovna logika u okviru
+sistema.
+
+NestJs - User Service
+
+26
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - User Service
+
+NestJs - Appointments Service
+
+27
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Appointments Service
+
+4.5 Kontroleri i API rute
+
+Kontroleri u NestJS-u predstavljaju ulaznu tačku za sve HTTP zahteve koji dolaze od
+frontenda ili drugih klijenata. Njihova glavna uloga jeste da obrade zahtev, proslede ga
+odgovarajućem servisu i vrate rezultat u obliku HTTP odgovora.
+Svaki kontroler se nalazi u okviru modula i povezan je sa servisom tog modula. Na primer:
+•
+
+users.controller.ts obrađuje rute vezane za upravljanje korisnicima (registracija, pretraga,
+izmena, brisanje).
+
+•
+
+appointments.controller.ts definiše API rute za kreiranje, izmenu i otkazivanje termina.
+28
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+auth.controller.ts služi za autentifikaciju i izdavanje JWT tokena.
+
+•
+
+roles.controller.ts i scopes.controller.ts upravljaju ulogama i dozvolama u sistemu.
+
+Rute se definišu pomoću dekoratora poput @Get(), @Post(), @Put(), @Delete(), uz
+opcionalne parametre (npr. @Param(), @Body(), @Query()). Na taj način se precizno određuje
+koja metoda kontrolera odgovara na koji tip HTTP zahteva.
+Primeri ruta koje aplikacija podržava uključuju:
+•
+
+POST /auth/login – autentifikacija korisnika i izdavanje JWT tokena,
+
+•
+
+GET /users – vraćanje liste korisnika,
+
+•
+
+POST /appointments – kreiranje novog termina,
+
+•
+
+PUT /services/:id – ažuriranje postojeće usluge,
+
+•
+
+DELETE /clients/:id – brisanje klijenta.
+
+Kontroleri se oslanjaju na servise za obradu logike i validaciju podataka, dok oni sami
+ostaju fokusirani na rukovanje HTTP protokolom i mapiranje ruta. Na taj način se postiže jasna
+separacija slojeva i jednostavna nadogradnja API-ja.
+Na narednim slikama prikazani su primeri kontrolera, poput UserController i
+AppointmentController, koji ilustruju kako se definišu API rute u aplikaciji.
+
+29
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - User Controller
+
+30
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Appointments Controller
+
+4.6 Autorizacija i autentifikacija (JWT)
+
+Jedan od ključnih aspekata svake višekorisničke aplikacije jeste kontrola pristupa. U okviru
+ovog sistema, autentifikacija i autorizacija implementirane su korišćenjem JWT (JSON Web
+Token) mehanizma, koji omogućava sigurno prepoznavanje korisnika i dodeljivanje prava
+pristupa.
+Autentifikacija podrazumeva proces potvrde identiteta korisnika. Kada se korisnik uspešno
+prijavi na sistem putem rute POST /auth/login, uneti podaci se proveravaju u bazi podataka. Ako
+31
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+su ispravni, aplikacija generiše JWT token koji se sastoji od tri dela (header, payload i signature)
+i vraća ga klijentu. Payload sadrži osnovne podatke o korisniku (ID, korisničko ime, ulogu, tenant),
+dok signature osigurava da token nije neovlašćeno izmenjen.
+Autorizacija se odnosi na kontrolu pristupa određenim resursima na osnovu korisničke
+uloge i dozvola. Kada korisnik šalje zahtev ka zaštićenoj ruti, token se prosleđuje u HTTP
+zaglavlju (Authorization: Bearer <token>). Sistem proverava validnost tokena i na osnovu uloge i
+dodeljenih scope-ova određuje da li korisnik ima pravo pristupa traženom resursu.
+U okviru aplikacije, implementirani su sledeći slojevi zaštite:
+•
+
+AuthGuard – proverava prisustvo i validnost JWT tokena.
+
+•
+
+Role/Scope Guard – proverava da li korisnik ima potrebne privilegije za izvršavanje akcije
+(npr. da li je administrator ili da li poseduje pravo kreiranja termina).
+
+Ovim pristupom postiže se:
+•
+
+sigurnost aplikacije – jer se samo validirani korisnici mogu prijaviti i koristiti sistem,
+
+•
+
+precizna kontrola pristupa – putem uloga i dozvola,
+
+•
+
+skalabilnost – jer je lako dodavati nove uloge i proširivati sistem dozvola bez većih izmena
+u kodu.
+
+Na narednim slikama prikazan je način na koji se u aplikaciji implementira login proces i
+validacija JWT tokena.
+
+NestJs - Auth Controller
+
+32
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Auth Guard
+
+NestJs - Auth Module
+
+33
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Auth Service
+
+34
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - JWT Strategy
+
+NestJs - Scopes Guard
+
+35
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+NestJs - Scopes Decorator
+
+4.7 Admin Panel Modul za Superadmina
+Pored standardnih modula aplikacije, sistem Flowzen sadrži poseban Admin Panel modul
+namenjen superadmin korisnicima. Ovaj modul omogućava globalno upravljanje svim
+tenantima, korisnicima, ulogama i dozvolama u okviru celokupnog sistema, bez obzira na tenant
+izolaciju.
+
+Admin Panel modul implementiran je kao zaseban modul u okviru NestJS backend aplikacije
+(src/modules/admin/) i sastoji se od nekoliko kontrolera i servisa:
+•
+
+AdminTenantsController - upravljanje tenantima (kreiranje, aktivacija, suspendovanje,
+upravljanje licencama)
+
+•
+
+AdminUsersController - pregled i upravljanje korisnicima kroz sve tenant-e
+
+•
+
+AdminRolesController - upravljanje globalnim ulogama
+
+•
+
+AdminScopesController - upravljanje globalnim dozvolama (scopes)
+
+•
+
+AdminAuditController - pregled audit loga za sve akcije superadmin korisnika
+
+36
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Za zaštitu Admin Panel ruta korišćen je SuperAdminGuard, koji proverava da li korisnik ima
+status superadmina ili globalnog administratora. Ovaj guard se primenjuje na sve admin rute
+zajedno sa JwtAuthGuard i GlobalScopesGuard, čime se obezbeđuje višeslojna zaštita pristupa.
+
+37
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Poseban Admin Setup modul (src/modules/admin-setup/) omogućava inicijalizaciju
+superadmin naloga prilikom prvog pokretanja sistema. Ovaj modul pruža API endpoint-e za
+kreiranje i rollback superadmin naloga, sa dodatnom zaštitom putem zaštitnog tokena.
+
+38
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+39
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+4.8 Self-Service Funkcionalnost za Klijente
+
+Aplikacija Flowzen podržava self-service funkcionalnost koja omogućava klijentima da
+samostalno upravljaju svojim terminima putem posebnog klijentskog portala. Ova funkcionalnost
+implementirana je kroz proširenje Clients modula sa dodatnim endpoint-ima koji omogućavaju
+povezivanje User naloga sa Client profilom.
+
+Ključni endpoint-i za self-service funkcionalnost implementirani su u ClientsController
+(src/modules/clients/controller/clients.controller.ts):
+•
+
+GET /clients/by-user/:userId - pronalaženje Client entiteta povezanog sa User nalogom.
+Ovaj endpoint koristi se prilikom logina klijenta da se pronađe njegov profil.
+
+•
+
+PUT /clients/connect-user/:clientId/:userId - povezivanje User naloga sa Client entitetom.
+Omogućava administratorima da dodele User nalog klijentu za self-service pristup.
+
+•
+
+PUT /clients/disconnect-user/:clientId - diskonektovanje User naloga od klijenta, čime se
+uklanja mogućnost self-service pristupa.
+
+•
+
+POST /appointments/waitlist - dodavanje klijenta na listu čekanja za termin
+
+•
+
+GET /appointments/waitlist/client/:clientId - pregled waitlist-a za određenog klijenta
+
+•
+
+GET /appointments/waitlist - pregled svih waitlist entry-ja (za administratore)
+
+•
+
+DELETE /appointments/waitlist/:id - uklanjanje sa waitlist-a
+
+•
+
+POST /appointments/waitlist/claim - prihvatanje termina sa waitlist-a (za autentifikovane
+korisnike)
+
+•
+
+POST /appointments/waitlist/claim-public - prihvatanje termina sa waitlist-a (javni
+endpoint, bez autentifikacije)
+
+•
+
+POST /appointments/waitlist/notify - ručno obaveštavanje waitlist-a o dostupnom terminu
+
+•
+
+POST /appointments/waitlist/notify-day - automatsko obaveštavanje waitlist-a za ceo dan
+
+40
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+U ClientsService (src/modules/clients/service/clients.service.ts) implementirane su
+metode findClientByUserId() i updateUserReference() koje omogućavaju pronalaženje klijenta
+po User ID-u i povezivanje User i Client entiteta. Ove metode koriste MongoDB upite sa $or
+operatorom kako bi pronašle klijenta bilo po direktnoj referenci ili po email adresi.
+Waitlist funkcionalnost implementirana je u WaitlistService
+(src/modules/appointments/service/waitlist.service.ts) i omogućava klijentima da se prijave na
+listu čekanja za termine koji su trenutno zauzeti. Kada se termin oslobodi (npr. otkazivanjem),
+sistem automatski generiše claimToken i obaveštava klijente na waitlisti putem email-a. Klijent
+može prihvatiti termin koristeći claimToken kroz javni endpoint
+POST /appointments/waitlist/claim-public ili autentifikovani endpoint
+POST /appointments/waitlist/claim.
+
+Self-service funkcionalnost integrisana je sa Appointments modulom, omogućavajući
+klijentima da kroz klijentski portal zakazuju termine, pregledaju svoje zakazane termine, otkazuju
+termine i koriste
+
+41
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+5. Frontend (Angular)
+Frontend deo aplikacije predstavlja korisnički interfejs putem kojeg korisnici ostvaruju
+interakciju sa sistemom. U ovom projektu frontend je razvijen korišćenjem Angular frejmvorka,
+modernog i robusnog okvira za razvoj jednostraničnih aplikacija (SPA – Single Page
+Applications). Angular je odabran zbog svoje modularne arhitekture, podrške za TypeScript,
+bogatog ekosistema biblioteka i mogućnosti jednostavnog povezivanja sa RESTful API servisima.
+Aplikacija je osmišljena tako da korisniku pruži jasan, intuitivan i responzivan interfejs,
+prilagođen različitim veličinama ekrana.
+Poseban akcenat stavljen je na preglednost informacija, jednostavnost korišćenja i pouzdan
+rad, jer je cilj sistema omogućavanje efikasnog upravljanja salonima, klinikama i sličnim
+poslovnim objektima.
+Za vizuelni prikaz elemenata korišćen je Angular Material, koji omogućava izradu
+modernog dizajna u skladu sa Material Design standardima. Ovaj UI paket obezbeđuje
+komponente poput dugmadi, tabela, dijaloga, kartica i formi, čime se postiže konzistentnost
+izgleda i smanjuje vreme potrebno za razvoj korisničkog interfejsa.
+Frontend sloj obezbeđuje komunikaciju sa backend servisima razvijenim u NestJS
+okruženju putem HTTP zahteva, kao i upravljanje lokalnim stanjem aplikacije, autentifikacijom
+korisnika i kontrolom pristupa pojedinim funkcionalnostima.
+
+Angular
+
+5.1 Struktura aplikacije
+Frontend deo aplikacije razvijen je korišćenjem Angular frameworka, čija modularna
+arhitektura omogućava jasno razdvajanje logičkih celina i jednostavnije održavanje koda.
+Struktura projekta je organizovana tako da svaka funkcionalnost ima sopstveni modul, dok
+zajedničke komponente, servisi i modeli imaju centralizovano mesto u okviru posebnih
+direktorijuma.
+42
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Glavni direktorijum aplikacije je src/app, koji sadrži sve osnovne delove potrebne za rad
+korisničkog interfejsa. Unutar njega se nalazi nekoliko ključnih foldera:
+•
+
+core/ – sadrži osnovne servise i pomoćne klase koje se koriste globalno kroz aplikaciju,
+poput servisa za autentifikaciju, rukovanja tokenima i komunikaciju sa API-jem.
+
+•
+
+dialogs/ – obuhvata komponente dijaloga (pop-up prozora) koje se koriste za potvrde,
+uređivanje podataka i interakciju sa korisnikom.
+
+•
+
+layout/ – definiše osnovni izgled aplikacije, uključujući navigacioni meni, zaglavlje, bočnu
+traku i glavni sadržajni deo.
+
+•
+
+models/ – sadrži TypeScript interfejse i klase koje definišu tipove podataka korišćenih kroz
+aplikaciju (npr. User, Role, Client, Appointment itd.).
+
+•
+
+modules/ – predstavlja centralni deo aplikacije i sadrži pojedinačne module koji odgovaraju
+glavnim funkcionalnostima sistema. Svaki modul ima sopstvene komponente, servise i
+rute. Neki od najvažnijih su:
+o
+
+appointments/ – upravljanje terminima i rasporedima;
+
+o
+
+articles/ – moduli za prikaz i uređivanje artikala i proizvoda;
+
+o
+
+clients/ – rad sa klijentima i njihovim podacima;
+
+o
+
+employees/ – evidencija zaposlenih i njihovih radnih zadataka;
+
+o
+
+login/ – forma i logika za prijavljivanje korisnika;
+
+o
+
+services/ – upravljanje uslugama koje salon ili ordinacija nudi;
+
+o
+
+suppliers/ – evidencija dobavljača i nabavke;
+
+o
+
+user-administration/ – administracija korisnika, uloga i dozvola;
+
+o
+
+working-shifts/ – definisanje i pregled radnih smena;
+
+o
+
+settings/ – konfiguracione opcije aplikacije;
+
+o
+
+unauthorized/ – stranica za prikaz kada korisnik nema prava pristupa određenom
+modulu;
+
+o
+
+home/ – početna (dashboard) stranica aplikacije.
+
+Osim modula, prisutni su i dodatni direktorijumi:
+43
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+themes/ – čuva SCSS fajlove, globalne stilove i definicije tema koje određuju izgled
+korisničkog interfejsa.
+
+•
+
+environments/ – sadrži konfiguracione fajlove sa API URL-ovima i drugim parametrima
+koji se razlikuju između razvojne i produkcione verzije.
+
+Na vrhu strukture nalaze se i ključni fajlovi Angular aplikacije:
+•
+
+app.component.ts – glavna komponenta koja predstavlja korenski deo aplikacije;
+
+•
+
+app.routes.ts – definiše rute (putanje) između različitih modula i komponenti;
+
+•
+
+index.html – ulazna HTML datoteka aplikacije;
+
+•
+
+app.config.ts – sadrži osnovna podešavanja i inicijalizaciju aplikacije.
+
+Ovakva organizacija foldera omogućava jasnu separaciju odgovornosti, jednostavno
+proširenje funkcionalnosti, kao i bolju čitljivost i održavanje koda. Svaki modul može se
+samostalno razvijati, testirati i integrisati u ostatak sistema bez narušavanja drugih delova
+aplikacije.
+
+Angular - Struktura projekta
+
+44
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+5.2 Komponente
+
+Komponente predstavljaju osnovne građevinske jedinice svake Angular aplikacije.
+Svaka komponenta se sastoji od tri ključna dela:
+•
+
+HTML šablona, koji definiše izgled interfejsa,
+
+•
+
+TypeScript klase, koja sadrži logiku ponašanja,
+
+•
+
+stila (CSS/SCSS), koji određuje vizuelni izgled.
+
+U ovoj aplikaciji svaka komponenta ima jasno definisanu ulogu u sistemu.
+Najznačajnije komponente su sledeće:
+•
+
+LoginComponent – omogućava korisniku da se prijavi unosom e-mail adrese i lozinke.
+Nakon uspešne prijave, token se čuva u localStorage, a korisnik se preusmerava na
+dashboard. U slučaju greške (nevažeći podaci, neaktivan nalog i sl.), prikazuje se
+odgovarajuća poruka.
+
+•
+
+DashboardComponent – središnja komponenta aplikacije koja prikazuje zbirne informacije
+i ključne pokazatelje poslovanja. Korišćenjem ECharts biblioteke, podaci se vizuelizuju
+kroz grafikone koji prikazuju broj kreiranih termina po mesecima, najtraženije usluge, kao
+i druge pokazatelje uspešnosti poslovanja.
+
+•
+
+AppointmentsComponent – služi za prikaz liste svih zakazanih termina. Omogućava
+filtriranje po zaposlenima, datumima i statusima termina. U okviru nje se nalazi dijalog za
+dodavanje ili izmenu termina (AppointmentFormComponent), u kojem se koriste reaktivne
+forme sa validacijom podataka.
+
+•
+
+UsersComponent – prikazuje listu svih korisnika u sistemu. Administrator može dodavati
+nove korisnike, menjati njihove uloge i aktivirati/deaktivirati naloge. Podaci se prikazuju
+u tabelarnom formatu sa mogućnošću pretrage i paginacije.
+
+•
+
+RoleManagementComponent – omogućava definisanje i izmenu uloga. Interfejs sadrži
+listu dostupnih modula (npr. Klijenti, Zaposleni, Usluge, POS sales) i checkbox polja za
+izbor akcija kao što su access, read, create, update i delete.
+Ova komponenta povezana je sa RolesService, koji vrši ažuriranje i čuvanje dozvola na
+serveru.
+45
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+SharedComponent-i – obuhvataju univerzalne elemente kao što su dijalozi za potvrdu
+brisanja, toast notifikacije, spinner za učitavanje i zajedničke tabele koje se koriste na više
+mesta u aplikaciji.
+
+Zahvaljujući ovoj organizaciji, svaka komponenta je izolovana, testabilna i jednostavna za
+ponovno korišćenje, čime se značajno smanjuje kompleksnost razvoja.
+
+Angular - Appointments HTML
+
+46
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Angular - Appointments component
+
+Angular - Appointments UI
+
+47
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+5.3 Servisi i komunikacija sa backendom
+
+Komunikacija između frontend i backend dela aplikacije realizovana je putem servisa u
+Angular okviru.
+Servisi predstavljaju ključni deo arhitekture aplikacije jer omogućavaju odvajanje
+poslovne logike od prikaza, čime se obezbeđuje bolja organizacija koda, ponovna upotrebljivost i
+jednostavnije testiranje.
+U okviru aplikacije Flowzen, svaki funkcionalni modul poseduje sopstveni servis koji je
+zadužen za komunikaciju sa odgovarajućim API rutama na backendu.
+Na primer, moduli kao što su Appointments, Clients, Employees, Suppliers i User
+Administration imaju svoje servisne klase koje koriste Angular-ov HttpClient za slanje HTTP
+zahteva i obradu odgovora.
+Servisi se najčešće injektuju u komponente putem dependency injection mehanizma, što
+omogućava da komponente ostanu jednostavne i fokusirane na prikaz podataka.
+Na taj način, komponente ne sadrže logiku za pristup API-ju, već samo pozivaju metode servisa.
+Uobičajena struktura servisa u ovoj aplikaciji sadrži sledeće metode:
+•
+
+getAll() – vraća listu svih entiteta (npr. svih klijenata ili zaposlenih),
+
+•
+
+getById(id: string) – preuzima pojedinačan entitet na osnovu identifikatora,
+
+•
+
+create(payload: any) – šalje POST zahtev za kreiranje novog zapisa,
+
+•
+
+update(id: string, payload: any) – vrši izmenu postojećeg zapisa,
+
+•
+
+delete(id: string) – uklanja entitet iz baze podataka.
+
+Na sledećoj slici prikazan je primer servisa user-administration.service.ts, koji omogućava
+komunikaciju između frontend dela i API-ja zaduženog za upravljanje korisnicima i njihovim
+ulogama.
+
+48
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Angular - User Administration Service
+
+Servisi u aplikaciji koriste Environment konfiguraciju (environment.ts) za definisanje
+osnovne putanje ka API-ju, čime se olakšava prilagođavanje različitim okruženjima (lokalno,
+testno, produkcijsko).
+Pored osnovnih CRUD operacija, pojedini servisi implementiraju i dodatne metode
+specifične za funkcionalnost određenog modula.
+Na primer:
+•
+
+appointments.service.ts sadrži metode za filtriranje termina po zaposlenom ili klijentu,
+
+•
+
+clients.service.ts omogućava pretragu i filtriranje klijenata prema imenu, email adresi ili
+statusu,
+49
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+user-administration.service.ts upravlja korisnicima, dodelom uloga i statusima pristupa.
+
+Svi servisi koriste Observable tipove iz RxJS biblioteke, što omogućava reaktivno praćenje
+promena i jednostavno asinhrono rukovanje podacima.
+Na taj način se osigurava efikasno osvežavanje podataka u komponentama bez potrebe za
+ručnim osvežavanjem stranice.
+Servisi čine osnovu komunikacionog sloja između korisničkog interfejsa i backend APIja, i imaju ključnu ulogu u održavanju konzistentnosti podataka i performansi sistema.
+
+5.4 Routing i čuvanje stanja aplikacije
+Angular koristi ugrađeni Router modul za upravljanje navigacijom i dinamičko učitavanje
+komponenti.
+Rute se definišu u fajlu app-routing.module.ts, gde se svaka putanja povezuje sa svojom
+komponentom.
+Za kontrolu pristupa implementirani su route guard-ovi:
+•
+
+AuthGuard proverava da li korisnik ima važeći JWT token,
+
+•
+
+ScopeGuard proverava da li korisnik ima dozvolu za pristup određenom modulu u skladu
+sa svojom ulogom.
+
+Prilikom uspešne prijave, aplikacija čuva JWT token i osnovne informacije o korisniku u
+localStorage, što omogućava očuvanje sesije čak i nakon osvežavanja stranice. Ovo rešenje je
+praktično jer se frontend ponaša kao klijent koji nezavisno komunicira sa backend API-jem, bez
+potrebe za dodatnim stanjem na serveru. Upravljanje stanjem u aplikaciji realizovano je putem
+BehaviorSubject objekata u servisima, koji omogućavaju reaktivno ažuriranje podataka u realnom
+vremenu.
+Na primer, kada korisnik izmeni ulogu ili kreira novi termin, odgovarajući servis emituje
+promenu, a sve komponente koje su pretplaćene na taj tok automatski ažuriraju svoj prikaz.
+Ovakav pristup omogućava efikasno upravljanje podacima, pouzdan rad u realnom
+vremenu i visok nivo korisničkog iskustva (UX), jer korisnici ne moraju ručno osvežavati stranice
+da bi videli promene.
+
+50
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Angular - App Routes
+
+Angular - Auth Guard
+
+51
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Angular - Scope Guard
+
+5.5 Admin Panel Modul
+
+Admin Panel modul u Angular aplikaciji (src/app/modules/admin/) predstavlja kompletan
+interfejs za superadmin korisnike. Modul je organizovan kao lazy-loaded modul sa posebnim
+rutama i guard-ovima koji osiguravaju da samo korisnici sa globalnim dozvolama mogu pristupiti
+ovom delu aplikacije.
+
+Struktura Admin Panel modula obuhvata:
+•
+
+Overview stranica - prikazuje zbirne statistike o tenantima, korisnicima i nedavnim
+aktivnostima superadmin tima
+
+•
+
+Tenants stranica - omogućava pregled, kreiranje, aktivaciju, suspendovanje i upravljanje
+licencama za sve tenant-e u sistemu
+52
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+
+Users stranica - prikazuje sve korisnike kroz sve tenant-e, sa mogućnostima filtriranja i
+upravljanja
+
+•
+
+Roles stranica - upravljanje globalnim ulogama i dodela dozvola
+
+•
+
+Scopes stranica - pregled i upravljanje globalnim dozvolama (scopes) u sistemu
+
+•
+
+Audit stranica - pregled audit loga sa svim akcijama superadmin korisnika
+
+Za zaštitu Admin Panel ruta korišćen je GlobalScopeGuard (src/app/core/guards/globalscope.guard.ts), koji proverava da li korisnik poseduje potrebne globalne dozvole (scopes)
+definisane u route data objektu. Svaka ruta u admin modulu ima definisan scope u data objektu,
+na primer 'global.tenants:read' za pregled tenant-a.
+
+53
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Code 1
+
+Code 2
+
+Komunikacija sa backend API-jem realizovana je kroz zasebne servise u okviru admin modula
+(src/app/modules/admin/services/), gde svaki servis odgovara odgovarajućem kontroleru na
+backend strani. Servisi koriste Angular HttpClient za slanje HTTP zahteva i vraćanje Observable
+tokova podataka.
+54
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+5.6 Self-Service Modul za Klijente
+Self-Service modul za klijente omogućava klijentima da samostalno upravljaju svojim
+terminima putem posebnog klijentskog portala. Modul se sastoji od dve glavne komponente:
+ClientLoginComponent za prijavljivanje klijenata i ClientDashboardComponent za upravljanje
+terminima.
+
+Code 3
+
+55
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+ClientLoginComponent (src/app/modules/client-login/client-login.component.ts) predstavlja
+posebnu login stranicu namenjenu klijentima. Komponenta koristi standardni AuthService za
+autentifikaciju, ali nakon uspešne prijave, sistem automatski pronalazi Client profil povezan sa
+User nalogom i preusmerava korisnika na Client Dashboard.
+
+•
+
+ClientDashboardComponen (modules/client-dashboard/client-dashboard.component.ts) je
+glavna komponenta self-service portala koja omogućava klijentima:
+
+•
+
+Pregled svih zakazanih termina - prikazuje termine sa detaljima o usluzi, zaposlenom,
+datumu i vremenu
+
+•
+
+Otkazivanje termina - omogućava klijentima da otkažu termine koji još nisu naplaćeni ili
+fiskalizovani
+
+•
+
+Prijavu na waitlist - klijenti se mogu prijaviti na listu čekanja za željene termine
+
+•
+
+Pregled waitlist statusa - prikazuje trenutne waitlist entry-je sa detaljima o usluzi,
+zaposlenom, datumu i vremenu, kao i status obaveštenja (isNotified) i claim token-a
+
+•
+
+Prihvatanje termina sa waitlista - kada se termin oslobodi, klijent dobija obaveštenje i
+može prihvatiti termin koristeći claimToken kroz javni endpoint ili autentifikovani
+endpoint
+
+Code 4
+
+56
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Komponenta implementira automatsko osvežavanje podataka svakih 15 sekundi, čime se
+obezbeđuje da klijenti uvek vide najnovije informacije o svojim terminima i waitlist statusu.
+Komunikacija sa backend-om realizovana je kroz AppointmentsService i ClientsService, gde se
+koriste metode specifične za self-service funkcionalnost kao što su getClientAppointments() i
+getClientWaitlist().
+
+Self-service modul integrisan je sa glavnim routing sistemom aplikacije, sa posebnom rutom
+/client-dashboard koja je zaštićena ScopeGuard-om sa scope-om 'scope_client_dashboard:access'.
+Ovo osigurava da samo korisnici sa odgovarajućim dozvolama mogu pristupiti klijentskom
+portalu.
+
+6. Implementacija poslovne logike
+Poslovna logika predstavlja srž aplikacije Flowzen i obuhvata pravila, procese i relacije
+između entiteta koji omogućavaju efikasno upravljanje radom salona i sličnih objekata.
+U ovoj fazi razvoja implementirane su ključne funkcionalnosti koje obuhvataju upravljanje
+korisnicima i ulogama, zakazivanje termina i evidenciju poslovanja.
+Poslovna logika je implementirana pretežno na backend strani (NestJS), gde se izvršavaju
+sve validacije, provere prava pristupa i obrada podataka, dok frontend (Angular) obezbeđuje
+korisnički interfejs i poziva odgovarajuće API metode.
+Ovakva arhitektura obezbeđuje sigurnost, doslednost podataka i lakšu buduću nadogradnju
+sistema.
+Svaka poslovna funkcionalnost povezana je sa posebnim modulom koji obuhvata:
+•
+
+kontroler koji prima zahtev od korisnika,
+
+•
+
+servis koji sadrži poslovnu logiku,
+
+•
+
+DTO klase koje definišu validaciju i strukturu podataka,
+
+•
+
+i šemu koja definiše model podataka u bazi.
+
+57
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Na frontend strani, svaka od ovih funkcionalnosti ima svoj modul, komponentu i servis,
+koji komuniciraju sa backend API-jem i prikazuju podatke u vizuelnom obliku.
+Time je ostvarena dvosmerna sinhronizacija između korisničkog interfejsa i baze podataka,
+što omogućava korisnicima da u realnom vremenu zakazuju termine, prate zaposlene, pregledaju
+klijente i upravljaju finansijskim izveštajima.
+Na sledećim podpoglavljima detaljnije su opisani ključni procesi koji čine osnovu
+poslovnog modela aplikacije Flowzen:
+•
+
+upravljanje korisnicima i ulogama,
+
+•
+
+upravljanje zakazivanjima,
+
+•
+
+i evidencija poslovanja i statistike.
+
+6.1 Upravljanje korisnicima i uloge (admin, zaposleni)
+
+Upravljanje korisnicima i njihovim ulogama predstavlja centralni deo sistema Flowzen, jer
+omogućava kontrolu pristupa funkcionalnostima u skladu sa hijerarhijom i zaduženjima unutar
+organizacije.
+Aplikacija je projektovana tako da svaki korisnik ima tačno definisane dozvole i obaveze,
+čime se obezbeđuje sigurnost, preglednost i lakše upravljanje podacima u okviru različitih
+poslovnih jedinica (salona, klinika i ordinacija). Na serverskoj strani, funkcionalnost upravljanja
+korisnicima realizovana je kroz User modul, koji obuhvata User šemu, User servis, User kontroler
+i odgovarajuće DTO klase.
+Svaki korisnik je povezan sa jednom ulogom (Role), dok svaka uloga definiše skup
+dozvoljenih akcija kroz polje availableScopes.
+Uloge kao što su administrator, menadžer i zaposleni razlikuju se po nivou ovlašćenja:
+•
+
+Administrator ima pristup svim modulima aplikacije, uključujući upravljanje korisnicima
+i podešavanja sistema.
+
+•
+
+Menadžer ima pristup modulu za zakazivanje, pregled klijenata i izveštaje.
+
+•
+
+Zaposleni može pristupati samo sopstvenim terminima i podacima klijenata koji su mu
+dodeljeni.
+58
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Registracija i autentifikacija korisnika obavljaju se putem API ruta definisanih u
+auth.controller.ts, dok su CRUD operacije nad korisnicima realizovane u users.controller.ts.
+Validacija podataka vrši se pomoću DTO klasa koje koriste class-validator dekoratore,
+čime se sprečava unos neispravnih podataka u bazu.
+
+NestJs - User Controller update metoda
+
+NestJs - User Schema
+
+Pored osnovnih operacija dodavanja, izmena i brisanja korisnika, sistem omogućava i
+promenu uloge, dodelu globalnih dozvola (isGlobalAdmin) i direktnu dodelu dodatnih dozvola
+(scopes) bez potrebe za ponovnim kreiranjem korisnika. Ove operacije dostupne su isključivo
+administratorima i superadmin korisnicima, dok ostali korisnici mogu menjati samo lične podatke.
+Na frontend strani, upravljanje korisnicima realizovano je kroz modul User
+Administration, koji se sastoji od komponente user-administration.component.ts i servisa useradministration.service.ts.
+59
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Ova komponenta omogućava prikaz svih korisnika u tabeli, dodavanje novih korisnika
+putem dijaloga, izmenu uloga i brisanje postojećih naloga.
+Korisnički interfejs je koncipiran tako da administrator može brzo pregledati korisnike,
+filtrirati ih po ulozi, kao i menjati dozvole klikom na odgovarajući red u tabeli.
+Komunikacija sa backendom odvija se preko REST API poziva, dok se vizuelne
+komponente baziraju na Angular Material biblioteci.
+
+Angular - Tabela User-a
+
+Angular - Edit Role dijalog
+
+60
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Svaka promena uloga automatski se sinhronizuje sa servisom za autentifikaciju
+(AuthService), koji ažurira trenutno prijavljenog korisnika u lokalnom stanju aplikacije.
+Na taj način, izmene u dozvolama odmah se odražavaju na korisnički interfejs — korisnik
+gubi ili dobija pristup određenim modulima bez potrebe za ponovnim prijavljivanjem.
+Ovakav pristup obezbeđuje real-time ažuriranje prava pristupa, čime se značajno povećava
+sigurnost sistema i eliminiše mogućnost neovlašćenog korišćenja aplikacije.
+
+6.2 Upravljanje zakazivanjima
+
+Zakazivanje termina predstavlja jednu od najvažnijih funkcionalnosti sistema Flowzen, jer
+omogućava efikasno upravljanje radom salona, klinika i ordinacija. Ova funkcionalnost obuhvata
+procese kreiranja, uređivanja, otkazivanja i praćenja termina, kao i dodelu termina zaposlenima i
+klijentima.
+Na backend strani, funkcionalnost zakazivanja realizovana je kroz Appointments modul.
+Ovaj modul sadrži sledeće ključne komponente:
+•
+
+appointments.schema.ts – definiše strukturu dokumenta u bazi podataka (MongoDB),
+gdesvaki termin sadrži referencu na zaposlenog (employee), klijenta (client), uslugu
+(service), facility (facility), tenant (tenant), datum (date), vreme početka i završetka
+(startHour, endHour), status plaćanja (paid), status otkazivanja (cancelled) i opcionu
+referencu na Sale entitet (sale) za naplaćene termine;
+
+•
+
+appointments.service.ts – sadrži poslovnu logiku, uključujući validaciju raspoloživosti
+zaposlenog i sprečavanje preklapanja termina;
+
+•
+
+appointments.controller.ts – prima HTTP zahteve sa frontenda i prosleđuje ih servisnom
+sloju;
+
+•
+
+DTO klase – koriste se za validaciju ulaznih podataka i osiguravaju da svi termini sadrže
+validne reference i vremenske vrednosti.
+
+Zakazivanje termina odvija se tako što klijent ili administrator pošalje zahtev preko APIja, nakon čega servis proverava:
+
+61
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+1. da li je zaposleni dostupan u željenom terminu,
+2. da li termin ne preklapa drugi postojeći termin istog zaposlenog,
+3. i da li su svi potrebni podaci validni.
+Ako su uslovi ispunjeni, novi termin se čuva u bazi i postaje vidljiv u interfejsu zaposlenih
+i klijenata.
+Na frontend strani, funkcionalnost zakazivanja implementirana je u okviru modula
+Appointments, koji se sastoji od više komponenti i dijaloga za rad sa terminima. Ključna
+komponenta je appointments.component.ts, koja prikazuje kalendar sa pregledom svih zakazanih
+termina. Aplikacija koristi Angular Material Datepicker i Table komponente za prikaz i unos
+termina, dok su forme povezane sa appointments.service.ts servisom koji komunicira sa backend
+API-jem.
+Dijalozi omogućavaju korisniku da:
+•
+
+doda novi termin,
+
+•
+
+izmeni postojeći,
+
+•
+
+otkaže termin,
+
+•
+
+i pregleda detalje o usluzi, zaposlenom i klijentu.
+
+Svaka izmena automatski ažurira stanje aplikacije pomoću BehaviorSubject objekata, čime
+se ostvaruje reaktivan prikaz bez potrebe za ručnim osvežavanjem stranice.
+Tokom zakazivanja implementirane su višestruke validacije:
+•
+
+onemogućeno je kreiranje termina u prošlosti,
+
+•
+
+sistem ne dozvoljava preklapanje termina istog zaposlenog,
+
+•
+
+svi obavezni podaci moraju biti popunjeni pre potvrde.
+
+Interfejs pruža jasan vizuelni pregled svih termina po danima, zaposlenima i uslugama,
+čime se olakšava planiranje i organizacija poslovanja.
+
+62
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Angular - Add Appointment dijalog
+
+Angular - prikaz appointmenta u rasporedu
+
+63
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+6.3 Evidencija poslovanja i statistike
+
+Evidencija poslovanja i prikaz statistike predstavljaju završni sloj poslovne logike
+aplikacije Flowzen, čiji je cilj da korisnicima pruži uvid u ključne pokazatelje uspešnosti
+poslovanja, broj zakazanih termina, promet, aktivnosti zaposlenih i druge relevantne podatke.
+Ovaj deo sistema doprinosi analitičkom praćenju rada salona ili ordinacije i omogućava
+donošenje informisanih odluka na osnovu realnih podataka.
+Na serverskoj strani, evidencija poslovanja oslanja se na kombinaciju podataka iz više
+kolekcija u bazi — appointments, services, employees, sales (POS transakcije), i clients.
+Podaci se agregiraju i obrađuju pomoću MongoDB upita, čime se generišu izveštaji o broju
+obavljenih termina, ukupnom prihodu i najčešće korišćenim uslugama.
+Ključne funkcionalnosti uključuju:
+•
+
+izračunavanje ukupnog broja termina po mesecima,
+
+•
+
+analizu najčešće korišćenih usluga,
+
+•
+
+praćenje učinka zaposlenih po broju obavljenih termina,
+
+•
+
+i generisanje podataka za prikaz grafičkih statistika na frontend strani.
+
+Ove funkcionalnosti su implementirane unutar servisnih klasa, gde se koriste Mongoose
+metode kao što su aggregate(), countDocuments() i group operatori za efikasno prikupljanje
+podataka. Rezultati se zatim vraćaju u formatu koji frontend može direktno prikazati u vidu
+grafikona ili tabela.
+Na frontend strani, evidencija poslovanja realizovana je kroz poseban deo dashboarda, koji
+omogućava prikaz različitih statističkih podataka u vizuelnom obliku. Za prikaz grafika korišćena
+je ECharts biblioteka, koja omogućava dinamično renderovanje podataka i interaktivne
+vizualizacije. Korisnici mogu pratiti trendove zakazivanja po mesecima, ukupan broj klijenata,
+prihode i učinak zaposlenih. Komunikacija sa backendom odvija se putem posebnog servisa koji
+periodično preuzima podatke i ažurira grafove u realnom vremenu.
+Na taj način menadžeri i administratori uvek imaju uvid u trenutno stanje poslovanja bez
+potrebe za ručnim osvežavanjem.
+
+64
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Ova funkcionalnost omogućava vlasnicima i menadžerima da:
+•
+
+prate rast i uspešnost poslovanja,
+
+•
+
+identifikuju najtraženije usluge,
+
+•
+
+optimizuju raspored zaposlenih na osnovu opterećenja,
+
+•
+
+i prepoznaju periode povećane ili smanjene potražnje.
+
+Na taj način, aplikacija Flowzen ne služi samo za upravljanje svakodnevnim operacijama,
+već i kao alat za strateško planiranje i unapređenje poslovnih procesa.
+
+6.4 Self-Service Zakazivanje za Klijente
+
+Self-service zakazivanje predstavlja funkcionalnost koja omogućava klijentima da
+samostalno upravljaju svojim terminima bez posredovanja zaposlenih ili administratora. Ova
+funkcionalnost implementirana je kroz integraciju Clients i Appointments modula, sa posebnim
+endpoint-ima i komponentama koje omogućavaju klijentima pristup samo svojim podacima.
+
+Proces self-service zakazivanja započinje povezivanjem User naloga sa Client profilom.
+Administrator ili zaposleni kroz admin panel može dodeliti User nalog klijentu pozivom endpointa PUT /clients/connect-user/:clientId/:userId. Nakon povezivanja, User nalog dobija pristup Client
+Dashboard-u gde može pregledati svoje termine i zakazivati nove.
+
+Klijenti mogu zakazivati termine kroz BookAppointmentDialogComponent, koja
+omogućava izbor usluge, zaposlenog, datuma i vremena. Sistem automatski proverava dostupnost
+zaposlenog i sprečava preklapanje termina. Dodatno, klijenti mogu koristiti waitlist funkcionalnost
+- prijavljivanje na listu čekanja za termine koji su trenutno zauzeti. Kada se termin oslobodi (npr.
+otkazivanjem), sistem automatski generiše claimToken i obaveštava klijente na waitlisti. Klijent
+može prihvatiti termin pozivom endpoint-a POST /appointments/waitlist/claim sa claimTokenom.
+Alternativno, postoji javni endpoint POST /appointments/waitlist/claim-public koji ne zahteva
+autentifikaciju i koristi se kada klijent klikne na link iz emaila.
+
+65
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Prikazati dijalog za zakazivanje termina
+
+Validacija prilikom self-service zakazivanja uključuje:
+•
+•
+
+Proveru da li je zaposleni dostupan u željenom terminu
+Sprečavanje preklapanja termina
+66
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+•
+•
+
+Proveru da li je termin u okviru radnog vremena zaposlenog (working shift)
+Validaciju da klijent može pristupiti samo svojim podacima
+
+Self-service funkcionalnost omogućava klijentima veću autonomiju u upravljanju svojim
+terminima, smanjujući opterećenje zaposlenih i poboljšavajući korisničko iskustvo.
+
+7. Budući razvoj aplikacije
+Napomena: U trenutnoj verziji aplikacije već su implementirani Admin Panel modul
+za superadmin korisnike i Self-Service modul za klijente, koji omogućavaju globalno upravljanje
+sistemom i samostalno zakazivanje termina od strane klijenata.
+Aplikacija Flowzen trenutno obuhvata sve ključne funkcionalnosti potrebne za efikasno
+vođenje poslovanja u okviru kozmetičkih salona, frizerskih studija, klinika i sličnih objekata.
+Ipak, arhitektura sistema projektovana je tako da omogućava laku nadogradnju i
+proširivost, što otvara mogućnost za uvođenje dodatnih funkcionalnosti koje bi unapredile
+korisničko iskustvo i efikasnost poslovanja.
+U narednim fazama razvoja planirano je proširenje aplikacije kroz sledeće funkcionalnosti:
+1. Integracija sa sistemima elektronskog plaćanja
+Uvođenjem podrške za online plaćanja (npr. putem kartica, PayPal-a ili lokalnih servisa),
+korisnicima bi se omogućila brža i jednostavnija naplata usluga, dok bi aplikacija
+automatski evidentirala uplate u bazu podataka.
+2. Obaveštenja i podsetnici (notifikacije)
+Planirano je dodavanje sistema notifikacija putem e-maila ili SMS poruka, kojim bi klijenti
+dobijali podsetnike za zakazane termine, dok bi zaposleni bili obaveštavani o promenama
+u rasporedu.
+3. Mobilna verzija aplikacije
+Razvoj responzivne mobilne verzije ili posebne mobilne aplikacije (koristeći Ionic ili React
+Native) doprineo bi većoj dostupnosti i praktičnosti, posebno za zaposlene koji žele pristup
+rasporedu i podacima u pokretu.
+4. Napredna analitika i izveštavanje
+67
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Proširenje postojećeg sistema statistike uvođenjem prediktivnih analiza zasnovanih na
+istorijskim podacima.
+Korišćenjem tehnologija veštačke inteligencije (AI) moglo bi se omogućiti automatsko
+predviđanje opterećenja zaposlenih, najprometnijih dana i perioda povećane potražnje.
+5. Integracija sa eksternim servisima i alatima
+U budućnosti je planirana mogućnost povezivanja sa eksternim kalendarima (npr. Google
+Calendar) i alatima za fakturisanje, čime bi se omogućila veća automatizacija poslovnih
+procesa.
+Dalji razvoj aplikacije Flowzen usmeren je ka povećanju automatizacije, dostupnosti i
+inteligentne analize podataka.
+Planirane funkcionalnosti imaju za cilj da unaprede korisničko iskustvo, smanje manuelni
+rad i pruže vlasnicima salona alat koji im omogućava donošenje odluka zasnovanih na podacima.
+Zahvaljujući modularnoj arhitekturi backend sistema (NestJS) i fleksibilnom frontend
+okviru (Angular), implementacija novih mogućnosti može se realizovati bez potrebe za značajnim
+promenama u postojećem sistemu.
+
+8. Zaključak
+
+U ovom radu prikazan je proces razvoja veb aplikacije za vođenje kozmetičkih i frizerskih
+salona, klinika i ordinacija. Glavni cilj projekta bio je da se napravi savremeno, efikasno i
+intuitivno rešenje koje će vlasnicima i zaposlenima omogućiti lakše upravljanje terminima,
+korisnicima, zaposlenima, uslugama i sales.
+Tokom realizacije rada primenjene su moderne tehnologije i pristupi u razvoju veb
+aplikacija. Na serverskoj strani korišćen je NestJS frejmork, zasnovan na Node.js platformi, koji
+omogućava modularnu i skalabilnu arhitekturu. Za bazu podataka izabran je MongoDB, što je
+omogućilo fleksibilno čuvanje podataka i jednostavno upravljanje više poslovnih jedinica kroz
+sistem višestrukih zakupaca (multi-tenant arhitektura).
+Na klijentskoj strani implementirana je Angular aplikacija, koja pruža dinamičan i
+responzivan korisnički interfejs. Korišćenjem servisa i modula postignuta je jasna separacija
+odgovornosti i olakšano održavanje koda. Takođe, primenjeni su mehanizmi autentifikacije i
+autorizacije putem JWT tokena, čime je obezbeđen bezbedan pristup sistemu i kontrola korisničkih
+privilegija.
+68
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+U okviru testiranja, proverena je ispravnost rada ključnih funkcionalnosti i komunikacije
+između frontenda i backenda. Rezultati su pokazali da sistem stabilno funkcioniše, brzo reaguje
+na korisničke zahteve i pouzdano upravlja podacima.
+Razvijena aplikacija ostvaruje sve postavljene ciljeve i potvrđuje početnu hipotezu da je
+moguće izgraditi sveobuhvatan informacioni sistem za upravljanje salonima koristeći savremene
+veb tehnologije.
+U budućem radu, planirano je proširenje funkcionalnosti kroz dodavanje notifikacija,
+online rezervacija i mobilne aplikacije za još jednostavnije korišćenje od strane klijenata i osoblja.
+
+69
+
+Diplomski rad
+
+Bojan Bjelič 5238
+
+Literatura
+
+1. Official Angular Documentation
+URL: https://angular.dev
+Zvanična Angular dokumentacija pruža detaljan uvid u razvoj jednostraničnih aplikacija
+(SPA), objašnjava rad sa komponentama, servisima, rutama i reaktivnim obrascima
+upravljanja podacima.
+2. NestJS Documentation
+URL: https://docs.nestjs.com
+Dokumentacija NestJS okvira opisuje modularnu arhitekturu i način izgradnje skalabilnih
+backend aplikacija zasnovanih na TypeScript-u i principima objektno orijentisanog i
+reaktivnog programiranja.
+3. MongoDB Documentation
+URL: https://www.mongodb.com/docs/manual
+Zvanična dokumentacija za MongoDB objašnjava rad sa NoSQL bazama podataka,
+koncept kolekcija i dokumenata, kao i metode za agregaciju i optimizaciju upita.
+4. TypeScript Documentation
+URL: https://www.typescriptlang.org/docs
+Ovaj vodič pokriva osnove i napredne koncepte TypeScript jezika, uključujući tipove,
+interfejse i klase koji omogućavaju robusniji i održiviji razvoj aplikacija.
+5. JWT Authentication Best Practices – Google Cloud
+URL: https://cloud.google.com/docs/authentication
+Dokument koji objašnjava principe i preporuke za implementaciju sigurne autentifikacije
+korišćenjem JWT tokena u web aplikacijama.
+6. RxJS Documentation
+URL: https://rxjs.dev/guide/overview
+Zvanična dokumentacija biblioteke RxJS koja objašnjava rad sa Observable objektima i
+reaktivnim tokovima podataka u Angular aplikacijama.
+70
+
+

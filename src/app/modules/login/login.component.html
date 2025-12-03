@@ -3,7 +3,9 @@
     <ng-template pTemplate="header">
       <div class="login-header" fxLayout="row" fxLayoutAlign="space-between center">
         <img src="flowzen-logo.png" alt="flowzen" class="logo">
-        <h2 class="brand-title">Flowzen</h2>
+        <h2 class="brand-title">
+          <span class="letter" *ngFor="let letter of 'Flowzen'.split(''); let i = index">{{ letter === ' ' ? '\u00A0' : letter }}</span>
+        </h2>
       </div>
     </ng-template>
     

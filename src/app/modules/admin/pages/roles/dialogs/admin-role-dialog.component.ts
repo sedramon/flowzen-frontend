@@ -74,11 +74,15 @@ export class AdminRoleDialogComponent implements OnInit, OnDestroy {
     type: ['global' as 'global' | 'tenant'],
     tenantId: [{ value: null, disabled: true }],
     scopeSearch: [''],
+    selectedScopes: [[] as string[]],
   });
 
   scopesLoading = false;
   private allScopes: AdminScope[] = [];
-  private readonly selectedScopeIds = new Set<string>();
+  
+  get selectedScopesControl() {
+    return this.form.get('selectedScopes');
+  }
   scopeBuckets: ScopeBucket[] = [];
 
   ngOnInit(): void {
@@ -94,24 +98,58 @@ export class AdminRoleDialogComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  isScopeSelected(scopeId: string): boolean {
-    return this.selectedScopeIds.has(scopeId);
+  private getScopeId(scope: AdminScope): string {
+    return scope._id || scope.name;
+  }
+
+  isScopeSelected(scopeId: string | undefined): boolean {
+    if (!scopeId) return false;
+    const currentSelected = this.selectedScopesControl?.value || [];
+    return currentSelected.includes(scopeId);
   }
 
   selectAll(bucket: ScopeBucket): void {
-    bucket.scopes.forEach((scope) => this.selectedScopeIds.add(scope._id));
+    const currentSelected = this.selectedScopesControl?.value || [];
+    const newScopes = bucket.scopes
+      .map(scope => this.getScopeId(scope))
+      .filter(id => id && !currentSelected.includes(id));
+    
+    if (newScopes.length > 0) {
+      this.selectedScopesControl?.setValue([...currentSelected, ...newScopes]);
+    }
   }
 
   clearAll(bucket: ScopeBucket): void {
-    bucket.scopes.forEach((scope) => this.selectedScopeIds.delete(scope._id));
+    const currentSelected = this.selectedScopesControl?.value || [];
+    const bucketScopeIds = bucket.scopes
+      .map(scope => this.getScopeId(scope))
+      .filter(Boolean);
+    
+    const filtered = currentSelected.filter((id: string) => !bucketScopeIds.includes(id));
+    this.selectedScopesControl?.setValue(filtered);
   }
 
-  onScopeOptionToggle(scopeId: string, selected: boolean): void {
-    if (selected) {
-      this.selectedScopeIds.add(scopeId);
+  onScopeOptionToggle(scopeId: string | undefined, selected: boolean): void {
+    if (!scopeId) {
+      console.warn('[AdminRoleDialog] onScopeOptionToggle: scopeId is undefined');
       return;
     }
-    this.selectedScopeIds.delete(scopeId);
+    
+    const currentSelected = this.selectedScopesControl?.value || [];
+    let newSelected: string[];
+    
+    if (selected) {
+      if (!currentSelected.includes(scopeId)) {
+        newSelected = [...currentSelected, scopeId];
+      } else {
+        return; // Already selected
+      }
+    } else {
+      newSelected = currentSelected.filter((id: string) => id !== scopeId);
+    }
+    
+    this.selectedScopesControl?.setValue(newSelected);
+    console.log('[AdminRoleDialog] Selected scopes updated:', newSelected);
   }
 
   submit(): void {
@@ -126,13 +164,17 @@ export class AdminRoleDialogComponent implements OnInit, OnDestroy {
       tenantId: string | null;
     };
 
+    const availableScopes = (this.selectedScopesControl?.value || []).filter(Boolean) as string[];
+    console.log('[AdminRoleDialog] Submitting with scopes:', availableScopes);
+
     const result: AdminRoleDialogResult = {
       name: value.name.trim(),
       type: value.type,
       tenantId: value.type === 'tenant' ? value.tenantId ?? null : null,
-      availableScopes: Array.from(this.selectedScopeIds),
+      availableScopes: availableScopes,
     };
 
+    console.log('[AdminRoleDialog] Final payload:', result);
     this.dialogRef.close(result);
   }
 
@@ -166,7 +208,8 @@ export class AdminRoleDialogComponent implements OnInit, OnDestroy {
         typeof scope === 'string' ? scope : scope._id ?? scope.name,
       ) ?? [];
 
-    scopeIds.filter(Boolean).forEach((id) => this.selectedScopeIds.add(id));
+    const validScopeIds = scopeIds.filter(Boolean) as string[];
+    this.selectedScopesControl?.setValue(validScopeIds);
     this.refreshBuckets();
   }
 

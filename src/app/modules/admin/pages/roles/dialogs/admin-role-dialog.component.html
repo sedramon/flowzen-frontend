@@ -89,11 +89,10 @@
                   </div>
                 </div>
 
-                <mat-selection-list>
-                  @for (scope of bucket.scopes; track scope._id) {
+                <mat-selection-list [formControl]="selectedScopesControl" multiple>
+                  @for (scope of bucket.scopes; track scope._id || scope.name) {
                     <mat-list-option
-                      [selected]="isScopeSelected(scope._id)"
-                      (selectionChange)="onScopeOptionToggle(scope._id, $event.source.selected)"
+                      [value]="scope._id || scope.name"
                       matTooltip="{{ scope.description || 'Opis nije dodat' }}"
                       matTooltipShowDelay="250"
                       matTooltipPosition="above"

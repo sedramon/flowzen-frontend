@@ -49,14 +49,83 @@
   .logo {
     width: 100px;
     height: 85px;
+    animation: logoFloat 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+    transform-origin: center;
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.3));
   }
   
   .brand-title {
     margin: 0;
     font-size: 2rem;
-    font-weight: 700;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+    font-weight: 600;
     letter-spacing: 2px;
+    display: inline-flex;
+    align-items: center;
+    
+    .letter {
+      display: inline-block;
+      font-size: 2rem;
+      font-weight: 600;
+      letter-spacing: 2px;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ebff 30%, #f0f2ff 70%, #f8f9ff 100%);
+      background-size: 200% 200%;
+      background-clip: text;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 
+        0 0 10px rgba(255, 255, 255, 0.3),
+        0 0 20px rgba(199, 210, 254, 0.2),
+        0 2px 8px rgba(0, 0, 0, 0.4);
+      animation: letterFloat 5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.3));
+      transform-origin: center;
+      will-change: transform;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      
+      @for $i from 1 through 7 {
+        &:nth-child(#{$i}) {
+          animation-delay: #{$i * 0.1}s;
+        }
+      }
+    }
+  }
+}
+
+@keyframes logoFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+  25% {
+    transform: translate3d(0, 3px, 0) rotate(-0.8deg);
+  }
+  50% {
+    transform: translate3d(0, 5px, 0) rotate(0deg);
+  }
+  75% {
+    transform: translate3d(0, 3px, 0) rotate(0.8deg);
+  }
+}
+
+@keyframes letterFloat {
+  0%, 100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    background-position: 0% 50%;
+  }
+  25% {
+    transform: translate3d(0, -3px, 0) rotate(0.8deg);
+    background-position: 50% 50%;
+  }
+  50% {
+    transform: translate3d(0, -5px, 0) rotate(0deg);
+    background-position: 100% 50%;
+  }
+  75% {
+    transform: translate3d(0, -3px, 0) rotate(-0.8deg);
+    background-position: 50% 50%;
   }
 }
 

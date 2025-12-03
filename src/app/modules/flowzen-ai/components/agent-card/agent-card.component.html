@@ -1,0 +1,61 @@
+<p-card 
+  [style]="{ 'margin-bottom': '1.5rem' }" 
+  class="agent-card"
+  [style.--accent-color]="getAccentColor()"
+  [style.--accent-rgb]="hexToRgb(getAccentColor())">
+  <div 
+    #cardContent
+    class="agent-card-content" 
+    (click)="onCardClick($event)"
+    [class.navigating]="isNavigating">
+    <div 
+      class="minion-image-wrapper"
+      [style.--accent-color]="getAccentColor()"
+      [style.--secondary-accent-color]="getSecondaryAccentColor()"
+      [style.--accent-rgb]="hexToRgb(getAccentColor())"
+      [style.--secondary-accent-rgb]="hexToRgb(getSecondaryAccentColor())">
+      <img 
+        [src]="agent.minionImage" 
+        [alt]="agent.name" 
+        class="minion-image"
+        loading="lazy" />
+      <div class="agent-actions" [style.--accent-color]="getAccentColor()">
+        <p-button 
+          icon="pi pi-eye" 
+          [text]="true" 
+          [rounded]="true"
+          (click)="onPreviewClick($event)"
+          [pTooltip]="'Preview Agent'"
+          tooltipPosition="top">
+        </p-button>
+      </div>
+    </div>
+    
+    <div class="agent-info">
+      <div class="agent-header">
+        <h3 class="agent-name">{{ agent.name }}</h3>
+        <div class="badges">
+          <p-badge 
+            [value]="agent.agentType === 'internal' ? 'Internal' : 'Client'" 
+            [severity]="agent.agentType === 'internal' ? 'info' : 'warning'"
+            class="type-badge">
+          </p-badge>
+          <p-badge 
+            [value]="agent.isActive ? 'Active' : 'Inactive'" 
+            [severity]="agent.isActive ? 'success' : 'secondary'"
+            class="status-badge">
+          </p-badge>
+        </div>
+      </div>
+      
+      <p class="agent-description">{{ agent.description }}</p>
+      
+      <div class="agent-tags" [style.--accent-color]="getAccentColor()" [style.--accent-rgb]="hexToRgb(getAccentColor())">
+        @for (tag of agent.tags; track tag) {
+          <p-tag [value]="tag" class="agent-tag"></p-tag>
+        }
+      </div>
+    </div>
+  </div>
+</p-card>
+

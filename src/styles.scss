@@ -148,6 +148,52 @@ html.theme-light body {
     background: #ffffff !important;
   }
 
+  // Flowzen AI Module - Override card background to transparent
+  .flowzen-ai-dashboard,
+  .agent-detail-container {
+    .p-card {
+      background: transparent !important;
+      background-color: transparent !important;
+      
+      .p-card-body,
+      .p-card-content {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+    }
+  }
+
+  // Flowzen AI Module - Override for component selectors
+  app-agent-card,
+  app-agent-detail,
+  app-flowzen-ai-dashboard {
+    .p-card {
+      background: transparent !important;
+      background-color: transparent !important;
+      
+      .p-card-body,
+      .p-card-content {
+        background: transparent !important;
+        background-color: transparent !important;
+      }
+    }
+  }
+
+  // Flowzen AI Module - Remove autofocus border on buttons
+  .flowzen-ai-dashboard,
+  .agent-detail-container,
+  app-agent-card,
+  app-agent-detail,
+  app-flowzen-ai-dashboard {
+    .p-button[autofocus],
+    .p-button:focus,
+    .p-button:focus-visible {
+      outline: none !important;
+      border: none !important;
+      box-shadow: none !important;
+    }
+  }
+
   .search-field {
     .p-inputicon {
       color: rgba(38, 38, 38, 0.95) !important;
@@ -956,6 +1002,18 @@ html.theme-light body {
       color: rgb(220, 38, 38) !important;
       border: 1px solid rgba(239, 68, 68, 0.4) !important;
       font-weight: 600 !important;
+    }
+  }
+
+  // Flowzen AI Module - Override tag color to use accent colors
+  .flowzen-ai-dashboard,
+  .agent-detail-container,
+  app-agent-card,
+  app-agent-detail,
+  app-flowzen-ai-dashboard {
+    .p-tag,
+    .agent-tag .p-tag {
+      color: inherit !important;
     }
   }
 

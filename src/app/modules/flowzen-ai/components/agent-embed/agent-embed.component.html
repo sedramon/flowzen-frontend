@@ -1,0 +1,12 @@
+<div class="agent-embed-container" [style.height]="height">
+  @if (isLoading) {
+    <div class="loading-state">
+      <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: #00cfff;"></i>
+      <p>Loading agent...</p>
+    </div>
+  }
+  @if (sanitizedEmbedCode && !isLoading) {
+    <div class="embed-wrapper" [innerHTML]="sanitizedEmbedCode"></div>
+  }
+</div>
+

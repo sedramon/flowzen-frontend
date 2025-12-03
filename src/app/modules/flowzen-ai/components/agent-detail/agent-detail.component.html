@@ -1,0 +1,75 @@
+@if (agent) {
+  <div class="agent-detail-container"
+       [style.--accent-color]="getAccentColor()"
+       [style.--secondary-accent-color]="getSecondaryAccentColor()"
+       [style.--accent-rgb]="hexToRgb(getAccentColor())"
+       [style.--secondary-accent-rgb]="hexToRgb(getSecondaryAccentColor())">
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-content">
+        <div class="minion-hero-wrapper">
+          <img 
+            [src]="agent.minionImage" 
+            [alt]="agent.name" 
+            class="minion-hero-image"
+            loading="lazy" />
+        </div>
+        
+        <div class="hero-info">
+          <div class="hero-header">
+            <h1 class="agent-title">{{ agent.name }}</h1>
+            <div class="hero-badges">
+              <p-badge 
+                [value]="agent.agentType === 'internal' ? 'Internal' : 'Client'" 
+                [severity]="agent.agentType === 'internal' ? 'info' : 'warning'"
+                class="type-badge">
+              </p-badge>
+              <p-badge 
+                [value]="agent.isActive ? 'Active' : 'Inactive'" 
+                [severity]="agent.isActive ? 'success' : 'secondary'"
+                class="status-badge">
+              </p-badge>
+            </div>
+          </div>
+          
+          <p class="agent-description">{{ agent.description }}</p>
+          
+          <div class="agent-tags" [style.--accent-color]="getAccentColor()" [style.--accent-rgb]="hexToRgb(getAccentColor())">
+            @for (tag of agent.tags; track tag) {
+              <p-tag [value]="tag" class="agent-tag"></p-tag>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Embed Area -->
+    <div class="embed-section">
+      <p-card class="embed-card" [style.--accent-color]="getAccentColor()" [style.--accent-rgb]="hexToRgb(getAccentColor())">
+        <div class="embed-header">
+          <div class="embed-title-wrapper">
+            <i class="pi pi-comments embed-icon"></i>
+            <h2>Agent Interface</h2>
+          </div>
+          <p-button 
+            icon="pi pi-arrow-left" 
+            label="Back to Dashboard" 
+            [text]="true"
+            (click)="goBack()"
+            [style.color]="getAccentColor()">
+          </p-button>
+        </div>
+        <app-agent-embed 
+          [embedCode]="agent.embedCode" 
+          [height]="'600px'">
+        </app-agent-embed>
+      </p-card>
+    </div>
+  </div>
+} @else {
+  <div class="loading-container">
+    <i class="pi pi-spin pi-spinner" style="font-size: 2rem; color: #00cfff;"></i>
+    <p>Loading agent...</p>
+  </div>
+}
+

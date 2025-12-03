@@ -1,0 +1,173 @@
+<p-dialog 
+  [(visible)]="visible"
+  (visibleChange)="onVisibleChange($event)"
+  [modal]="true"
+  [style]="{ width: '90vw', maxWidth: '800px' }"
+  [header]="isEditMode ? 'Edit Agent' : 'Create New Agent'"
+  [draggable]="false"
+  [resizable]="false"
+  [closable]="true"
+  class="agent-editor-dialog">
+  
+  <form [formGroup]="agentForm" (ngSubmit)="onSave()">
+    <div class="form-grid">
+      <!-- Name -->
+      <div class="form-field">
+        <label for="name">Agent Name <span class="required">*</span></label>
+        <input 
+          id="name"
+          type="text" 
+          pInputText 
+          formControlName="name"
+          placeholder="e.g., Elixir Agronomy Minion"
+          (blur)="generateSlug()" />
+        @if (agentForm.get('name')?.invalid && agentForm.get('name')?.touched) {
+          <small class="error">Name is required and must be at least 3 characters</small>
+        }
+      </div>
+
+      <!-- Slug -->
+      <div class="form-field">
+        <label for="slug">Slug <span class="required">*</span></label>
+        <input 
+          id="slug"
+          type="text" 
+          pInputText 
+          formControlName="slug"
+          placeholder="e.g., elixir-agronomy-minion" />
+        @if (agentForm.get('slug')?.invalid && agentForm.get('slug')?.touched) {
+          <small class="error">Slug is required and must contain only lowercase letters, numbers, and hyphens</small>
+        }
+      </div>
+
+      <!-- Description -->
+      <div class="form-field full-width">
+        <label for="description">Description <span class="required">*</span></label>
+        <textarea 
+          id="description"
+          pInputTextarea 
+          formControlName="description"
+          [rows]="3"
+          placeholder="Describe what this agent does..."></textarea>
+        @if (agentForm.get('description')?.invalid && agentForm.get('description')?.touched) {
+          <small class="error">Description is required and must be at least 10 characters</small>
+        }
+      </div>
+
+      <!-- Minion Image URL -->
+      <div class="form-field full-width">
+        <label for="minionImage">Minion Image URL <span class="required">*</span></label>
+        <input 
+          id="minionImage"
+          type="text" 
+          pInputText 
+          formControlName="minionImage"
+          placeholder="/assets/minions/agent-name.png" />
+        @if (agentForm.get('minionImage')?.invalid && agentForm.get('minionImage')?.touched) {
+          <small class="error">Minion image URL is required</small>
+        }
+      </div>
+
+      <!-- Embed Code -->
+      <div class="form-field full-width">
+        <label for="embedCode">Voiceflow Embed Code <span class="required">*</span></label>
+        <textarea 
+          id="embedCode"
+          pInputTextarea 
+          formControlName="embedCode"
+          [rows]="4"
+          placeholder="<iframe src='...' ...></iframe>"></textarea>
+        @if (agentForm.get('embedCode')?.invalid && agentForm.get('embedCode')?.touched) {
+          <small class="error">Embed code is required</small>
+        }
+      </div>
+
+      <!-- Tags -->
+      <div class="form-field full-width">
+        <label for="tagsInput">Tags</label>
+        <input 
+          id="tagsInput"
+          type="text" 
+          pInputText 
+          formControlName="tagsInput"
+          placeholder="Enter tags separated by commas (e.g., tag1, tag2, tag3)" />
+        @if (agentForm.get('tags')?.value && agentForm.get('tags')?.value.length > 0) {
+          <div class="tags-preview">
+            @for (tag of agentForm.get('tags')?.value; track tag) {
+              <p-tag [value]="tag" class="tag-preview"></p-tag>
+            }
+          </div>
+        }
+      </div>
+
+      <!-- Agent Type -->
+      <div class="form-field">
+        <label for="agentType">Agent Type <span class="required">*</span></label>
+        <p-select 
+          id="agentType"
+          formControlName="agentType"
+          [options]="agentTypeOptions"
+          optionLabel="label"
+          optionValue="value"
+          placeholder="Select type"></p-select>
+      </div>
+
+      <!-- Client ID (optional, only if client type) -->
+      <div class="form-field">
+        <label for="clientId">Client ID</label>
+        <input 
+          id="clientId"
+          type="text" 
+          pInputText 
+          formControlName="clientId"
+          placeholder="Only if agent type is 'client'" />
+      </div>
+
+      <!-- Accent Colors -->
+      <div class="form-field">
+        <label for="accentColor">Accent Color</label>
+        <input 
+          id="accentColor"
+          type="color" 
+          formControlName="accentColor" />
+      </div>
+
+      <div class="form-field">
+        <label for="secondaryAccentColor">Secondary Accent Color</label>
+        <input 
+          id="secondaryAccentColor"
+          type="color" 
+          formControlName="secondaryAccentColor" />
+      </div>
+
+      <!-- Is Active -->
+      <div class="form-field full-width">
+        <label for="isActive">Status</label>
+        <p-toggleButton 
+          id="isActive"
+          formControlName="isActive"
+          onLabel="Active"
+          offLabel="Inactive"
+          [style]="{ width: '100px' }"></p-toggleButton>
+      </div>
+    </div>
+  </form>
+
+  <ng-template pTemplate="footer">
+    <div class="dialog-footer">
+      <p-button 
+        label="Cancel" 
+        icon="pi pi-times"
+        [text]="true"
+        (click)="onCancel()">
+      </p-button>
+      <p-button 
+        [label]="isEditMode ? 'Update Agent' : 'Create Agent'" 
+        icon="pi pi-check"
+        (click)="onSave()"
+        [disabled]="!agentForm.valid">
+      </p-button>
+    </div>
+  </ng-template>
+</p-dialog>
+

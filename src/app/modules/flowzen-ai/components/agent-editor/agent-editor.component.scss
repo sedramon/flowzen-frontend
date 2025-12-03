@@ -1,0 +1,192 @@
+::ng-deep {
+  .agent-editor-dialog {
+    .p-dialog {
+      background: linear-gradient(135deg, rgba(17, 22, 48, 0.98), rgba(45, 27, 78, 0.98));
+      border: 1px solid rgba(0, 207, 255, 0.3);
+      border-radius: 20px;
+      color: white;
+
+      .p-dialog-header {
+        background: linear-gradient(135deg, rgba(0, 207, 255, 0.1), rgba(57, 255, 20, 0.1));
+        border-bottom: 1px solid rgba(0, 207, 255, 0.2);
+        padding: 1.5rem;
+        border-radius: 20px 20px 0 0;
+
+        .p-dialog-title {
+          color: white;
+          font-size: 1.5rem;
+          font-weight: 600;
+          background: linear-gradient(135deg, #00cfff, #39ff14);
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          background-clip: text;
+        }
+
+        .p-dialog-header-icon {
+          color: rgba(255, 255, 255, 0.7);
+          transition: all 0.2s ease;
+
+          &:hover {
+            color: #00cfff;
+            transform: scale(1.1);
+          }
+        }
+      }
+
+      .p-dialog-content {
+        background: transparent;
+        padding: 2rem;
+        color: white;
+      }
+
+      .p-dialog-footer {
+        background: linear-gradient(135deg, rgba(0, 207, 255, 0.05), rgba(57, 255, 20, 0.05));
+        border-top: 1px solid rgba(0, 207, 255, 0.2);
+        padding: 1.5rem;
+        border-radius: 0 0 20px 20px;
+      }
+    }
+  }
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.5rem;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+  &.full-width {
+    grid-column: 1 / -1;
+  }
+
+  label {
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    font-size: 0.875rem;
+
+    .required {
+      color: #ff6b6b;
+    }
+  }
+
+  ::ng-deep {
+    .p-inputtext,
+    .p-inputtextarea,
+    .p-chips,
+    .p-select {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 207, 255, 0.3);
+      color: white;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+
+      &:focus,
+      &:focus-within {
+        border-color: #00cfff;
+        box-shadow: 0 0 0 2px rgba(0, 207, 255, 0.2);
+        background: rgba(255, 255, 255, 0.08);
+      }
+
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+    }
+
+    .tags-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+
+      .tag-preview {
+        ::ng-deep .p-tag {
+          background: rgba(0, 207, 255, 0.2);
+          color: #00cfff;
+          border: 1px solid rgba(0, 207, 255, 0.4);
+          font-size: 0.75rem;
+          padding: 0.25rem 0.75rem;
+        }
+      }
+    }
+
+    .p-select {
+      .p-select-label {
+        color: white;
+      }
+    }
+
+    .p-togglebutton {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(0, 207, 255, 0.3);
+      color: white;
+
+      &.p-highlight {
+        background: #00cfff;
+        border-color: #00cfff;
+      }
+    }
+  }
+
+  input[type="color"] {
+    width: 100%;
+    height: 40px;
+    border: 1px solid rgba(0, 207, 255, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+  }
+
+  .error {
+    color: #ff6b6b;
+    font-size: 0.75rem;
+    margin-top: 0.25rem;
+  }
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 1rem;
+
+  ::ng-deep {
+    .p-button {
+      &.p-button-text {
+        color: rgba(255, 255, 255, 0.7);
+
+        &:hover {
+          color: #00cfff;
+          background: rgba(0, 207, 255, 0.1);
+        }
+      }
+
+      &:not(.p-button-text) {
+        background: #00cfff;
+        border-color: #00cfff;
+        color: white;
+
+        &:hover:not(:disabled) {
+          background: #00b8e6;
+          border-color: #00b8e6;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 207, 255, 0.3);
+        }
+
+        &:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+      }
+    }
+  }
+}
+

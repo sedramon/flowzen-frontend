@@ -163,17 +163,45 @@
         <p-menu #posMenu [model]="posMenuItems" [popup]="true" appendTo="body"></p-menu>
       }
 
+      @if (authService.hasGlobalScope('global.beta:*')) {
+        <p-button 
+          icon="pi pi-sparkles" 
+          label="Flowzen AI"
+          [text]="true"
+          [rounded]="true"
+          pTooltip="Upravljanje AI agentima i minionima" 
+          tooltipPosition="bottom"
+          routerLink="/flowzen-ai" 
+          routerLinkActive="active-nav"
+          class="nav-btn">
+        </p-button>
+      }
+
+      @if (authService.hasGlobalScope('global.beta:*')) {
+        <p-button 
+          icon="pi pi-flag" 
+          label="Demo Chile"
+          [text]="true"
+          [rounded]="true"
+          pTooltip="Demo komponenta za Chile" 
+          tooltipPosition="bottom"
+          routerLink="/demo-chile" 
+          routerLinkActive="active-nav"
+          class="nav-btn">
+        </p-button>
+      }
+
       @if (authService.isGlobalAdmin()) {
         <p-button 
           icon="pi pi-globe" 
           label="Global Admin"
-          [outlined]="true"
+          [text]="true"
           [rounded]="true"
           pTooltip="Globalna administracija" 
           tooltipPosition="bottom"
           routerLink="/admin" 
           routerLinkActive="active-nav"
-          class="nav-btn global-admin-btn">
+          class="nav-btn">
         </p-button>
       }
     </div>

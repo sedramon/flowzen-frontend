@@ -159,22 +159,104 @@
   align-items: center;
   gap: 10px;
   padding: 12px 22px;
-  border-radius: 999px;
+  border-radius: 12px;
   text-transform: uppercase;
-  letter-spacing: 0.22em;
+  letter-spacing: 0.5px;
   font-weight: 700;
-  color: rgba(229, 234, 255, 0.9);
-  background: rgba(24, 32, 68, 0.55);
-  border: 1px solid rgba(134, 148, 255, 0.42);
+  font-size: 0.875rem;
+  color: rgba(229, 234, 255, 0.95);
+  background: linear-gradient(135deg, rgba(134, 148, 255, 0.15), rgba(247, 104, 191, 0.1));
+  border: 2px solid rgba(134, 148, 255, 0.5);
   backdrop-filter: blur(12px);
-  box-shadow: 0 18px 48px rgba(6, 10, 32, 0.45);
-  transition: transform 240ms ease, box-shadow 240ms ease, border-color 240ms ease;
+  box-shadow: 
+    0 4px 16px rgba(134, 148, 255, 0.3),
+    0 0 20px rgba(134, 148, 255, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  cursor: pointer;
+  overflow: hidden;
+  z-index: 10;
+  will-change: transform, box-shadow, background, border-color, color;
+  backface-visibility: hidden;
 
-  &:hover,
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transform: translateX(-100%);
+  }
+
+  mat-icon {
+    font-size: 1.125rem;
+    width: 1.125rem;
+    height: 1.125rem;
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  &:hover:not(:disabled),
   &:focus-visible {
-    transform: translateY(-2px);
-    border-color: rgba(164, 176, 255, 0.72);
-    box-shadow: 0 24px 64px rgba(10, 20, 56, 0.5);
+    transform: translateY(2px);
+    background: linear-gradient(135deg, rgba(134, 148, 255, 0.25), rgba(247, 104, 191, 0.15));
+    border-color: rgba(164, 176, 255, 0.8);
+    color: rgba(255, 255, 255, 1);
+    box-shadow: 
+      0 2px 8px rgba(134, 148, 255, 0.4),
+      0 0 15px rgba(134, 148, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.3);
+
+    &::before {
+      transform: translateX(100%);
+    }
+
+    mat-icon {
+      transform: scale(1.1) rotate(-5deg);
+    }
+  }
+
+  &:active:not(:disabled) {
+    transform: translateY(3px);
+    box-shadow: 
+      0 1px 4px rgba(134, 148, 255, 0.5),
+      0 0 10px rgba(134, 148, 255, 0.4),
+      inset 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.15s ease;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 
+      0 4px 16px rgba(134, 148, 255, 0.3),
+      0 0 20px rgba(134, 148, 255, 0.2),
+      0 0 0 3px rgba(134, 148, 255, 0.3),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+  }
+}
+
+// Hide Material touch target overlay
+::ng-deep {
+  .access-restriction__logout {
+    .mat-mdc-button-touch-target {
+      display: none;
+    }
+
+    .mat-mdc-button-persistent-ripple {
+      display: none;
+    }
+
+    .mat-ripple-element {
+      display: none;
+    }
   }
 }
 

@@ -1,0 +1,158 @@
+<div class="flowzen-ai-dashboard">
+  <!-- Hero Section -->
+  <div class="hero-section">
+    <div class="hero-card-wrapper">
+      <div class="hero-card">
+        <div class="hero-background-animation"></div>
+        <div class="hero-content">
+          <div class="hero-text">
+            <div class="hero-badge">
+              <i class="pi pi-sparkles"></i>
+              <span>AI Platform</span>
+            </div>
+            <h1 class="hero-title">
+              <span class="title-main">Flowzen AI</span>
+              <span class="title-subtitle">Your Team of AI Minions</span>
+            </h1>
+            <p class="hero-description">
+              Premium platforma za upravljanje AI agentima. Vaš tim AI Miniona spremnih da pomognu u svakom zadatku.
+            </p>
+            <div class="hero-stats">
+              <div class="stat-item">
+                <span class="stat-number">{{ agents.length }}</span>
+                <span class="stat-label">Active Agents</span>
+              </div>
+              <div class="stat-divider"></div>
+              <div class="stat-item">
+                <span class="stat-number">{{ filteredAgents.length }}</span>
+                <span class="stat-label">Available Now</span>
+              </div>
+            </div>
+          </div>
+          <div class="hero-actions">
+            <p-button 
+              label="Create Agent" 
+              icon="pi pi-plus"
+              (click)="openCreateDialog()"
+              [pTooltip]="'Create a new AI agent'"
+              tooltipPosition="bottom">
+            </p-button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Tabs Section -->
+  <p-tabs [(value)]="activeTab" (valueChange)="onTabChange($event)" class="agents-tabs">
+    <p-tablist>
+      <p-tab value="0">All Agents</p-tab>
+      <p-tab value="1">Internal Agents</p-tab>
+      <p-tab value="2">Client Agents</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <div class="agents-grid">
+          @for (agent of filteredAgents; track agent.id) {
+            <app-agent-card 
+              [agent]="agent" 
+              (previewClick)="onPreviewClick($event)">
+            </app-agent-card>
+          }
+          @if (filteredAgents.length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: #4a5568;"></i>
+              <p>No agents found</p>
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+      
+      <p-tabpanel value="1">
+        <div class="agents-grid">
+          @for (agent of filteredAgents; track agent.id) {
+            <app-agent-card 
+              [agent]="agent" 
+              (previewClick)="onPreviewClick($event)">
+            </app-agent-card>
+          }
+          @if (filteredAgents.length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: #4a5568;"></i>
+              <p>No internal agents found</p>
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+      
+      <p-tabpanel value="2">
+        <div class="agents-grid">
+          @for (agent of filteredAgents; track agent.id) {
+            <app-agent-card 
+              [agent]="agent" 
+              (previewClick)="onPreviewClick($event)">
+            </app-agent-card>
+          }
+          @if (filteredAgents.length === 0) {
+            <div class="empty-state">
+              <i class="pi pi-inbox" style="font-size: 3rem; color: #4a5568;"></i>
+              <p>No client agents found</p>
+            </div>
+          }
+        </div>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+
+  <!-- Preview Modal -->
+  @if (showPreview && previewAgent) {
+    <div class="preview-overlay" (click)="closePreview()">
+      <div class="preview-modal" 
+           (click)="$event.stopPropagation()"
+           [style.--accent-color]="getAccentColor()"
+           [style.--secondary-accent-color]="getSecondaryAccentColor()"
+           [style.--accent-rgb]="hexToRgb(getAccentColor())"
+           [style.--secondary-accent-rgb]="hexToRgb(getSecondaryAccentColor())">
+        <div class="preview-header">
+          <div class="preview-title-wrapper">
+            <i class="pi pi-eye preview-icon"></i>
+            <h2>{{ previewAgent.name }}</h2>
+          </div>
+          <p-button 
+            icon="pi pi-times" 
+            [text]="true"
+            [rounded]="true"
+            (click)="closePreview()"
+            [style.color]="getAccentColor()"
+            [pTooltip]="'Close Preview'"
+            tooltipPosition="left">
+          </p-button>
+        </div>
+        <div class="preview-content">
+          <app-agent-embed 
+            [embedCode]="previewAgent.embedCode" 
+            [height]="'500px'">
+          </app-agent-embed>
+        </div>
+        <div class="preview-footer">
+          <p-button 
+            label="View Full Details" 
+            icon="pi pi-arrow-right"
+            (click)="router.navigate(['/flowzen-ai', previewAgent.id]); closePreview();"
+            [style.background]="getAccentColor()"
+            [style.border-color]="getAccentColor()">
+          </p-button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Agent Editor Dialog -->
+  <app-agent-editor
+    [(visible)]="showCreateDialog"
+    [agent]="editingAgent"
+    (save)="saveAgent($event)"
+    (cancel)="closeDialog()">
+  </app-agent-editor>
+</div>
+
