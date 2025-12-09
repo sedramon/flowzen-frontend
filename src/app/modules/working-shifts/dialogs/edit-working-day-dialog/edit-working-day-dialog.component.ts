@@ -1,12 +1,12 @@
-import { Component, Inject } from '@angular/core';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
+import { Component } from '@angular/core';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatSelectModule } from '@angular/material/select';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-edit-working-day-dialog',
@@ -16,27 +16,30 @@ import { MatSlideToggleModule } from '@angular/material/slide-toggle';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatSelectModule,
-    MatSlideToggleModule
+    FormsModule,
+    ButtonModule,
+    InputTextModule,
+    SelectModule,
+    CheckboxModule
   ]
 })
 export class EditWorkingDayDialogComponent {
   form: FormGroup;
-  shiftTypes = [
-    { value: 'morning', label: 'Jutarnja', time: '08:00-14:00' },
-    { value: 'afternoon', label: 'Popodnevna', time: '14:00-20:00' },
-    { value: 'evening', label: 'Večernja', time: '16:00-22:00' },
-    { value: 'full', label: 'Cela smena', time: '08:00-20:00' }
-  ];
+  shiftTypes: any[] = [];
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: any,
-    public dialogRef: MatDialogRef<EditWorkingDayDialogComponent>,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
     private fb: FormBuilder
   ) {
+    const data = this.config.data;
+    this.shiftTypes = data.shiftTypes || [
+      { value: 'morning', label: 'Jutarnja', time: '08:00-14:00' },
+      { value: 'afternoon', label: 'Popodnevna', time: '14:00-20:00' },
+      { value: 'evening', label: 'Večernja', time: '16:00-22:00' },
+      { value: 'full', label: 'Cela smena', time: '08:00-20:00' }
+    ];
+
     this.form = this.fb.group({
       works: [!!data.shift.shiftType, []],
       shiftType: [data.shift.shiftType || 'morning', []],
@@ -47,11 +50,15 @@ export class EditWorkingDayDialogComponent {
   save() {
     if (this.form.valid) {
       const { works, shiftType, note } = this.form.value;
-      this.dialogRef.close(
+      this.ref.close(
         works
           ? { shiftType, note }
           : { shiftType: null, note }
       );
     }
+  }
+
+  cancel() {
+    this.ref.close();
   }
 }

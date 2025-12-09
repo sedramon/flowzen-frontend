@@ -14,18 +14,17 @@ import {
 import { HttpClient }                   from '@angular/common/http';
 import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 
-/* Angular-Material */
-import { DateAdapter, MatNativeDateModule }     from '@angular/material/core';
-import { MatCardModule }             from '@angular/material/card';
-import { MatFormFieldModule }        from '@angular/material/form-field';
-import { MatInputModule }            from '@angular/material/input';
-import { MatSelectModule }           from '@angular/material/select';
-import { MatDatepickerModule, MatDatepicker } from '@angular/material/datepicker';
-import { MatButtonModule }           from '@angular/material/button';
-import { MatIconModule }             from '@angular/material/icon';
-import { MatDialog, MatDialogModule }from '@angular/material/dialog';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatListModule }             from '@angular/material/list';
+/* PrimeNG */
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputTextModule } from 'primeng/inputtext';
+import { DialogModule } from 'primeng/dialog';
+import { MessageService } from 'primeng/api';
+import { ToastModule } from 'primeng/toast';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { TooltipModule } from 'primeng/tooltip';
 
 /* Aplikacijski modeli / servisi */
 import { environment }               from '../../../environments/environment';
@@ -34,7 +33,6 @@ import { AuthService }               from '../../core/services/auth.service';
 import { WorkingShiftsService }      from './services/working-shifts.service';
 import { ShiftsService }             from './services/shifts.service';
 import { EditWorkingDayDialogComponent } from './dialogs/edit-working-day-dialog/edit-working-day-dialog.component';
-import { FlexLayoutModule } from '@angular/flex-layout';
 import { SettingsService }           from '../settings/services/settings.service';
 
 /* ────────────────────────── Tipovi ────────────────────────── */
@@ -62,19 +60,17 @@ interface CalendarDay {
     ReactiveFormsModule,
     FormsModule,
 
-    /* Angular-Material */
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatButtonModule,
-    MatIconModule,
-    MatDialogModule,
-    MatSnackBarModule,
-    MatListModule
+    /* PrimeNG */
+    CardModule,
+    ButtonModule,
+    SelectModule,
+    DatePickerModule,
+    InputTextModule,
+    DialogModule,
+    ToastModule,
+    TooltipModule
   ],
+  providers: [DialogService, MessageService],
   templateUrl : './working-shifts.component.html',
   styleUrls   : ['./working-shifts.component.scss'],
 })
@@ -89,6 +85,8 @@ export class WorkingShiftsComponent implements OnInit {
   shiftForm : FormGroup;     // forma za tip smene
 
   employees : Employee[]          = [];
+  employeeOptions: any[]          = [];
+  scheduleTitle: string = '';
   facilities: any[]              = [];
   weeks     : CalendarDay[][]     = [];
 
@@ -119,14 +117,10 @@ export class WorkingShiftsComponent implements OnInit {
     private wsService    : WorkingShiftsService,
     private shiftsService: ShiftsService,
     private authService  : AuthService,
-    private snackBar     : MatSnackBar,
-    private dialog       : MatDialog,
-    private dateAdapter  : DateAdapter<Date>,
+    private messageService: MessageService,
+    private dialogService: DialogService,
     private settingsService: SettingsService,
   ) {
-    /* Locale za datepicker (SR) */
-    this.dateAdapter.setLocale('en-US');
-    this.dateAdapter.setLocale('en-US');
 
     /* -------- glavna forma (zaposleni + facility + mesec) -------- */
     this.form = this.fb.group({
@@ -156,21 +150,16 @@ export class WorkingShiftsComponent implements OnInit {
     this.loadFacilities();
     this.loadShifts();
 
-    // Automatsko ažuriranje kalendara kada se promeni bilo koje polje
-    // + mogućnost ručnog poziva preko dugmeta "Prikaži kalendar"
-    this.form.valueChanges.pipe(debounceTime(500), distinctUntilChanged())
-      .subscribe(() => {
-        // Učitaj shifts kada se promeni facility
-        if (this.form.get('facility')?.valid) {
-          this.loadShifts();
-          this.updateTimeOptions();
-        }
-        
-        // Automatsko učitavanje kalendara kada su sva polja validna
-        if (this.form.valid) {
-          this.loadSchedule();
-        }
-      });
+    // Učitaj shifts kada se promeni facility
+    this.form.get('facility')?.valueChanges.pipe(
+      debounceTime(300), 
+      distinctUntilChanged()
+    ).subscribe(() => {
+      if (this.form.get('facility')?.valid) {
+        this.loadShifts();
+        this.updateTimeOptions();
+      }
+    });
   }
 
   /* ────────────────────────── HTTP pozivi ───────────────────────── */
@@ -180,7 +169,13 @@ export class WorkingShiftsComponent implements OnInit {
     const tenantId = this.currentUser?.tenant;
     this.http
       .get<Employee[]>(`${environment.apiUrl}/employees?tenant=${tenantId}`)
-      .subscribe(res => this.employees = res.filter(e => e.includeInAppoitments));
+      .subscribe(res => {
+        this.employees = res.filter(e => e.includeInAppoitments);
+        this.employeeOptions = this.employees.map(emp => ({
+          label: `${emp.firstName} ${emp.lastName}`,
+          value: emp._id
+        }));
+      });
   }
 
   /** Učitaj sve facilities za tenant-a. */
@@ -251,6 +246,8 @@ export class WorkingShiftsComponent implements OnInit {
     const employeeId    = this.form.value.employee;
     const facilityId    = this.form.value.facility;
     const tenantId      = this.currentUser?.tenant;
+
+    this.scheduleTitle = `Raspored za ${selectedMonth.toLocaleString('default', { month: 'long', year: 'numeric' })}`;
 
     this.buildCalendar(selectedMonth);
 
@@ -356,7 +353,8 @@ export class WorkingShiftsComponent implements OnInit {
   /* ───────────────────────── Modal za detalj ──────────────────────── */
 
   openEditDialogForDay(day: CalendarDay): void {
-    const ref = this.dialog.open(EditWorkingDayDialogComponent, {
+    const ref = this.dialogService.open(EditWorkingDayDialogComponent, {
+      header: 'Uredi radni dan',
       width: '400px',
       data : {
         date      : day.date,
@@ -367,14 +365,16 @@ export class WorkingShiftsComponent implements OnInit {
       },
     });
 
-    ref.afterClosed().subscribe(res => {
-      if (!res) return;
-      day.shift = res.shiftType
-        ? { shiftType: res.shiftType, note: res.note }
-        : undefined;
+    if (ref) {
+      ref.onClose.subscribe((res) => {
+        if (!res) return;
+        day.shift = res.shiftType
+          ? { shiftType: res.shiftType, note: res.note }
+          : undefined;
 
-      this.snackBar.open('Radni dan izmenjen!', 'Zatvori', { duration: 2000 });
-    });
+        this.messageService.add({ severity: 'success', summary: 'Uspešno', detail: 'Radni dan izmenjen!' });
+      });
+    }
   }
 
   /* ────────────────────── Uređivanje tipova smena ───────────────────── */
@@ -397,7 +397,7 @@ export class WorkingShiftsComponent implements OnInit {
     
     // Proveri da li editingShift ima id pre update-a
     if (this.editingShift && !this.editingShift.id) {
-      this.snackBar.open('Greška: Nedostaje ID smene', 'Zatvori', { duration: 3000 });
+      this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Nedostaje ID smene' });
       return;
     }
     
@@ -463,10 +463,9 @@ export class WorkingShiftsComponent implements OnInit {
     ].join('-');
   }
 
-  /** Handle za datepicker: postavi mesec i resetuj kalendar */
-  chosenMonthHandler(month: Date, dp: MatDatepicker<Date>): void {
-    this.form.get('month')?.setValue(month);
-    dp.close();
+  /** Handle za datepicker: postavi mesec */
+  onMonthSelect(event: any): void {
+    this.form.get('month')?.setValue(event);
   }
 
   getShiftType(value?: string) {

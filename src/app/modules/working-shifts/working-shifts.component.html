@@ -1,114 +1,128 @@
-<!--
-  Glavni šablon: prikaz kalendara radnih dana + režim uređivanja tipova smena.
-  Sve klase ostaju iste da ne bi pukao postojeći SCSS.
--->
 <div class="main-container">
+  <p-toast position="top-right"></p-toast>
+  
   <!-- ─────────────────────── FORMULAR ─────────────────────── -->
-  <mat-card class="shift-form-card">
-    <h2 class="title">
-      <mat-icon>calendar_month</mat-icon>
-      Pregled radnih dana zaposlenog
-    </h2>
+  <p-card class="shift-form-card">
+    <ng-template pTemplate="header">
+      <div class="card-header">
+        <i class="pi pi-calendar"></i>
+        <h2>Pregled radnih dana zaposlenog</h2>
+      </div>
+    </ng-template>
 
-    <form [formGroup]="form" (ngSubmit)="loadSchedule()" class="shift-form">
-      <!-- Zaposleni -->
-      <mat-form-field appearance="outline">
-        <mat-label>Zaposleni</mat-label>
-        <mat-select formControlName="employee" required>
-          <mat-option *ngFor="let emp of employees" [value]="emp._id">
-            {{ emp.firstName }} {{ emp.lastName }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div class="form-content">
+      <form [formGroup]="form" (ngSubmit)="loadSchedule()" class="shift-form">
+        <div class="form-row">
+          <!-- Zaposleni -->
+          <div class="form-field">
+            <label>Zaposleni</label>
+            <p-select 
+              formControlName="employee" 
+              [options]="employeeOptions"
+              optionLabel="label"
+              optionValue="value"
+              placeholder="Izaberi zaposlenog"
+              styleClass="form-select">
+            </p-select>
+          </div>
 
-      <!-- Facility -->
-      <mat-form-field appearance="outline">
-        <mat-label>Lokacija</mat-label>
-        <mat-select formControlName="facility" required>
-          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+          <!-- Facility -->
+          <div class="form-field">
+            <label>Lokacija</label>
+            <p-select 
+              formControlName="facility" 
+              [options]="facilities"
+              optionLabel="name"
+              optionValue="_id"
+              placeholder="Izaberi lokaciju"
+              styleClass="form-select">
+            </p-select>
+          </div>
 
-      <!-- Izbor meseca (custom dugme + sakriven input za datepicker) -->
-      <button mat-stroked-button type="button" (click)="picker.open()">
-        <mat-icon>event</mat-icon>
-        Izaberi mesec
-      </button>
+          <!-- Izbor meseca -->
+          <div class="form-field">
+            <label>Mesec</label>
+            <p-datepicker 
+              formControlName="month"
+              view="month"
+              dateFormat="mm/yy"
+              placeholder="Izaberi mesec"
+              styleClass="month-calendar"
+              (onSelect)="onMonthSelect($event)">
+            </p-datepicker>
+          </div>
+        </div>
 
-      <input
-        matInput
-        [matDatepicker]="picker"
-        formControlName="month"
-        tabindex="-1"
-        style="position:absolute;left:-9999px;width:0;height:0;opacity:0;pointer-events:none"
-        readonly
-      />
-
-      <mat-datepicker
-        #picker
-        startView="multi-year"
-        [startView]="'year'"
-        touchUi="true"
-        panelClass="month-picker"
-        (monthSelected)="chosenMonthHandler($event, picker)"
-      ></mat-datepicker>
-
-      <!-- Prikaz izabranog meseca -->
-      <span *ngIf="form.value.month" style="font-weight:500">
-        {{ form.value.month | date:'MMMM yyyy' }}
-      </span>
-
-      <button
-        mat-raised-button
-        color="primary"
-        type="submit"
-        [disabled]="form.invalid"
-        style="margin-left:16px"
-      >
-        Prikaži kalendar
-      </button>
-
-    </form>
-  </mat-card>
+        <div class="form-actions">
+          <p-button
+            type="submit"
+            label="Prikaži kalendar"
+            icon="pi pi-calendar"
+            [disabled]="form.invalid"
+            [rounded]="true"
+            class="submit-btn">
+          </p-button>
+        </div>
+      </form>
+    </div>
+  </p-card>
 
   <!-- ─────────────── KALENDAR  /  UREĐIVANJE SMENA ─────────────── -->
   <div *ngIf="weeks.length" class="calendar-card">
-    <mat-card class="shift-schedule-card">
-      <h3 class="schedule-title">
-        {{ editShiftsMode
-          ? 'Uredi smene'
-          : ('Raspored za ' + (form.value.month | date:'MMMM yyyy')) }}
-      </h3>
+    <p-card class="shift-schedule-card">
+      <ng-template pTemplate="header">
+        <div class="schedule-header">
+          <h3>
+            {{ editShiftsMode
+              ? 'Uredi smene'
+              : scheduleTitle }}
+          </h3>
+        </div>
+      </ng-template>
 
       <!-- Header: izbor aktivne smene + toggle dugme -->
-      <div class="calendar-header-row" style="display:flex;align-items:center;gap:30px;margin:16px 0;justify-content:center">
-        <mat-form-field
-          *ngIf="!editShiftsMode"
-          appearance="outline"
-          style="max-width:200px;margin:0"
-        >
-          <mat-label>Aktivna smena</mat-label>
-          <mat-select [(ngModel)]="activeShiftType" name="activeShiftType">
-            <mat-option *ngFor="let shift of shiftTypes" [value]="shift.value">
-              <span [style.color]="shift.color">&#9679;</span>
-              {{ shift.label }}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-
-        <button mat-stroked-button color="primary" (click)="toggleEditShifts()">
-          <mat-icon>{{ editShiftsMode ? 'calendar_month' : 'edit' }}</mat-icon>
-          {{ editShiftsMode ? 'Prikaži raspored' : 'Uredi smene' }}
-        </button>
+      <div class="calendar-header-row">
+        <p-button 
+          [icon]="editShiftsMode ? 'pi pi-calendar' : 'pi pi-pencil'"
+          [label]="editShiftsMode ? 'Prikaži raspored' : 'Uredi smene'"
+          [rounded]="true"
+          severity="secondary"
+          (onClick)="toggleEditShifts()"
+          styleClass="toggle-btn">
+        </p-button>
+        
+        <div class="active-shift-selector" *ngIf="!editShiftsMode">
+          <label>Aktivna smena</label>
+          <p-select 
+            [(ngModel)]="activeShiftType" 
+            [options]="shiftTypes"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Izaberi smenu"
+            styleClass="shift-select">
+            <ng-template let-shift pTemplate="item">
+              <div class="shift-option">
+                <span class="shift-dot-option" [style.background]="shift.color"></span>
+                <span>{{ shift.label }}</span>
+              </div>
+            </ng-template>
+            <ng-template let-shift pTemplate="selectedItem">
+              <div class="shift-option">
+                <span class="shift-dot-option" [style.background]="shift.color"></span>
+                <span>{{ shift.label }}</span>
+              </div>
+            </ng-template>
+          </p-select>
+        </div>
       </div>
 
       <!-- ─────────────── REŽIM UREĐIVANJA TIPOVA SMENA ─────────────── -->
-      <div *ngIf="editShiftsMode">
+      <div *ngIf="editShiftsMode" class="edit-shifts-section">
         <!-- Prikaz radnih sati facility-ja -->
-        <div *ngIf="facilityWorkingHours" style="padding: 12px;">
-          <strong>Radni sati facility-ja:</strong> {{ facilityWorkingHours.opening }}:00 - {{ facilityWorkingHours.closing }}:00
+        <div *ngIf="facilityWorkingHours" class="facility-hours-info">
+          <i class="pi pi-clock"></i>
+          <strong>Radni sati facility-ja:</strong> 
+          <span>{{ facilityWorkingHours.opening }}:00 - {{ facilityWorkingHours.closing }}:00</span>
         </div>
 
         <div class="shifts-edit-container">
@@ -120,68 +134,91 @@
           >
             <div class="shifts-form-fields">
               <!-- value -->
-              <mat-form-field>
-                <mat-label>Vrednost</mat-label>
-                <mat-select formControlName="value" required>
-                  <mat-option
-                    *ngFor="let opt of shiftEnumOptions"
-                    [value]="opt.value"
-                  >
-                    {{ opt.label }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-field">
+                <label>Vrednost</label>
+                <p-select 
+                  formControlName="value" 
+                  [options]="shiftEnumOptions"
+                  optionLabel="label"
+                  optionValue="value"
+                  placeholder="Izaberi vrednost"
+                  styleClass="form-select">
+                </p-select>
+              </div>
 
               <!-- label -->
-              <mat-form-field>
-                <mat-label>Labela</mat-label>
-                <input matInput formControlName="label" required />
-              </mat-form-field>
+              <div class="form-field">
+                <label>Labela</label>
+                <input 
+                  pInputText 
+                  formControlName="label" 
+                  placeholder="Unesi labelu"
+                  class="form-input" />
+              </div>
 
               <!-- color -->
-              <mat-form-field>
-                <mat-label>Boja</mat-label>
-                <input matInput type="color" formControlName="color" required />
-              </mat-form-field>
+              <div class="form-field">
+                <label>Boja</label>
+                <input 
+                  type="color" 
+                  formControlName="color" 
+                  class="color-input" />
+              </div>
 
               <!-- start -->
-              <mat-form-field>
-                <mat-label>Početak</mat-label>
-                <mat-select formControlName="startHour" required>
-                  <mat-option *ngFor="let t of timeOptions" [value]="t">
-                    {{ formatTime(t) }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-field">
+                <label>Početak</label>
+                <p-select 
+                  formControlName="startHour" 
+                  [options]="timeOptions"
+                  placeholder="Izaberi početak"
+                  styleClass="form-select">
+                  <ng-template let-time pTemplate="item">
+                    <span>{{ formatTime(time) }}</span>
+                  </ng-template>
+                </p-select>
+              </div>
 
               <!-- end -->
-              <mat-form-field>
-                <mat-label>Kraj</mat-label>
-                <mat-select formControlName="endHour" required>
-                  <mat-option *ngFor="let t of timeOptions" [value]="t">
-                    {{ formatTime(t) }}
-                  </mat-option>
-                </mat-select>
-              </mat-form-field>
+              <div class="form-field">
+                <label>Kraj</label>
+                <p-select 
+                  formControlName="endHour" 
+                  [options]="timeOptions"
+                  placeholder="Izaberi kraj"
+                  styleClass="form-select">
+                  <ng-template let-time pTemplate="item">
+                    <span>{{ formatTime(time) }}</span>
+                  </ng-template>
+                </p-select>
+              </div>
             </div>
 
             <div class="shifts-form-actions">
-              <button mat-raised-button color="primary" type="submit">
-                {{ editingShift ? 'Sačuvaj izmene' : 'Dodaj smenu' }}
-              </button>
-              <button
+              <p-button
+                type="submit"
+                [label]="editingShift ? 'Sačuvaj izmene' : 'Dodaj smenu'"
+                icon="pi pi-check"
+                [rounded]="true"
+                class="submit-btn">
+              </p-button>
+              <p-button
                 *ngIf="editingShift"
-                mat-button
-                type="button"
-                (click)="cancelEditShift()"
-              >Otkaži</button>
+                label="Otkaži"
+                icon="pi pi-times"
+                [rounded]="true"
+                severity="secondary"
+                [outlined]="true"
+                (onClick)="cancelEditShift()"
+                styleClass="cancel-btn">
+              </p-button>
             </div>
           </form>
 
           <!-- Lista svih definisanih smena -->
           <div class="shifts-list-wrapper">
-            <mat-list>
-              <mat-list-item *ngFor="let shift of shiftTypes">
+            <div class="shifts-list">
+              <div class="shift-list-item" *ngFor="let shift of shiftTypes">
                 <div class="shift-list-row">
                   <span class="shift-dot" [style.background]="shift.color"></span>
                   <span class="shift-list-label">{{ shift.label }}</span>
@@ -190,37 +227,38 @@
                     *ngIf="shift.startHour !== undefined"
                     class="shift-list-hours"
                   >
-                    {{ formatTime(shift.startHour) }} -
-                    {{ formatTime(shift.endHour) }}h
+                    {{ formatTime(shift.startHour) }} - {{ formatTime(shift.endHour) }}h
                   </span>
 
-                  <span class="shift-list-actions">
-                    <button
-                      mat-icon-button
-                      color="primary"
-                      (click)="editShift(shift)"
-                      aria-label="Edit"
-                    >
-                      <mat-icon>edit</mat-icon>
-                    </button>
-                    <button
-                      mat-icon-button
-                      color="warn"
-                      (click)="deleteShift(shift)"
-                      aria-label="Delete"
-                    >
-                      <mat-icon>delete</mat-icon>
-                    </button>
-                  </span>
+                  <div class="shift-list-actions">
+                    <p-button
+                      icon="pi pi-pencil"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="info"
+                      (onClick)="editShift(shift)"
+                      [pTooltip]="'Uredi'"
+                      styleClass="edit-btn">
+                    </p-button>
+                    <p-button
+                      icon="pi pi-trash"
+                      [rounded]="true"
+                      [text]="true"
+                      severity="danger"
+                      (onClick)="deleteShift(shift)"
+                      [pTooltip]="'Obriši'"
+                      styleClass="delete-btn">
+                    </p-button>
+                  </div>
                 </div>
-              </mat-list-item>
-            </mat-list>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- ─────────────────────── KALENDAR ─────────────────────── -->
-      <div *ngIf="!editShiftsMode">
+      <div *ngIf="!editShiftsMode" class="calendar-wrapper">
         <table class="calendar-table">
           <thead>
             <tr>
@@ -236,6 +274,7 @@
                 (click)="onDayClick(day)"
                 [ngClass]="{ filled: day?.shift, rotate: day?.animate }"
                 [style.background]="getShiftType(day?.shift?.shiftType).color"
+                class="calendar-day-cell"
               >
                 <div class="day-cell" *ngIf="day">
                   <span
@@ -254,6 +293,6 @@
           </tbody>
         </table>
       </div>
-    </mat-card>
+    </p-card>
   </div>
 </div>

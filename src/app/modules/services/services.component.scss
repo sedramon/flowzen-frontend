@@ -6,32 +6,6 @@
   gap: 2rem;
 }
 
-// Filter Card Styling
-.filter-card {
-  ::ng-deep {
-    .p-card {
-      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      
-      .p-card-header {
-        background: transparent;
-        padding: 1.5rem 2rem;
-        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
-      }
-      
-      .p-card-body {
-        padding: 0;
-        
-        .p-card-content {
-          padding: 1.5rem 2rem;
-        }
-      }
-    }
-  }
-}
 
 .filter-header {
   padding: 1rem 1.5rem;

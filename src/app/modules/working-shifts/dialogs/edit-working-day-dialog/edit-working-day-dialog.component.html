@@ -1,29 +1,54 @@
-<div class="dialog-gradient">
-  <h2 mat-dialog-title>Radni dan zaposlenog</h2>
+<div class="dialog-content">
+  <h2>Radni dan zaposlenog</h2>
   <form [formGroup]="form" (ngSubmit)="save()">
-    <mat-slide-toggle formControlName="works" color="accent">
-      Radi tog dana
-    </mat-slide-toggle>
-
-    <div *ngIf="form.value.works" class="shift-select">
-      <mat-form-field appearance="outline" style="width: 100%;">
-        <mat-label>Tip smene</mat-label>
-        <mat-select formControlName="shiftType">
-          <mat-option *ngFor="let t of shiftTypes" [value]="t.value">
-            {{ t.label }} ({{ t.time }})
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+    <div class="form-field">
+      <p-checkbox 
+        formControlName="works" 
+        inputId="works"
+        [binary]="true"
+        label="Radi tog dana">
+      </p-checkbox>
     </div>
 
-    <mat-form-field appearance="outline" style="width: 100%;">
-      <mat-label>Napomena</mat-label>
-      <input matInput formControlName="note" maxlength="200">
-    </mat-form-field>
+    <div *ngIf="form.value.works" class="form-field">
+      <label>Tip smene</label>
+      <p-select 
+        formControlName="shiftType"
+        [options]="shiftTypes"
+        optionLabel="label"
+        optionValue="value"
+        placeholder="Izaberi tip smene"
+        styleClass="form-select">
+        <ng-template let-shift pTemplate="item">
+          <span>{{ shift.label }} <span *ngIf="shift.time">({{ shift.time }})</span></span>
+        </ng-template>
+      </p-select>
+    </div>
+
+    <div class="form-field">
+      <label>Napomena</label>
+      <input 
+        pInputText 
+        formControlName="note" 
+        maxlength="200"
+        placeholder="Unesi napomenu"
+        class="form-input" />
+    </div>
 
     <div class="dialog-actions">
-      <button mat-button type="button" (click)="dialogRef.close()">Otkaži</button>
-      <button mat-raised-button color="primary" type="submit" [disabled]="form.invalid">Sačuvaj</button>
+      <p-button 
+        label="Otkaži" 
+        severity="secondary"
+        [outlined]="true"
+        [rounded]="true"
+        (onClick)="cancel()">
+      </p-button>
+      <p-button 
+        label="Sačuvaj" 
+        [rounded]="true"
+        type="submit"
+        [disabled]="form.invalid">
+      </p-button>
     </div>
   </form>
 </div>

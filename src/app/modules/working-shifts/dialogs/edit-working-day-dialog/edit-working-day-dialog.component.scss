@@ -1,23 +1,133 @@
-.dialog-gradient {
-//   background: linear-gradient(to bottom, #8c0055, #b3006e);
-  border-radius: 18px;
-  padding: 24px 18px 18px 18px;
-  color: #fff;
-  min-width: 340px;
+.dialog-content {
+  padding: 1.5rem;
+  color: rgba(255, 255, 255, 0.9);
+  min-width: 400px;
+  
+  h2 {
+    margin: 0 0 1.5rem 0;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(135deg, #8b5cf6, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
 }
 
-h2 {
-  margin-bottom: 18px;
-  color: #fff;
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  
+  label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.8);
+  }
 }
 
-mat-form-field, .shift-select {
-  margin-top: 18px;
+::ng-deep {
+  .form-select {
+    width: 100%;
+    
+    .p-select {
+      width: 100%;
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      transition: all 0.3s ease;
+      
+      .p-select-label {
+        padding: 0.75rem 1rem;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1rem;
+      }
+      
+      &:not(.p-disabled):hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: #1a1a1a;
+      }
+      
+      &:not(.p-disabled).p-focus {
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        background: #2a2a2a;
+      }
+    }
+  }
+  
+  .form-input {
+    width: 100%;
+    
+    .p-inputtext {
+      width: 100%;
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 12px;
+      padding: 0.75rem 1rem;
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      
+      &::placeholder {
+        color: rgba(255, 255, 255, 0.4);
+      }
+      
+      &:enabled:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+        background: #1a1a1a;
+      }
+      
+      &:enabled:focus {
+        border-color: rgba(139, 92, 246, 0.6);
+        box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
+        background: #2a2a2a;
+      }
+    }
+  }
+  
+  .p-checkbox {
+    .p-checkbox-box {
+      background: #1a1a1a;
+      border: 2px solid rgba(139, 92, 246, 0.3);
+      border-radius: 8px;
+      
+      &.p-highlight {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
+        border-color: rgba(139, 92, 246, 0.6);
+      }
+      
+      &:hover {
+        border-color: rgba(139, 92, 246, 0.5);
+      }
+    }
+    
+    .p-checkbox-label {
+      color: rgba(255, 255, 255, 0.9);
+      margin-left: 0.5rem;
+    }
+  }
 }
 
 .dialog-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 12px;
-  margin-top: 12px;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(139, 92, 246, 0.2);
+  
+  ::ng-deep {
+    .p-button {
+      padding: 0.75rem 1.5rem;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      
+      &:not(:disabled):hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
 }

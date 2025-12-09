@@ -38,6 +38,118 @@ html.theme-system body {
   background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%) !important;
   color: rgb(255, 255, 255) !important;
 
+  .p-card {
+    background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+
+    .submit-btn .p-button {
+      padding: 0.875rem 2rem !important;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+      border: none !important;
+      color: white !important;
+      font-weight: 600;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      
+      &:hover:not(:disabled) {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+      }
+      
+      &:active:not(:disabled) {
+        background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+      }
+      
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(99, 102, 241, 0.5)) !important;
+      }
+    }
+  }
+
+  .p-inputtext {
+    color: rgba(255, 255, 255, 0.95) !important;
+    background: #1a1a1a !important;
+    border: 2px solid rgba(139, 92, 246, 0.3) !important;
+    border-radius: 12px !important;
+    transition: all 0.3s ease !important; 
+    padding: 0.75rem;
+    width: 100% !important;
+  }
+
+
+    .date-picker {
+      width: 200px;
+      flex-shrink: 0;
+      
+      .p-datepicker {
+        display: flex;
+        align-items: center;
+      }
+      
+      .p-datepicker-input-icon-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+      
+      .p-datepicker-input {
+        background: #1a1a1a;
+        border: 2px solid rgba(139, 92, 246, 0.3);
+        border-radius: 10px;
+        padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+        height: 40px;
+        width: 100%;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        
+        &::placeholder {
+          color: rgba(255, 255, 255, 0.4);
+        }
+        
+        &:enabled:hover {
+          border-color: rgba(139, 92, 246, 0.5);
+        }
+        
+        &:enabled:focus {
+          border-color: rgba(139, 92, 246, 0.6);
+          box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+          background: #2a2a2a;
+          outline: none;
+        }
+      }
+      
+      .p-datepicker-dropdown-button,
+      .p-datepicker-trigger {
+        position: absolute;
+        right: 8px;
+        color: rgba(139, 92, 246, 0.7);
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        
+        &:hover {
+          color: rgba(139, 92, 246, 0.9);
+        }
+        
+        .p-icon {
+          color: rgba(139, 92, 246, 0.7);
+          font-size: 1rem;
+        }
+      }
+    }
+  
+
+  
 
   .login-card {
     background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
