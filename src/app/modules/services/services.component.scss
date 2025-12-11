@@ -79,29 +79,6 @@
   }
 }
 
-.clear-btn {
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.5rem;
-    border: 2px solid rgba(139, 92, 246, 0.4);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.6);
-      color: rgba(255, 255, 255, 0.95);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-}
-
 // Services Card Styling
 .services-card {
   ::ng-deep {
@@ -171,30 +148,6 @@
   }
 }
 
-.add-btn {
-  flex-shrink: 0;
-  
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-    border: none;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-}
 
 // Table Styling
 ::ng-deep {
@@ -490,22 +443,6 @@
   .search-field {
     min-width: 100%;
   }
-  
-  .clear-btn {
-    width: 100%;
-    
-    ::ng-deep .p-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
-  .add-btn {
-    width: 100%;
-    
-    ::ng-deep .p-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
+
+
 }

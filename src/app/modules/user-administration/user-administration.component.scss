@@ -78,31 +78,6 @@
   }
 }
 
-.add-btn {
-  flex-shrink: 0;
-  
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-    border: none;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-}
-
 // Table Styling
 ::ng-deep {
   .p-datatable {

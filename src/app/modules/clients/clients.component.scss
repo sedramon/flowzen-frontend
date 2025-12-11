@@ -7,34 +7,6 @@
 }
 
 
-
-// Filter Card Styling
-.filter-card {
-  ::ng-deep {
-    .p-card {
-      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      
-      .p-card-header {
-        background: transparent;
-        padding: 1.5rem 2rem;
-        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
-      }
-      
-      .p-card-body {
-        padding: 0;
-        
-        .p-card-content {
-          padding: 1.5rem 2rem;
-        }
-      }
-    }
-  }
-}
-
 .filter-header {
   padding: 1rem 1.5rem;
   margin-bottom: 0.5rem;
@@ -113,24 +85,6 @@
   }
 }
 
-.search-btn {
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-    border: none;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-  }
-}
-
 .date-field,
 .sort-field {
   flex: 1;
@@ -144,82 +98,6 @@
     font-weight: 600;
     color: rgba(255, 255, 255, 0.8);
     margin-bottom: 0.25rem;
-  }
-  
-  ::ng-deep {
-    .p-datepicker,
-    .p-select {
-      width: 100% !important;
-      display: flex;
-      
-      .p-inputtext,
-      .p-select-label {
-        width: 100%;
-        background: #1a1a1a;
-        border-radius: 12px;
-        color: rgba(255, 255, 255, 0.9);
-        padding: 0.875rem 1rem;
-        transition: all 0.3s ease;
-        
-        &:enabled:hover {
-          border-color: rgba(139, 92, 246, 0.5);
-          background: #1a1a1a;
-        }
-        
-        &:enabled:focus {
-          border-color: rgba(139, 92, 246, 0.6);
-          box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.15);
-          background: #2a2a2a;
-        }
-      }
-      
-      .p-datepicker-dropdown,
-      .p-select-dropdown {
-        color: rgba(139, 92, 246, 0.7);
-        
-        &:hover {
-          color: rgba(139, 92, 246, 0.9);
-        }
-      }
-    }
-    
-    .p-select {
-      background: #1a1a1a;
-      border-radius: 12px;
-      
-      &:hover {
-        border-color: rgba(139, 92, 246, 0.5);
-      }
-      
-      .p-select-trigger {
-        color: rgba(139, 92, 246, 0.7);
-      }
-    }
-  }
-}
-
-.clear-btn {
-  align-self: flex-start;
-  
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.5rem;
-    border: 2px solid rgba(139, 92, 246, 0.4);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.6);
-      color: rgba(255, 255, 255, 0.95);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
   }
 }
 
@@ -292,30 +170,6 @@
   }
 }
 
-.add-btn {
-  flex-shrink: 0;
-  
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.75rem;
-    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-    border: none;
-    color: white;
-    font-weight: 600;
-    font-size: 1rem;
-    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
-      transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-}
 
 // Table Styling
 ::ng-deep {
@@ -622,31 +476,4 @@
     }
   }
   
-  .search-btn {
-    width: 100%;
-    
-    ::ng-deep .p-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
-  .clear-btn {
-    width: 100%;
-    align-self: stretch;
-    
-    ::ng-deep .p-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
-  
-  .add-btn {
-    width: 100%;
-    
-    ::ng-deep .p-button {
-      width: 100%;
-      justify-content: center;
-    }
-  }
 }

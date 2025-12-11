@@ -20,6 +20,10 @@ export class AuthService {
   public user$ = this.userSubject.asObservable();
   private accessRestrictionSubject = new BehaviorSubject<TenantAccessState | null>(null);
   public accessRestriction$ = this.accessRestrictionSubject.asObservable();
+  
+  // Status validacije sesije: 'idle' | 'pending' | 'valid' | 'invalid'
+  private sessionValidationStatusSubject = new BehaviorSubject<'idle' | 'pending' | 'valid' | 'invalid'>('idle');
+  public sessionValidationStatus$ = this.sessionValidationStatusSubject.asObservable();
 
   constructor(
     private http: HttpClient, 
@@ -31,6 +35,7 @@ export class AuthService {
     // Hybrid approach: If user data exists, validate session is still active
     // Delay the call to avoid circular dependency with HttpClient/Interceptors
     if (this.getCurrentUser()) {
+      this.sessionValidationStatusSubject.next('pending');
       setTimeout(() => this.validateSession(), 0);
     }
   }
@@ -84,16 +89,17 @@ export class AuthService {
                 isGlobalAdmin: body.user.isGlobalAdmin === true,
               };
 
-              const normalizedUser = this.normalizeUser(user);
-              this.saveUser(normalizedUser);
-              this.userSubject.next(normalizedUser);
-              this.clearAccessRestrictionState();
-              this.log('login:user-normalized', {
-                userId: normalizedUser.userId,
-                tenantId: normalizedUser.tenantId,
-                isGlobalAdmin: normalizedUser.isGlobalAdmin,
-                scopesCount: Array.isArray(normalizedUser.scopes) ? normalizedUser.scopes.length : 0,
-              });
+            const normalizedUser = this.normalizeUser(user);
+            this.saveUser(normalizedUser);
+            this.userSubject.next(normalizedUser);
+            this.sessionValidationStatusSubject.next('valid');
+            this.clearAccessRestrictionState();
+            this.log('login:user-normalized', {
+              userId: normalizedUser.userId,
+              tenantId: normalizedUser.tenantId,
+              isGlobalAdmin: normalizedUser.isGlobalAdmin,
+              scopesCount: Array.isArray(normalizedUser.scopes) ? normalizedUser.scopes.length : 0,
+            });
             }
 
             const storedReturnUrl = localStorage.getItem('returnUrl');
@@ -136,6 +142,8 @@ export class AuthService {
    */
   validateSession(): void {
     this.log('validateSession:start');
+    this.sessionValidationStatusSubject.next('pending');
+    
     this.http
       .get<{ valid: boolean; user: any }>(`${this.apiUrl}/auth/validate`, {
         withCredentials: true,
@@ -143,6 +151,15 @@ export class AuthService {
       .subscribe({
         next: (response) => {
           this.log('validateSession:success', { valid: response.valid });
+          
+          // Debug: Proveri tačan response od backend-a
+          console.error('[AuthService] VALIDATE RESPONSE:', {
+            hasUser: !!response.user,
+            userId: response.user?.userId,
+            userName: response.user?.name,
+            userEmail: response.user?.email,
+            responseUserKeys: response.user ? Object.keys(response.user) : []
+          });
           
           if (response.valid && response.user) {
             // Extract and normalize user data from validation response
@@ -172,7 +189,10 @@ export class AuthService {
 
             const normalizedUser = this.normalizeUser(user);
             this.saveUser(normalizedUser);
+            
+            // Prvo ažuriraj korisnika, pa onda status - važan redosled!
             this.userSubject.next(normalizedUser);
+            this.sessionValidationStatusSubject.next('valid');
             
             this.log('validateSession:user-updated', {
               userId: normalizedUser.userId,
@@ -181,6 +201,7 @@ export class AuthService {
           } else {
             // Session is not valid, clear local data
             this.log('validateSession:invalid-session');
+            this.sessionValidationStatusSubject.next('invalid');
             this.clearSession();
           }
         },
@@ -190,7 +211,11 @@ export class AuthService {
           
           // Clear session on authentication errors
           if (err.status === 401 || err.status === 403) {
+            this.sessionValidationStatusSubject.next('invalid');
             this.clearSession();
+          } else {
+            // Za ostale greške (network error itd.), ostavi status kao 'pending' ili 'idle'
+            this.sessionValidationStatusSubject.next('invalid');
           }
         },
       });
@@ -201,9 +226,37 @@ export class AuthService {
    * Note: JWT is in httpOnly cookie, we only store user info for UI purposes
    */
   private saveUser(user: AuthenticatedUser): void {
+    console.log('[AuthService] Input user to save:', {
+      hasUserId: !!user.userId,
+      userId: user.userId,
+      hasTenantId: !!user.tenantId,
+      tenantId: user.tenantId,
+      keys: Object.keys(user)
+    });
+    
     const normalizedUser = this.normalizeUser(user);
 
+    console.log('[AuthService] Normalized user to save:', {
+      hasUserId: !!normalizedUser.userId,
+      userId: normalizedUser.userId,
+      hasTenantId: !!normalizedUser.tenantId,
+      tenantId: normalizedUser.tenantId
+    });
+
     localStorage.setItem(this.USER_KEY, JSON.stringify(normalizedUser));
+    
+    // Proveri šta je tačno sačuvano
+    const saved = localStorage.getItem(this.USER_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      console.log('[AuthService] Saved to localStorage:', {
+        hasUserId: !!parsed.userId,
+        userId: parsed.userId,
+        hasTenantId: !!parsed.tenantId,
+        tenantId: parsed.tenantId
+      });
+    }
+    
     this.log('state:save-user', {
       userId: normalizedUser.userId,
       tenantId: normalizedUser.tenantId,
@@ -234,6 +287,7 @@ export class AuthService {
     localStorage.removeItem('returnUrl');
     this.csrfService.clearToken();
     this.userSubject.next(null);
+    this.sessionValidationStatusSubject.next('idle');
     this.clearAccessRestrictionState();
     this.log('state:clear-session');
   }
@@ -265,7 +319,33 @@ export class AuthService {
   private loadUserFromStorage(): void {
     const user = this.getStoredUser();
     if (user) {
+      console.log('[AuthService] Raw user from localStorage:', {
+        hasUserId: !!user.userId,
+        userId: user.userId,
+        hasTenantId: !!user.tenantId,
+        tenantId: user.tenantId,
+        keys: Object.keys(user)
+      });
+      
       const normalized = this.normalizeUser(user);
+      
+      console.log('[AuthService] Normalized user:', {
+        hasUserId: !!normalized.userId,
+        userId: normalized.userId,
+        hasTenantId: !!normalized.tenantId,
+        tenantId: normalized.tenantId
+      });
+      
+      // Proveri da li korisnik ima validne podatke
+      if (!normalized.userId || !normalized.tenantId) {
+        console.warn('[AuthService] Stored user has invalid data, clearing', {
+          hasUserId: !!normalized.userId,
+          hasTenantId: !!normalized.tenantId
+        });
+        localStorage.removeItem(this.USER_KEY);
+        return;
+      }
+      
       this.userSubject.next(normalized);
       this.log('state:load-from-storage', {
         userId: normalized.userId,
@@ -278,6 +358,10 @@ export class AuthService {
 
   getCurrentUser(): AuthenticatedUser | null {
     return this.userSubject.getValue();
+  }
+
+  getSessionValidationStatus$(): Observable<'idle' | 'pending' | 'valid' | 'invalid'> {
+    return this.sessionValidationStatus$;
   }
 
   getCurrentTenantId(): string | null {
@@ -552,8 +636,12 @@ export class AuthService {
       tenantInfo?.tenantId ??
       null;
 
+    // Osiguraj da userId postoji - može biti userId, _id, ili id
+    const userId = user.userId || (user as any)._id || (user as any).id || null;
+
     return {
       ...user,
+      userId,
       tenant: tenantId ?? undefined,
       tenantId: tenantId ?? null,
       tenantInfo,

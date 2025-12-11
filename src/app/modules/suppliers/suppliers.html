@@ -96,7 +96,7 @@
           label="Dodaj dobavljača"
           [rounded]="true"
           (onClick)="addSupplier()"
-          class="add-btn">
+          class="submit-btn">
         </p-button>
       </div>
     </ng-template>
@@ -104,7 +104,7 @@
     <p-table 
       [value]="filteredSuppliers" 
       [paginator]="true" 
-      [rows]="10" 
+      [rows]="10"   
       [rowsPerPageOptions]="[10, 25, 50]"
       [showCurrentPageReport]="true"
       currentPageReportTemplate="Prikazano {first} do {last} od {totalRecords} dobavljača"

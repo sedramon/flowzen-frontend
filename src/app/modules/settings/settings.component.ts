@@ -8,7 +8,7 @@ import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule } from '@angul
 import { MatDialog } from '@angular/material/dialog';
 import { ConfirmDeleteDialogComponent } from '../../dialogs/confirm-delete-dialog/confirm-delete-dialog.component';
 import { CreateEditFacilityDialog } from './dialogs/create-edit-facility-dialog/create-edit-facility-dialog';
-import { catchError, EMPTY, filter, forkJoin, switchMap, tap } from 'rxjs';
+import { catchError, EMPTY, filter, forkJoin, switchMap, take, tap } from 'rxjs';
 import { EffectiveSettings, RawSettings } from '../../models/Settings';
 import { ButtonModule } from 'primeng/button';
 import { CardModule } from 'primeng/card';
@@ -76,20 +76,28 @@ export class SettingsComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    const currentUser = this.authService.getCurrentUser();
-    if (!currentUser) return;
+    // Čekaj da se sesija validira pre učitavanja settings-a
+    this.authService.getSessionValidationStatus$().pipe(
+      filter(status => status === 'valid'), // Čekaj da se validacija završi uspešno
+      take(1)
+    ).subscribe(() => {
+      const currentUser = this.authService.getCurrentUser();
+      if (!currentUser) {
+        return;
+      }
 
-    this.tenantId = this.authService.requireCurrentTenantId();
-    this.userId = currentUser.userId!;
+      this.tenantId = this.authService.requireCurrentTenantId();
+      this.userId = currentUser.userId!;
 
-    // facilities
-    this.settingsService.getAllFacilities(this.tenantId).subscribe({
-      next: (data) => (this.facilities = data),
-      error: (err) => console.error('Error fetching facilities:', err),
+      // facilities
+      this.settingsService.getAllFacilities(this.tenantId).subscribe({
+        next: (data) => (this.facilities = data),
+        error: (err) => console.error('Error fetching facilities:', err),
+      });
+
+      // settings
+      this.loadSettings();
     });
-
-    // settings
-    this.loadSettings();
   }
 
   openAddFacilityDialog() {
@@ -105,7 +113,6 @@ export class SettingsComponent implements OnInit {
         this.showToast('Objekat uspešno kreiran');
       }),
       catchError(err => {
-        console.warn('Failed to create facility!', err);
         this.showToast('Neuspešno kreiranje objekta', true);
         return EMPTY;
       })
@@ -126,7 +133,6 @@ export class SettingsComponent implements OnInit {
         this.showToast('Objekat uspešno ažuriran');
       }),
       catchError(err => {
-        console.warn('Failed to update facility!', err);
         this.showToast('Neuspešno ažuriranje objekta', true);
         return EMPTY;
       })
@@ -189,7 +195,6 @@ export class SettingsComponent implements OnInit {
       },
       error: (err) => {
         this.error = 'Neuspešno učitavanje podešavanja';
-        console.error(err);
         this.loading = false;
       },
     });

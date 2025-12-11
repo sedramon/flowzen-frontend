@@ -59,18 +59,6 @@
   }
 }
 
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-  padding-top: 0.5rem;
-}
-
-.employee-option {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 0;
-}
 
 // ============================================
 // Calendar Card Styling
@@ -317,20 +305,6 @@
   margin-left: auto;
 }
 
-::ng-deep {
-  .edit-btn, .delete-btn {
-    .p-button {
-      width: 2.5rem;
-      height: 2.5rem;
-      padding: 0;
-      transition: all 0.3s ease;
-      
-      &:hover:not(:disabled) {
-        transform: scale(1.1);
-      }
-    }
-  }
-}
 
 // ============================================
 // Calendar Table

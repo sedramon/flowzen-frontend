@@ -99,31 +99,6 @@
   flex: 1;
 }
 
-.content-card {
-  ::ng-deep {
-    .p-card {
-      background: linear-gradient(135deg, rgba(26, 31, 58, 0.95), rgba(45, 27, 78, 0.95)) !important;
-      border: 1px solid rgba(139, 92, 246, 0.3);
-      border-radius: 20px;
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-      overflow: hidden;
-      
-      .p-card-header {
-        background: transparent;
-        padding: 2rem 2.5rem;
-        border-bottom: 2px solid rgba(139, 92, 246, 0.25);
-      }
-      
-      .p-card-body {
-        padding: 0;
-        
-        .p-card-content {
-          padding: 2rem 2.5rem;
-        }
-      }
-    }
-  }
-}
 
 .content-header {
   display: flex;
@@ -302,48 +277,8 @@
   &.space-between {
     justify-content: space-between;
   }
-  
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.75rem;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &[type="submit"]:not(:disabled) {
-      background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9));
-      border: none;
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-      
-      &:hover {
-        background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1));
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
-      }
-    }
-  }
 }
 
-.reset-btn {
-  ::ng-deep .p-button {
-    padding: 0.875rem 1.5rem;
-    border: 2px solid rgba(139, 92, 246, 0.4);
-    background: transparent;
-    color: rgba(255, 255, 255, 0.85);
-    font-weight: 600;
-    transition: all 0.3s ease;
-    
-    &:hover:not(:disabled) {
-      background: rgba(139, 92, 246, 0.15);
-      border-color: rgba(139, 92, 246, 0.6);
-      color: rgba(255, 255, 255, 0.95);
-      transform: translateY(-1px);
-      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
-    }
-    
-    &:active:not(:disabled) {
-      transform: translateY(0);
-    }
-  }
-}
 
 .button-group {
   display: flex;

@@ -87,7 +87,11 @@
 
   <ng-container *ngIf="loading">
     <div class="loading-spinner-container">
-      <div class="spinner"></div>
+      <p-progressSpinner 
+        styleClass="custom-spinner"
+        strokeWidth="3"
+        animationDuration="1s">
+      </p-progressSpinner>
       <div class="loading-text">Učitavanje rasporeda...</div>
     </div>
   </ng-container>

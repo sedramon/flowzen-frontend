@@ -23,18 +23,29 @@ export class ThemeService implements OnDestroy {
     // Primeni default temu odmah
     this.applyTheme('system');
     
-    // Slušaj promene korisnika i učitaj temu kada se korisnik uloguje
-    this.userSubscription = this.authService.user$.pipe(
-      filter(user => user !== null), // Čekaj dok se korisnik ne učita
-      take(1), // Uzmi samo prvi put kada se korisnik učita
-      switchMap(user => {
+    // Slušaj promene korisnika I validaciju sesije pre učitavanja teme
+    this.userSubscription = this.authService.getSessionValidationStatus$().pipe(
+      filter(status => status === 'valid'), // Čekaj da se sesija validira
+      take(1), // Uzmi samo prvi put kada je validacija završena
+      switchMap(() => {
+        const user = this.authService.getCurrentUser();
+        
         if (!user) {
+          this.applyTheme('system');
           return of(null);
         }
-        return this.loadThemeForUser(user.userId!, user.tenantId || this.authService.getCurrentTenantId() || '');
+        
+        const tenantId = user.tenantId || this.authService.getCurrentTenantId() || '';
+        const userId = user.userId;
+        
+        if (!tenantId || !userId) {
+          this.applyTheme('system');
+          return of(null);
+        }
+        
+        return this.loadThemeForUser(userId, tenantId);
       }),
       catchError(err => {
-        console.error('[ThemeService] Error loading theme:', err);
         this.applyTheme('system');
         return of(null);
       })
@@ -54,36 +65,23 @@ export class ThemeService implements OnDestroy {
    */
   private loadThemeForUser(userId: string, tenantId: string): Observable<Theme | null> {
     if (!tenantId || !userId) {
-      console.warn('[ThemeService] Missing tenantId or userId, using system theme', { tenantId, userId });
       this.applyTheme('system');
       return of(null);
     }
 
-    console.log('[ThemeService] Loading theme for user', { userId, tenantId });
-
     return this.settingsService.getEffectiveSettings(tenantId, userId).pipe(
       switchMap(settings => {
         if (!settings) {
-          console.warn('[ThemeService] No settings returned, using system theme');
           this.applyTheme('system');
           return of(null);
         }
 
         const theme = (settings.theme as Theme) || 'system';
-        console.log('[ThemeService] Loaded theme from settings:', { theme, settings });
         this.currentThemeSubject.next(theme);
         this.applyTheme(theme);
         return of(theme);
       }),
       catchError(err => {
-        console.error('[ThemeService] Error loading theme settings:', {
-          error: err,
-          message: err?.message,
-          status: err?.status,
-          userId,
-          tenantId
-        });
-        console.warn('[ThemeService] Falling back to system theme');
         this.applyTheme('system');
         return of(null);
       })
@@ -98,7 +96,6 @@ export class ThemeService implements OnDestroy {
     const currentUser = this.authService.getCurrentUser();
     if (!currentUser) {
       // Ako korisnik nije ulogovan, koristi sistemsku temu
-      console.log('[ThemeService] No user found, using system theme');
       this.applyTheme('system');
       return;
     }
@@ -107,7 +104,6 @@ export class ThemeService implements OnDestroy {
     const userId = currentUser.userId;
 
     if (!tenantId || !userId) {
-      console.warn('[ThemeService] Missing tenantId or userId, using system theme');
       this.applyTheme('system');
       return;
     }
@@ -160,12 +156,6 @@ export class ThemeService implements OnDestroy {
     } else {
       appliedTheme = 'nepoznata';
     }
-
-    // Console log za debugging
-    console.log(`[ThemeService] Tema promenjena na: ${theme} (primenjeno: ${appliedTheme})`);
-    console.log(`[ThemeService] HTML data-theme: ${htmlElement.getAttribute('data-theme')}`);
-    console.log(`[ThemeService] HTML klase: ${htmlElement.className}`);
-    console.log(`[ThemeService] Body klase: ${bodyElement.className}`);
     
     // Force reflow da osiguramo da se stilovi primene
     void htmlElement.offsetHeight;
@@ -203,21 +193,46 @@ export class ThemeService implements OnDestroy {
    */
   refreshTheme(): void {
     const currentUser = this.authService.getCurrentUser();
+    
+    // Ako nema korisnika, koristi sistemsku temu
     if (!currentUser) {
       this.applyTheme('system');
       return;
     }
 
-    const tenantId = this.authService.getCurrentTenantId();
-    const userId = currentUser.userId;
+    // Proveri status validacije sesije
+    const validationStatus = this.authService.getSessionValidationStatus$();
+    
+    validationStatus.pipe(
+      filter(status => status !== 'pending'), // Čekaj da se validacija završi
+      take(1),
+      switchMap(status => {
+        if (status !== 'valid') {
+          this.applyTheme('system');
+          return of(null);
+        }
+        
+        const user = this.authService.getCurrentUser();
+        if (!user) {
+          this.applyTheme('system');
+          return of(null);
+        }
+        
+        const tenantId = this.authService.getCurrentTenantId();
+        const userId = user.userId;
 
-    if (!tenantId || !userId) {
-      this.applyTheme('system');
-      return;
-    }
+        if (!tenantId || !userId) {
+          this.applyTheme('system');
+          return of(null);
+        }
 
-    // Učitaj temu direktno bez čekanja na observable
-    this.loadThemeForUser(userId, tenantId).subscribe();
+        return this.loadThemeForUser(userId, tenantId);
+      }),
+      catchError(err => {
+        this.applyTheme('system');
+        return of(null);
+      })
+    ).subscribe();
   }
 }
 

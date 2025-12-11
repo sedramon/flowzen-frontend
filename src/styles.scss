@@ -38,6 +38,10 @@ html.theme-system body {
   background: linear-gradient(135deg, #0f1419 0%, #1a1f3a 50%, #0f1419 100%) !important;
   color: rgb(255, 255, 255) !important;
 
+  .p-select-list-container {
+    border-radius: 24px !important;
+  }
+
   .p-card {
     background: linear-gradient(135deg, rgba(17, 22, 48, 0.6), rgba(0, 0, 0, 0.6)) !important;
     border: 1px solid rgba(139, 92, 246, 0.3);
@@ -148,7 +152,28 @@ html.theme-system body {
       }
     }
   
-
+    .clear-btn {
+      .p-button {
+        padding: 0.875rem 1.5rem;
+        border: 2px solid rgba(139, 92, 246, 0.4);
+        background: transparent;
+        color: rgba(255, 255, 255, 0.85);
+        font-weight: 600;
+        transition: all 0.3s ease;
+        
+        &:hover:not(:disabled) {
+          background: rgba(139, 92, 246, 0.15);
+          border-color: rgba(139, 92, 246, 0.6);
+          color: rgba(255, 255, 255, 0.95);
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+        }
+        
+        &:active:not(:disabled) {
+          transform: translateY(0);
+        }
+      }
+    }
   
 
   .login-card {
@@ -258,6 +283,32 @@ html.theme-light body {
   .p-card {
     color: rgba(38, 38, 38, 0.95) !important;
     background: #ffffff !important;
+  }
+
+  .submit-btn .p-button {
+    padding: 0.875rem 2rem !important;
+    background: linear-gradient(135deg, rgba(139, 92, 246, 0.9), rgba(99, 102, 241, 0.9)) !important;
+    border: none !important;
+    color: white !important;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    
+    &:hover:not(:disabled) {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+    }
+    
+    &:active:not(:disabled) {
+      background: linear-gradient(135deg, rgba(139, 92, 246, 1), rgba(99, 102, 241, 1)) !important;
+    }
+    
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      background: linear-gradient(135deg, rgba(139, 92, 246, 0.5), rgba(99, 102, 241, 0.5)) !important;
+    }
   }
 
   // Flowzen AI Module - Override card background to transparent
@@ -421,32 +472,6 @@ html.theme-light body {
     }
   }
 
-  .date-field {
-    .p-datepicker {
-      .p-inputtext {
-        background: #ffffff !important;
-        color: rgba(38, 38, 38, 0.95) !important;
-
-        &::placeholder {
-          color: rgba(38, 38, 38, 0.4) !important;
-        }
-      }
-    }
-
-    .p-select {
-      background: #ffffff !important;
-      border: 2px solid rgba(139, 92, 246, 0.3) !important;
-
-      .p-select-label {
-        background: #ffffff !important;
-        color: rgba(38, 38, 38, 0.95) !important;
-
-        &.p-placeholder {
-          color: rgba(38, 38, 38, 0.4) !important;
-        }
-      }
-    }
-  }
 
   /* Clear button text color for light theme */
   .clear-btn {
@@ -462,6 +487,7 @@ html.theme-light body {
       color: rgba(38, 38, 38, 0.85) !important;
     }
   }
+
 
   label {
     color: rgba(38, 38, 38, 0.95) !important;
@@ -760,6 +786,7 @@ html.theme-light body {
       max-height: 200px !important;
       overflow-y: auto !important;
       background: #ffffff !important;
+      border-radius: 24px !important;
     }
 
     .p-select-list {

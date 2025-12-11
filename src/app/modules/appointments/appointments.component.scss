@@ -762,20 +762,36 @@
   justify-content: center;
   min-height: 400px;
   animation: fadeIn 0.5s;
+  gap: 1.5rem;
 }
 
-.spinner {
-  width: 64px;
-  height: 64px;
-  border: 8px solid #8c0055;
-  border-top: 8px solid #fff;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin-bottom: 16px;
+::ng-deep .custom-spinner {
+  width: 80px;
+  height: 80px;
+  
+  .p-progress-spinner-circle {
+    stroke: #8b5cf6 !important;
+    animation: spinner-dash 1.5s ease-in-out infinite;
+  }
+  
+  @keyframes spinner-dash {
+    0% {
+      stroke-dasharray: 1, 200;
+      stroke-dashoffset: 0;
+    }
+    50% {
+      stroke-dasharray: 100, 200;
+      stroke-dashoffset: -15;
+    }
+    100% {
+      stroke-dasharray: 100, 200;
+      stroke-dashoffset: -125;
+    }
+  }
 }
 
 .loading-text {
-  color: #fff;
+  color: rgba(255, 255, 255, 0.9);
   font-size: 1.2em;
   font-weight: 500;
   margin-top: 8px;

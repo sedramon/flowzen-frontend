@@ -23,6 +23,7 @@ import { MatSelectModule } from '@angular/material/select';
 import { ButtonModule } from 'primeng/button';
 import { SelectModule } from 'primeng/select';
 import { DatePickerModule } from 'primeng/datepicker';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 import interact from 'interactjs';
 import {
   trigger,
@@ -105,6 +106,7 @@ export const CUSTOM_DATE_FORMATS = {
     ButtonModule,
     SelectModule,
     DatePickerModule,
+    ProgressSpinnerModule,
     PosCheckoutComponent
   ],
   templateUrl: './appointments.component.html',
