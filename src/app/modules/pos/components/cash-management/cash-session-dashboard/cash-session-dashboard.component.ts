@@ -1,12 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { TooltipModule } from 'primeng/tooltip';
 import { Subject, takeUntil, forkJoin, of } from 'rxjs';
 import { map, switchMap, catchError } from 'rxjs/operators';
 
@@ -53,12 +54,14 @@ interface TodayStats {
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressSpinnerModule
+    CardModule,
+    ButtonModule,
+    TagModule,
+    ProgressSpinnerModule,
+    ToastModule,
+    TooltipModule
   ],
+  providers: [DialogService, MessageService],
   templateUrl: './cash-session-dashboard.component.html',
   styleUrls: ['./cash-session-dashboard.component.scss']
 })
@@ -94,8 +97,8 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   constructor(
     private readonly posService: PosService,
     private readonly authService: AuthService,
-    private readonly snackBar: MatSnackBar,
-    private readonly dialog: MatDialog
+    private readonly messageService: MessageService,
+    private readonly dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -179,17 +182,24 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
    * Otvara dialog za otvaranje nove sesije
    */
   openNewSession(): void {
-    const dialogRef = this.dialog.open(OpenSessionDialogComponent, {
+    const ref = this.dialogService.open(OpenSessionDialogComponent, {
+      header: 'Otvaranje sesije',
       width: '500px',
       data: { facilities: this.facilities }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadDashboardData();
-        this.snackBar.open('Sesija uspešno otvorena', 'Zatvori', { duration: 2000 });
-      }
-    });
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result) {
+          this.loadDashboardData();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Uspeh',
+            detail: 'Sesija uspešno otvorena'
+          });
+        }
+      });
+    }
   }
 
   /**
@@ -198,17 +208,24 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   closeCurrentSession(): void {
     if (!this.currentSession) return;
     
-    const dialogRef = this.dialog.open(CloseSessionDialogComponent, {
+    const ref = this.dialogService.open(CloseSessionDialogComponent, {
+      header: 'Zatvaranje sesije',
       width: '600px',
       data: { session: this.currentSession }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadDashboardData();
-        this.snackBar.open('Sesija uspešno zatvorena', 'Zatvori', { duration: 2000 });
-      }
-    });
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result) {
+          this.loadDashboardData();
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Uspeh',
+            detail: 'Sesija uspešno zatvorena'
+          });
+        }
+      });
+    }
   }
 
   // ============================================================================
@@ -221,16 +238,19 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   countCash(): void {
     if (!this.currentSession) return;
 
-    const dialogRef = this.dialog.open(CashCountingDialogComponent, {
+    const ref = this.dialogService.open(CashCountingDialogComponent, {
+      header: 'Brojanje cash-a',
       width: '500px',
       data: { session: this.currentSession }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadDashboardData();
-      }
-    });
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result) {
+          this.loadDashboardData();
+        }
+      });
+    }
   }
 
   /**
@@ -240,16 +260,19 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
     const targetSession = session || this.currentSession;
     if (!targetSession) return;
 
-    const dialogRef = this.dialog.open(CashReconciliationDialogComponent, {
+    const ref = this.dialogService.open(CashReconciliationDialogComponent, {
+      header: 'Usklađivanje cash-a',
       width: '700px',
       data: { session: targetSession }
     });
 
-    dialogRef.afterClosed().subscribe(result => {
-      if (result) {
-        this.loadDashboardData();
-      }
-    });
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result) {
+          this.loadDashboardData();
+        }
+      });
+    }
   }
 
   // ============================================================================
@@ -266,13 +289,25 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
 
 
   /**
-   * Vraća boju za status sesije
+   * Vraća boju za status sesije (za backward compatibility)
+   * @deprecated Koristi getStatusSeverity umesto toga
    */
   getStatusColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status) {
       case 'open': return 'primary';
       case 'closed': return 'accent';
       default: return 'warn';
+    }
+  }
+
+  /**
+   * Vraća severity za status sesije (PrimeNG)
+   */
+  getStatusSeverity(status: string): 'success' | 'info' | 'warning' | 'danger' {
+    switch (status) {
+      case 'open': return 'success';
+      case 'closed': return 'info';
+      default: return 'warning';
     }
   }
 
@@ -298,14 +333,26 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Get variance icon
+   * Get variance icon (PrimeIcons)
    * @param variance - Variance amount
-   * @returns Icon name
+   * @returns Icon class name
    */
   getVarianceIcon(variance: number): string {
-    if (variance > 0) return 'trending_up';
-    if (variance < 0) return 'trending_down';
-    return 'trending_flat';
+    if (variance > 0) return 'pi-arrow-up';
+    if (variance < 0) return 'pi-arrow-down';
+    return 'pi-minus';
+  }
+
+  /**
+   * Get variance severity (PrimeNG)
+   * @param variance - Variance amount
+   * @returns Severity
+   */
+  getVarianceSeverity(variance: number): 'success' | 'info' | 'warning' | 'danger' {
+    const absVariance = Math.abs(variance);
+    if (absVariance <= 100) return 'success';
+    if (absVariance <= 500) return 'warning';
+    return 'danger';
   }
 
   /**
@@ -313,7 +360,11 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
    * @param message - Error message
    */
   private showError(message: string): void {
-    this.snackBar.open(message, 'Zatvori', { duration: 3000 });
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Greška',
+      detail: message
+    });
   }
 
   /**
@@ -321,7 +372,11 @@ export class CashSessionDashboardComponent implements OnInit, OnDestroy {
    * @param message - Success message
    */
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Uspeh',
+      detail: message
+    });
   }
 
   /**

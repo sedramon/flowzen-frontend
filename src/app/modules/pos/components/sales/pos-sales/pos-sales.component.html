@@ -1,203 +1,263 @@
-<mat-card class="pos-sales-container">
+<p-toast position="top-right"></p-toast>
+
+<p-card class="pos-sales-container">
+  <!-- Header -->
   <div class="pos-header">
     <h2 class="pos-title">
-      <mat-icon color="accent">point_of_sale</mat-icon>
+      <i class="pi pi-shopping-cart"></i>
       POS Prodaja
     </h2>
     <div class="header-actions">
-      <mat-form-field appearance="outline" class="facility-selector">
-        <mat-label>Objekat</mat-label>
-        <mat-select [value]="currentFacility?._id" (selectionChange)="onFacilityChange($event.value)">
-          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
-      <button mat-raised-button color="accent" class="new-sale-btn" (click)="openNewSale()" [disabled]="!currentFacility">
-        <mat-icon>add_shopping_cart</mat-icon>
-        Nova prodaja
-      </button>
+      <p-floatLabel class="facility-selector">
+        <p-select 
+          [(ngModel)]="selectedFacilityId"
+          [options]="facilityOptions"
+          optionLabel="label"
+          optionValue="value"
+          (onChange)="onFacilityChange($event.value)"
+          styleClass="full-width">
+        </p-select>
+        <label>Objekat</label>
+      </p-floatLabel>
+      <p-button 
+        label="Nova prodaja" 
+        icon="pi pi-plus" 
+        (onClick)="openNewSale()" 
+        [disabled]="!currentFacility"
+        severity="accent"
+        [raised]="true"
+        class="new-sale-btn">
+      </p-button>
     </div>
   </div>
 
+  <!-- Loading Spinner -->
   <div *ngIf="loading" class="loading-container">
-    <div class="spinner"></div>
+    <p-progressSpinner></p-progressSpinner>
     <p>Učitavanje podataka...</p>
   </div>
 
+  <!-- Content -->
   <div *ngIf="!loading" class="pos-content">
     <!-- Statistics Cards -->
     <div class="stats-grid">
-      <div class="stat-card">
-        <div class="stat-icon">
-          <mat-icon>shopping_cart</mat-icon>
-        </div>
+      <p-card class="stat-card">
         <div class="stat-content">
-          <div class="stat-label">Ukupno prodaja</div>
-          <div class="stat-value">{{ statistics.totalSales }}</div>
+          <div class="stat-icon">
+            <i class="pi pi-shopping-cart"></i>
+          </div>
+          <div class="stat-details">
+            <div class="stat-label">Ukupno prodaja</div>
+            <div class="stat-value">{{ statistics.totalSales }}</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <mat-icon>today</mat-icon>
-        </div>
+      </p-card>
+      <p-card class="stat-card">
         <div class="stat-content">
-          <div class="stat-label">Današnji promet</div>
-          <div class="stat-value">{{ formatCurrency(statistics.todayRevenue) }}</div>
+          <div class="stat-icon">
+            <i class="pi pi-calendar"></i>
+          </div>
+          <div class="stat-details">
+            <div class="stat-label">Današnji promet</div>
+            <div class="stat-value">{{ formatCurrency(statistics.todayRevenue) }}</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <mat-icon>trending_up</mat-icon>
-        </div>
+      </p-card>
+      <p-card class="stat-card">
         <div class="stat-content">
-          <div class="stat-label">Prosečna vrednost</div>
-          <div class="stat-value">{{ formatCurrency(statistics.averageSale) }}</div>
+          <div class="stat-icon">
+            <i class="pi pi-arrow-up"></i>
+          </div>
+          <div class="stat-details">
+            <div class="stat-label">Prosečna vrednost</div>
+            <div class="stat-value">{{ formatCurrency(statistics.averageSale) }}</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card">
-        <div class="stat-icon">
-          <mat-icon>account_balance_wallet</mat-icon>
-        </div>
+      </p-card>
+      <p-card class="stat-card">
         <div class="stat-content">
-          <div class="stat-label">Ukupan promet</div>
-          <div class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</div>
+          <div class="stat-icon">
+            <i class="pi pi-wallet"></i>
+          </div>
+          <div class="stat-details">
+            <div class="stat-label">Ukupan promet</div>
+            <div class="stat-value">{{ formatCurrency(statistics.totalRevenue) }}</div>
+          </div>
         </div>
-      </div>
+      </p-card>
     </div>
 
     <!-- Sales Table -->
     <div class="sales-section">
       <div class="section-header">
         <h3>Poslednje prodaje</h3>
-        <button mat-button color="primary" (click)="loadSales()">
-          <mat-icon>refresh</mat-icon>
-          Osveži
-        </button>
+        <p-button 
+          label="Osveži" 
+          icon="pi pi-refresh" 
+          (onClick)="loadSales()"
+          severity="secondary"
+          [text]="true">
+        </p-button>
       </div>
       
       <div *ngIf="sales.length === 0" class="no-data">
-        <mat-icon color="accent">shopping_cart</mat-icon>
+        <i class="pi pi-shopping-cart"></i>
         <p>Nema podataka o prodajama</p>
-        <button mat-button color="accent" (click)="openNewSale()">
-          Kreiraj prvu prodaju
-        </button>
+        <p-button 
+          label="Kreiraj prvu prodaju" 
+          icon="pi pi-plus" 
+          (onClick)="openNewSale()"
+          severity="accent"
+          [text]="true">
+        </p-button>
       </div>
 
       <div *ngIf="sales.length > 0" class="table-container">
-        <table mat-table [dataSource]="sales" class="sales-table">
-          <!-- Number Column -->
-          <ng-container matColumnDef="number">
-            <th mat-header-cell *matHeaderCellDef>Broj računa</th>
-            <td mat-cell *matCellDef="let sale">
-              <div class="sale-numbers">
-                <span class="sale-number">{{ sale.number }}</span>
-                <span *ngIf="sale.refund" class="refund-badge">REF</span>
-              </div>
-            </td>
-          </ng-container>
+        <p-table 
+          [value]="sales" 
+          [paginator]="true" 
+          [rows]="10" 
+          [rowsPerPageOptions]="[5, 10, 25, 50]"
+          [tableStyle]="{ 'min-width': '50rem' }"
+          styleClass="p-datatable-sm sales-table">
+          
+          <ng-template pTemplate="header">
+            <tr>
+              <th>Broj računa</th>
+              <th>Datum</th>
+              <th>Klijent</th>
+              <th>Objekat</th>
+              <th>Blagajnik</th>
+              <th>Status</th>
+              <th>Ukupno</th>
+              <th>Fiskalizacija</th>
+              <th class="actions-column">Akcije</th>
+            </tr>
+          </ng-template>
 
-          <!-- Date Column -->
-          <ng-container matColumnDef="date">
-            <th mat-header-cell *matHeaderCellDef>Datum</th>
-            <td mat-cell *matCellDef="let sale">
-              {{ formatDate(sale.date) }}
-            </td>
-          </ng-container>
-
-          <!-- Client Column -->
-          <ng-container matColumnDef="client">
-            <th mat-header-cell *matHeaderCellDef>Klijent</th>
-            <td mat-cell *matCellDef="let sale">
-              <span *ngIf="sale.client">{{ sale.client.firstName }} {{ sale.client.lastName }}</span>
-              <span *ngIf="!sale.client" class="no-client">N/A</span>
-            </td>
-          </ng-container>
-
-          <!-- Facility Column -->
-          <ng-container matColumnDef="facility">
-            <th mat-header-cell *matHeaderCellDef>Objekat</th>
-            <td mat-cell *matCellDef="let sale">
-              {{ sale.facility?.name || 'N/A' }}
-            </td>
-          </ng-container>
-
-          <!-- Cashier Column -->
-          <ng-container matColumnDef="cashier">
-            <th mat-header-cell *matHeaderCellDef>Blagajnik</th>
-            <td mat-cell *matCellDef="let sale">
-              <span *ngIf="sale.cashier">{{ sale.cashier.firstName }} {{ sale.cashier.lastName }}</span>
-              <span *ngIf="!sale.cashier && getSessionOpenedBy(sale)">{{ getSessionOpenedBy(sale) }}</span>
-              <span *ngIf="!sale.cashier && !getSessionOpenedBy(sale)" class="no-cashier">N/A</span>
-            </td>
-          </ng-container>
-
-          <!-- Status Column -->
-          <ng-container matColumnDef="status">
-            <th mat-header-cell *matHeaderCellDef>Status</th>
-            <td mat-cell *matCellDef="let sale">
-              <div class="status-container">
-                <div class="status-row">
-                  <span class="status-label">POS:</span>
-                  <mat-chip [color]="getStatusColor(sale.status)" class="status-chip">
-                    {{ getStatusText(sale.status) }}
-                  </mat-chip>
+          <ng-template pTemplate="body" let-sale>
+            <tr>
+              <!-- Number Column -->
+              <td>
+                <div class="sale-numbers">
+                  <span class="sale-number">{{ sale.number }}</span>
+                  <p-tag *ngIf="sale.refund" value="REF" severity="warning" [rounded]="true"></p-tag>
                 </div>
-                <div *ngIf="sale.refund" class="status-row refund-row">
-                  <span class="status-label">REF:</span>
-                  <mat-chip [color]="getStatusColor(sale.refund.status)" class="status-chip refund-chip">
-                    {{ getStatusText(sale.refund.status) }}
-                  </mat-chip>
+              </td>
+
+              <!-- Date Column -->
+              <td>{{ formatDate(sale.date) }}</td>
+
+              <!-- Client Column -->
+              <td>
+                <span *ngIf="sale.client">{{ sale.client.firstName }} {{ sale.client.lastName }}</span>
+                <span *ngIf="!sale.client" class="no-client">N/A</span>
+              </td>
+
+              <!-- Facility Column -->
+              <td>{{ sale.facility?.name || 'N/A' }}</td>
+
+              <!-- Cashier Column -->
+              <td>
+                <span *ngIf="sale.cashier">{{ sale.cashier.firstName }} {{ sale.cashier.lastName }}</span>
+                <span *ngIf="!sale.cashier && getSessionOpenedBy(sale)">{{ getSessionOpenedBy(sale) }}</span>
+                <span *ngIf="!sale.cashier && !getSessionOpenedBy(sale)" class="no-cashier">N/A</span>
+              </td>
+
+              <!-- Status Column -->
+              <td>
+                <div class="status-container">
+                  <div class="status-row">
+                    <span class="status-label">POS:</span>
+                    <p-tag 
+                      [value]="getStatusText(sale.status)" 
+                      [severity]="getStatusSeverity(sale.status)"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
+                  <div *ngIf="sale.refund" class="status-row refund-row">
+                    <span class="status-label">REF:</span>
+                    <p-tag 
+                      [value]="getStatusText(sale.refund.status)" 
+                      [severity]="getStatusSeverity(sale.refund.status)"
+                      [rounded]="true">
+                    </p-tag>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </ng-container>
+              </td>
 
-          <!-- Total Column -->
-          <ng-container matColumnDef="total">
-            <th mat-header-cell *matHeaderCellDef>Ukupno</th>
-            <td mat-cell *matCellDef="let sale">
-              <span class="total-amount">{{ formatCurrency(sale.summary?.grandTotal || 0) }}</span>
-            </td>
-          </ng-container>
+              <!-- Total Column -->
+              <td>
+                <span class="total-amount">{{ formatCurrency(sale.summary?.grandTotal || 0) }}</span>
+              </td>
 
-          <!-- Fiscal Column -->
-          <ng-container matColumnDef="fiscal">
-            <th mat-header-cell *matHeaderCellDef>Fiskalizacija</th>
-            <td mat-cell *matCellDef="let sale">
-              <mat-chip [color]="getFiscalColor(sale.fiscal)">
-                {{ getFiscalStatus(sale.fiscal) }}
-              </mat-chip>
-            </td>
-          </ng-container>
+              <!-- Fiscal Column -->
+              <td>
+                <p-tag 
+                  [value]="getFiscalStatus(sale.fiscal)" 
+                  [severity]="getFiscalSeverity(sale.fiscal)"
+                  [rounded]="true">
+                </p-tag>
+              </td>
 
-          <!-- Actions Column -->
-          <ng-container matColumnDef="actions">
-            <th mat-header-cell *matHeaderCellDef>Akcije</th>
-            <td mat-cell *matCellDef="let sale">
-              <div class="action-buttons">
-                <button mat-icon-button (click)="viewSale(sale)" matTooltip="Pregled">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-                <button mat-icon-button (click)="printReceipt(sale)" matTooltip="Štampaj račun">
-                  <mat-icon>print</mat-icon>
-                </button>
-                <button mat-icon-button (click)="refundSale(sale)" matTooltip="Povraćaj" 
-                  [disabled]="sale.status === 'refunded' || sale.fiscal?.status !== 'success' || sale.refund">
-                  <mat-icon>undo</mat-icon>
-                </button>
-                <button mat-icon-button (click)="fiscalizeSale(sale)" matTooltip="Fiskalizuj" 
-                  [disabled]="sale.fiscal?.status === 'success' || sale.status === 'refunded'">
-                  <mat-icon>receipt_long</mat-icon>
-                </button>
-              </div>
-            </td>
-          </ng-container>
+              <!-- Actions Column -->
+              <td class="actions-column">
+                <div class="action-buttons">
+                  <p-button 
+                    icon="pi pi-eye" 
+                    [text]="true"
+                    [rounded]="true"
+                    severity="info"
+                    pTooltip="Pregled"
+                    tooltipPosition="top"
+                    (onClick)="viewSale(sale)">
+                  </p-button>
+                  <p-button 
+                    icon="pi pi-print" 
+                    [text]="true"
+                    [rounded]="true"
+                    severity="secondary"
+                    pTooltip="Štampaj račun"
+                    tooltipPosition="top"
+                    (onClick)="printReceipt(sale)">
+                  </p-button>
+                  <p-button 
+                    icon="pi pi-undo" 
+                    [text]="true"
+                    [rounded]="true"
+                    severity="warning"
+                    pTooltip="Povraćaj"
+                    tooltipPosition="top"
+                    [disabled]="sale.status === 'refunded' || sale.fiscal?.status !== 'success' || sale.refund"
+                    (onClick)="refundSale(sale)">
+                  </p-button>
+                  <p-button 
+                    icon="pi pi-receipt" 
+                    [text]="true"
+                    [rounded]="true"
+                    severity="success"
+                    pTooltip="Fiskalizuj"
+                    tooltipPosition="top"
+                    [disabled]="sale.fiscal?.status === 'success' || sale.status === 'refunded'"
+                    (onClick)="fiscalizeSale(sale)">
+                  </p-button>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
 
-          <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-          <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-        </table>
+          <ng-template pTemplate="emptymessage">
+            <tr>
+              <td colspan="9" class="empty-message">
+                <div class="empty-state">
+                  <i class="pi pi-shopping-cart"></i>
+                  <p>Nema podataka o prodajama</p>
+                </div>
+              </td>
+            </tr>
+          </ng-template>
+        </p-table>
       </div>
     </div>
   </div>
-</mat-card>
+</p-card>

@@ -1,20 +1,18 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatSortModule } from '@angular/material/sort';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { TableModule } from 'primeng/table';
+import { PaginatorModule } from 'primeng/paginator';
+import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { Subject, takeUntil } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { PosService } from '../../../services/pos.service';
 import { DailyCashReport } from '../../../../../models/CashSession';
@@ -25,21 +23,20 @@ import { Facility } from '../../../../../models/Facility';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatSortModule,
+    CardModule,
+    ButtonModule,
+    TagModule,
+    ProgressSpinnerModule,
+    FloatLabelModule,
+    SelectModule,
+    DatePickerModule,
+    TableModule,
+    PaginatorModule,
+    TooltipModule,
+    ToastModule,
     ReactiveFormsModule
   ],
+  providers: [MessageService],
   templateUrl: './cash-reports.component.html',
   styleUrls: ['./cash-reports.component.scss']
 })
@@ -49,6 +46,7 @@ export class CashReportsComponent implements OnInit, OnDestroy {
   // Data
   dailyReports: DailyCashReport[] = [];
   facilities: Facility[] = [];
+  facilityOptions: { label: string; value: string }[] = [];
   
   // Loading states
   loading = true;
@@ -56,19 +54,6 @@ export class CashReportsComponent implements OnInit, OnDestroy {
   
   // Form
   reportForm: FormGroup;
-  
-  // Table data
-  displayedColumns: string[] = [
-    'date', 
-    'facility', 
-    'sessionCount', 
-    'totalOpeningFloat', 
-    'totalExpectedCash', 
-    'totalActualCash', 
-    'totalVariance', 
-    'variancePercentage',
-    'actions'
-  ];
 
   // Cache for total stats to avoid repeated calculations
   private _cachedTotalStats: any = null;
@@ -76,7 +61,7 @@ export class CashReportsComponent implements OnInit, OnDestroy {
 
   constructor(
     private posService: PosService,
-    private snackBar: MatSnackBar,
+    private messageService: MessageService,
     private fb: FormBuilder
   ) {
     this.reportForm = this.fb.group({
@@ -106,6 +91,10 @@ export class CashReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (facilities) => {
           this.facilities = facilities;
+          this.facilityOptions = [
+            { label: 'Sve lokacije', value: '' },
+            ...facilities.map(f => ({ label: f.name, value: f._id || '' }))
+          ];
           this.loadReports().then(reports => {
             this.dailyReports = reports;
             this.loading = false;
@@ -115,13 +104,13 @@ export class CashReportsComponent implements OnInit, OnDestroy {
             this._lastReportsHash = '';
           }).catch(error => {
             console.error('Error loading reports:', error);
-            this.snackBar.open('Greška pri učitavanju izveštaja', 'Zatvori', { duration: 3000 });
+            this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri učitavanju izveštaja', life: 3000 });
             this.loading = false;
           });
         },
         error: (error) => {
           console.error('Error loading facilities:', error);
-          this.snackBar.open('Greška pri učitavanju objekata', 'Zatvori', { duration: 3000 });
+          this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri učitavanju objekata', life: 3000 });
           this.loading = false;
         }
       });
@@ -169,10 +158,10 @@ export class CashReportsComponent implements OnInit, OnDestroy {
       this._cachedTotalStats = null;
       this._lastReportsHash = '';
       
-      this.snackBar.open('Izveštaj uspešno generisan', 'Zatvori', { duration: 2000 });
+      this.messageService.add({ severity: 'success', summary: 'Uspešno', detail: 'Izveštaj uspešno generisan', life: 2000 });
     }).catch(error => {
       console.error('Error generating report:', error);
-      this.snackBar.open('Greška pri generisanju izveštaja', 'Zatvori', { duration: 3000 });
+      this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri generisanju izveštaja', life: 3000 });
       this.reportLoading = false;
     });
   }
@@ -182,12 +171,12 @@ export class CashReportsComponent implements OnInit, OnDestroy {
    */
   exportReport(): void {
     if (this.dailyReports.length === 0) {
-      this.snackBar.open('Nema podataka za eksport', 'Zatvori', { duration: 3000 });
+      this.messageService.add({ severity: 'warn', summary: 'Upozorenje', detail: 'Nema podataka za eksport', life: 3000 });
       return;
     }
 
     // TODO: Implement export functionality
-    this.snackBar.open('Eksport funkcionalnost će biti implementirana', 'Zatvori', { duration: 2000 });
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Eksport funkcionalnost će biti implementirana', life: 2000 });
   }
 
   /**
@@ -214,22 +203,22 @@ export class CashReportsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća boju za variance
+   * Vraća boju za variance (PrimeNG severity)
    */
-  getVarianceColor(variance: number): 'primary' | 'accent' | 'warn' {
+  getVarianceColor(variance: number): 'success' | 'info' | 'warn' | 'danger' {
     const absVariance = Math.abs(variance);
-    if (absVariance <= 100) return 'primary';
-    if (absVariance <= 500) return 'accent';
+    if (absVariance <= 100) return 'success';
+    if (absVariance <= 500) return 'info';
     return 'warn';
   }
 
   /**
-   * Vraća ikonu za variance
+   * Vraća ikonu za variance (PrimeIcons)
    */
   getVarianceIcon(variance: number): string {
-    if (variance > 0) return 'trending_up';
-    if (variance < 0) return 'trending_down';
-    return 'trending_flat';
+    if (variance > 0) return 'pi-arrow-up-right';
+    if (variance < 0) return 'pi-arrow-down-left';
+    return 'pi-minus';
   }
 
   /**

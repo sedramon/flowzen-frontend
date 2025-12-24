@@ -1,3 +1,52 @@
+@use "sass:color";
+
+// Primary boja za cash analytics (umesto zelene)
+$analytics-primary-color: #8c0055;
+
+// Override PrimeNG default zelene boje
+::ng-deep {
+  .cash-analytics {
+    // Override PrimeNG buttons
+    .p-button.p-button-primary,
+    .p-button[severity="primary"],
+    .p-button.p-button-success,
+    .p-button[severity="success"],
+    .p-button.p-button-accent,
+    .p-button[severity="accent"],
+    button.p-button-primary,
+    button.p-button-success,
+    button.p-button-accent {
+      background: $analytics-primary-color !important;
+      border-color: $analytics-primary-color !important;
+      color: white !important;
+      
+      &:hover:not(:disabled) {
+        background: color.adjust($analytics-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($analytics-primary-color, $lightness: -5%) !important;
+      }
+      
+      .p-button-label,
+      .p-button-icon {
+        color: white !important;
+      }
+    }
+    
+    // Override PrimeNG success tags
+    .p-tag.p-tag-success,
+    .p-tag[severity="success"],
+    .p-tag.severity-success {
+      background: $analytics-primary-color !important;
+      color: white !important;
+      border-color: $analytics-primary-color !important;
+    }
+    
+    // Override PrimeNG CSS varijable
+    --p-green-500: #{$analytics-primary-color};
+    --p-green-600: #{$analytics-primary-color};
+    --p-green-700: #{$analytics-primary-color};
+  }
+}
+
 @keyframes gradientPan {
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
@@ -11,7 +60,7 @@
 
 // Trend color classes
 .primary {
-  color: #4caf50 !important;
+  color: $analytics-primary-color !important; // Primary boja iz teme
 }
 
 .accent {

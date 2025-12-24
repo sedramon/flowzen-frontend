@@ -118,9 +118,9 @@ mat-card-actions {
 }
 
 button[mat-button] {
-  color: #2c3e50;
-  font-weight: 400;
-  font-size: 13px;
+  color: #667eea !important;
+  font-weight: 500;
+  font-size: 14px;
   padding: 4px 8px;
   border-radius: 4px;
   transition: all 0.3s ease;
@@ -129,6 +129,13 @@ button[mat-button] {
   min-height: auto;
   line-height: 1.2;
   animation: fadeInButton 0.5s ease-out 1s both;
+  
+  ::ng-deep .mat-mdc-button-persistent-ripple,
+  ::ng-deep .mat-mdc-button-ripple,
+  ::ng-deep span,
+  ::ng-deep .mat-icon {
+    color: #667eea !important;
+  }
 }
 
 @keyframes fadeInButton {
@@ -143,9 +150,27 @@ button[mat-button] {
 }
 
 button[mat-button]:hover {
-  background: rgba(44, 62, 80, 0.1);
-  color: #34495e;
+  background: rgba(102, 126, 234, 0.1);
+  color: #5568d3 !important;
   transform: translateX(5px);
+  
+  ::ng-deep .mat-mdc-button-persistent-ripple,
+  ::ng-deep .mat-mdc-button-ripple,
+  ::ng-deep span,
+  ::ng-deep .mat-icon {
+    color: #5568d3 !important;
+  }
+}
+
+button[mat-button]:disabled {
+  color: rgba(102, 126, 234, 0.5) !important;
+  
+  ::ng-deep .mat-mdc-button-persistent-ripple,
+  ::ng-deep .mat-mdc-button-ripple,
+  ::ng-deep span,
+  ::ng-deep .mat-icon {
+    color: rgba(102, 126, 234, 0.5) !important;
+  }
 }
 
 // Animacija za prelazak nazad na admin login

@@ -1,14 +1,15 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
+import { SelectModule } from 'primeng/select';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CardModule } from 'primeng/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { Subject, takeUntil } from 'rxjs';
 import { PosService } from '../../../services/pos.service';
 import { Facility } from '../../../../../models/Facility';
@@ -23,13 +24,13 @@ export interface OpenSessionDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
+    FloatLabelModule,
+    InputNumberModule,
+    TextareaModule,
+    SelectModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    CardModule,
     ReactiveFormsModule
   ],
   templateUrl: './open-session-dialog.component.html',
@@ -40,13 +41,23 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
   processing = false;
   private readonly destroy$ = new Subject<void>();
 
+  facilityOptions: any[] = [];
+
   constructor(
-    private readonly dialogRef: MatDialogRef<OpenSessionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: OpenSessionDialogData,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
     private readonly fb: FormBuilder,
     private readonly posService: PosService,
-    private readonly snackBar: MatSnackBar
+    private readonly messageService: MessageService
   ) {
+    const data = this.config.data;
+    
+    // Prepare facility options for PrimeNG select
+    this.facilityOptions = (data?.facilities || []).map((f: Facility) => ({
+      label: f.name,
+      value: f._id
+    }));
+    
     this.openSessionForm = this.fb.group({
       facility: ['', Validators.required],
       openingFloat: [0, [Validators.required, Validators.min(0)]],
@@ -55,10 +66,11 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const data = this.config.data;
     // Set default facility if only one available
-    if (this.data.facilities.length === 1) {
+    if (data?.facilities?.length === 1) {
         this.openSessionForm.patchValue({
-          facility: this.data.facilities[0]._id
+          facility: data.facilities[0]._id
         });
     }
   }
@@ -73,7 +85,11 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
    */
   openSession(): void {
     if (this.openSessionForm.invalid) {
-      this.snackBar.open('Molimo popunite sva obavezna polja', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validacija',
+        detail: 'Molimo popunite sva obavezna polja'
+      });
       return;
     }
 
@@ -90,12 +106,20 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (result) => {
-          this.snackBar.open('Sesija uspešno otvorena', 'Zatvori', { duration: 2000 });
-          this.dialogRef.close(result);
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Uspeh',
+            detail: 'Sesija uspešno otvorena'
+          });
+          this.ref.close(result);
         },
         error: (error) => {
           console.error('Error opening session:', error);
-          this.snackBar.open('Greška pri otvaranju sesije', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri otvaranju sesije'
+          });
           this.processing = false;
         }
       });
@@ -105,7 +129,7 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
    * Zatvara dialog
    */
   cancel(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 
   /**
@@ -139,7 +163,8 @@ export class OpenSessionDialogComponent implements OnInit, OnDestroy {
    */
   getSelectedFacilityName(): string {
     const facilityId = this.openSessionForm.get('facility')?.value;
-    const facility = this.data.facilities.find(f => f._id === facilityId);
+    const data = this.config.data;
+    const facility = data?.facilities?.find((f: Facility) => f._id === facilityId);
     return facility?.name || 'N/A';
   }
 }

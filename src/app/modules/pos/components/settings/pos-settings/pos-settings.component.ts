@@ -1,17 +1,19 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatSelectModule } from '@angular/material/select';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TabsModule } from 'primeng/tabs';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputTextModule } from 'primeng/inputtext';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { SelectModule } from 'primeng/select';
+import { CheckboxModule } from 'primeng/checkbox';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TextareaModule } from 'primeng/textarea';
+import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { PosService } from '../../../services/pos.service';
 import { AuthService } from '../../../../../core/services/auth.service';
 import { Facility } from '../../../../../models/Facility';
@@ -49,21 +51,24 @@ interface PosSettings {
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatSelectModule,
-    MatCheckboxModule,
-    MatSlideToggleModule,
-    MatTabsModule,
-    MatTooltipModule,
-    ReactiveFormsModule
+    CardModule,
+    ButtonModule,
+    TabsModule,
+    FloatLabelModule,
+    InputTextModule,
+    InputNumberModule,
+    SelectModule,
+    CheckboxModule,
+    TextareaModule,
+    TooltipModule,
+    ToastModule,
+    ProgressSpinnerModule,
+    ReactiveFormsModule,
+    FormsModule
   ],
   templateUrl: './pos-settings.component.html',
   styleUrl: './pos-settings.component.scss',
-  providers: [AuthService, PosService]
+  providers: [AuthService, PosService, MessageService]
 })
 export class PosSettingsComponent implements OnInit {
   settingsForm!: FormGroup;
@@ -71,6 +76,7 @@ export class PosSettingsComponent implements OnInit {
   saving = false;
   currentFacility: Facility | null = null;
   facilities: Facility[] = [];
+  selectedTab: string = 'payment';
 
   // Payment methods configuration
   paymentMethodsConfig = [
@@ -89,11 +95,13 @@ export class PosSettingsComponent implements OnInit {
     { value: 'cloud', label: 'Cloud servis' }
   ];
 
+  facilityOptions: { label: string; value: string }[] = [];
+
   constructor(
     private fb: FormBuilder,
     private posService: PosService,
     @Inject(AuthService) private authService: AuthService,
-    private snackBar: MatSnackBar
+    private messageService: MessageService
   ) {
     this.initializeForm();
   }
@@ -111,7 +119,7 @@ export class PosSettingsComponent implements OnInit {
     const paymentMethodsGroup: any = {};
     this.paymentMethodsConfig.forEach(method => {
       paymentMethodsGroup[method.key] = this.fb.group({
-        enabled: [method.defaultEnabled],
+        enabled: [Boolean(method.defaultEnabled)],
         label: [method.defaultLabel]
       });
     });
@@ -153,6 +161,7 @@ export class PosSettingsComponent implements OnInit {
       .subscribe({
       next: (facilities) => {
         this.facilities = facilities;
+        this.facilityOptions = facilities.map(f => ({ label: f.name, value: f._id || '' }));
         if (facilities.length > 0) {
           this.currentFacility = facilities[0];
           this.settingsForm.patchValue({ facility: facilities[0]._id });
@@ -163,7 +172,7 @@ export class PosSettingsComponent implements OnInit {
       },
       error: (error) => {
         console.error('Error loading facilities:', error);
-        this.snackBar.open('Greška pri učitavanju objekata', 'Zatvori', { duration: 3000 });
+        this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri učitavanju objekata', life: 3000 });
         this.loading = false;
       }
     });
@@ -194,16 +203,20 @@ export class PosSettingsComponent implements OnInit {
           }
           
           // Prepare form data with proper structure
+          // Ensure payment methods have boolean enabled values
+          const backendPaymentMethods = settings.paymentMethods || {};
+          const paymentMethods: any = {};
+          this.paymentMethodsConfig.forEach(method => {
+            const backendMethod = backendPaymentMethods[method.key];
+            paymentMethods[method.key] = {
+              enabled: backendMethod?.enabled === true || backendMethod?.enabled === 'true' || (backendMethod?.enabled === undefined && method.defaultEnabled),
+              label: backendMethod?.label || method.defaultLabel
+            };
+          });
+
           const formData = {
             facility: settings.facility || this.currentFacility?._id || '',
-            paymentMethods: settings.paymentMethods || {
-              cash: { enabled: true, label: 'Gotovina' },
-              card: { enabled: true, label: 'Kartica' },
-              voucher: { enabled: false, label: 'Vaučer' },
-              gift: { enabled: false, label: 'Poklon bon' },
-              bank: { enabled: false, label: 'Bankovni transfer' },
-              other: { enabled: false, label: 'Ostalo' }
-            },
+            paymentMethods: paymentMethods,
             defaultTaxRate: settings.defaultTaxRate || 20,
             maxDiscountPercent: settings.maxDiscountPercent || 50,
             allowNegativePrice: settings.allowNegativePrice || false,
@@ -222,6 +235,14 @@ export class PosSettingsComponent implements OnInit {
           
           this.settingsForm.patchValue(formData);
           
+          // Ensure all payment method enabled controls are boolean
+          this.paymentMethodsConfig.forEach(method => {
+            const enabledControl = this.getPaymentMethodControl(method.key, 'enabled');
+            if (enabledControl && typeof enabledControl.value !== 'boolean') {
+              enabledControl.setValue(Boolean(enabledControl.value));
+            }
+          });
+          
           // Mark form as pristine after loading (not dirty)
           this.settingsForm.markAsPristine();
           
@@ -229,7 +250,7 @@ export class PosSettingsComponent implements OnInit {
         },
         error: (error) => {
           console.error('Error loading settings:', error);
-          this.snackBar.open('Greška pri učitavanju postavki', 'Zatvori', { duration: 3000 });
+          this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri učitavanju postavki', life: 3000 });
           
           // Fallback to default settings
           const defaultSettings = {
@@ -268,7 +289,8 @@ export class PosSettingsComponent implements OnInit {
   /**
    * Handler za promenu objekta
    */
-  onFacilityChange(facilityId: string): void {
+  onFacilityChange(event: any): void {
+    const facilityId = event.value || event;
     this.currentFacility = this.facilities.find(f => f._id === facilityId) || null;
     if (this.currentFacility) {
       this.loadSettings();
@@ -280,12 +302,12 @@ export class PosSettingsComponent implements OnInit {
    */
   saveSettings(): void {
     if (this.settingsForm.invalid) {
-      this.snackBar.open('Molimo popunite sva obavezna polja', 'Zatvori', { duration: 3000 });
+      this.messageService.add({ severity: 'warn', summary: 'Upozorenje', detail: 'Molimo popunite sva obavezna polja', life: 3000 });
       return;
     }
 
     if (!this.currentFacility) {
-      this.snackBar.open('Izaberite objekat', 'Zatvori', { duration: 3000 });
+      this.messageService.add({ severity: 'warn', summary: 'Upozorenje', detail: 'Izaberite objekat', life: 3000 });
       return;
     }
 
@@ -314,12 +336,13 @@ export class PosSettingsComponent implements OnInit {
     this.posService.updateSettings(settingsData)
       .subscribe({
         next: (response) => {
-          this.snackBar.open('Podešavanja uspešno sačuvana', 'Zatvori', { duration: 2000 });
+          this.messageService.add({ severity: 'success', summary: 'Uspeh', detail: 'Podešavanja uspešno sačuvana', life: 2000 });
+          this.settingsForm.markAsPristine();
           this.saving = false;
         },
         error: (error) => {
           console.error('Error saving settings:', error);
-          this.snackBar.open('Greška pri čuvanju podešavanja', 'Zatvori', { duration: 3000 });
+          this.messageService.add({ severity: 'error', summary: 'Greška', detail: 'Greška pri čuvanju podešavanja', life: 3000 });
           this.saving = false;
         }
       });
@@ -356,8 +379,9 @@ export class PosSettingsComponent implements OnInit {
     };
     
     this.settingsForm.patchValue(defaultSettings);
+    this.settingsForm.markAsDirty();
 
-    this.snackBar.open('Podešavanja vraćena na podrazumevano', 'Zatvori', { duration: 2000 });
+    this.messageService.add({ severity: 'info', summary: 'Info', detail: 'Podešavanja vraćena na podrazumevano', life: 2000 });
   }
 
   /**
@@ -369,6 +393,27 @@ export class PosSettingsComponent implements OnInit {
 
   getPaymentMethodControl(key: string, field: string) {
     return this.settingsForm.get(`paymentMethods.${key}.${field}`);
+  }
+
+  /**
+   * Get payment method enabled value as boolean
+   */
+  getPaymentMethodEnabled(key: string): boolean {
+    const control = this.getPaymentMethodControl(key, 'enabled');
+    return control ? Boolean(control.value) : false;
+  }
+
+  /**
+   * Toggle payment method enabled status (for label click)
+   */
+  togglePaymentMethod(methodKey: string): void {
+    const enabledControl = this.getPaymentMethodControl(methodKey, 'enabled');
+    if (enabledControl) {
+      // Ensure we're working with boolean value
+      const currentValue = Boolean(enabledControl.value);
+      enabledControl.setValue(!currentValue);
+      enabledControl.markAsDirty();
+    }
   }
 
   getFiscalProviders() {

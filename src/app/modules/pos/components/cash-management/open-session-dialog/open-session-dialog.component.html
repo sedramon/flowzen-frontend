@@ -1,65 +1,64 @@
 <div class="open-session-dialog">
-  <!-- Dialog Header -->
-  <div class="dialog-header">
-    <div class="header-content">
-      <mat-icon class="header-icon">account_balance_wallet</mat-icon>
-      <h2 class="dialog-title">Otvaranje Cash Sesije</h2>
-    </div>
-  </div>
-
   <!-- Dialog Content -->
   <div class="dialog-content">
     <form [formGroup]="openSessionForm" (ngSubmit)="openSession()">
       
       <!-- Facility Selection -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Lokacija</mat-label>
-        <mat-select formControlName="facility" required>
-            <mat-option *ngFor="let facility of data.facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-        <mat-icon matSuffix>location_on</mat-icon>
-        <mat-error *ngIf="openSessionForm.get('facility')?.hasError('required')">
-          {{ getErrorMessage('facility') }}
-        </mat-error>
-      </mat-form-field>
+      <p-floatLabel class="full-width">
+        <p-select 
+          formControlName="facility" 
+          inputId="facility"
+          [options]="facilityOptions"
+          optionLabel="label"
+          optionValue="value"
+          styleClass="full-width">
+        </p-select>
+        <label for="facility">Lokacija</label>
+      </p-floatLabel>
+      <small class="p-error" *ngIf="openSessionForm.get('facility')?.hasError('required') && openSessionForm.get('facility')?.touched">
+        {{ getErrorMessage('facility') }}
+      </small>
 
       <!-- Opening Float -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Početni Float (RSD)</mat-label>
-        <input 
-          matInput 
-          type="number" 
+      <p-floatLabel class="full-width">
+        <p-inputNumber 
           formControlName="openingFloat" 
-          placeholder="0"
-          min="0"
-          step="1">
-        <mat-icon matSuffix>attach_money</mat-icon>
-        <mat-error *ngIf="openSessionForm.get('openingFloat')?.hasError('required')">
-          {{ getErrorMessage('openingFloat') }}
-        </mat-error>
-        <mat-error *ngIf="openSessionForm.get('openingFloat')?.hasError('min')">
-          {{ getErrorMessage('openingFloat') }}
-        </mat-error>
-      </mat-form-field>
+          inputId="openingFloat"
+          [min]="0"
+          [step]="1"
+          mode="decimal"
+          [minFractionDigits]="0"
+          [maxFractionDigits]="0"
+          styleClass="full-width">
+        </p-inputNumber>
+        <label for="openingFloat">Početni Float (RSD)</label>
+      </p-floatLabel>
+      <small class="p-error" *ngIf="openSessionForm.get('openingFloat')?.hasError('required') && openSessionForm.get('openingFloat')?.touched">
+        {{ getErrorMessage('openingFloat') }}
+      </small>
+      <small class="p-error" *ngIf="openSessionForm.get('openingFloat')?.hasError('min') && openSessionForm.get('openingFloat')?.touched">
+        {{ getErrorMessage('openingFloat') }}
+      </small>
 
       <!-- Note -->
-      <mat-form-field appearance="outline" class="full-width">
-        <mat-label>Napomena (opciono)</mat-label>
-        <textarea 
-          matInput 
+      <p-floatLabel class="full-width">
+          <textarea 
+          pInputTextarea
           formControlName="note" 
+          id="note"
           placeholder="Dodatne napomene..."
-          rows="3">
+          [rows]="3"
+          class="full-width">
         </textarea>
-        <mat-icon matSuffix>note</mat-icon>
-      </mat-form-field>
+        <label for="note">Napomena (opciono)</label>
+      </p-floatLabel>
 
       <!-- Preview -->
       <div class="preview-section" *ngIf="openSessionForm.get('openingFloat')?.value">
-        <div class="preview-card">
-          <h4>Pregled Sesije</h4>
+        <p-card>
+          <ng-template pTemplate="header">
+            <h4>Pregled Sesije</h4>
+          </ng-template>
           <div class="preview-details">
             <div class="preview-row">
               <span class="label">Lokacija:</span>
@@ -76,33 +75,29 @@
               <span class="value">{{ openSessionForm.get('note')?.value }}</span>
             </div>
           </div>
-        </div>
+        </p-card>
       </div>
     </form>
   </div>
 
   <!-- Dialog Actions -->
   <div class="dialog-actions">
-    <button 
-      mat-button 
-      type="button" 
-      (click)="cancel()"
+    <p-button 
+      label="Otkaži" 
+      icon="pi pi-times" 
+      (onClick)="cancel()"
       [disabled]="processing"
-      class="cancel-button">
-      <mat-icon>close</mat-icon>
-      Otkaži
-    </button>
+      severity="secondary"
+      [text]="true">
+    </p-button>
     
-    <button 
-      mat-raised-button 
-      color="primary" 
-      type="submit"
-      (click)="openSession()"
+    <p-button 
+      label="{{ processing ? 'Otvaranje...' : 'Otvori Sesiju' }}" 
+      icon="pi pi-wallet" 
+      (onClick)="openSession()"
       [disabled]="openSessionForm.invalid || processing"
-      class="action-button">
-      <mat-spinner *ngIf="processing" diameter="20" class="button-spinner"></mat-spinner>
-      <mat-icon *ngIf="!processing">account_balance_wallet</mat-icon>
-      {{ processing ? 'Otvaranje...' : 'Otvori Sesiju' }}
-    </button>
+      [loading]="processing"
+      severity="primary">
+    </p-button>
   </div>
 </div>

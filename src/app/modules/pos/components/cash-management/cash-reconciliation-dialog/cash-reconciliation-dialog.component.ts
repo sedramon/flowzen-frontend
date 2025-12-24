@@ -1,12 +1,10 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CardModule } from 'primeng/card';
+import { MessageService } from 'primeng/api';
 import { CashSession, CashReconciliationResult } from '../../../../../models/CashSession';
 import { PosService } from '../../../services/pos.service';
 
@@ -19,12 +17,9 @@ export interface CashReconciliationDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatCardModule,
-    MatChipsModule
+    ButtonModule,
+    ProgressSpinnerModule,
+    CardModule
   ],
   templateUrl: './cash-reconciliation-dialog.component.html',
   styleUrls: ['./cash-reconciliation-dialog.component.scss']
@@ -34,11 +29,15 @@ export class CashReconciliationDialogComponent implements OnInit {
   reconciliationData: CashReconciliationResult | null = null;
 
   constructor(
-    private dialogRef: MatDialogRef<CashReconciliationDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CashReconciliationDialogData,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
     private posService: PosService,
-    private snackBar: MatSnackBar
+    private messageService: MessageService
   ) {}
+
+  get data() {
+    return this.config.data;
+  }
 
   ngOnInit(): void {
     this.loadReconciliationData();
@@ -49,15 +48,20 @@ export class CashReconciliationDialogComponent implements OnInit {
    */
   private loadReconciliationData(): void {
     this.loading = true;
+    const data = this.config.data;
 
-    this.posService.reconcileSession(this.data.session.id).subscribe({
+    this.posService.reconcileSession(data.session.id).subscribe({
       next: (result) => {
         this.reconciliationData = result;
         this.loading = false;
       },
       error: (error) => {
         console.error('Error loading reconciliation data:', error);
-        this.snackBar.open('Greška pri učitavanju podataka za usklađivanje', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri učitavanju podataka za usklađivanje'
+        });
         this.loading = false;
       }
     });
@@ -67,7 +71,7 @@ export class CashReconciliationDialogComponent implements OnInit {
    * Zatvara dialog
    */
   close(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 
   /**
@@ -93,12 +97,22 @@ export class CashReconciliationDialogComponent implements OnInit {
   }
 
   /**
-   * Vraća ikonu za variance
+   * Vraća ikonu za variance (PrimeIcons)
    */
   getVarianceIcon(variance: number): string {
-    if (variance > 0) return 'trending_up';
-    if (variance < 0) return 'trending_down';
-    return 'trending_flat';
+    if (variance > 0) return 'pi-arrow-up';
+    if (variance < 0) return 'pi-arrow-down';
+    return 'pi-minus';
+  }
+
+  /**
+   * Vraća severity za variance (PrimeNG)
+   */
+  getVarianceSeverity(variance: number): 'success' | 'warning' | 'danger' {
+    const absVariance = Math.abs(variance);
+    if (absVariance <= 100) return 'success';
+    if (absVariance <= 500) return 'warning';
+    return 'danger';
   }
 
   /**
@@ -114,16 +128,28 @@ export class CashReconciliationDialogComponent implements OnInit {
   }
 
   /**
-   * Vraća ikonu za payment method
+   * Vraća ikonu za payment method (PrimeIcons)
    */
   getPaymentMethodIcon(method: string): string {
     switch (method) {
-      case 'cash': return 'attach_money';
-      case 'card': return 'credit_card';
-      case 'voucher': return 'confirmation_number';
-      case 'gift': return 'card_giftcard';
-      case 'bank': return 'account_balance';
-      default: return 'payment';
+      case 'cash': return 'pi-dollar';
+      case 'card': return 'pi-credit-card';
+      case 'voucher': return 'pi-ticket';
+      case 'gift': return 'pi-gift';
+      case 'bank': return 'pi-building';
+      default: return 'pi-money-bill';
+    }
+  }
+
+  /**
+   * Vraća severity za payment method (PrimeNG)
+   */
+  getPaymentMethodSeverity(method: string): 'success' | 'info' | 'warning' | 'danger' {
+    switch (method) {
+      case 'cash': return 'success';
+      case 'card': return 'info';
+      case 'voucher': return 'warning';
+      default: return 'info';
     }
   }
 

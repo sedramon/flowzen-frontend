@@ -1,22 +1,20 @@
 import { Component, OnInit, Inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTableModule } from '@angular/material/table';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatDialogModule } from '@angular/material/dialog';
-import { FormControl, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatDialog } from '@angular/material/dialog';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+import { TooltipModule } from 'primeng/tooltip';
+import { DatePickerModule } from 'primeng/datepicker';
+import { InputTextModule } from 'primeng/inputtext';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TabsModule } from 'primeng/tabs';
+import { TagModule } from 'primeng/tag';
+import { ToastModule } from 'primeng/toast';
+import { FormsModule, FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MessageService } from 'primeng/api';
+import { DialogService } from 'primeng/dynamicdialog';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { PosService } from '../../../services/pos.service';
 import { AuthService } from '../../../../../core/services/auth.service';
@@ -65,25 +63,24 @@ interface ZReport {
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTableModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatTooltipModule,
-    MatDatepickerModule,
-    MatInputModule,
-    MatNativeDateModule,
-    MatProgressSpinnerModule,
-    MatTabsModule,
-    MatChipsModule,
-    MatDialogModule,
+    CardModule,
+    ButtonModule,
+    TableModule,
+    FloatLabelModule,
+    SelectModule,
+    TooltipModule,
+    DatePickerModule,
+    InputTextModule,
+    ProgressSpinnerModule,
+    TabsModule,
+    TagModule,
+    ToastModule,
+    FormsModule,
     ReactiveFormsModule
   ],
   templateUrl: './pos-reports.component.html',
   styleUrl: './pos-reports.component.scss',
-  providers: [AuthService, PosService]
+  providers: [AuthService, PosService, MessageService, DialogService]
 })
 export class PosReportsComponent implements OnInit, OnDestroy {
   private destroy$ = new Subject<void>();
@@ -108,13 +105,16 @@ export class PosReportsComponent implements OnInit, OnDestroy {
   dateFrom = new FormControl<Date | null>(null);
   dateTo = new FormControl<Date | null>(null);
   facilityFilter = new FormControl<string>('');
-  selectedTab = 0;
+  selectedTab = '0';
+  
+  // Options for selects
+  facilityOptions: Array<{label: string, value: string}> = [];
 
   constructor(
     private posService: PosService,
     @Inject(AuthService) private authService: AuthService,
-    private snackBar: MatSnackBar,
-    private dialog: MatDialog
+    private messageService: MessageService,
+    private dialogService: DialogService
   ) {}
 
   ngOnInit(): void {
@@ -149,6 +149,11 @@ export class PosReportsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (facilities) => {
           this.facilities = facilities;
+          // Build facility options for p-select
+          this.facilityOptions = [
+            { label: 'Svi objekti', value: '' },
+            ...facilities.map(f => ({ label: f.name, value: f._id || '' }))
+          ];
           if (facilities.length > 0) {
             this.facilityFilter.setValue(facilities[0]._id || '');
             this.loadReports();
@@ -158,7 +163,11 @@ export class PosReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading facilities:', error);
-          this.snackBar.open('Greška pri učitavanju objekata', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri učitavanju objekata'
+          });
           this.loading = false;
         }
       });
@@ -269,7 +278,11 @@ export class PosReportsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading daily reports:', error);
-          this.snackBar.open('Greška pri učitavanju dnevnih izveštaja', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri učitavanju dnevnih izveštaja'
+          });
           this.reportsLoading = false;
         }
       });
@@ -323,40 +336,52 @@ export class PosReportsComponent implements OnInit, OnDestroy {
               },
               error: (error) => {
                 console.error('Error loading Z reports:', error);
-                this.snackBar.open('Greška pri učitavanju Z izveštaja', 'Zatvori', { duration: 3000 });
+                this.messageService.add({
+                  severity: 'error',
+                  summary: 'Greška',
+                  detail: 'Greška pri učitavanju Z izveštaja'
+                });
                 this.zReportsLoading = false;
               }
             });
         },
         error: (error) => {
           console.error('Error loading sessions:', error);
-          this.snackBar.open('Greška pri učitavanju sesija', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri učitavanju sesija'
+          });
           this.zReportsLoading = false;
         }
       });
   }
 
-  onFilterChange(): void {
-    if (this.selectedTab === 0) {
-      this.loadReports();
-      this.loadTodaysReport();
-    } else if (this.selectedTab === 1) {
+  onTabChange(value: string): void {
+    this.selectedTab = value;
+    if (value === '1' && this.zReports.length === 0) {
       this.loadZReports();
     }
   }
 
-  onTabChange(index: number): void {
-    this.selectedTab = index;
-    if (index === 1 && this.zReports.length === 0) {
+  onFilterChange(): void {
+    if (this.selectedTab === '0') {
+      this.loadReports();
+      this.loadTodaysReport();
+    } else if (this.selectedTab === '1') {
       this.loadZReports();
     }
   }
 
   exportToExcel(): void {
-    const dataToExport = this.selectedTab === 0 ? this.dailyReports : this.zReports;
+    const dataToExport = this.selectedTab === '0' ? this.dailyReports : this.zReports;
     
     if (dataToExport.length === 0) {
-      this.snackBar.open('Nema podataka za izvoz', 'Zatvori', { duration: 2000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Upozorenje',
+        detail: 'Nema podataka za izvoz'
+      });
       return;
     }
 
@@ -376,16 +401,28 @@ export class PosReportsComponent implements OnInit, OnDestroy {
       link.click();
       document.body.removeChild(link);
       
-      this.snackBar.open('Izveštaj uspešno izvezen', 'Zatvori', { duration: 2000 });
+      this.messageService.add({
+        severity: 'success',
+        summary: 'Uspeh',
+        detail: 'Izveštaj uspešno izvezen'
+      });
     } else {
-      this.snackBar.open('Greška pri izvozu - pregledač ne podržava preuzimanje', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Greška',
+        detail: 'Greška pri izvozu - pregledač ne podržava preuzimanje'
+      });
     }
   }
 
   viewReportDetails(report: any): void {
     // TODO: Napravi ReportDetailsDialogComponent
     console.log('Report details:', report);
-    this.snackBar.open(`Prikaz detalja za ${report.date} - ${report.facility}`, 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Detalji',
+      detail: `Prikaz detalja za ${report.date} - ${report.facility}`
+    });
     
     // Privremeno - otvori dialog sa detaljima izveštaja
     // const dialogRef = this.dialog.open(ReportDetailsDialogComponent, {
@@ -404,7 +441,7 @@ export class PosReportsComponent implements OnInit, OnDestroy {
     if (data.length === 0) return '';
     
     // Odredi kolone na osnovu tipa podataka
-    const isDailyReport = this.selectedTab === 0;
+    const isDailyReport = this.selectedTab === '0';
     const headers = isDailyReport 
       ? ['Datum', 'Objekat', 'Broj prodaja', 'Ukupan promet', 'Povraćaji', 'Neto promet']
       : ['ID Sesije', 'Blagajnik', 'Otvorio', 'Zatvorio', 'Ukupan promet', 'Varijacija'];

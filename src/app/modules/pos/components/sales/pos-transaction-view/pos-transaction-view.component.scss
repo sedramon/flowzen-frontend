@@ -1,3 +1,53 @@
+@use "sass:color";
+
+// Primary boja za pos transaction view (umesto zelene)
+$transaction-primary-color: #8c0055;
+
+// Override PrimeNG default zelene boje
+::ng-deep {
+  .outer-dialog-container,
+  .dialog-container {
+    // Override PrimeNG buttons
+    .p-button.p-button-primary,
+    .p-button[severity="primary"],
+    .p-button.p-button-success,
+    .p-button[severity="success"],
+    .p-button.p-button-accent,
+    .p-button[severity="accent"],
+    button.p-button-primary,
+    button.p-button-success,
+    button.p-button-accent {
+      background: $transaction-primary-color !important;
+      border-color: $transaction-primary-color !important;
+      color: white !important;
+      
+      &:hover:not(:disabled) {
+        background: color.adjust($transaction-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($transaction-primary-color, $lightness: -5%) !important;
+      }
+      
+      .p-button-label,
+      .p-button-icon {
+        color: white !important;
+      }
+    }
+    
+    // Override PrimeNG success tags
+    .p-tag.p-tag-success,
+    .p-tag[severity="success"],
+    .p-tag.severity-success {
+      background: $transaction-primary-color !important;
+      color: white !important;
+      border-color: $transaction-primary-color !important;
+    }
+    
+    // Override PrimeNG CSS varijable
+    --p-green-500: #{$transaction-primary-color};
+    --p-green-600: #{$transaction-primary-color};
+    --p-green-700: #{$transaction-primary-color};
+  }
+}
+
 @keyframes gradientPan {
   0% {
     background-position: 0% 50%;

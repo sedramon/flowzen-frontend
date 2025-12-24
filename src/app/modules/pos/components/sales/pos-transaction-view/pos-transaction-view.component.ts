@@ -1,9 +1,8 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MAT_DIALOG_DATA, MatDialogRef } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { ButtonModule } from 'primeng/button';
+import { TagModule } from 'primeng/tag';
 
 export interface TransactionViewData {
   transaction: any;
@@ -14,8 +13,8 @@ export interface TransactionViewData {
   standalone: true,
   imports: [
     CommonModule,
-    MatButtonModule,
-    MatIconModule
+    ButtonModule,
+    TagModule
   ],
   templateUrl: './pos-transaction-view.component.html',
   styleUrls: ['./pos-transaction-view.component.scss']
@@ -24,11 +23,10 @@ export class PosTransactionViewComponent implements OnInit {
   transaction: any;
 
   constructor(
-    @Inject(MAT_DIALOG_DATA) public data: TransactionViewData,
-    private dialogRef: MatDialogRef<PosTransactionViewComponent>,
-    private snackBar: MatSnackBar
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig
   ) {
-    this.transaction = data.transaction;
+    this.transaction = config.data?.transaction;
   }
 
   ngOnInit(): void {
@@ -95,33 +93,33 @@ export class PosTransactionViewComponent implements OnInit {
     return statuses[status] || 'Nepoznato';
   }
 
-  getStatusColor(transaction: any): string {
+  getStatusSeverity(transaction: any): 'success' | 'info' | 'warning' | 'danger' {
     // Proveri da li je fiskalizovano
     if (transaction.sale?.fiscal?.status === 'success') {
-      return '#66bb6a'; // Svetlija zelena - fiskalizovano
+      return 'success';
     }
     
     // Proveri da li je na čekanju fiskalizacije
     if (transaction.sale?.fiscal?.status === 'pending') {
-      return '#ffb74d'; // Svetlija narandžasta - na čekanju
+      return 'warning';
     }
     
     // Proveri da li je greška u fiskalizaciji
     if (transaction.sale?.fiscal?.status === 'error') {
-      return '#ef5350'; // Svetlija crvena - greška
+      return 'danger';
     }
     
     // Proveri osnovni status
     const status = transaction.status || transaction.sale?.status;
-    const colors: { [key: string]: string } = {
-      'pending': '#ffb74d',
-      'completed': '#ab47bc', // Svetlija naša boja
-      'final': '#ab47bc', // Svetlija naša boja
-      'cancelled': '#ef5350',
-      'refunded': '#ba68c8', // Svetlija ljubičasta
-      'partial_refund': '#f48fb1' // Svetlija roza
+    const severities: { [key: string]: 'success' | 'info' | 'warning' | 'danger' } = {
+      'pending': 'warning',
+      'completed': 'success',
+      'final': 'success',
+      'cancelled': 'danger',
+      'refunded': 'info',
+      'partial_refund': 'info'
     };
-    return colors[status] || '#bdbdbd'; // Svetlija siva
+    return severities[status] || 'info';
   }
 
   printTransaction(): void {
@@ -130,6 +128,6 @@ export class PosTransactionViewComponent implements OnInit {
   }
 
   closeDialog(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 }

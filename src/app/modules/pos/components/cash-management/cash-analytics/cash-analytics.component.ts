@@ -1,16 +1,13 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatInputModule } from '@angular/material/input';
-import { MatDatepickerModule } from '@angular/material/datepicker';
-import { MatNativeDateModule } from '@angular/material/core';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+import { DatePickerModule } from 'primeng/datepicker';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 import { Subject, takeUntil, forkJoin } from 'rxjs';
 import { FormBuilder, FormGroup, ReactiveFormsModule } from '@angular/forms';
 import { Facility } from '../../../../../models/Facility';
@@ -22,18 +19,16 @@ import { AuthService } from '../../../../../core/services/auth.service';
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatChipsModule,
-    MatProgressSpinnerModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatInputModule,
-    MatDatepickerModule,
-    MatNativeDateModule,
+    CardModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    FloatLabelModule,
+    SelectModule,
+    DatePickerModule,
+    ToastModule,
     ReactiveFormsModule
   ],
+  providers: [MessageService],
   templateUrl: './cash-analytics.component.html',
   styleUrls: ['./cash-analytics.component.scss']
 })
@@ -70,9 +65,17 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
     ]
   };
 
+  facilityOptions: any[] = [];
+  periodOptions = [
+    { label: 'Nedelja', value: 'week' },
+    { label: 'Mesec', value: 'month' },
+    { label: 'Kvartal', value: 'quarter' },
+    { label: 'Godina', value: 'year' }
+  ];
+
   constructor(
     private posService: PosService,
-    private snackBar: MatSnackBar,
+    private messageService: MessageService,
     private fb: FormBuilder,
     private authService: AuthService
   ) {
@@ -113,6 +116,16 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
       .subscribe({
         next: (facilities) => {
           this.facilities = facilities;
+          
+          // Prepare facility options for PrimeNG select
+          this.facilityOptions = [
+            { label: 'Sve lokacije', value: '' },
+            ...facilities.map((f: Facility) => ({
+              label: f.name,
+              value: f._id
+            }))
+          ];
+          
           if (facilities.length > 0 && !this.analyticsForm.get('facility')?.value) {
             this.analyticsForm.patchValue({ facility: facilities[0]._id });
           }
@@ -121,7 +134,11 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading facilities:', error);
-          this.snackBar.open('Greška pri učitavanju objekata', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri učitavanju objekata'
+          });
           this.loading = false;
         }
       });
@@ -162,7 +179,11 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
         },
         error: (error) => {
           console.error('Error loading analytics:', error);
-          this.snackBar.open('Greška pri učitavanju analytics podataka', 'Zatvori', { duration: 3000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: 'Greška pri učitavanju analytics podataka'
+          });
           
           // Set empty state
           this.analyticsData = {
@@ -354,7 +375,11 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
    */
   generateAnalytics(): void {
     this.loadAnalytics();
-    this.snackBar.open('Analytics uspešno generisan', 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Uspeh',
+      detail: 'Analytics uspešno generisan'
+    });
   }
 
   /**
@@ -377,12 +402,20 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
    */
   exportAnalytics(): void {
     if (!this.analyticsData) {
-      this.snackBar.open('Nema podataka za eksport', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Upozorenje',
+        detail: 'Nema podataka za eksport'
+      });
       return;
     }
 
     // TODO: Implement export functionality
-    this.snackBar.open('Eksport funkcionalnost će biti implementirana', 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Info',
+      detail: 'Eksport funkcionalnost će biti implementirana'
+    });
   }
 
   /**
@@ -410,14 +443,26 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća ikonu za trend
+   * Vraća ikonu za trend (PrimeIcons)
    */
   getTrendIcon(trend: string): string {
     switch (trend) {
-      case 'improving': return 'trending_up';
-      case 'stable': return 'trending_flat';
-      case 'declining': return 'trending_down';
-      default: return 'trending_flat';
+      case 'improving': return 'pi-arrow-up';
+      case 'stable': return 'pi-minus';
+      case 'declining': return 'pi-arrow-down';
+      default: return 'pi-minus';
+    }
+  }
+
+  /**
+   * Vraća severity za trend (PrimeNG)
+   */
+  getTrendSeverity(trend: string): 'success' | 'warning' | 'danger' | 'info' {
+    switch (trend) {
+      case 'improving': return 'success';
+      case 'stable': return 'info';
+      case 'declining': return 'warning';
+      default: return 'info';
     }
   }
 
@@ -446,16 +491,16 @@ export class CashAnalyticsComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća ikonu za payment method
+   * Vraća ikonu za payment method (PrimeIcons)
    */
   getPaymentMethodIcon(method: string): string {
     switch (method) {
-      case 'cash': return 'attach_money';
-      case 'card': return 'credit_card';
-      case 'voucher': return 'confirmation_number';
-      case 'gift': return 'card_giftcard';
-      case 'bank': return 'account_balance';
-      default: return 'payment';
+      case 'cash': return 'pi-dollar';
+      case 'card': return 'pi-credit-card';
+      case 'voucher': return 'pi-ticket';
+      case 'gift': return 'pi-gift';
+      case 'bank': return 'pi-building';
+      default: return 'pi-money-bill';
     }
   }
 

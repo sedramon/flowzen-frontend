@@ -1,16 +1,17 @@
 import { Component, OnInit, OnDestroy, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatSelectModule } from '@angular/material/select';
-import { MatTableModule } from '@angular/material/table';
-import { MatPaginatorModule } from '@angular/material/paginator';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatTooltipModule } from '@angular/material/tooltip';
-import { MatDialog } from '@angular/material/dialog';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { FormsModule } from '@angular/forms';
+import { CardModule } from 'primeng/card';
+import { ButtonModule } from 'primeng/button';
+import { TableModule } from 'primeng/table';
+import { TagModule } from 'primeng/tag';
+import { TooltipModule } from 'primeng/tooltip';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { SelectModule } from 'primeng/select';
+import { ToastModule } from 'primeng/toast';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { DialogService, DynamicDialogRef } from 'primeng/dynamicdialog';
+import { MessageService } from 'primeng/api';
 import { forkJoin, of, Subject } from 'rxjs';
 import { map, catchError, takeUntil } from 'rxjs/operators';
 
@@ -60,19 +61,20 @@ interface SalesStatistics {
   standalone: true,
   imports: [
     CommonModule,
-    MatCardModule,
-    MatButtonModule,
-    MatIconModule,
-    MatFormFieldModule,
-    MatSelectModule,
-    MatTableModule,
-    MatPaginatorModule,
-    MatChipsModule,
-    MatTooltipModule
+    FormsModule,
+    CardModule,
+    ButtonModule,
+    TableModule,
+    TagModule,
+    TooltipModule,
+    FloatLabelModule,
+    SelectModule,
+    ToastModule,
+    ProgressSpinnerModule
   ],
+  providers: [AuthService, PosService, DialogService, MessageService],
   templateUrl: './pos-sales.component.html',
-  styleUrl: './pos-sales.component.scss',
-  providers: [AuthService, PosService]
+  styleUrl: './pos-sales.component.scss'
 })
 export class PosSalesComponent implements OnInit, OnDestroy {
   
@@ -82,6 +84,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   
   loading = false;
   currentFacility: Facility | null = null;
+  selectedFacilityId: string | null = null;
   private destroy$ = new Subject<void>();
   
   // Data arrays
@@ -91,11 +94,20 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   articles: Article[] = [];
   sales: Sale[] = [];
   
-  // Table configuration
-  readonly displayedColumns: string[] = [
-    'number', 'date', 'client', 'facility', 'cashier', 
-    'status', 'total', 'fiscal', 'actions'
+  // Table configuration for PrimeNG
+  salesColumns: any[] = [
+    { field: 'number', header: 'Broj računa' },
+    { field: 'date', header: 'Datum' },
+    { field: 'client', header: 'Klijent' },
+    { field: 'facility', header: 'Objekat' },
+    { field: 'cashier', header: 'Blagajnik' },
+    { field: 'status', header: 'Status' },
+    { field: 'total', header: 'Ukupno' },
+    { field: 'fiscal', header: 'Fiskalizacija' },
+    { field: 'actions', header: 'Akcije' }
   ];
+  
+  facilityOptions: any[] = [];
   
   // Statistics
   statistics: SalesStatistics = {
@@ -110,8 +122,8 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   // ============================================================================
 
   constructor(
-    private readonly dialog: MatDialog,
-    private readonly snackBar: MatSnackBar,
+    private readonly dialogService: DialogService,
+    private readonly messageService: MessageService,
     private readonly posService: PosService,
     @Inject(AuthService) private readonly authService: AuthService
   ) {}
@@ -181,6 +193,12 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     this.services = data.services || [];
     this.articles = data.articles || [];
     
+    // Prepare facility options for PrimeNG select
+    this.facilityOptions = this.facilities.map((f: Facility) => ({
+      label: f.name,
+      value: f._id
+    }));
+    
     console.log('=== POS SALES COMPONENT INITIALIZATION ===');
     console.log('Facilities loaded:', this.facilities.length, this.facilities);
     console.log('Clients loaded:', this.clients.length, this.clients);
@@ -189,6 +207,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     
     if (this.facilities.length > 0) {
       this.currentFacility = this.facilities[0];
+      this.selectedFacilityId = this.currentFacility._id;
       console.log('Current facility set:', this.currentFacility);
       this.loadSales();
     } else {
@@ -327,7 +346,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    */
   private handleSalesLoadError(error: any): any {
     console.error('Error loading sales:', error);
-    this.showError('Greška pri učitavanju prodaja');
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Greška',
+      detail: 'Greška pri učitavanju prodaja'
+    });
     this.loading = false;
     return of(this.sales);
   }
@@ -421,6 +444,7 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    * Menja trenutni facility i učitava prodaje za novi facility
    */
   onFacilityChange(facilityId: string): void {
+    this.selectedFacilityId = facilityId;
     this.currentFacility = this.facilities.find(f => f._id === facilityId) || null;
     if (this.currentFacility) {
       this.loadSales();
@@ -436,11 +460,18 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    */
   openNewSale(): void {
     if (!this.currentFacility) {
-      this.snackBar.open('Izaberite objekat pre kreiranja prodaje', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Upozorenje',
+        detail: 'Izaberite objekat pre kreiranja prodaje'
+      });
       return;
     }
 
-    const dialogRef = this.dialog.open(PosCheckoutComponent, {
+    const ref = this.dialogService.open(PosCheckoutComponent, {
+      header: 'Nova prodaja',
+      width: '800px',
+      styleClass: 'custom-appointment-dialog',
       data: {
         facility: this.currentFacility,
         clients: this.clients,
@@ -449,31 +480,32 @@ export class PosSalesComponent implements OnInit, OnDestroy {
         total: 0,
         appointment: null,
         tenant: this.authService.getCurrentTenantId() ?? undefined
-      },
-      panelClass: 'custom-appointment-dialog',
-      backdropClass: 'custom-backdrop',
-      width: '800px',
-      maxWidth: '95vw'
-    });
-
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result && result.id) {
-        this.snackBar.open('Prodaja uspešno kreirana!', 'Zatvori', { duration: 2000 });
-        this.loadSales();
       }
     });
+
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result && result.id) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Uspeh',
+            detail: 'Prodaja uspešno kreirana!'
+          });
+          this.loadSales();
+        }
+      });
+    }
   }
 
   /**
    * Otvara dialog za pregled detalja prodaje
    */
   viewSale(sale: any): void {
-    const dialogRef = this.dialog.open(PosTransactionViewComponent, {
-      data: { transaction: sale },
-      panelClass: 'pos-transaction-view-dialog',
-      backdropClass: 'custom-backdrop',
+    this.dialogService.open(PosTransactionViewComponent, {
+      header: 'Pregled transakcije',
       width: '800px',
-      maxWidth: '95vw'
+      styleClass: 'pos-transaction-view-dialog',
+      data: { transaction: sale }
     });
   }
 
@@ -481,12 +513,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    * Otvara dialog za štampanje računa
    */
   printReceipt(sale: any): void {
-    const dialogRef = this.dialog.open(PosReceiptComponent, {
-      data: { saleId: sale._id || sale.id },
-      panelClass: 'pos-receipt-dialog',
-      backdropClass: 'custom-backdrop',
+    this.dialogService.open(PosReceiptComponent, {
+      header: 'Štampanje računa',
       width: '600px',
-      maxWidth: '90vw'
+      styleClass: 'pos-receipt-dialog',
+      data: { saleId: sale._id || sale.id }
     });
   }
 
@@ -494,20 +525,25 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    * Otvara dialog za povraćaj prodaje
    */
   refundSale(sale: any): void {
-    const dialogRef = this.dialog.open(PosRefundComponent, {
-      data: { sale: sale },
-      panelClass: 'pos-refund-dialog',
-      backdropClass: 'custom-backdrop',
+    const ref = this.dialogService.open(PosRefundComponent, {
+      header: 'Povraćaj prodaje',
       width: '900px',
-      maxWidth: '95vw'
+      styleClass: 'pos-refund-dialog',
+      data: { sale: sale }
     });
 
-    dialogRef.afterClosed().subscribe((result) => {
-      if (result) {
-        this.snackBar.open('Povraćaj uspešno obrađen', 'Zatvori', { duration: 2000 });
-        this.loadSales();
-      }
-    });
+    if (ref) {
+      ref.onClose.subscribe((result) => {
+        if (result) {
+          this.messageService.add({
+            severity: 'success',
+            summary: 'Uspeh',
+            detail: 'Povraćaj uspešno obrađen'
+          });
+          this.loadSales();
+        }
+      });
+    }
   }
 
   // ============================================================================
@@ -519,12 +555,20 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    */
   fiscalizeSale(sale: any): void {
     if (!this.currentFacility) {
-      this.snackBar.open('Izaberite objekat pre fiskalizacije', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Upozorenje',
+        detail: 'Izaberite objekat pre fiskalizacije'
+      });
       return;
     }
 
     if (!sale || !sale._id) {
-      this.snackBar.open('Nije moguće fiskalizovati prodaju', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'error',
+        summary: 'Greška',
+        detail: 'Nije moguće fiskalizovati prodaju'
+      });
       return;
     }
 
@@ -532,7 +576,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     
     // Ako je već fiskalizovana, prikaži poruku
     if (sale.fiscal?.status === 'success') {
-      this.snackBar.open('Račun je već fiskalizovan', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Račun je već fiskalizovan'
+      });
       return;
     }
 
@@ -544,13 +592,21 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     const maxRetries = 1; // Samo jedan retry
     
     if (retryCount === 0) {
-      this.snackBar.open('Resetovanje fiskalizacije...', 'Zatvori', { duration: 2000 });
+      this.messageService.add({
+        severity: 'info',
+        summary: 'Info',
+        detail: 'Resetovanje fiskalizacije...'
+      });
     }
     
     this.posService.resetFiscalization(saleId).subscribe({
       next: (result: any) => {
         console.log('Reset successful:', result);
-        this.snackBar.open('Fiskalizacija resetovana, pokretanje...', 'Zatvori', { duration: 1500 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Uspeh',
+          detail: 'Fiskalizacija resetovana, pokretanje...'
+        });
         // Kratka pauza pa fiskalizacija
         setTimeout(() => {
           this.performFiscalization(saleId, retryCount);
@@ -558,7 +614,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
       },
       error: (error: any) => {
         console.error('Error resetting fiscalization:', error);
-        this.snackBar.open('Greška pri resetovanju fiskalizacije', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri resetovanju fiskalizacije'
+        });
       }
     });
   }
@@ -567,12 +627,20 @@ export class PosSalesComponent implements OnInit, OnDestroy {
     const maxRetries = 1;
     
     console.log('Starting fiscalization for sale:', saleId, 'retry:', retryCount);
-    this.snackBar.open('Pokretanje fiskalizacije...', 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'info',
+      summary: 'Info',
+      detail: 'Pokretanje fiskalizacije...'
+    });
     
     this.posService.fiscalizeSale(saleId, this.currentFacility!._id).subscribe({
       next: (result: any) => {
         console.log('Fiscalization successful:', result);
-        this.snackBar.open('Fiskalizacija uspešno završena!', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Uspeh',
+          detail: 'Fiskalizacija uspešno završena!'
+        });
         this.loadSales();
       },
       error: (error: any) => {
@@ -580,12 +648,20 @@ export class PosSalesComponent implements OnInit, OnDestroy {
         
         // Ako je greška "Fiskalizacija je u toku" i imamo retry, pokušaj ponovo
         if (error.error?.message?.includes('Fiskalizacija je u toku') && retryCount < maxRetries) {
-          this.snackBar.open(`Fiskalizacija u toku, pokušavam ponovo... (${retryCount + 1}/${maxRetries + 1})`, 'Zatvori', { duration: 2000 });
+          this.messageService.add({
+            severity: 'warn',
+            summary: 'Upozorenje',
+            detail: `Fiskalizacija u toku, pokušavam ponovo... (${retryCount + 1}/${maxRetries + 1})`
+          });
           setTimeout(() => {
             this.resetFiscalizationAndRetry(saleId, retryCount + 1);
           }, 2000);
         } else {
-          this.snackBar.open(`Greška pri fiskalizaciji: ${error.error?.message || 'Nepoznata greška'}`, 'Zatvori', { duration: 4000 });
+          this.messageService.add({
+            severity: 'error',
+            summary: 'Greška',
+            detail: `Greška pri fiskalizaciji: ${error.error?.message || 'Nepoznata greška'}`
+          });
         }
       }
     });
@@ -596,15 +672,15 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   // ============================================================================
 
   /**
-   * Vraća boju za status prodaje
+   * Vraća severity za status prodaje (PrimeNG)
    */
-  getStatusColor(status: string): string {
+  getStatusSeverity(status: string): 'success' | 'info' | 'warning' | 'danger' {
     switch (status) {
-      case 'final': return 'primary';
-      case 'fiscalized': return 'accent';
-      case 'refunded': return 'warn';
-      case 'partial_refund': return 'accent';
-      default: return 'basic';
+      case 'final': return 'success';
+      case 'fiscalized': return 'info';
+      case 'refunded': return 'warning';
+      case 'partial_refund': return 'info';
+      default: return 'info';
     }
   }
 
@@ -636,16 +712,16 @@ export class PosSalesComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća boju za status fiskalizacije
+   * Vraća severity za status fiskalizacije (PrimeNG)
    */
-  getFiscalColor(fiscal: any): string {
-    if (!fiscal) return 'basic';
+  getFiscalSeverity(fiscal: any): 'success' | 'info' | 'warning' | 'danger' {
+    if (!fiscal) return 'info';
     switch (fiscal.status) {
-      case 'pending': return 'accent';
-      case 'success': return 'primary';
-      case 'done': return 'primary'; // Backward compatibility
-      case 'error': return 'warn';
-      default: return 'basic';
+      case 'pending': return 'info';
+      case 'success': return 'success';
+      case 'done': return 'success'; // Backward compatibility
+      case 'error': return 'danger';
+      default: return 'info';
     }
   }
 
@@ -654,7 +730,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    * @param message - Error message
    */
   private showError(message: string): void {
-    this.snackBar.open(message, 'Zatvori', { duration: 3000 });
+    this.messageService.add({
+      severity: 'error',
+      summary: 'Greška',
+      detail: message
+    });
   }
 
   /**
@@ -662,7 +742,11 @@ export class PosSalesComponent implements OnInit, OnDestroy {
    * @param message - Success message
    */
   private showSuccess(message: string): void {
-    this.snackBar.open(message, 'Zatvori', { duration: 2000 });
+    this.messageService.add({
+      severity: 'success',
+      summary: 'Uspeh',
+      detail: message
+    });
   }
 
   /**

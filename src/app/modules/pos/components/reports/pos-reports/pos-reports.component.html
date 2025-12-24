@@ -1,300 +1,311 @@
-<mat-card class="pos-reports-container">
+<p-toast position="top-right"></p-toast>
+
+<p-card class="pos-reports-container">
   <!-- Header -->
-  <div class="pos-header">
-    <h2>
-      <mat-icon>assessment</mat-icon>
-      POS Izveštaji
-    </h2>
-    <button 
-      mat-raised-button 
-      color="accent" 
-      class="export-btn"
-      (click)="exportToExcel()"
-      [disabled]="(selectedTab === 0 && dailyReports.length === 0) || (selectedTab === 1 && zReports.length === 0)">
-      <mat-icon>upload_file</mat-icon>
-      Izvezi Excel
-    </button>
-  </div>
+  <ng-template pTemplate="header">
+    <div class="pos-header">
+      <h2>
+        <i class="pi pi-chart-bar"></i>
+        POS Izveštaji
+      </h2>
+      <p-button
+        label="Izvezi Excel"
+        icon="pi pi-upload"
+        class="export-btn"
+        (onClick)="exportToExcel()"
+        [disabled]="(selectedTab === '0' && dailyReports.length === 0) || (selectedTab === '1' && zReports.length === 0)"
+        severity="accent"
+        [raised]="true">
+      </p-button>
+    </div>
+  </ng-template>
 
   <!-- Filters -->
   <div class="filters-section">
     <div class="filters-grid">
-      <mat-form-field appearance="outline">
-        <mat-label>Datum od</mat-label>
-        <input matInput [matDatepicker]="fromPicker" [formControl]="dateFrom" (dateChange)="onFilterChange()">
-        <mat-datepicker-toggle matSuffix [for]="fromPicker"></mat-datepicker-toggle>
-        <mat-datepicker #fromPicker></mat-datepicker>
-      </mat-form-field>
+      <p-floatLabel>
+        <p-datepicker
+          [formControl]="dateFrom"
+          inputId="dateFrom"
+          (onSelect)="onFilterChange()"
+          (onClear)="onFilterChange()"
+          [showIcon]="true"
+          dateFormat="dd.mm.yy">
+        </p-datepicker>
+        <label for="dateFrom">Datum od</label>
+      </p-floatLabel>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Datum do</mat-label>
-        <input matInput [matDatepicker]="toPicker" [formControl]="dateTo" (dateChange)="onFilterChange()">
-        <mat-datepicker-toggle matSuffix [for]="toPicker"></mat-datepicker-toggle>
-        <mat-datepicker #toPicker></mat-datepicker>
-      </mat-form-field>
+      <p-floatLabel>
+        <p-datepicker
+          [formControl]="dateTo"
+          inputId="dateTo"
+          (onSelect)="onFilterChange()"
+          (onClear)="onFilterChange()"
+          [showIcon]="true"
+          dateFormat="dd.mm.yy">
+        </p-datepicker>
+        <label for="dateTo">Datum do</label>
+      </p-floatLabel>
 
-      <mat-form-field appearance="outline">
-        <mat-label>Objekat</mat-label>
-        <mat-select [formControl]="facilityFilter" (selectionChange)="onFilterChange()">
-          <mat-option value="">Svi objekti</mat-option>
-          <mat-option *ngFor="let facility of facilities" [value]="facility._id">
-            {{ facility.name }}
-          </mat-option>
-        </mat-select>
-      </mat-form-field>
+      <p-floatLabel>
+        <p-select
+          [formControl]="facilityFilter"
+          inputId="facility"
+          [options]="facilityOptions"
+          optionLabel="label"
+          optionValue="value"
+          (onChange)="onFilterChange()">
+        </p-select>
+        <label for="facility">Objekat</label>
+      </p-floatLabel>
     </div>
   </div>
 
   <!-- Tabs -->
-  <mat-tab-group [(selectedIndex)]="selectedTab" (selectedIndexChange)="onTabChange($event)" mat-stretch-tabs>
-    <!-- Daily Reports Tab -->
-    <mat-tab label="Dnevni izveštaji">
-      <div class="tab-content">
+  <p-tabs [(value)]="selectedTab" (valueChange)="onTabChange($event)" class="pos-reports-tabs">
+    <p-tablist>
+      <p-tab value="0">Dnevni izveštaji</p-tab>
+      <p-tab value="1">Z izveštaji</p-tab>
+    </p-tablist>
+    <p-tabpanels>
+      <p-tabpanel value="0">
+        <div class="tab-content">
 
         <!-- Daily Reports Summary Cards -->
         <div class="summary-cards">
-          <mat-card class="summary-card">
-            <mat-card-content>
+          <p-card class="summary-card">
+            <div class="summary-content">
               <div class="summary-icon">
-                <mat-icon>shopping_cart</mat-icon>
+                <i class="pi pi-shopping-cart"></i>
               </div>
-              <div class="summary-content">
+              <div class="summary-details">
                 <h3>Ukupno transakcija</h3>
                 <p class="summary-number">{{ getTotalTransactions() }}</p>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
+          <p-card class="summary-card">
+            <div class="summary-content">
               <div class="summary-icon">
-                <mat-icon>attach_money</mat-icon>
+                <i class="pi pi-dollar"></i>
               </div>
-              <div class="summary-content">
+              <div class="summary-details">
                 <h3>Ukupan promet</h3>
                 <p class="summary-number">{{ formatCurrency(getTotalSales()) }}</p>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
+          <p-card class="summary-card">
+            <div class="summary-content">
               <div class="summary-icon">
-                <mat-icon>trending_up</mat-icon>
+                <i class="pi pi-arrow-up"></i>
               </div>
-              <div class="summary-content">
+              <div class="summary-details">
                 <h3>Neto promet</h3>
                 <p class="summary-number">{{ formatCurrency(getNetAmount()) }}</p>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
+          <p-card class="summary-card">
+            <div class="summary-content">
               <div class="summary-icon">
-                <mat-icon>account_balance_wallet</mat-icon>
+                <i class="pi pi-wallet"></i>
               </div>
-              <div class="summary-content">
+              <div class="summary-details">
                 <h3>Prosečna vrednost</h3>
                 <p class="summary-number">{{ formatCurrency(getAverageTransactionValue()) }}</p>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </div>
+          </p-card>
         </div>
 
         <!-- Loading State -->
         <div *ngIf="reportsLoading || todayReportLoading" class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
+          <p-progressSpinner></p-progressSpinner>
           <p *ngIf="todayReportLoading">Učitavanje današnjeg izveštaja...</p>
           <p *ngIf="reportsLoading && !todayReportLoading">Učitavanje dnevnih izveštaja...</p>
         </div>
 
         <!-- Daily Reports Table -->
         <div *ngIf="!reportsLoading && !todayReportLoading" class="reports-content">
-          <mat-table [dataSource]="dailyReports" class="reports-table">
-            <!-- Date Column -->
-            <ng-container matColumnDef="date">
-              <mat-header-cell *matHeaderCellDef>Datum</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatDate(report.date) }}</mat-cell>
-            </ng-container>
+          <p-table
+            [value]="dailyReports"
+            [tableStyle]="{ 'min-width': '50rem' }"
+            styleClass="reports-table">
 
-            <!-- Facility Column -->
-            <ng-container matColumnDef="facility">
-              <mat-header-cell *matHeaderCellDef>Objekat</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ report.facility }}</mat-cell>
-            </ng-container>
+            <ng-template pTemplate="header">
+              <tr>
+                <th>Datum</th>
+                <th>Objekat</th>
+                <th>Broj prodaja</th>
+                <th>Ukupan promet</th>
+                <th>Povraćaji</th>
+                <th>Neto promet</th>
+                <th>Akcije</th>
+              </tr>
+            </ng-template>
 
-            <!-- Sales Count Column -->
-            <ng-container matColumnDef="salesCount">
-              <mat-header-cell *matHeaderCellDef>Broj prodaja</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ report.salesCount }}</mat-cell>
-            </ng-container>
+            <ng-template pTemplate="body" let-report>
+              <tr>
+                <td>{{ formatDate(report.date) }}</td>
+                <td>{{ report.facility }}</td>
+                <td>{{ report.salesCount }}</td>
+                <td>{{ formatCurrency(report.totalSales) }}</td>
+                <td>{{ formatCurrency(report.totalRefunds) }}</td>
+                <td>{{ formatCurrency(report.totalSales - report.totalRefunds) }}</td>
+                <td>
+                  <p-button
+                    icon="pi pi-eye"
+                    [text]="true"
+                    [rounded]="true"
+                    severity="info"
+                    pTooltip="Prikaži detalje"
+                    tooltipPosition="top"
+                    (onClick)="viewReportDetails(report)">
+                  </p-button>
+                </td>
+              </tr>
+            </ng-template>
 
-            <!-- Total Sales Column -->
-            <ng-container matColumnDef="totalSales">
-              <mat-header-cell *matHeaderCellDef>Ukupan promet</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales) }}</mat-cell>
-            </ng-container>
-
-            <!-- Total Refunds Column -->
-            <ng-container matColumnDef="totalRefunds">
-              <mat-header-cell *matHeaderCellDef>Povraćaji</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalRefunds) }}</mat-cell>
-            </ng-container>
-
-            <!-- Net Amount Column -->
-            <ng-container matColumnDef="netAmount">
-              <mat-header-cell *matHeaderCellDef>Neto promet</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales - report.totalRefunds) }}</mat-cell>
-            </ng-container>
-
-            <!-- Actions Column -->
-            <ng-container matColumnDef="actions">
-              <mat-header-cell *matHeaderCellDef>Akcije</mat-header-cell>
-              <mat-cell *matCellDef="let report">
-                <button 
-                  mat-icon-button 
-                  color="primary"
-                  matTooltip="Prikaži detalje"
-                  (click)="viewReportDetails(report)">
-                  <mat-icon>visibility</mat-icon>
-                </button>
-              </mat-cell>
-            </ng-container>
-
-            <mat-header-row *matHeaderRowDef="displayedColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: displayedColumns;"></mat-row>
-          </mat-table>
-
-          <!-- No Data State -->
-          <div *ngIf="dailyReports.length === 0" class="no-data">
-            <mat-icon>assessment</mat-icon>
-            <p>Nema podataka za izabrani period</p>
-            <button mat-button color="primary" (click)="loadReports()">
-              Osveži podatke
-            </button>
-          </div>
+            <ng-template pTemplate="emptymessage">
+              <tr>
+                <td colspan="7">
+                  <div class="no-data">
+                    <i class="pi pi-chart-bar"></i>
+                    <p>Nema podataka za izabrani period</p>
+                    <p-button
+                      label="Osveži podatke"
+                      icon="pi pi-refresh"
+                      (onClick)="loadReports()"
+                      severity="primary"
+                      [text]="true">
+                    </p-button>
+                  </div>
+                </td>
+              </tr>
+            </ng-template>
+          </p-table>
         </div>
       </div>
-    </mat-tab>
+      </p-tabpanel>
 
-    <!-- Z Reports Tab -->
-    <mat-tab label="Z izveštaji">
-      <div class="tab-content">
-        <!-- Z Reports Summary Cards -->
-        <div class="summary-cards">
-          <mat-card class="summary-card">
-            <mat-card-content>
-              <div class="summary-icon">
-                <mat-icon>receipt_long</mat-icon>
-              </div>
+      <!-- Z Reports Tab -->
+      <p-tabpanel value="1">
+        <div class="tab-content">
+          <!-- Z Reports Summary Cards -->
+          <div class="summary-cards">
+            <p-card class="summary-card">
               <div class="summary-content">
-                <h3>Ukupno sesija</h3>
-                <p class="summary-number">{{ zReports.length }}</p>
+                <div class="summary-icon">
+                  <i class="pi pi-file"></i>
+                </div>
+                <div class="summary-details">
+                  <h3>Ukupno sesija</h3>
+                  <p class="summary-number">{{ zReports.length }}</p>
+                </div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
-              <div class="summary-icon">
-                <mat-icon>attach_money</mat-icon>
-              </div>
+            <p-card class="summary-card">
               <div class="summary-content">
-                <h3>Ukupan promet</h3>
-                <p class="summary-number">{{ formatCurrency(getZTotalSales()) }}</p>
+                <div class="summary-icon">
+                  <i class="pi pi-dollar"></i>
+                </div>
+                <div class="summary-details">
+                  <h3>Ukupan promet</h3>
+                  <p class="summary-number">{{ formatCurrency(getZTotalSales()) }}</p>
+                </div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
-              <div class="summary-icon">
-                <mat-icon>trending_up</mat-icon>
-              </div>
+            <p-card class="summary-card">
               <div class="summary-content">
-                <h3>Ukupna varijacija</h3>
-                <p class="summary-number">{{ formatCurrency(getZTotalVariance()) }}</p>
+                <div class="summary-icon">
+                  <i class="pi pi-arrow-up"></i>
+                </div>
+                <div class="summary-details">
+                  <h3>Ukupna varijacija</h3>
+                  <p class="summary-number">{{ formatCurrency(getZTotalVariance()) }}</p>
+                </div>
               </div>
-            </mat-card-content>
-          </mat-card>
+            </p-card>
 
-          <mat-card class="summary-card">
-            <mat-card-content>
-              <div class="summary-icon">
-                <mat-icon>account_balance_wallet</mat-icon>
-              </div>
+            <p-card class="summary-card">
               <div class="summary-content">
-                <h3>Prosečna varijacija</h3>
-                <p class="summary-number">{{ formatCurrency(getZAverageVariance()) }}</p>
+                <div class="summary-icon">
+                  <i class="pi pi-wallet"></i>
+                </div>
+                <div class="summary-details">
+                  <h3>Prosečna varijacija</h3>
+                  <p class="summary-number">{{ formatCurrency(getZAverageVariance()) }}</p>
+                </div>
               </div>
-            </mat-card-content>
-          </mat-card>
-        </div>
+            </p-card>
+          </div>
 
-        <!-- Loading State -->
-        <div *ngIf="zReportsLoading" class="loading-container">
-          <mat-spinner diameter="40"></mat-spinner>
-          <p>Učitavanje Z izveštaja...</p>
-        </div>
+          <!-- Loading State -->
+          <div *ngIf="zReportsLoading" class="loading-container">
+            <p-progressSpinner></p-progressSpinner>
+            <p>Učitavanje Z izveštaja...</p>
+          </div>
 
-        <!-- Z Reports Table -->
-        <div *ngIf="!zReportsLoading" class="reports-content">
-          <mat-table [dataSource]="zReports" class="reports-table">
-            <!-- Session ID Column -->
-            <ng-container matColumnDef="sessionId">
-              <mat-header-cell *matHeaderCellDef>ID sesije</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ report.sessionId?.substring(0, 8) || 'N/A' }}...</mat-cell>
-            </ng-container>
+          <!-- Z Reports Table -->
+          <div *ngIf="!zReportsLoading" class="reports-content">
+            <p-table
+              [value]="zReports"
+              [tableStyle]="{ 'min-width': '50rem' }"
+              styleClass="reports-table">
 
-            <!-- Cashier Column -->
-            <ng-container matColumnDef="cashier">
-              <mat-header-cell *matHeaderCellDef>Blagajnik</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ report.cashier }}</mat-cell>
-            </ng-container>
+              <ng-template pTemplate="header">
+                <tr>
+                  <th>ID sesije</th>
+                  <th>Blagajnik</th>
+                  <th>Otvaranje</th>
+                  <th>Zatvaranje</th>
+                  <th>Ukupan promet</th>
+                  <th>Varijacija</th>
+                </tr>
+              </ng-template>
 
-            <!-- Opened At Column -->
-            <ng-container matColumnDef="openedAt">
-              <mat-header-cell *matHeaderCellDef>Otvaranje</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatDateTime(report.openedAt) }}</mat-cell>
-            </ng-container>
+              <ng-template pTemplate="body" let-report>
+                <tr>
+                  <td>{{ report.sessionId?.substring(0, 8) || 'N/A' }}...</td>
+                  <td>{{ report.cashier }}</td>
+                  <td>{{ formatDateTime(report.openedAt) }}</td>
+                  <td>{{ formatDateTime(report.closedAt) }}</td>
+                  <td>{{ formatCurrency(report.totalSales) }}</td>
+                  <td>
+                    <span [class]="report.variance >= 0 ? 'positive' : 'negative'">
+                      {{ formatCurrency(report.variance) }}
+                    </span>
+                  </td>
+                </tr>
+              </ng-template>
 
-            <!-- Closed At Column -->
-            <ng-container matColumnDef="closedAt">
-              <mat-header-cell *matHeaderCellDef>Zatvaranje</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatDateTime(report.closedAt) }}</mat-cell>
-            </ng-container>
-
-            <!-- Total Sales Column -->
-            <ng-container matColumnDef="totalSales">
-              <mat-header-cell *matHeaderCellDef>Ukupan promet</mat-header-cell>
-              <mat-cell *matCellDef="let report">{{ formatCurrency(report.totalSales) }}</mat-cell>
-            </ng-container>
-
-            <!-- Variance Column -->
-            <ng-container matColumnDef="variance">
-              <mat-header-cell *matHeaderCellDef>Varijacija</mat-header-cell>
-              <mat-cell *matCellDef="let report">
-                <span [class]="report.variance >= 0 ? 'positive' : 'negative'">
-                  {{ formatCurrency(report.variance) }}
-                </span>
-              </mat-cell>
-            </ng-container>
-
-            <mat-header-row *matHeaderRowDef="zReportColumns"></mat-header-row>
-            <mat-row *matRowDef="let row; columns: zReportColumns;"></mat-row>
-          </mat-table>
-
-          <!-- No Data State -->
-          <div *ngIf="zReports.length === 0" class="no-data">
-            <mat-icon>receipt_long</mat-icon>
-            <p>Nema zatvorenih sesija za izabrani period</p>
-            <button mat-button color="primary" (click)="loadZReports()">
-              Osveži podatke
-            </button>
+              <ng-template pTemplate="emptymessage">
+                <tr>
+                  <td colspan="6">
+                    <div class="no-data">
+                      <i class="pi pi-file"></i>
+                      <p>Nema zatvorenih sesija za izabrani period</p>
+                      <p-button
+                        label="Osveži podatke"
+                        icon="pi pi-refresh"
+                        (onClick)="loadZReports()"
+                        severity="primary"
+                        [text]="true">
+                      </p-button>
+                    </div>
+                  </td>
+                </tr>
+              </ng-template>
+            </p-table>
           </div>
         </div>
-      </div>
-    </mat-tab>
-  </mat-tab-group>
-</mat-card>
+      </p-tabpanel>
+    </p-tabpanels>
+  </p-tabs>
+</p-card>

@@ -1,15 +1,14 @@
-import { Component, Inject, OnInit } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatChipsModule } from '@angular/material/chips';
-import { MatCardModule } from '@angular/material/card';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { TagModule } from 'primeng/tag';
+import { CardModule } from 'primeng/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { PosService } from '../../../services/pos.service';
 import { CashCountingRequest, CashCountingResult, CashSession, CashVarianceRequest, CashVerificationRequest, VarianceAction } from '../../../../../models/CashSession';
 
@@ -22,14 +21,12 @@ export interface CashCountingDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatChipsModule,
-    MatCardModule,
+    FloatLabelModule,
+    InputNumberModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    TagModule,
+    CardModule,
     ReactiveFormsModule
   ],
   templateUrl: './cash-counting-dialog.component.html',
@@ -41,11 +38,11 @@ export class CashCountingDialogComponent implements OnInit {
   countingResult: CashCountingResult | null = null;
 
   constructor(
-    private dialogRef: MatDialogRef<CashCountingDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CashCountingDialogData,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
     private fb: FormBuilder,
     private posService: PosService,
-    private snackBar: MatSnackBar
+    private messageService: MessageService
   ) {
     this.countingForm = this.fb.group({
       countedCash: [0, [Validators.required, Validators.min(0)]]
@@ -53,10 +50,17 @@ export class CashCountingDialogComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    const data = this.config.data;
     // Set expected cash as default value
-    this.countingForm.patchValue({
-      countedCash: this.data.session.expectedCash
-    });
+    if (data?.session?.expectedCash !== undefined) {
+      this.countingForm.patchValue({
+        countedCash: data.session.expectedCash
+      });
+    }
+  }
+
+  get data() {
+    return this.config.data;
   }
 
   /**
@@ -64,12 +68,17 @@ export class CashCountingDialogComponent implements OnInit {
    */
   countCash(): void {
     if (this.countingForm.invalid) {
-      this.snackBar.open('Molimo unesite validnu vrednost', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validacija',
+        detail: 'Molimo unesite validnu vrednost'
+      });
       return;
     }
 
     this.processing = true;
     const formData = this.countingForm.value;
+    const data = this.config.data;
     const countingData: CashCountingRequest = {
       countedCash: Number(formData.countedCash),
       note: formData.note || undefined,
@@ -77,14 +86,18 @@ export class CashCountingDialogComponent implements OnInit {
       cashInRegister: formData.cashInRegister ? Number(formData.cashInRegister) : undefined
     };
 
-    this.posService.countCash(this.data.session.id, countingData).subscribe({
+    this.posService.countCash(data.session.id, countingData).subscribe({
       next: (result) => {
         this.countingResult = result;
         this.processing = false;
       },
       error: (error) => {
         console.error('Error counting cash:', error);
-        this.snackBar.open('Greška pri brojanju cash-a', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri brojanju cash-a'
+        });
         this.processing = false;
       }
     });
@@ -98,20 +111,29 @@ export class CashCountingDialogComponent implements OnInit {
 
     this.processing = true;
     const formData = this.countingForm.value;
+    const data = this.config.data;
     const verificationData: CashVerificationRequest = {
       actualCash: Number(formData.countedCash),
       note: formData.note || undefined
     };
 
-    this.posService.verifyCashCount(this.data.session.id, verificationData).subscribe({
+    this.posService.verifyCashCount(data.session.id, verificationData).subscribe({
       next: (result) => {
-        this.snackBar.open('Cash uspešno verifikovan', 'Zatvori', { duration: 2000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Uspeh',
+          detail: 'Cash uspešno verifikovan'
+        });
         this.processing = false;
         // Ne zatvaramo dialog automatski - korisnik može da nastavi sa brojanjem
       },
       error: (error) => {
         console.error('Error verifying cash count:', error);
-        this.snackBar.open('Greška pri verifikaciji cash-a', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri verifikaciji cash-a'
+        });
         this.processing = false;
       }
     });
@@ -125,6 +147,7 @@ export class CashCountingDialogComponent implements OnInit {
 
     this.processing = true;
     const formData = this.countingForm.value;
+    const data = this.config.data;
     const varianceData: CashVarianceRequest = {
       actualCash: Number(formData.countedCash),
       action: action,
@@ -132,15 +155,23 @@ export class CashCountingDialogComponent implements OnInit {
       note: formData.note || undefined
     };
 
-    this.posService.handleCashVariance(this.data.session.id, varianceData).subscribe({
+    this.posService.handleCashVariance(data.session.id, varianceData).subscribe({
       next: (result) => {
-        this.snackBar.open('Variance uspešno obrađena', 'Zatvori', { duration: 2000 });
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Uspeh',
+          detail: 'Variance uspešno obrađena'
+        });
         this.processing = false;
-        this.dialogRef.close(result);
+        this.ref.close(result);
       },
       error: (error) => {
         console.error('Error handling variance:', error);
-        this.snackBar.open('Greška pri obradi variance', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri obradi variance'
+        });
         this.processing = false;
       }
     });
@@ -150,7 +181,7 @@ export class CashCountingDialogComponent implements OnInit {
    * Zatvara dialog
    */
   cancel(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 
   /**
@@ -166,7 +197,8 @@ export class CashCountingDialogComponent implements OnInit {
   }
 
   /**
-   * Vraća boju za status variance
+   * Vraća boju za status variance (za backward compatibility)
+   * @deprecated Koristi getVarianceStatusSeverity umesto toga
    */
   getVarianceColor(status: string): 'primary' | 'accent' | 'warn' {
     switch (status) {
@@ -175,6 +207,19 @@ export class CashCountingDialogComponent implements OnInit {
       case 'critical':
       case 'severe': return 'warn';
       default: return 'primary';
+    }
+  }
+
+  /**
+   * Vraća severity za status variance (PrimeNG)
+   */
+  getVarianceStatusSeverity(status: string): 'success' | 'warning' | 'danger' {
+    switch (status) {
+      case 'acceptable': return 'success';
+      case 'warning': return 'warning';
+      case 'critical':
+      case 'severe': return 'danger';
+      default: return 'success';
     }
   }
 
@@ -192,12 +237,12 @@ export class CashCountingDialogComponent implements OnInit {
   }
 
   /**
-   * Vraća ikonu za variance
+   * Vraća ikonu za variance (PrimeIcons)
    */
   getVarianceIcon(variance: number): string {
-    if (variance > 0) return 'trending_up';
-    if (variance < 0) return 'trending_down';
-    return 'trending_flat';
+    if (variance > 0) return 'pi-arrow-up';
+    if (variance < 0) return 'pi-arrow-down';
+    return 'pi-minus';
   }
 
   /**

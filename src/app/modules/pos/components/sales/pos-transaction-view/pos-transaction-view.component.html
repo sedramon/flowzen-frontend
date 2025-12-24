@@ -36,9 +36,11 @@
             </div>
             <div class="transaction-row">
               <span>Status:</span>
-              <span class="status-badge" [style.color]="getStatusColor(transaction)">
-                {{ getStatusText(transaction) }}
-              </span>
+              <p-tag 
+                [value]="getStatusText(transaction)" 
+                [severity]="getStatusSeverity(transaction)"
+                [rounded]="true">
+              </p-tag>
             </div>
           </div>
 
@@ -123,13 +125,19 @@
         </div>
 
         <div class="transaction-actions">
-          <button mat-raised-button color="primary" (click)="printTransaction()">
-            <mat-icon>print</mat-icon>
-            Štampaj transakciju
-          </button>
-          <button mat-button (click)="closeDialog()">
-            Zatvori
-          </button>
+          <p-button 
+            label="Štampaj transakciju" 
+            icon="pi pi-print" 
+            (onClick)="printTransaction()"
+            severity="primary"
+            [raised]="true">
+          </p-button>
+          <p-button 
+            label="Zatvori" 
+            (onClick)="closeDialog()"
+            severity="secondary"
+            [text]="true">
+          </p-button>
         </div>
       </div>
     </div>

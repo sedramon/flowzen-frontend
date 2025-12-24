@@ -1,15 +1,14 @@
-import { Component, Inject, OnInit, OnDestroy } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MatDialogRef, MAT_DIALOG_DATA, MatDialogModule } from '@angular/material/dialog';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatCardModule } from '@angular/material/card';
-import { MatChipsModule } from '@angular/material/chips';
+import { DynamicDialogRef, DynamicDialogConfig } from 'primeng/dynamicdialog';
+import { FloatLabelModule } from 'primeng/floatlabel';
+import { InputNumberModule } from 'primeng/inputnumber';
+import { TextareaModule } from 'primeng/textarea';
+import { ButtonModule } from 'primeng/button';
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
+import { CardModule } from 'primeng/card';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { MatSnackBar } from '@angular/material/snack-bar';
+import { MessageService } from 'primeng/api';
 import { Subject, takeUntil } from 'rxjs';
 import { PosService } from '../../../services/pos.service';
 import { CashSession, CashSessionSummary, CloseSessionRequest } from '../../../../../models/CashSession';
@@ -23,14 +22,12 @@ export interface CloseSessionDialogData {
   standalone: true,
   imports: [
     CommonModule,
-    MatDialogModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatProgressSpinnerModule,
-    MatCardModule,
-    MatChipsModule,
+    FloatLabelModule,
+    InputNumberModule,
+    TextareaModule,
+    ButtonModule,
+    ProgressSpinnerModule,
+    CardModule,
     ReactiveFormsModule
   ],
   templateUrl: './close-session-dialog.component.html',
@@ -43,11 +40,11 @@ export class CloseSessionDialogComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
 
   constructor(
-    private readonly dialogRef: MatDialogRef<CloseSessionDialogComponent>,
-    @Inject(MAT_DIALOG_DATA) public data: CloseSessionDialogData,
+    public ref: DynamicDialogRef,
+    public config: DynamicDialogConfig,
     private readonly fb: FormBuilder,
     private readonly posService: PosService,
-    private readonly snackBar: MatSnackBar
+    private readonly messageService: MessageService
   ) {
     this.closeSessionForm = this.fb.group({
       closingCount: [0, [Validators.required, Validators.min(0)]],
@@ -56,10 +53,17 @@ export class CloseSessionDialogComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const data = this.config.data;
     // Set expected cash as default value
-    this.closeSessionForm.patchValue({
-      closingCount: this.data.session.expectedCash
-    });
+    if (data?.session?.expectedCash !== undefined) {
+      this.closeSessionForm.patchValue({
+        closingCount: data.session.expectedCash
+      });
+    }
+  }
+
+  get data() {
+    return this.config.data;
   }
 
   ngOnDestroy(): void {
@@ -72,26 +76,39 @@ export class CloseSessionDialogComponent implements OnInit, OnDestroy {
    */
   closeSession(): void {
     if (this.closeSessionForm.invalid) {
-      this.snackBar.open('Molimo unesite validnu vrednost', 'Zatvori', { duration: 3000 });
+      this.messageService.add({
+        severity: 'warn',
+        summary: 'Validacija',
+        detail: 'Molimo unesite validnu vrednost'
+      });
       return;
     }
 
     this.processing = true;
     const formData = this.closeSessionForm.value;
+    const data = this.config.data;
     const closeData: CloseSessionRequest = {
       closingCount: Number(formData.closingCount),
       note: formData.note || undefined
     };
 
-    this.posService.closeSession(this.data.session.id, closeData).subscribe({
+    this.posService.closeSession(data.session.id, closeData).subscribe({
       next: (result) => {
         this.sessionSummary = result;
-        this.snackBar.open('Sesija uspešno zatvorena', 'Zatvori', { duration: 2000 });
-        this.dialogRef.close(result);
+        this.messageService.add({
+          severity: 'success',
+          summary: 'Uspeh',
+          detail: 'Sesija uspešno zatvorena'
+        });
+        this.ref.close(result);
       },
       error: (error) => {
         console.error('Error closing session:', error);
-        this.snackBar.open('Greška pri zatvaranju sesije', 'Zatvori', { duration: 3000 });
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Greška',
+          detail: 'Greška pri zatvaranju sesije'
+        });
         this.processing = false;
       }
     });
@@ -101,7 +118,7 @@ export class CloseSessionDialogComponent implements OnInit, OnDestroy {
    * Zatvara dialog
    */
   cancel(): void {
-    this.dialogRef.close();
+    this.ref.close();
   }
 
   /**
@@ -140,12 +157,22 @@ export class CloseSessionDialogComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * Vraća ikonu za variance
+   * Vraća ikonu za variance (PrimeIcons)
    */
   getVarianceIcon(variance: number): string {
-    if (variance > 0) return 'trending_up';
-    if (variance < 0) return 'trending_down';
-    return 'trending_flat';
+    if (variance > 0) return 'pi-arrow-up';
+    if (variance < 0) return 'pi-arrow-down';
+    return 'pi-minus';
+  }
+
+  /**
+   * Vraća severity za variance (PrimeNG)
+   */
+  getVarianceSeverity(variance: number): 'success' | 'warning' | 'danger' {
+    const absVariance = Math.abs(variance);
+    if (absVariance <= 100) return 'success';
+    if (absVariance <= 500) return 'warning';
+    return 'danger';
   }
 
   /**

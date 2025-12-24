@@ -1,3 +1,7 @@
+@use "sass:color";
+
+$settings-primary-color: #8c0055; // Primary accent boja iz teme
+
 @keyframes gradientPan {
   0% {
     background-position: 0% 50%;
@@ -15,17 +19,6 @@
   100% { transform: rotate(360deg); }
 }
 
-// Global styles for all icons in this component
-:host {
-  ::ng-deep mat-icon {
-    color: #ffffff !important;
-  }
-  
-  ::ng-deep .mat-icon {
-    color: #ffffff !important;
-  }
-}
-
 .pos-settings-container {
   padding: 60px;
   margin: 100px;
@@ -33,6 +26,18 @@
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
   color: #e0e0e0;
+
+  ::ng-deep .p-card-body {
+    padding: 24px;
+  }
+
+  ::ng-deep .p-card-header {
+    padding: 0;
+  }
+}
+
+.pos-settings-content {
+  width: 100%;
 }
 
 .pos-header {
@@ -62,7 +67,7 @@
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
-    mat-icon {
+    i.pi-cog {
       color: #ffffff;
       font-size: 1.8em;
       width: 1.8em;
@@ -82,8 +87,69 @@
     align-items: flex-start;
     gap: 16px;
 
-    .facility-selector {
+      ::ng-deep .facility-selector {
+      flex: 1;
       min-width: 200px;
+      width: 100%;
+
+      .p-floatlabel {
+        width: 100%;
+        min-height: 56px !important;
+        display: flex !important;
+        flex-direction: column !important;
+        justify-content: flex-end !important;
+
+        label {
+          color: #cccccc !important;
+          font-weight: 500 !important;
+          font-size: 0.9em !important;
+          transition: all 0.2s ease !important;
+        }
+
+        &.p-floatlabel-over {
+          padding-top: 8px !important;
+
+          label {
+            color: #ffffff !important;
+            font-size: 0.85em !important;
+          }
+        }
+
+        .p-select {
+          width: 100%;
+          margin-top: auto !important;
+
+          .p-select-label {
+            background: rgba(255, 255, 255, 0.05) !important;
+            border: 1px solid rgba(255, 255, 255, 0.2) !important;
+            color: #ffffff !important;
+            border-radius: 8px !important;
+            padding: 12px 16px !important;
+            font-size: 0.95em !important;
+            min-height: 48px !important;
+            display: flex !important;
+            align-items: center !important;
+            white-space: normal !important;
+            word-break: break-word !important;
+            overflow: visible !important;
+            text-overflow: clip !important;
+
+            &:focus,
+            &:focus-within {
+              border-color: $settings-primary-color !important;
+              box-shadow: 0 0 0 1px $settings-primary-color !important;
+            }
+          }
+
+          .p-placeholder {
+            color: #999999 !important;
+          }
+
+          .p-select-trigger {
+            color: #cccccc !important;
+          }
+        }
+      }
     }
   }
 }
@@ -96,13 +162,7 @@
   padding: 48px;
   color: #999999;
 
-  .spinner {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #666666;
-    border-top: 4px solid #8c0055;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+  ::ng-deep .p-progressspinner {
     margin-bottom: 16px;
   }
 
@@ -117,44 +177,40 @@
     .settings-tabs {
       margin-bottom: 24px;
 
-      ::ng-deep {
-        .mat-mdc-tab-group {
-          background: transparent;
-        }
+      ::ng-deep .p-tablist {
+        background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
+        border-radius: 12px 12px 0 0;
+        border-bottom: 2px solid $settings-primary-color;
+        padding: 8px 16px 0;
 
-        .mat-mdc-tab-header {
-          background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
-          border-radius: 12px 12px 0 0;
-          border-bottom: 2px solid #8c0055;
-          padding: 8px 16px 0;
-        }
-
-        .mat-mdc-tab {
-          color: #999999;
+        .p-tab {
+          color: #cccccc;
           font-weight: 500;
           transition: all 0.3s ease;
+          display: flex;
+          align-items: center;
+          gap: 8px;
 
-          &.mdc-tab--active {
-            color: #d0d0d0;
+          &[aria-selected="true"] {
+            color: #ffffff;
             font-weight: 600;
           }
 
+          &:hover:not([aria-selected="true"]) {
+            color: #e0e0e0;
+          }
+
           .tab-icon {
-            margin-right: 8px;
             font-size: 1.2em;
+            color: inherit;
           }
         }
+      }
 
-        .mat-mdc-tab-body-wrapper {
-          background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-          border-radius: 0 0 12px 12px;
-          padding: 24px;
-        }
-
-        .mdc-tab-indicator__content--underline {
-          border-color: #8c0055;
-          border-width: 3px;
-        }
+      ::ng-deep .p-tabpanels {
+        background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
+        border-radius: 0 0 12px 12px;
+        padding: 24px;
       }
 
       .tab-content {
@@ -165,7 +221,7 @@
 
           h3 {
             margin: 0 0 8px 0;
-            color: #d0d0d0;
+            color: #ffffff;
             font-size: 1.6em;
             font-weight: 600;
             display: flex;
@@ -175,7 +231,7 @@
 
           .section-description {
             margin: 0;
-            color: #999999;
+            color: #aaaaaa;
             font-size: 0.95em;
             line-height: 1.5;
           }
@@ -202,7 +258,7 @@
               left: 0;
               right: 0;
               height: 4px;
-              background: linear-gradient(90deg, #8c0055, #b3006e);
+              background: linear-gradient(90deg, $settings-primary-color, #b3006e);
               opacity: 0;
               transition: opacity 0.3s ease;
             }
@@ -223,31 +279,95 @@
               align-items: center;
               margin-bottom: 16px;
 
-              ::ng-deep .mat-mdc-slide-toggle {
+              .toggle-wrapper {
+                display: flex;
+                align-items: center;
+                gap: 12px;
                 flex: 1;
 
-                .mdc-switch__icons {
-                  color: #8c0055;
+                ::ng-deep .p-checkbox {
+                  cursor: pointer;
+                  
+                  .p-checkbox-box {
+                    width: 22px;
+                    height: 22px;
+                    border-radius: 4px;
+                    border: 2px solid #aaaaaa;
+                    background: transparent;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
+                    cursor: pointer;
+
+                    // Unchecked state - explicit styling
+                    &:not(.p-highlight) {
+                      border-color: #aaaaaa;
+                      background-color: transparent;
+                    }
+
+                    // Checked state - explicit styling
+                    &.p-highlight {
+                      background-color: $settings-primary-color;
+                      border-color: $settings-primary-color;
+
+                      .p-checkbox-icon {
+                        color: #ffffff;
+                        font-size: 14px;
+                      }
+                    }
+
+                    // Hover state
+                    &:hover:not(:disabled) {
+                      border-color: $settings-primary-color;
+                      transform: scale(1.08);
+                    }
+
+                    // Focus state
+                    &:focus,
+                    &:focus-visible {
+                      outline: 2px solid $settings-primary-color;
+                      outline-offset: 2px;
+                    }
+                  }
+
+                  // Disabled state
+                  &.p-checkbox-disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+
+                    .p-checkbox-box {
+                      cursor: not-allowed;
+                    }
+                  }
                 }
 
                 .toggle-label {
                   font-weight: 600;
                   font-size: 1.1em;
-                  color: #d0d0d0;
+                  color: #ffffff;
+                  cursor: pointer;
+                  user-select: none;
+                  transition: opacity 0.2s ease;
+
+                  &:hover {
+                    opacity: 0.9;
+                  }
                 }
               }
 
               .method-icon {
-                color: #8c0055;
+                color: #ffb0cf;
                 font-size: 1.8em;
                 width: 1.8em;
                 height: 1.8em;
-                opacity: 0.7;
+                opacity: 1;
               }
             }
 
             .method-label {
               width: 100%;
+
             }
           }
         }
@@ -267,7 +387,10 @@
             padding: 24px;
             border: 1px solid rgba(255, 255, 255, 0.1);
             transition: all 0.3s ease;
-            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 16px;
 
             &:hover {
               transform: translateY(-2px);
@@ -276,24 +399,154 @@
             }
 
             .card-icon {
-              position: absolute;
-              top: 25px;
-              right: 30px;
-              color: #8c0055;
-              opacity: 0.4;
+              flex-shrink: 0;
+              color: #ffb0cf;
+              opacity: 0.8;
               font-size: 1.8em;
-              width: 1.8em;
-              height: 1.8em;
-              background: rgba(255, 255, 255, 0.1);
-              border-radius: 50%;
+              width: auto;
+              height: auto;
+              background: none;
+              border-radius: 0;
               display: flex;
-              align-items: center;
+              align-items: flex-start;
               justify-content: center;
-              backdrop-filter: blur(10px);
-              border: 1px solid rgba(255, 255, 255, 0.1);
+              backdrop-filter: none;
+              border: none;
+              margin-top: 8px;
+              margin-left: auto;
+              order: 2;
             }
 
-            mat-form-field {
+            > ::ng-deep .p-floatlabel,
+            > p-floatLabel {
+              flex: 1;
+              min-width: 0;
+              width: 100%;
+              order: 1;
+            }
+            
+            > .field-hint {
+              order: 3;
+              width: 100%;
+              flex-basis: 100%;
+            }
+
+            ::ng-deep .p-floatlabel {
+              width: 100%;
+              min-height: 56px !important;
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: flex-end !important;
+
+              label {
+                color: #cccccc !important;
+                font-weight: 500 !important;
+                font-size: 0.9em !important;
+                transition: all 0.2s ease !important;
+              }
+
+              &.p-floatlabel-over {
+                padding-top: 8px !important;
+
+                label {
+                  color: #ffffff !important;
+                  font-size: 0.85em !important;
+                  z-index: 1 !important;
+                  pointer-events: none !important;
+                }
+              }
+
+              .p-inputtext,
+              .p-inputnumber-input,
+              .p-select-label,
+              .p-inputtextarea {
+                background: rgba(255, 255, 255, 0.05) !important;
+                border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                color: #ffffff !important;
+                border-radius: 8px !important;
+                padding: 12px 16px !important;
+                font-size: 0.95em !important;
+                margin-top: auto !important;
+                min-height: 48px !important;
+
+                &::placeholder {
+                  color: #999999 !important;
+                }
+
+                &:focus {
+                  border-color: $settings-primary-color !important;
+                  box-shadow: 0 0 0 1px $settings-primary-color !important;
+                  outline: none !important;
+                }
+              }
+
+              .p-inputnumber {
+                position: relative;
+                width: 100%;
+                
+                .p-inputnumber-input {
+                  padding-right: 60px !important;
+                  width: 100%;
+                }
+              }
+
+              .p-inputnumber-buttons {
+                position: absolute;
+                right: 8px;
+                top: 50%;
+                transform: translateY(-50%);
+                z-index: 10;
+                
+                .p-button {
+                  background: rgba(255, 255, 255, 0.1) !important;
+                  border-color: rgba(255, 255, 255, 0.2) !important;
+                  color: #ffffff !important;
+
+                  &:hover:not(:disabled) {
+                    background: $settings-primary-color !important;
+                    border-color: $settings-primary-color !important;
+                    color: white !important;
+                  }
+                }
+              }
+
+              .p-select {
+                margin-top: auto !important;
+
+                .p-select-label {
+                  background: rgba(255, 255, 255, 0.05) !important;
+                  border: 1px solid rgba(255, 255, 255, 0.2) !important;
+                  color: #ffffff !important;
+                  border-radius: 8px !important;
+                  padding: 12px 16px !important;
+                  font-size: 0.95em !important;
+                  min-height: 48px !important;
+                  display: flex !important;
+                  align-items: center !important;
+
+                  &:focus,
+                  &:focus-within {
+                    border-color: $settings-primary-color !important;
+                    box-shadow: 0 0 0 1px $settings-primary-color !important;
+                  }
+                }
+
+                .p-placeholder {
+                  color: #999999 !important;
+                }
+
+                .p-select-trigger {
+                  color: #cccccc !important;
+                }
+              }
+            }
+
+            .field-hint {
+              display: block;
+              color: #aaaaaa;
+              font-size: 0.85em;
+              margin-top: 4px;
+              flex-basis: 100%;
               width: 100%;
             }
 
@@ -304,34 +557,104 @@
               padding: 20px 24px;
 
               .card-icon {
-                position: relative;
-                top: 0;
-                right: 0;
-                opacity: 0.7;
+                flex-shrink: 0;
+                color: #ffb0cf;
+                opacity: 0.8;
                 font-size: 1.5em;
-                width: 1.5em;
-                height: 1.5em;
+                width: auto;
+                height: auto;
+                background: none;
+                border: none;
+                margin-top: 4px;
+                margin-left: auto;
+                order: 2;
               }
 
-              ::ng-deep .mat-mdc-checkbox {
+              .checkbox-wrapper {
                 flex: 1;
+                display: flex;
+                align-items: flex-start;
+                gap: 12px;
+                order: 1;
 
-                .mdc-checkbox__background {
-                  border-color: #666666;
+                ::ng-deep .p-checkbox {
+                  margin-top: 4px;
+                  cursor: pointer;
+                  pointer-events: auto !important;
+
+                  .p-checkbox-box {
+                    border: 2px solid #aaaaaa !important;
+                    background: transparent !important;
+                    width: 18px !important;
+                    height: 18px !important;
+                    border-radius: 4px !important;
+                    transition: all 0.2s ease !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    cursor: pointer !important;
+                    pointer-events: auto !important;
+
+                    &:not(.p-highlight) {
+                      border-color: #aaaaaa !important;
+                      background: transparent !important;
+                    }
+
+                    &.p-highlight {
+                      background: $settings-primary-color !important;
+                      border-color: $settings-primary-color !important;
+
+                      .p-checkbox-icon {
+                        color: #ffffff !important;
+                        font-size: 12px !important;
+                        font-weight: bold !important;
+                        line-height: 1 !important;
+                        display: block !important;
+                        width: 100% !important;
+                        height: 100% !important;
+                        visibility: visible !important;
+                        opacity: 1 !important;
+
+                        &::before {
+                          content: '\e909' !important;
+                          font-family: 'primeicons' !important;
+                          color: #ffffff !important;
+                          font-size: 12px !important;
+                          font-weight: bold !important;
+                          line-height: 1 !important;
+                          display: flex !important;
+                          align-items: center !important;
+                          justify-content: center !important;
+                          width: 100% !important;
+                          height: 100% !important;
+                        }
+                      }
+                    }
+
+                    &:hover {
+                      border-color: $settings-primary-color !important;
+                      transform: scale(1.05) !important;
+                    }
+                  }
                 }
 
                 .checkbox-label {
-                  display: block;
-                  font-weight: 600;
-                  color: #d0d0d0;
-                  margin-bottom: 4px;
-                }
+                  flex: 1;
+                  cursor: pointer;
 
-                .checkbox-hint {
-                  display: block;
-                  font-size: 0.85em;
-                  color: #999999;
-                  margin-top: 4px;
+                  .checkbox-label-text {
+                    display: block;
+                    font-weight: 600;
+                    color: #ffffff;
+                    margin-bottom: 4px;
+                  }
+
+                  .checkbox-hint {
+                    display: block;
+                    font-size: 0.85em;
+                    color: #aaaaaa;
+                    margin-top: 4px;
+                  }
                 }
               }
             }
@@ -349,156 +672,82 @@
       margin-top: 24px;
       gap: 16px;
 
-      button {
-        height: 52px;
-        padding: 0 32px;
-        font-size: 1em;
-        font-weight: 600;
-        border-radius: 8px;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 8px;
+      ::ng-deep .reset-btn {
+        .p-button {
+          height: 52px;
+          padding: 0 32px;
+          font-size: 1em;
+          font-weight: 600;
+          border-radius: 8px;
+          background: transparent;
+          border: 2px solid rgba(255, 255, 255, 0.2);
+          color: #d0d0d0;
 
-        mat-icon {
-          font-size: 1.3em;
-          width: 1.3em;
-          height: 1.3em;
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+          }
 
-          &.spinning {
-            animation: spin 1s linear infinite;
+          &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
           }
         }
       }
 
-      .reset-btn {
-        background: transparent;
-        border: 2px solid rgba(255, 255, 255, 0.2);
-        color: #d0d0d0;
-
-        &:hover:not(:disabled) {
-          background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
-          border-color: rgba(255, 255, 255, 0.3);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        &:disabled {
-          opacity: 0.5;
-          cursor: not-allowed;
-        }
-
-        mat-icon {
-          color: #999999;
-        }
-      }
-
-      .save-btn {
-        background: linear-gradient(135deg, #8c0055, #b3006e);
-        color: white;
-        border: none;
-        box-shadow: 0 4px 12px rgba(140, 0, 85, 0.3);
-
-        &:hover:not(:disabled) {
-          background: linear-gradient(135deg, #a3006b, #c90082);
-          transform: translateY(-2px);
-          box-shadow: 0 6px 20px rgba(140, 0, 85, 0.5);
-        }
-
-        &:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        mat-icon {
+      ::ng-deep .save-btn {
+        .p-button {
+          height: 52px;
+          padding: 0 32px;
+          font-size: 1em;
+          font-weight: 600;
+          border-radius: 8px;
+          background: linear-gradient(135deg, $settings-primary-color, #b3006e);
           color: white;
+          border: none;
+          box-shadow: 0 4px 12px rgba(140, 0, 85, 0.3);
+
+          &:hover:not(:disabled) {
+            background: linear-gradient(135deg, color.adjust($settings-primary-color, $lightness: 5%), #c90082);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(140, 0, 85, 0.5);
+          }
+
+          &:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+          }
         }
       }
     }
   }
 }
 
-// Custom Material Design overrides
+// Global overrides for PrimeNG components
 ::ng-deep {
   .pos-settings-container {
-    .mat-mdc-form-field {
-      .mdc-text-field {
-        background-color: rgba(255, 255, 255, 0.05);
-        border-radius: 8px;
-      }
+    // Override PrimeNG buttons
+    .p-button.p-button-primary,
+    .p-button[severity="primary"],
+    .p-button.p-button-accent,
+    .p-button[severity="accent"],
+    .p-button.p-button-success,
+    .p-button[severity="success"] {
+      background: $settings-primary-color !important;
+      border-color: $settings-primary-color !important;
+      color: white !important;
 
-      .mdc-notched-outline__leading,
-      .mdc-notched-outline__notch,
-      .mdc-notched-outline__trailing {
-        border-color: rgba(255, 255, 255, 0.2) !important;
-      }
-
-      &.mat-focused {
-        .mdc-notched-outline__leading,
-        .mdc-notched-outline__notch,
-        .mdc-notched-outline__trailing {
-          border-color: #8c0055 !important;
-          border-width: 2px !important;
-        }
-      }
-
-      .mat-mdc-form-field-label,
-      .mat-mdc-form-field-hint {
-        color: #999999;
-      }
-
-      .mat-mdc-input-element,
-      .mat-mdc-select-value-text {
-        color: #d0d0d0;
-      }
-
-      .mat-mdc-select-arrow {
-        color: #999999;
+      &:hover:not(:disabled) {
+        background: color.adjust($settings-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($settings-primary-color, $lightness: -5%) !important;
       }
     }
 
-    .mat-mdc-select-panel {
-      background: linear-gradient(135deg, #2d2d2d, #1a1a1a);
-      border-radius: 8px;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-
-      .mat-mdc-option {
-        color: #d0d0d0;
-
-        &:hover {
-          background: rgba(140, 0, 85, 0.2);
-        }
-
-        &.mdc-list-item--selected {
-          background: rgba(140, 0, 85, 0.3);
-        }
-      }
-    }
-
-    .mat-mdc-slide-toggle {
-      .mdc-switch:enabled .mdc-switch__track::after {
-        background: #666666;
-      }
-
-      .mdc-switch--selected:enabled .mdc-switch__track::after {
-        background: #8c0055;
-      }
-
-      .mdc-switch--selected:enabled .mdc-switch__handle::after {
-        background: #b3006e;
-      }
-    }
-
-    .mat-mdc-checkbox {
-      .mdc-checkbox__background {
-        border-color: #666666;
-      }
-
-      &.mat-mdc-checkbox-checked .mdc-checkbox__background {
-        background-color: #8c0055;
-        border-color: #8c0055;
-      }
-    }
+    // Override PrimeNG CSS varijable
+    --p-primary-color: #{$settings-primary-color};
+    --p-accent-color: #{$settings-primary-color};
   }
 }
 
@@ -518,7 +767,7 @@
       font-size: 1.2em;
       padding: 12px 16px;
 
-      mat-icon {
+      i.pi-cog {
         font-size: 1.5em;
         width: 1.5em;
         height: 1.5em;
@@ -529,7 +778,7 @@
       flex-direction: column;
       gap: 12px;
 
-      .facility-selector {
+      ::ng-deep .facility-selector {
         min-width: auto;
         width: 100%;
       }
@@ -539,8 +788,8 @@
   .pos-content {
     .settings-form {
       .settings-tabs {
-        ::ng-deep {
-          .mat-mdc-tab {
+        ::ng-deep .p-tablist {
+          .p-tab {
             font-size: 0.85em;
             min-width: 80px;
 
@@ -549,10 +798,10 @@
               font-size: 1em;
             }
           }
+        }
 
-          .mat-mdc-tab-body-wrapper {
-            padding: 16px;
-          }
+        ::ng-deep .p-tabpanels {
+          padding: 16px;
         }
       }
 
@@ -578,7 +827,8 @@
         flex-direction: column;
         gap: 12px;
 
-        button {
+        ::ng-deep .reset-btn .p-button,
+        ::ng-deep .save-btn .p-button {
           width: 100%;
           justify-content: center;
           height: 48px;
@@ -587,3 +837,4 @@
     }
   }
 }
+

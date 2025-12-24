@@ -1,3 +1,101 @@
+@use "sass:color";
+
+// Primary boja za cash management (umesto zelene)
+$cash-primary-color: #8c0055; // Primary accent boja iz teme
+
+// Override PrimeNG default zelenu boju sa primary bojom za ceo cash-management modul
+::ng-deep {
+  .cash-dashboard,
+  .cash-analytics,
+  .cash-counting-dialog,
+  .close-session-dialog,
+  .open-session-dialog,
+  .cash-reconciliation-dialog {
+    // Override PrimeNG success tags
+    .p-tag.p-tag-success,
+    .p-tag[severity="success"],
+    .p-tag.severity-success {
+      background: $cash-primary-color !important;
+      color: white !important;
+      border-color: $cash-primary-color !important;
+    }
+
+    // Override custom severity-success klase - EKSPLICITNO za stat-elemente
+    .stat-icon.severity-success {
+      background-color: $cash-primary-color !important;
+      color: white !important;
+      
+      i {
+        color: white !important;
+      }
+    }
+
+    .stat-value.severity-success {
+      color: $cash-primary-color !important;
+    }
+
+    // Override PrimeNG CSS varijable za success boje
+    --p-green-500: #{$cash-primary-color};
+    --p-green-600: #{$cash-primary-color};
+    --p-green-700: #{$cash-primary-color};
+    
+    // Override PrimeNG buttons - uklanjanje zelene boje
+    .p-button.p-button-primary,
+    .p-button[severity="primary"],
+    button.p-button-primary {
+      background: $cash-primary-color !important;
+      border-color: $cash-primary-color !important;
+      color: white !important;
+      
+      &:hover:not(:disabled) {
+        background: color.adjust($cash-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($cash-primary-color, $lightness: -5%) !important;
+      }
+      
+      .p-button-label,
+      .p-button-icon {
+        color: white !important;
+      }
+    }
+    
+    .p-button.p-button-accent,
+    .p-button[severity="accent"],
+    button.p-button-accent {
+      background: $cash-primary-color !important;
+      border-color: $cash-primary-color !important;
+      color: white !important;
+      
+      &:hover:not(:disabled) {
+        background: color.adjust($cash-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($cash-primary-color, $lightness: -5%) !important;
+      }
+      
+      .p-button-label,
+      .p-button-icon {
+        color: white !important;
+      }
+    }
+    
+    .p-button.p-button-success,
+    .p-button[severity="success"],
+    button.p-button-success {
+      background: $cash-primary-color !important;
+      border-color: $cash-primary-color !important;
+      color: white !important;
+      
+      &:hover:not(:disabled) {
+        background: color.adjust($cash-primary-color, $lightness: -5%) !important;
+        border-color: color.adjust($cash-primary-color, $lightness: -5%) !important;
+      }
+      
+      .p-button-label,
+      .p-button-icon {
+        color: white !important;
+      }
+    }
+  }
+}
+
 @keyframes gradientPan {
   0% {
     background-position: 0% 50%;
@@ -10,13 +108,20 @@
   }
 }
 
-.cash-dashboard {
+::ng-deep .cash-dashboard {
   padding: 60px;
   margin: 100px;
   border-radius: 12px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
-  background: linear-gradient(135deg, #1a1a1a, #2d2d2d);
-  color: #e0e0e0;
+
+  .p-card {
+    background: var(--p-surface-ground);
+    color: var(--p-text-color);
+  }
+
+  .p-card-body {
+    padding: 0;
+  }
 
   .dashboard-header {
     display: flex;
@@ -74,35 +179,27 @@
       }
       
       .header-actions {
-        .action-button {
-          height: 48px;
-          padding: 0 24px;
+        ::ng-deep .action-button {
+          height: 48px !important;
+          padding: 0 24px !important;
           font-size: 1em;
           font-weight: 600;
           border-radius: 8px;
-          background: linear-gradient(135deg, #3d3d3d, #2a2a2a);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          color: #d0d0d0;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-          transition: all 0.2s ease;
-          display: flex;
-          align-items: center;
-          gap: 8px;
 
-          &:hover {
-            background: linear-gradient(135deg, #4d4d4d, #3a3a3a);
-            border-color: rgba(255, 255, 255, 0.3);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
-            color: #ffffff;
+          .p-button-label {
+            color: #ffffff !important;
+            font-weight: 600;
           }
 
-          mat-icon {
+          .p-button-icon {
+            color: #ffffff !important;
             margin-right: 8px;
-            color: #aaaaaa;
-            font-size: 20px;
-            width: 20px;
-            height: 20px;
+          }
+
+          &.p-button-primary {
+            .p-button-label {
+              color: #ffffff !important;
+            }
           }
         }
       }
@@ -115,21 +212,11 @@
     align-items: center;
     justify-content: center;
     padding: 48px;
-    color: #999999;
-
-    .spinner {
-      width: 40px;
-      height: 40px;
-      border: 4px solid #666666;
-      border-top: 4px solid #8c0055;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-      margin-bottom: 16px;
-    }
+    color: var(--p-text-muted-color);
 
     p {
       font-size: 1.1em;
-      margin: 0;
+      margin: 16px 0 0 0;
     }
   }
 
@@ -143,111 +230,84 @@
       margin-bottom: 32px;
       
       .session-card {
-        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-        border: 1px solid #555555;
+        ::ng-deep .p-card {
+          background: var(--p-surface-card);
+          border: 1px solid var(--p-surface-border);
         border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        
-        mat-card-header {
+        }
+
+        .session-card-header {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          padding: 16px;
+
           .session-avatar {
-            background: linear-gradient(135deg, #8c0055, #b3006e);
+            background: $cash-primary-color !important; // Override var(--p-primary-color)
             color: white;
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             
-            mat-icon {
+            i {
               font-size: 24px;
-              width: 24px;
-              height: 24px;
             }
           }
           
-          mat-card-title {
-            color: #e0e0e0;
+          .session-header-text {
+            h3 {
+              color: var(--p-text-color);
             font-size: 20px;
             font-weight: 600;
+              margin: 0;
           }
           
-          mat-card-subtitle {
-            color: #cccccc;
+            p {
+              color: var(--p-text-muted-color);
             font-size: 14px;
+              margin: 4px 0 0 0;
+            }
           }
         }
         
-        mat-card-content {
           .session-details {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 16px;
-            margin-top: 16px;
+          padding: 16px;
             
             .detail-row {
               display: flex;
               justify-content: space-between;
               align-items: center;
               padding: 8px 0;
-              border-bottom: 1px solid #444444;
+            border-bottom: 1px solid var(--p-surface-border);
               
               .detail-label {
-                color: #cccccc;
+              color: var(--p-text-muted-color);
                 font-weight: 500;
               }
               
               .detail-value {
-                color: #e0e0e0;
+              color: var(--p-text-color);
                 font-weight: 600;
                 
                 &.amount {
-                  color: #8c0055;
+                color: var(--p-primary-color);
                   font-family: 'Courier New', monospace;
-                }
               }
             }
           }
         }
         
-        mat-card-actions {
-          padding: 16px 24px;
+        .card-actions {
+          padding: 16px;
+          display: flex;
           gap: 12px;
-          
-          .action-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 6px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            
-            &::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: -100%;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-              transition: left 0.5s;
-            }
-            
-            &:hover::before {
-              left: 100%;
-            }
-            
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-            }
-            
-            mat-icon {
-              font-size: 18px;
-              width: 18px;
-              height: 18px;
-            }
-          }
+          flex-wrap: wrap;
         }
       }
     }
@@ -256,10 +316,10 @@
       margin-bottom: 32px;
       
       .empty-card {
-        background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-        border: 1px solid #555555;
-        border-radius: 12px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        ::ng-deep .p-card {
+          background: var(--p-surface-card);
+          border: 1px solid var(--p-surface-border);
+        }
         
         .empty-content {
           text-align: center;
@@ -267,62 +327,21 @@
           
           .empty-icon {
             font-size: 64px;
-            width: 64px;
-            height: 64px;
-            color: #666666;
+            color: var(--p-text-muted-color);
             margin-bottom: 16px;
           }
           
           h3 {
-            color: #e0e0e0;
+            color: var(--p-text-color);
             font-size: 24px;
             font-weight: 600;
             margin: 0 0 8px 0;
           }
           
           p {
-            color: #cccccc;
+            color: var(--p-text-muted-color);
             font-size: 16px;
             margin: 0 0 24px 0;
-          }
-          
-          .action-button {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            margin: 0 auto;
-            
-            &::before {
-              content: '';
-              position: absolute;
-              top: 0;
-              left: -100%;
-              width: 100%;
-              height: 100%;
-              background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
-              transition: left 0.5s;
-            }
-            
-            &:hover::before {
-              left: 100%;
-            }
-            
-            &:hover {
-              transform: translateY(-2px);
-              box-shadow: 0 8px 25px rgba(140, 0, 85, 0.3);
-            }
-            
-            mat-icon {
-              font-size: 20px;
-              width: 20px;
-              height: 20px;
-            }
           }
         }
       }
@@ -335,13 +354,11 @@
       margin-bottom: 32px;
 
       .stat-card {
-        background: linear-gradient(135deg, #3d3d3d 0%, #2a2a2a 100%);
-        border: 1px solid #555555;
+        ::ng-deep .p-card {
+          background: var(--p-surface-card);
+          border: 1px solid var(--p-surface-border);
         border-radius: 16px;
-        padding: 28px;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
-        color: #e0e0e0;
         position: relative;
         overflow: hidden;
 
@@ -352,13 +369,14 @@
           left: 0;
           right: 0;
           height: 3px;
-          background: linear-gradient(90deg, #8c0055, #b3006e);
+            background: $cash-primary-color !important; // Override var(--p-primary-color)
         }
 
         &:hover {
           transform: translateY(-4px);
-          box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
-          border-color: #8c0055;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+            border-color: $cash-primary-color !important; // Override var(--p-primary-color)
+          }
         }
 
         .stat-content {
@@ -366,32 +384,38 @@
           align-items: flex-start;
           gap: 20px;
           width: 100%;
+          padding: 28px;
           
           .stat-icon {
             width: 56px;
             height: 56px;
             border-radius: 12px;
-            background: linear-gradient(135deg, #8c0055, #b3006e);
+            background: $cash-primary-color !important; // Override var(--p-primary-color) da koristi primary boju umesto zelene
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
+            color: white !important;
             flex-shrink: 0;
-            box-shadow: 0 4px 12px rgba(140, 0, 85, 0.3);
             
-            mat-icon {
+            i {
               font-size: 28px;
-              width: 28px;
-              height: 28px;
+            }
+
+            &.severity-warning {
+              background: var(--p-orange-500);
             }
             
-            &.accent {
-              background: linear-gradient(135deg, #ff9800, #ffb74d);
-              box-shadow: 0 4px 12px rgba(255, 152, 0, 0.3);
+            &.severity-danger {
+              background: var(--p-red-500);
             }
             
-            &.warn {
-              background: linear-gradient(135deg, #f44336, #ef5350);
+            &.severity-success {
+              background: $cash-primary-color !important;
+              color: white !important;
+              
+              i {
+                color: white !important;
+              }
             }
           }
           
@@ -403,7 +427,7 @@
 
             .stat-label {
               font-size: 14px;
-              color: #b0b0b0;
+              color: var(--p-text-muted-color);
               margin-bottom: 8px;
               font-weight: 500;
               text-transform: uppercase;
@@ -413,17 +437,20 @@
             .stat-value {
               font-size: 2.2em;
               font-weight: 800;
-              color: #ffffff;
+              color: var(--p-text-color);
               line-height: 1.1;
               font-family: 'Roboto', sans-serif;
-              text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-              
-              &.accent {
-                color: #ff9800;
+
+              &.severity-warning {
+                color: var(--p-orange-500);
               }
               
-              &.warn {
-                color: #f44336;
+              &.severity-danger {
+                color: var(--p-red-500);
+              }
+              
+              &.severity-success {
+                color: $cash-primary-color !important;
               }
             }
           }
@@ -444,22 +471,28 @@
         gap: 12px;
         
         .session-item {
-          background: linear-gradient(135deg, #2d2d2d 0%, #3a3a3a 100%);
-          border: 1px solid #555555;
+          ::ng-deep .p-card {
+            background: var(--p-surface-card);
+            border: 1px solid var(--p-surface-border);
           border-radius: 8px;
           transition: all 0.3s ease;
           
           &:hover {
             transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+              box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+            }
           }
           
           &.open {
-            border-left: 4px solid #8c0055;
+            ::ng-deep .p-card {
+              border-left: 4px solid $cash-primary-color !important; // Override var(--p-primary-color)
+            }
           }
           
           &.closed {
-            border-left: 4px solid #4caf50;
+            ::ng-deep .p-card {
+              border-left: 4px solid $cash-primary-color;
+            }
           }
           
           .session-item-content {
@@ -467,10 +500,11 @@
             justify-content: space-between;
             align-items: center;
             gap: 20px;
+            padding: 16px;
             
             .session-info {
               flex: 1;
-              min-width: 0; // Prevents flex item from overflowing
+              min-width: 0;
               
               .session-header {
                 display: flex;
@@ -479,16 +513,10 @@
                 margin-bottom: 8px;
                 
                 h4 {
-                  color: #e0e0e0;
+                  color: var(--p-text-color);
                   font-size: 16px;
                   font-weight: 600;
                   margin: 0;
-                }
-                
-                .status-chip {
-                  font-size: 12px;
-                  height: 24px;
-                  min-height: 24px;
                 }
               }
               
@@ -498,7 +526,7 @@
                 flex-wrap: wrap;
                 
                 .detail {
-                  color: #cccccc;
+                  color: var(--p-text-muted-color);
                   font-size: 14px;
                 }
               }
@@ -508,18 +536,7 @@
               display: flex;
               align-items: center;
               justify-content: center;
-              flex-shrink: 0; // Prevents shrinking
-              width: 60px; // Fixed width for consistent layout
-              
-              .action-icon {
-                color: #cccccc;
-                transition: all 0.3s ease;
-                
-                &:hover {
-                  color: #8c0055;
-                  transform: scale(1.1);
-                }
-              }
+              flex-shrink: 0;
             }
           }
         }
@@ -561,30 +578,11 @@
           width: 48px;
           height: 48px;
           
-          mat-icon {
-            font-size: 24px;
-            width: 24px;
-            height: 24px;
-          }
         }
         
         .stat-details {
           .stat-value {
             font-size: 1.8em;
-          }
-        }
-      }
-    }
-    
-    .recent-sessions {
-      .sessions-list {
-        .session-item {
-          .session-item-content {
-            gap: 16px;
-            
-            .session-actions {
-              width: 50px;
-            }
           }
         }
       }
